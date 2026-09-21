@@ -1,0 +1,87 @@
+name: CI
+
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+    branches: [master, main]
+  workflow_dispatch:
+
+jobs:
+  tests:
+    name: Tests Node ${{ matrix.node }} — ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, ubuntu-latest]
+        node: [20, 22]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Node ${{ matrix.node }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+
+      - name: Cache npm
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: npm-${{ runner.os }}-node${{ matrix.node }}-${{ hashFiles('agent-skills/menubar-app/package-lock.json') }}
+          restore-keys: |
+            npm-${{ runner.os }}-node${{ matrix.node }}-
+
+      - name: Syntaxe des fichiers Electron
+        working-directory: agent-skills/menubar-app
+        run: |
+          node --check main.js
+          node --check renderer.js
+          node --check preload.js
+          node --check settings.js
+
+      - name: Tests logiques (i18n + prompts personnalisés)
+        working-directory: agent-skills/menubar-app
+        run: |
+          node test-fr.js
+          node test-custom.js
+
+  build-macos:
+    name: Build macOS — ${{ matrix.arch }}
+    needs: tests
+    runs-on: macos-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [x64, arm64]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Cache Electron runtimes
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/megapack
+          key: megapack-${{ matrix.arch }}-v33
+
+      - name: Installer les dépendances
+        working-directory: agent-skills/menubar-app
+        run: npm ci
+
+      - name: Build + DMG (${{ matrix.arch }})
+        working-directory: agent-skills/menubar-app
+        run: ./build-app.sh --arch ${{ matrix.arch }} --no-launch
+
+      - name: Upload du DMG
+        uses: actions/upload-artifact@v4
+        with:
+          name: PromptDeck-${{ matrix.arch }}
+          path: agent-skills/menubar-app/dist/*.dmg
+          retention-days: 7
+          if-no-files-found: error

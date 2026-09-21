@@ -378,6 +378,134 @@ function resolveOpenCode() {
   return null;
 }
 
+// Capture d'écran pour la documentation (README) : 
+// --capture-panel → docs/captures/panneau.png · --capture-menu → docs/captures/menu-clic-droit.png
+// Rendu hors écran (offscreen: true), capture via l'événement paint, puis quit.
+function captureShots() {
+  const shotsDir = process.env.CAPTURE_DIR || path.join(__dirname, '..', '..', 'docs', 'captures');
+  try { fs.mkdirSync(shotsDir, { recursive: true }); } catch (e) { /* best effort */ }
+
+  const capturePanel = () => new Promise((resolve) => {
+    const rect = panelRect();
+    let saved = false;
+    const w = new BrowserWindow({
+      useContentSize: true,
+      x: rect.x, y: rect.y, width: rect.width, height: rect.height,
+      show: false, // hors écran — rien n'apparaît à l'écran
+      resizable: true,
+      title: 'MEGA PACK',
+      icon: nativeImage.createFromPath(APPICON),
+      movable: false,
+      fullscreenable: false,
+      minimizable: false,
+      maximizable: false,
+      skipTaskbar: true,
+      alwaysOnTop: true,
+      hasShadow: true,
+      transparent: false,
+      webPreferences: {
+        preload: path.join(__dirname, 'preload.js'),
+        contextIsolation: true,
+        nodeIntegration: false,
+        sandbox: false,
+        backgroundThrottling: false,
+        offscreen: true, // rendu logiciel : l'API paint livre les frames
+      },
+    });
+    w.webContents.setFrameRate(30);
+    let readyAt = null;
+    w.webContents.on('paint', (e, dirty, image) => {
+      if (saved || !image || image.isEmpty()) return;
+      if (!readyAt || Date.now() - readyAt < 1500) return; // laisse la liste se peindre
+      saved = true;
+      try {
+        fs.writeFileSync(path.join(shotsDir, 'panneau.png'), image.toPNG());
+        console.log('✓ panneau.png écrit dans', shotsDir);
+      } catch (err) { console.error('✗ écriture panneau :', err.message); }
+      w.destroy();
+      resolve();
+    });
+    w.loadFile('index.html');
+    w.webContents.once('did-finish-load', () => { readyAt = Date.now(); });
+    // Filet de sécurité : aucune frame exploitable → repli affichage + capturePage
+    setTimeout(async () => {
+      if (saved) return;
+      try {
+        w.showInactive();
+        await new Promise((r2) => setTimeout(r2, 1200));
+        const img = await w.webContents.capturePage();
+        if (img && !img.isEmpty()) {
+          fs.writeFileSync(path.join(shotsDir, 'panneau.png'), img.toPNG());
+          console.log('✓ panneau.png écrit (repli visible) dans', shotsDir);
+          saved = true;
+        }
+      } catch (err) { /* échec déjà signalé */ }
+      if (!saved) console.error('✗ capture panneau : aucune frame exploitable');
+      if (!w.isDestroyed()) w.destroy();
+      resolve();
+    }, 7000);
+  });
+
+  const captureMenu = () => new Promise((resolve) => {
+    const tpl = buildMenuTemplate();
+    // Un Menu Electron ne se dessine qu'en popup — on le rend via une fenêtre DOM dédiée :
+    // chaque item est recréé en HTML fidèle (émojis + compteurs + sous-menus résumés).
+    const rows = [];
+    const flatten = (items, depth) => {
+      for (const it of items) {
+        if (it.type === 'separator') { rows.push({ sep: true, depth }); continue; }
+        if (it.submenu && depth === 0) {
+          rows.push({ label: it.label, depth, arrow: true });
+          flatten(it.submenu, depth + 1);
+        } else if (depth <= 1) {
+          rows.push({ label: it.label, depth, arrow: false, accelerator: it.accelerator || null });
+        }
+      }
+    };
+    flatten(tpl, 0);
+    const itemHtml = rows.map((r) => r.sep
+      ? '<div class="sep"></div>'
+      : `<div class="mi" style="padding-left:${8 + r.depth * 18}px">`
+          + `<span class="lb">${r.label}</span>`
+          + (r.accelerator ? `<span class="acc">${r.accelerator}</span>` : '')
+          + (r.arrow ? '<span class="ar">▸</span>' : '')
+          + '</div>')
+      .join('\n');
+    const w = new BrowserWindow({
+      width: 460, height: 640, show: false, frame: false, resizable: false,
+      webPreferences: { offscreen: true },
+    });
+    const html = `<!doctype html><html><head><meta charset="utf-8"><style>
+      body { margin:0; font: 13px -apple-system, sans-serif; background:#f6f6f6;
+             border:1px solid #d9d9d9; border-radius:10px; overflow:hidden; }
+      .mi { display:flex; align-items:center; padding:5px 8px; color:#1d1d1f; }
+      .mi:nth-child(odd) { background:transparent; }
+      .lb { flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+      .acc { color:#86868b; font-size:11px; margin-left:12px; }
+      .ar { color:#86868b; margin-left:6px; }
+      .sep { height:1px; background:#e3e3e3; margin:4px 10px; }
+    </style></head><body>${itemHtml}</body></html>`;
+    w.loadURL('data:text/html;charset=utf-8,' + encodeURIComponent(html));
+    w.webContents.once('did-finish-load', async () => {
+      setTimeout(async () => {
+        try {
+          const img = await w.webContents.capturePage({ x: 0, y: 0, width: 460, height: 640 });
+          fs.writeFileSync(path.join(shotsDir, 'menu-clic-droit.png'), img.toPNG());
+          console.log('✓ menu-clic-droit.png écrit dans', shotsDir);
+        } catch (err) { console.error('✗ capture menu :', err.message); }
+        w.destroy();
+        resolve();
+      }, 900);
+    });
+  });
+
+  (async () => {
+    if (process.argv.includes('--capture-panel')) await capturePanel();
+    if (process.argv.includes('--capture-menu')) await captureMenu();
+    setTimeout(() => app.quit(), 300);
+  })();
+}
+
 function createTray() {
   tray = new Tray(iconImage());
   tray.setToolTip('MEGA PACK — Skills & Agents');
@@ -389,7 +517,9 @@ function createTray() {
 }
 
 // Mono-instance : un second lancement révèle le panneau au lieu d'un doublon
-if (!app.requestSingleInstanceLock()) {
+// (sauf en mode capture, qui doit pouvoir tourner même si l'app est déjà lancée)
+const CAPTURE_MODE = process.argv.includes('--capture-panel') || process.argv.includes('--capture-menu');
+if (!CAPTURE_MODE && !app.requestSingleInstanceLock()) {
   app.quit();
 } else {
   app.on('second-instance', togglePanel);
@@ -397,8 +527,6 @@ if (!app.requestSingleInstanceLock()) {
   app.whenReady().then(() => {
     loadPrefs();
     seedCustoms(); // exemples ✍️ au premier lancement (une seule fois)
-    createTray();
-    createPanel();
 
     // Icône ⚡ visible dans le Dock (l'app devient aussi retrouvable via ⌘Tab)
     if (process.platform === 'darwin' && app.dock) {
@@ -409,6 +537,14 @@ if (!app.requestSingleInstanceLock()) {
     applyAutostart();
 
     app.on('activate', () => createPanel());
+
+    // ── Mode capture (docs/README) : rend la fenêtre/popup hors écran puis PNG ──
+    if (process.argv.includes('--capture-panel') || process.argv.includes('--capture-menu')) {
+      captureShots(); // pas de tray ni de panneau visible pendant une capture
+    } else {
+      createTray();
+      createPanel();
+    }
   });
 
   app.on('window-all-closed', (e) => { /* reste résident dans la menu bar */ });

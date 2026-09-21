@@ -8,6 +8,7 @@ Recherche instantanée, prompts personnalisés, envoi vers 12 destinations
 (Claude, ChatGPT, Freebuff, OpenCode…) en un clic.
 
 [![Version](https://img.shields.io/badge/version-1.1.0-blue)](#-installation)
+[![CI](https://github.com/Azumizeus/PromptDeck/actions/workflows/ci.yml/badge.svg)](https://github.com/Azumizeus/PromptDeck/actions/workflows/ci.yml)
 [![macOS](https://img.shields.io/badge/macOS-13%2B-black?logo=apple)](#-installation)
 [![Architectures](https://img.shields.io/badge/arch-Intel%20%7C%20Apple%20Silicon%20%7C%20Universel-orange)](#-installation)
 [![Licence](https://img.shields.io/badge/licence-MIT-green)](LICENSE)
@@ -37,12 +38,11 @@ Le tout **100 % local** : pas de compte, pas de télémétrie, aucun envoi de do
 
 ## 📸 Aperçu
 
-<!-- TODO captures : remplace par tes vraies captures après premier push -->
-<!-- ![Panneau](docs/captures/panneau.png) -->
-<!-- ![Menu clic droit](docs/captures/menu-clic-droit.png) -->
+| Recherche bilingue (⌥Espace) | Menu clic droit ⚡ |
+|:---:|:---:|
+| ![Panneau de recherche PromptDeck](docs/captures/panneau.png) | ![Menu clic droit de l'icône ⚡](docs/captures/menu-clic-droit.png) |
 
-> 📷 *Zone réservée aux captures d'écran — dépose tes captures dans `docs/captures/` et décommente les lignes ci-dessus.*
-> Astuce : **⌘⇧4 puis Espace** pour capturer proprement la fenêtre du panneau.
+*Régénérables à tout moment : `./build-app.sh` puis `npx electron . --capture-panel --capture-menu` depuis `agent-skills/menubar-app/` (rendu automatique dans `docs/captures/`).*
 
 ## 🚀 Installation
 
