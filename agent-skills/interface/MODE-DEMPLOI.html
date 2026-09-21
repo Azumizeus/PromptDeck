@@ -154,6 +154,14 @@ li{margin:6px 0}
   <details><summary>Le prompt ne s'injecte pas dans le chat</summary><p>Le site a changé son DOM → le fallback copie dans le presse-papiers : colle manuellement (⌘V).</p></details>
   <details><summary>Le bookmarklet ne charge rien</summary><p>Le serveur local est éteint → double-clique <code>MEGA-PACK-serveur.command</code>, puis reclique le favori.</p></details>
 
+  <h2>❓ FAQ</h2>
+  <details><summary>🔒 Confidentialité — qu'est-ce qui quitte mon Mac ?</summary><p><b>Rien, par défaut.</b> Catalogue, prompts ✍️, favoris et config vivent dans <code>~/Library/Application Support/megapack-menubar/mgp-prefs.json</code> (JSON lisible). L'app n'a <b>aucune télémétrie ni analytique</b> — vérifiable dans le code (<code>main.js</code>). Le seul transfert part quand <b>toi</b> tu ouvres un LLM web : le prompt va vers ce service, comme si tu le collais toi-même.</p></details>
+  <details><summary>✍️ Pourquoi l'avertissement « app non signée » à l'ouverture ?</summary><p>La signature est <b>ad-hoc</b> et non <b>notarisée</b> par Apple (99 $/an + envoi des builds — incompatible avec l'open source gratuit). Un simple chemin de confiance, pas un signal de danger : le code est public. Premier lancement : <b>clic droit → Ouvrir</b> (une fois suffit). Vérification : <code>codesign -dv "MEGA PACK.app"</code> → <code>Signature=adhoc</code>.</p></details>
+  <details><summary>🌐 Comment ajouter ma propre destination « Ouvrir dans » ?</summary><p>Trois points dans <code>menubar-app/main.js</code> : <code>openLLM()</code> (l'URL <code>?q=</code> ou <code>shell.openPath</code>), <code>I18N</code> (libellés FR/EN) et la liste des destinations du sous-menu. Un système de destinations définies dans les Réglages (sans toucher au code) est en feuille de route.</p></details>
+  <details><summary>🧠 Electron, vraiment ? Et la RAM ?</summary><p>Assumé : <b>~150 à 300 Mo</b> en résidence. L'équivalent Swift natif serait un second projet pour quelques dizaines de Mo. En échange : développement accessible, dossiers inspectables, réouverture instantanée (panneau caché, pas détruit). <b>Clic droit ⚡ → Quitter</b> libère tout.</p></details>
+  <details><summary>⌨️ Pourquoi ⌥Espace et pas ⌘Espace ?</summary><p><b>⌘Espace est réservé par Spotlight</b> sur macOS — le raccourci global de l'app serait confisqué. Défaut : ⌥Espace, modifiable dans les Réglages (⌘Espace / ⌃Espace).</p></details>
+  <details><summary>🪟 Windows ou Linux ?</summary><p>Pas pour l'instant : la Tray de la barre de menus, les DMG et <code>lipo</code> sont des briques macOS. Le renderer est portable (Electron) — ouvre une issue sur GitHub si le besoin est réel.</p></details>
+
   <h2>📁 Les fichiers</h2>
   <table>
     <tr><th>Fichier (dans <code>agent-skills/interface/</code>)</th><th>Rôle</th></tr>
@@ -258,6 +266,14 @@ li{margin:6px 0}
   <details><summary>"Empty catalog" in the panel</summary><p>Fixed (lazy read + auto-load). If it persists: use <code>mega-pack-panel-full.user.js</code> (embedded catalog) instead of <code>mega-pack-panel.user.js</code>.</p></details>
   <details><summary>The prompt is not injected into the chat</summary><p>The site changed its DOM → the clipboard fallback copies it: paste manually (⌘V).</p></details>
   <details><summary>The bookmarklet loads nothing</summary><p>The local server is off → double-click <code>MEGA-PACK-serveur.command</code>, then click the bookmark again.</p></details>
+
+  <h2>❓ FAQ</h2>
+  <details><summary>🔒 Privacy — what leaves my Mac?</summary><p><b>Nothing, by default.</b> Catalog, ✍️ custom prompts, favorites and settings live in <code>~/Library/Application Support/megapack-menubar/mgp-prefs.json</code> (readable JSON). The app has <b>no telemetry or analytics</b> — verifiable in the code (<code>main.js</code>). The only transfer happens when <b>you</b> open a web LLM: the prompt goes to that service, as if you pasted it yourself.</p></details>
+  <details><summary>✍️ Why the "unsigned app" warning?</summary><p>The signature is <b>ad-hoc</b>, not <b>notarized</b> by Apple ($99/year + uploading every build — incompatible with free open source). Just a trust path, not a danger signal: the code is public. First launch: <b>right-click → Open</b> (once is enough). Verify: <code>codesign -dv "MEGA PACK.app"</code> → <code>Signature=adhoc</code>.</p></details>
+  <details><summary>🌐 How to add my own "Open in" destination?</summary><p>Three spots in <code>menubar-app/main.js</code>: <code>openLLM()</code> (the <code>?q=</code> URL or <code>shell.openPath</code>), <code>I18N</code> (FR/EN labels) and the submenu destination list. User-defined destinations in Settings (no code needed) are on the roadmap.</p></details>
+  <details><summary>🧠 Electron? What about RAM?</summary><p>Owned: <b>~150–300 MB</b> resident. A Swift-native equivalent would be a second project to save a few dozen MB. In exchange: accessible development, inspectable files, instant reopen (panel hidden, not destroyed). <b>Right-click ⚡ → Quit</b> frees everything.</p></details>
+  <details><summary>⌨️ Why ⌥Space instead of ⌘Space?</summary><p><b>⌘Space is reserved by Spotlight</b> on macOS — the app's global shortcut would be taken. Default: ⌥Space, changeable in Settings (⌘Space / ⌃Space).</p></details>
+  <details><summary>🪟 Windows or Linux?</summary><p>Not yet: the menu-bar Tray, DMG and <code>lipo</code> are macOS bricks. The renderer is portable (Electron) — open a GitHub issue if the need is real.</p></details>
 
   <h2>📁 Files</h2>
   <table>
