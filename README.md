@@ -36,6 +36,52 @@ une bibliothèque de **131 skills** et **190 agents IA** en lanceur instantané 
 
 Le tout **100 % local** : pas de compte, pas de télémétrie, aucun envoi de données.
 
+## 🤔 Pourquoi PromptDeck ?
+
+### Le problème
+
+Les meilleures bibliothèques de skills et d'agents IA finissent toutes au même endroit :
+**dans un dossier de fichiers `.md` qu'on n'ouvre plus**. Les utiliser demande trop d'étapes —
+trouver le bon fichier, l'ouvrir, copier le prompt, changer d'application, la coller, se
+souvenir de quel LLM fait quoi. La friction tue l'usage : ta bibliothèque de 300 items
+se transforme en bibliothèque de 5 réflexes.
+
+Le reste de la chaîne est tout aussi fragmenté : Claude dans un onglet, ChatGPT dans un
+autre, une app desktop par-ci, un outil terminal par-là. Chaque changement de contexte
+coûte des secondes qui s'accumulent en heures.
+
+### La philosophie
+
+- **⚡ Zéro friction.** ⌥Espace, trois lettres, ⏎ : ton prompt est dans le presse-papiers ou
+  déjà pré-rempli dans ton LLM. Moins de 3 secondes, main sur le clavier, jamais dans le Finder.
+- **🔒 100 % local par défaut.** Le catalogue, tes prompts ✍️, tes favoris et ta config vivent
+  dans des fichiers sur ton Mac (`mgp-prefs.json`). Pas de compte, pas de télémétrie, pas
+  d'analytique — rien à créer, rien à connecter. Le seul appel réseau, c'est **toi** qui le
+  déclenches en ouvrant un LLM web. Tes prompts sont stratégiques : ils ne sortent jamais
+  sans ton geste.
+- **📄 Tes prompts restent des textes.** Aucun format propriétaire, aucune base de données
+  fermée : `.md` et `.json` lisibles à l'œil nu, import/export intégré, réutilisables dans
+  n'importe quel autre outil. Si PromptDeck disparaît, tes données restent.
+- **🇫🇷 Bilingue natif, pas plaqué.** La recherche fonctionne en français (« multi-chaînes »
+  trouve l'item anglais) parce que le catalogue est bilingue à la source — pas une
+  traduction de surface ajoutée après coup.
+- **🔓 Open source, MIT.** Le code est lisible, modifiable, auditable. Tu peux vérifier
+  qu'aucune télémétrie n'existe, et adapter l'app à tes propres destinations.
+
+### Concrètement
+
+| Sans PromptDeck | Avec PromptDeck |
+|---|---|
+| Chercher le `.md` du skill dans le Finder (30 s) | ⌥Espace + 3 lettres (2 s) |
+| Ouvrir, sélectionner, copier à la main | ⏎ — prompt dans le presse-papiers, notification de confirmation |
+| Ouvrir claude.ai, coller dans la zone de saisie | ⌘⏎ — claude.ai/new **pré-rempli** avec ton LLM par défaut |
+| Refaire tout ça pour essayer ChatGPT | ⇧⏎, ou le menu « Ouvrir dans » vers 12 destinations |
+| Recopier la même consigne dans 3 prompts | Composeur : skill + agent + prompt perso → un seul texte |
+
+**Pour qui ?** Les développeurs qui accumulent des bibliothèques de skills, celles et ceux
+qui jonglent entre plusieurs assistants IA au quotidien, et quiconque veut sa bibliothèque
+de prompts à un raccourci clavier — sans confier sa liste à un service de plus.
+
 ## 📸 Aperçu
 
 | Recherche bilingue (⌥Espace) | Menu clic droit ⚡ | Réglages |
