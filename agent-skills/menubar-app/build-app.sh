@@ -96,21 +96,27 @@ iconutil -c icns "$TMP/icon.iconset" -o "$TMP/app.icns"
 # ── Runtime Electron par architecture ─────────────────────────────────────────
 electron_src_for() { # → dossier contenant Electron.app
   local a="$1"
-  if [[ "$a" == "x64" ]]; then
+  # Runtime « local » (npm install) : son architecture suit celle de la machine
+  # (un runner Apple Silicon fournit un Electron arm64 — pas utilisable pour le pack x64)
+  local local_arch
+  local_arch=$(lipo -archs "node_modules/electron/dist/Electron.app/Contents/MacOS/Electron" 2>/dev/null)
+  local suffix="x64"
+  case "$local_arch" in *arm64*) suffix="arm64" ;; esac # x86_64 → x64 (nom de pack)
+  if [[ "$a" == "$suffix" ]]; then
     echo "node_modules/electron/dist"; return
   fi
-  # arm64 : zip officiel mis en cache dans ~/.cache/megapack (téléchargé une seule fois)
-  local cache="$HOME/.cache/megapack/electron-v${ELECTRON_VERSION}-darwin-arm64"
+  # Sinon : zip officiel mis en cache dans ~/.cache/megapack (téléchargé une seule fois)
+  local cache="$HOME/.cache/megapack/electron-v${ELECTRON_VERSION}-darwin-$a"
   if [[ ! -d "$cache/Electron.app" ]]; then
     mkdir -p "$cache"
-    local url="https://github.com/electron/electron/releases/download/v${ELECTRON_VERSION}/electron-v${ELECTRON_VERSION}-darwin-arm64.zip"
-    log "Téléchargement Electron arm64 v${ELECTRON_VERSION} (~100 Mo, une seule fois)"
-    curl -L --retry 3 -o "$TMP/ele-arm64.zip" "$url" || die "téléchargement échoué — vérifie la connexion"
-    unzip -tqq "$TMP/ele-arm64.zip" >/dev/null || die "zip Electron arm64 corrompu"
-    unzip -qq "$TMP/ele-arm64.zip" -d "$cache"
+    local url="https://github.com/electron/electron/releases/download/v${ELECTRON_VERSION}/electron-v${ELECTRON_VERSION}-darwin-$a.zip"
+    log "Téléchargement Electron $a v${ELECTRON_VERSION} (~100 Mo, une seule fois)"
+    curl -L --retry 3 -o "$TMP/ele-$a.zip" "$url" || die "téléchargement échoué — vérifie la connexion"
+    unzip -tqq "$TMP/ele-$a.zip" >/dev/null || die "zip Electron $a corrompu"
+    unzip -qq "$TMP/ele-$a.zip" -d "$cache"
   fi
   [[ -d "$cache/Electron.app/Contents/Frameworks/Electron Framework.framework" ]] \
-    || die "runtime arm64 incomplet — supprime ~/.cache/megapack et relance"
+    || die "runtime $a incomplet — supprime ~/.cache/megapack et relance"
   echo "$cache"
 }
 
