@@ -191,20 +191,22 @@ if [[ "$ARCH" == "x64 arm64" ]]; then
   rm -rf "$UNI"
   cp -R "$APP64" "$UNI"
   # fusion de chaque binaire Mach-O x86_64 (exécutables, dylibs, bundles…) — sinon crash arm64
-  # Boucle explicite (pas de pipeline grep) : la sortie de « file » varie selon les versions
-  # et set -euo pipefail tuait le build en silence quand un grep ne matchait rien (CI).
+  # Classification par lipo -archs (pas par « file », trop variable entre systèmes) :
+  # non-Mach-O → lipo échoue → ignoré · déjà universel (arm64 présent) → ignoré
   LIPO_COUNT=0
+  SCAN_COUNT=0
   while IFS= read -r -d '' abs; do
-    desc=$(file -b "$abs" 2>/dev/null || true)
-    case "$desc" in *Mach-O*x86_64*) ;; *) continue ;; esac
-    case "$desc" in *universal*) continue ;; esac
+    SCAN_COUNT=$((SCAN_COUNT+1))
+    archs=$(lipo -archs "$abs" 2>/dev/null) || continue
+    case "$archs" in *"arm64"*) continue ;; esac
+    case "$archs" in *x86_64*) ;; *) continue ;; esac
     rel="${abs#$APP64/}"
     lipo -create "$APP64/$rel" "$APPAR/$rel" -output "$UNI/$rel" \
       || die "lipo a échoué sur $rel"
     LIPO_COUNT=$((LIPO_COUNT+1))
   done < <(find "$APP64" -type f -print0)
+  log "fusion : $SCAN_COUNT fichiers scannés, $LIPO_COUNT binaires x86_64 fusionnés"
   [[ "$LIPO_COUNT" -ge 10 ]] || die "fusion universelle : $LIPO_COUNT binaires Mach-O trouvés (attendu ≥ 10)"
-  log "$LIPO_COUNT binaires fusionnés par lipo"
   # fichiers spécifiques à une arch absents de l'autre pack : les DEUX snapshots V8
   # doivent être présents dans l'app universelle (Electron choisit selon l'arch)
   (cd "$APPAR" && find . -type f) | while IFS= read -r rel; do
