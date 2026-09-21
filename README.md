@@ -173,6 +173,66 @@ node test-custom.js       # prompts personnalisés : 28/28 (créer, chercher, é
 Electron 33 · JavaScript vanilla · HTML/CSS · scripts bash (`build-app.sh` : packaging
 multi-arch par `lipo`, DMG par `hdiutil`, signature ad-hoc)
 
+## ❓ FAQ
+
+### 🔒 Confidentialité — qu'est-ce qui quitte mon Mac ?
+
+**Rien, par défaut.** Le catalogue, tes prompts ✍️, tes favoris et ta config vivent dans
+`~/Library/Application Support/megapack-menubar/mgp-prefs.json` (un JSON lisible) et dans
+les fichiers du dépôt. L'app n'embarque **aucune télémétrie, aucun analytique, aucun
+crash-reporter** — vérifiable dans le code (`main.js` n'appelle jamais de serveur).
+
+Le seul transfert, c'est **toi** qui le déclenches : quand tu ouvres un LLM web (Claude,
+ChatGPT…), ton prompt part vers **ce** service, comme si tu l'avais collé toi-même — c'est
+tout l'objet de l'app. Les destinations locales (OpenCode, presse-papiers) n'envoient rien.
+
+### ✍️ Pourquoi l'avertissement « app non signée » à l'ouverture ?
+
+La signature est **ad-hoc** (locale, gratuite) et non **notarisée** par Apple — la
+notarisation exige un compte Apple Developer à 99 $/an et l'envoi de chaque build à
+Apple, incompatibles avec une distribution open source gratuite. C'est purement un
+chemin de confiance, pas un signal de danger : le code est public et auditable.
+
+Au premier lancement : **clic droit → Ouvrir** (une fois suffit). Pour vérifier un DMG :
+`codesign -dv "MEGA PACK.app"` affiche la signature ad-hoc (`Signature=adhoc`).
+
+### 🌐 Comment ajouter ma propre destination dans « Ouvrir dans » ?
+
+Trois points à étendre dans `agent-skills/menubar-app/`, tous dans `main.js` :
+
+1. `openLLM()` — l'URL avec `?q=` pour pré-remplir (ou `shell.openPath` pour une app locale)
+2. `I18N` — le libellé FR et EN de la destination
+3. la liste des destinations du sous-menu « Ouvrir dans » (même fichier)
+
+Une PR est bienvenue — et un système de **destinations définies par l'utilisateur**
+(dans les Réglages, sans toucher au code) est sur la feuille de route.
+
+### 🧠 Electron, vraiment ? Ça ne bouffe pas la RAM ?
+
+Si — c'est le coût connu d'Electron : compte **~150 à 300 Mo de RAM** en résidence.
+Le choix est assumé : la même app en Swift natif demanderait un portage complet et
+devenait un projet à part, pour gagner quelques dizaines de Mo sur des machines qui
+en ont des dizaines de Go. En échange : développement accessible à tous, dossiers
+inspectables, et le panneau reste **caché (pas détruit)** pour une réouverture instantanée.
+
+Si la mémoire compte plus que tout : **clic droit ⚡ → Quitter** libère tout, et une
+future option « quitter après inactivité » est envisageable. Les contributions d'une
+variante native sont les bienvenues — l'architecture (catalogue JSON, prompts .md)
+est pensée pour être réutilisable telle quelle.
+
+### ⌨️ Pourquoi ⌥Espace et pas ⌘Espace ?
+
+**⌘Espace est réservé par Spotlight** depuis toujours sur macOS — le raccourci global
+de l'app serait confisqué (ou pire, casserait Spotlight). Par défaut : **⌥Espace** ;
+modifiable dans les Réglages (⌘Espace / ⌃Espace) si tu as déjà remappé Spotlight.
+
+### 🪟 Windows ou Linux ?
+
+Pas pour l'instant — l'app repose sur des briques macOS (Tray de la barre de menus,
+raccourcis globaux, DMG, `lipo`). Electron rend un portage **possible** (une bonne
+partie du renderer est agnostique), mais rien n'est promis. Ouvre une issue si le
+besoin est réel : ça orientera les priorités.
+
 ## 🙏 Crédits
 
 - Bibliothèque de skills/agents construite à partir de nombreuses sources communautaires
