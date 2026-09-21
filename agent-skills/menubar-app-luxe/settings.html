@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'">
+<title>MEGA PACK — Réglages</title>
+<style>
+/* Design system V2 — Solana premium (cohérent avec le panneau) */
+:root{--bg:#07090f;--card:#101426;--card2:#151b30;--border:#1e2743;--border2:#2b3557;--txt:#f2f5fc;--txt2:#c9d0e2;--mut:#7e89a6;--vio:#9945ff;--grn:#14f195;--acc:#8f6dff;--grad:linear-gradient(120deg,#9945ff,#7c6cff 50%,#14f195)}
+body.light{--bg:#f6f7fd;--card:#ffffff;--card2:#f4f6fd;--border:#dfe4f3;--border2:#c5cfeb;--txt:#131a2e;--txt2:#2c3556;--mut:#5d6885;--acc:#6b46f2}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font:13px/1.5 -apple-system,BlinkMacSystemFont,sans-serif;background:var(--bg);color:var(--txt);padding:18px}
+h2{font-size:16px;margin-bottom:4px;letter-spacing:.01em}
+p.hint{color:var(--mut);font-size:11.5px;margin-bottom:16px}
+.row{display:flex;align-items:center;justify-content:space-between;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:11px 14px;margin-bottom:8px;transition:border-color .15s}
+.row:hover{border-color:var(--border2)}
+.row b{font-size:13px}
+.row span.d{display:block;color:var(--mut);font-size:11px;font-weight:400;margin-top:2px}
+select{background:var(--card2);color:var(--txt);border:1.5px solid var(--border);border-radius:8px;padding:6px 10px;font-size:12px}
+select:focus{border-color:var(--vio);box-shadow:0 0 0 3px rgba(153,69,255,.2);outline:none}
+input[type=checkbox]{accent-color:var(--vio)}
+
+.kbd{font:11px ui-monospace,monospace;background:var(--card2);border:1px solid var(--border2);border-radius:6px;padding:2px 7px;color:var(--mut)}
+.btn{background:var(--card2);color:var(--txt);border:1px solid var(--border2);border-radius:8px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;transition:transform .1s,border-color .15s}
+.btn:hover{border-color:var(--vio);transform:translateY(-1px)}
+.btn:focus-visible,select:focus-visible,input:focus-visible{outline:none;box-shadow:0 0 0 2px var(--bg),0 0 0 4px var(--vio)}
+.saved{position:fixed;bottom:14px;left:50%;transform:translateX(-50%);background:var(--grad);color:#fff;padding:7px 18px;border-radius:99px;font-weight:700;font-size:12px;opacity:0;transition:opacity .2s;box-shadow:0 8px 28px rgba(153,69,255,.35)}
+.saved.show{opacity:1}
+.row.col{flex-direction:column;align-items:stretch;gap:8px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chips button{border:1px solid var(--border2);background:var(--card2);color:var(--txt2);cursor:pointer;
+  font-size:11.5px;font-weight:600;padding:5px 11px;border-radius:99px;transition:all .12s}
+.chips button:hover{border-color:var(--vio);color:var(--txt)}
+.chips button.on{background:var(--grad);border-color:transparent;color:#0b0c10}
+.apirow{display:flex;gap:6px;flex-wrap:wrap}
+.apirow select,.apirow input{background:var(--card2);color:var(--txt);border:1.5px solid var(--border);border-radius:8px;padding:6px 10px;font-size:12px}
+.apirow input{flex:1;min-width:120px}
+.apirow input:focus,.apirow select:focus{border-color:var(--vio);box-shadow:0 0 0 3px rgba(153,69,255,.2);outline:none}
+.apirow2{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+#pdirPath{flex:1;min-width:160px;opacity:.85}
+#apiStatus{font-size:11.5px;font-weight:600}
+#apiStatus.ok{color:var(--grn)}
+#apiStatus.err{color:#ff8a8a}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<h2 data-i18n="h2">⚡ MEGA PACK — Réglages</h2>
+<p class="hint"><span data-i18n="cat">Catalogue :</span> <span id="stats">…</span> <span data-i18n="genFrom">· généré depuis</span> <code>agent-skills/</code> <span id="buildinfo"></span></p>
+<div class="row"><b><span data-i18n="theme">Thème</span><span class="d" data-i18n="themeD">Appliqué au panneau et à cette fenêtre</span></b>
+  <select id="theme"><option value="dark" data-i18n="dark">🌙 Sombre</option><option value="light" data-i18n="light">☀️ Clair</option></select></div>
+<div class="row"><b><span data-i18n="lang">Langue</span><span class="d" data-i18n="langD">Interface du panneau</span></b>
+  <select id="lang"><option value="fr">🇫🇷 Français</option><option value="en">🇬🇧 English</option></select></div>
+<div class="row"><b><span data-i18n="gs">Recherche globale</span><span class="d" data-i18n="gsD">Raccourci système (⌘Espace est réservé par Spotlight)</span></b>
+  <select id="shortcut"><option value="Alt+Space">⌥Espace (recommandé)</option><option value="CommandOrControl+Space">⌘Espace</option><option value="Control+Space">⌃Espace</option></select></div>
+<div class="row"><b><span data-i18n="set">Réglages</span><span class="d" data-i18n="setD">Ouvrir cette fenêtre</span></b><span class="kbd">⌘⇧Espace</span></div>
+<div class="row"><b><span data-i18n="dllm">LLM par défaut</span><span class="d" data-i18n="dllmD">⌘⏎ dans le panneau ouvre ce chat</span></b>
+  <select id="dllm"><option value="claude">Claude</option><option value="chatgpt">ChatGPT</option><option value="perplexity">Perplexity</option><option value="copilot">Copilot</option><option value="deepseek">DeepSeek</option><option value="zai">Z.ai</option><option value="kimi">Kimi</option><option value="mammouth">Mammouth.ia</option><option value="freebuff">Freebuff (app)</option><option value="opencode-app">OpenCode (desktop)</option><option value="opencode">OpenCode (terminal)</option><option value="clipboard">Presse-papiers</option></select></div>
+<div class="row col"><b><span data-i18n="tgt">Destinations du clic droit</span><span class="d" data-i18n="tgtD">Menu flottant sur un agent/skill : envoi en un clic vers plusieurs LLM (le premier est prioritaire)</span></b>
+  <div id="targets" class="chips"></div>
+  <span class="d" id="tgtHint" data-i18n="tgtHint"></span></div>
+<div class="row col"><b><span data-i18n="intel">🧠 Intelligence — génération IA (Atelier)</span><span class="d" data-i18n="intelD">Clé API utilisée pour générer agents & skills. Jamais envoyée ailleurs ; chiffrée par macOS si possible (sinon variable d'environnement : GROQ_API_KEY, OPENAI_API_KEY…)</span></b>
+  <div class="apirow">
+    <select id="apiProv">
+      <option value="groq">Groq</option>
+      <option value="openai">OpenAI</option>
+      <option value="anthropic">Anthropic (Claude)</option>
+      <option value="openrouter">OpenRouter</option>
+      <option value="ollama">Ollama (local, sans clé)</option>
+      <option value="custom">Endpoint compatible OpenAI</option>
+    </select>
+    <input id="apiKey" type="password" placeholder="sk-…" autocomplete="off">
+    <input id="apiModel" type="text" placeholder="modèle (ex : llama-3.3-70b-versatile)">
+  </div>
+  <div class="apirow2">
+    <button id="apiSave" class="btn">💾 <span data-i18n="apiSave">Enregistrer la clé</span></button>
+    <button id="apiTest" class="btn">⚡ <span data-i18n="apiTest">Tester</span></button>
+    <button id="apiDel" class="btn">🗑</button>
+    <span id="apiStatus"></span>
+  </div>
+  <span class="d" id="apiModels" data-i18n="apiModels"></span></div>
+<div class="row"><b><span data-i18n="auto">Lancement au démarrage</span><span class="d" data-i18n="autoD">Ouvre MEGA PACK à l'ouverture de session</span></b>
+  <input type="checkbox" id="autostart" style="width:18px;height:18px;accent-color:var(--acc)"></div>
+<div class="row"><b><span data-i18n="fsc">Raccourcis favoris</span><span class="d" data-i18n="fscD">⌘1 à ⌘9 lancent les 9 premiers favoris (menu du ⚡ ouvert)</span></b>
+  <input type="checkbox" id="favshortcuts" style="width:18px;height:18px;accent-color:var(--acc)"></div>
+<div class="row col"><b><span data-i18n="pdir">📁 Dossier MEGA PROMPT (.md)</span><span class="d" data-i18n="pdirD">Bibliothèque locale : skills/, agents/, perso/ — chaque prompt de l'app en fichier .md, avec le prompt d'activation prêt à coller</span></b>
+  <div class="apirow">
+    <input id="pdirPath" type="text" readonly placeholder="…">
+    <button id="pdirChoose" class="btn">📂 <span data-i18n="pdirChoose">Choisir</span></button>
+    <button id="pdirOpen" class="btn">↗ <span data-i18n="pdirOpen">Ouvrir</span></button>
+  </div>
+  <div class="apirow2">
+    <button id="pdirSync" class="btn">🔄 <span data-i18n="pdirSync">Générer tous les .md (catalogue + perso)</span></button>
+    <span id="pdirStatus"></span>
+  </div>
+  <span class="d" data-i18n="pdirTree">Arborescence : skills/&lt;catégorie&gt;/ · agents/&lt;catégorie&gt;/ · perso/&lt;tag&gt;/ + LISEZMOI.md</span></div>
+<div class="row"><b><span data-i18n="cfg">Configuration</span><span class="d" data-i18n="cfgD">Favoris, récents et préférences en JSON</span></b>
+  <span style="display:flex;gap:6px"><button id="export" class="btn">⬇ Exporter</button><button id="import" class="btn">⬆ Importer</button></span></div>
+<div class="row"><b><span data-i18n="xp">Mes prompts ✍️</span><span class="d" data-i18n="xpD">Télécharge tous tes prompts en Markdown</span></b>
+  <button id="exportcustoms" class="btn">⬇ Exporter en .md</button></div>
+<div class="row"><b><span data-i18n="osel">Ouvrir la sélection</span><span class="d" data-i18n="oselD">Dans le panneau : ⏎ copie · ⌘⏎ LLM par défaut · ⇧⏎ ChatGPT</span></b><span class="kbd">⏎ / ⌘⏎ / ⇧⏎</span></div>
+<div class="saved" id="saved" data-i18n="saved">✓ Enregistré</div>
+<script src="settings.js"></script>
+</body>
+</html>

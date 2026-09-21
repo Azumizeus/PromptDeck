@@ -1,0 +1,54 @@
+// Bridge IPC sécurisé (contextIsolation) : expose catalogue + actions au renderer
+const { contextBridge, ipcRenderer } = require('electron');
+const fs = require('fs');
+const path = require('path');
+
+// Catalogue chargé ici (côté Node) puis passé en objet clonable au renderer.
+// Plusieurs emplacements selon le mode :
+//  - dev      : agent-skills/interface/catalog-full.js (…/menubar-app/../interface)
+//  - packagé  : MEGA PACK.app/Contents/Resources/interface/catalog-full.js
+const CATALOG_CANDIDATES = [
+  path.join(__dirname, '..', 'interface', 'catalog-full.js'),
+  path.join(process.resourcesPath || __dirname, 'interface', 'catalog-full.js'),
+];
+let catalog = { meta: { version: '?' }, skills: [], agents: [] };
+for (const p of CATALOG_CANDIDATES) {
+  try {
+    const code = fs.readFileSync(p, 'utf8');
+    const parsed = new Function(code + '\n;return MEGA_CATALOG;')();
+    if (parsed && Array.isArray(parsed.skills) && Array.isArray(parsed.agents)) { catalog = parsed; break; }
+  } catch (e) { /* candidat suivant */ }
+}
+
+contextBridge.exposeInMainWorld('mgp', {
+  catalog,
+  copy: (t) => ipcRenderer.send('copy', t),
+  hide: () => ipcRenderer.send('hide'),
+  openLLM: (target, prompt) => ipcRenderer.send('open-llm', { target, prompt }),
+  openSettings: () => ipcRenderer.send('open-settings'),
+  onSettingsChange: (prefs) => ipcRenderer.send('settings-changed', prefs),
+  onSettings: (cb) => ipcRenderer.on('settings-changed', (e, prefs) => cb(prefs)),
+  getPrefs: () => ipcRenderer.sendSync('get-prefs'),
+  addRecent: (name) => ipcRenderer.send('add-recent', name),
+  toggleFav: (name) => ipcRenderer.send('toggle-fav', name),
+  exportConfig: () => ipcRenderer.invoke('export-config'),
+  importConfig: () => ipcRenderer.invoke('import-config'),
+  customSave: (item) => ipcRenderer.send('custom-save', item),
+  customDelete: (name) => ipcRenderer.send('custom-delete', name),
+  exportCustoms: () => ipcRenderer.invoke('export-customs'),
+  onEditCustom: (cb) => ipcRenderer.on('edit-custom', (e, c) => cb(c)),
+  // ── Atelier agents/skills + moteur LLM (API clé) ──
+  workshopList: (kind) => ipcRenderer.invoke('workshop-list', kind),
+  workshopDelete: (kind, name) => ipcRenderer.invoke('workshop-delete', { kind, name }),
+  workshopExport: (kind, name) => ipcRenderer.invoke('workshop-export', { kind, name }),
+  llmGenerate: (payload) => ipcRenderer.invoke('llm-generate', payload),
+  llmTest: (payload) => ipcRenderer.invoke('llm-test', payload),
+  apiSet: (payload) => ipcRenderer.invoke('api-set', payload),
+  // ── Dossier MEGA PROMPT (fichiers .md sur le disque) ──
+  promptDirGet: () => ipcRenderer.invoke('promptdir-get'),
+  promptDirChoose: () => ipcRenderer.invoke('promptdir-choose'),
+  promptMdCreate: (item) => ipcRenderer.invoke('prompt-md-create', item),
+  promptDirOpen: (sub) => ipcRenderer.invoke('prompt-dir-open', sub),
+  promptTreeSync: (dir) => ipcRenderer.invoke('prompt-tree-sync', dir),
+  workshopMdCreate: (kind, name) => ipcRenderer.invoke('workshop-md-create', { kind, name }),
+});

@@ -69,7 +69,7 @@ li{margin:6px 0}
   <div class="card">
     <h2>🏁 Ta progression</h2>
     <div class="check"><input type="checkbox" class="js-check" data-step="s1"><span>Launcher ouvert — <a href="mega-pack-launcher.html">mega-pack-launcher.html</a></span></div>
-    <div class="check"><input type="checkbox" class="js-check" data-step="s2"><span>Panneau installé dans Tampermonkey (version <code>mega-pack-panel-full.user.js</code> v1.2.1)</span></div>
+    <div class="check"><input type="checkbox" class="js-check" data-step="s2"><span>Panneau installé dans Tampermonkey (version <code>mega-pack-panel-full.user.js</code> v2.2.0)</span></div>
     <div class="check"><input type="checkbox" class="js-check" data-step="s3"><span>Prompt injecté dans un vrai chat LLM</span></div>
     <div class="check"><input type="checkbox" class="js-check" data-step="s4"><span>App menu-bar lancée (optionnel) — <code>cd menubar-app &amp;&amp; npm start</code></span></div>
     <div class="progress-wrap"><div class="progress js-progress"></div></div>
@@ -106,7 +106,7 @@ li{margin:6px 0}
       <li>Colle dans l'éditeur Tampermonkey → <b>⌘S</b></li>
       <li>Va sur claude.ai ou chatgpt.com → bouton <b>⚡</b> en bas à droite (raccourci <code>Ctrl+Shift+K</code>)</li>
     </ol>
-    <p class="note">⚠️ <b>Mise à jour :</b> après une régénération du catalogue (<code>build-interface.py</code>), <b>re-colle</b> le contenu de <code>mega-pack-panel-full.user.js</code> dans Tampermonkey — le catalogue est embarqué dedans. Version actuelle : <b>1.2.0</b>.</p>
+    <p class="note">⚠️ <b>Mise à jour :</b> après une régénération du catalogue (<code>build-interface.py</code>), <b>re-colle</b> le contenu de <code>mega-pack-panel-full.user.js</code> dans Tampermonkey — le catalogue est embarqué dedans. Version actuelle : <b>2.2.0</b>.</p>
     <p class="note">🌐 Le panneau a un bouton <b>FR/EN</b> dans son en-tête : la langue des textes ET des prompts injectés suit ton choix (mémorisé par site).</p>
   </div>
 
@@ -149,7 +149,7 @@ li{margin:6px 0}
   </div>
 
   <h2>🛠️ Dépannage</h2>
-  <details><summary>Le bouton ⚡ apparaît 2 fois</summary><p>Corrigé (garde anti-doublon + <code>@noframes</code> v1.2.1 — couvre aussi les iframes : artifacts Claude, canvas ChatGPT… et le cas de 2 userscripts installés ensemble). Si tu vois encore 2 boutons : tu as l'ancienne version dans Tampermonkey → re-colle la v1.2.1.</p></details>
+  <details><summary>Le bouton ⚡ apparaît 2 fois</summary><p>Corrigé (garde anti-doublon + <code>@noframes</code> v2.2.0 — couvre aussi les iframes : artifacts Claude, canvas ChatGPT… et le cas de 2 userscripts installés ensemble). Si tu vois encore 2 boutons : tu as l'ancienne version dans Tampermonkey → re-colle la v2.2.0.</p></details>
   <details><summary>« Catalogue vide » dans le panneau</summary><p>Corrigé (lecture paresseuse + auto-chargement). Si ça persiste : utilise <code>mega-pack-panel-full.user.js</code> (catalogue embarqué) au lieu de <code>mega-pack-panel.user.js</code>.</p></details>
   <details><summary>Le prompt ne s'injecte pas dans le chat</summary><p>Le site a changé son DOM → le fallback copie dans le presse-papiers : colle manuellement (⌘V).</p></details>
   <details><summary>Le bookmarklet ne charge rien</summary><p>Le serveur local est éteint → double-clique <code>MEGA-PACK-serveur.command</code>, puis reclique le favori.</p></details>
@@ -182,7 +182,7 @@ li{margin:6px 0}
   <div class="card">
     <h2>🏁 Your progress</h2>
     <div class="check"><input type="checkbox" class="js-check" data-step="s1"><span>Launcher opened — <a href="mega-pack-launcher.html">mega-pack-launcher.html</a></span></div>
-    <div class="check"><input type="checkbox" class="js-check" data-step="s2"><span>Panel installed in Tampermonkey (<code>mega-pack-panel-full.user.js</code> v1.2.0)</span></div>
+    <div class="check"><input type="checkbox" class="js-check" data-step="s2"><span>Panel installed in Tampermonkey (<code>mega-pack-panel-full.user.js</code> v2.2.0)</span></div>
     <div class="check"><input type="checkbox" class="js-check" data-step="s3"><span>Prompt injected into a real LLM chat</span></div>
     <div class="check"><input type="checkbox" class="js-check" data-step="s4"><span>Menu-bar app running (optional) — <code>cd menubar-app &amp;&amp; npm start</code></span></div>
     <div class="progress-wrap"><div class="progress js-progress"></div></div>
@@ -219,7 +219,7 @@ li{margin:6px 0}
       <li>Paste into the Tampermonkey editor → <b>⌘S</b></li>
       <li>Go to claude.ai or chatgpt.com → <b>⚡</b> button at the bottom right (shortcut <code>Ctrl+Shift+K</code>)</li>
     </ol>
-    <p class="note">⚠️ <b>Updating:</b> after a catalog regeneration (<code>build-interface.py</code>), <b>re-paste</b> the content of <code>mega-pack-panel-full.user.js</code> into Tampermonkey — the catalog is embedded inside. Current version: <b>1.2.0</b>.</p>
+    <p class="note">⚠️ <b>Updating:</b> after a catalog regeneration (<code>build-interface.py</code>), <b>re-paste</b> the content of <code>mega-pack-panel-full.user.js</code> into Tampermonkey — the catalog is embedded inside. Current version: <b>2.2.0</b>.</p>
     <p class="note">🌐 The panel has a <b>FR/EN</b> toggle in its header: both the UI texts and the injected prompts follow your choice (remembered per site).</p>
   </div>
 
@@ -262,7 +262,7 @@ li{margin:6px 0}
   </div>
 
   <h2>🛠️ Troubleshooting</h2>
-  <details><summary>The ⚡ button appears twice</summary><p>Fixed (anti-duplicate guard + <code>@noframes</code> v1.2.1 — also covers iframes: Claude artifacts, ChatGPT canvas… and the case of 2 userscripts installed together). If you still see 2 buttons: you have the old version in Tampermonkey → re-paste v1.2.1.</p></details>
+  <details><summary>The ⚡ button appears twice</summary><p>Fixed (anti-duplicate guard + <code>@noframes</code> v2.2.0 — also covers iframes: Claude artifacts, ChatGPT canvas… and the case of 2 userscripts installed together). If you still see 2 buttons: you have the old version in Tampermonkey → re-paste v2.2.0.</p></details>
   <details><summary>"Empty catalog" in the panel</summary><p>Fixed (lazy read + auto-load). If it persists: use <code>mega-pack-panel-full.user.js</code> (embedded catalog) instead of <code>mega-pack-panel.user.js</code>.</p></details>
   <details><summary>The prompt is not injected into the chat</summary><p>The site changed its DOM → the clipboard fallback copies it: paste manually (⌘V).</p></details>
   <details><summary>The bookmarklet loads nothing</summary><p>The local server is off → double-click <code>MEGA-PACK-serveur.command</code>, then click the bookmark again.</p></details>

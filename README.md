@@ -7,7 +7,7 @@
 Recherche instantanée, prompts personnalisés, envoi vers 12 destinations
 (Claude, ChatGPT, Freebuff, OpenCode…) en un clic.
 
-[![Version](https://img.shields.io/badge/version-1.1.0-blue)](#-installation)
+[![Version](https://img.shields.io/badge/version-2.2.0-blue)](#-installation)
 [![CI](https://github.com/Azumizeus/PromptDeck/actions/workflows/ci.yml/badge.svg)](https://github.com/Azumizeus/PromptDeck/actions/workflows/ci.yml)
 [![macOS](https://img.shields.io/badge/macOS-13%2B-black?logo=apple)](#-installation)
 [![Architectures](https://img.shields.io/badge/arch-Intel%20%7C%20Apple%20Silicon%20%7C%20Universel-orange)](#-installation)
@@ -32,6 +32,10 @@ une bibliothèque de **131 skills** et **190 agents IA** en lanceur instantané 
 | ⭐ **Favoris + ⌘1-⌘9** | Épingle tes items et lance les 9 premiers au clavier |
 | 🕘 **Récents** | Tes 8 derniers prompts toujours à portée de clic |
 | 🧩 **Composeur** | Multi-sélectionne skills + agents + prompts → un prompt combiné unique |
+| 💡 **Tooltip expert** | Survol d'un skill/agent : type, description complète, catégorie, compétences |
+| 🖱️ **Clic droit multi-LLM** | Menu flottant : envoi vers **plusieurs destinations choisies** dans les Réglages, copier, favori |
+| 📄 **Dossier MEGA PROMPT** | Tout le catalogue en fichiers `.md` sur le disque (`skills/`, `agents/`, `perso/`) — clic droit → **Créer le .md** ou **Ouvrir le dossier** en un clic |
+| 🛠 **Atelier IA** | Crée tes propres agents & skills **générés par IA** (Groq, OpenAI, Anthropic, OpenRouter, Ollama…) avec option « senior orchestrateur » |
 | ⚙️ **Réglages complets** | Thème clair/sombre, FR/EN, LLM par défaut, raccourci personnalisable, lancement au démarrage, export/import de config |
 
 Le tout **100 % local** : pas de compte, pas de télémétrie, aucun envoi de données.
@@ -144,13 +148,15 @@ Toute la documentation utilisateur est dans [`agent-skills/interface/MODE-DEMPLO
 | **⌘1-⌘9** | Lancer les 9 premiers favoris |
 | **＋** | Créer un prompt personnalisé |
 | **Glisser un .md/.txt** | Importer des prompts |
+| **Clic droit sur un item** | Envoyer à… · 📄 Créer le .md · 📂 Ouvrir le dossier MEGA PROMPT |
 
 ## 🏗️ Structure du dépôt
 
 ```
 PromptDeck/
 ├── agent-skills/
-│   ├── menubar-app/        ← l'app Electron (main.js, renderer.js, tests, build-app.sh)
+│   ├── menubar-app/        ← l'app Electron V1 (main.js, renderer.js, tests, build-app.sh)
+│   ├── menubar-app-luxe/   ← l'app Electron **Édition Luxe** (tooltip, clic droit multi-LLM, Atelier IA, MEGA PROMPT)
 │   ├── interface/          ← launcher HTML, panneau Tampermonkey, catalogue 321 items, MODE-DEMPLOI
 │   ├── skills/             ← 131 skills (SKILL.md)
 │   └── agents/             ← 190 agents (fiches de rôle système)
