@@ -1,0 +1,12 @@
+# macOS
+.DS_Store
+
+# Dépendances et artefacts de build (régénérés par npm install / ./build-app.sh)
+node_modules/
+dist/
+
+# Archives distributables (régénérées par build-interface.py / build-app.sh)
+/agent-skills-mega-pack.zip
+
+# Métadonnées locales Freebuff
+.freebuff/

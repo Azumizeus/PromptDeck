@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NEXUS & SEEKER — Pilotage Agents 3D</title>
+<style>
+  :root{
+    --bg:#0b0e14;
+    --panel:#131826;
+    --panel2:#0f1420;
+    --border:#232a3b;
+    --text:#e6e9f0;
+    --muted:#8b93a7;
+    --nexus:#3b6dd8;
+    --nexus-glow:#5b8cf5;
+    --seeker:#d69a4e;
+    --seeker-glow:#f0b96f;
+    --ok:#4ade80;
+    --warn:#fbbf24;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:radial-gradient(circle at 20% 0%, #131a2b 0%, var(--bg) 55%);
+    color:var(--text);
+    min-height:100vh;
+  }
+  .wrap{max-width:1080px;margin:0 auto;padding:28px 20px 60px;}
+  header{
+    display:flex;flex-direction:column;gap:6px;margin-bottom:24px;
+  }
+  header h1{margin:0;font-size:1.7rem;letter-spacing:.3px;}
+  header h1 span.n{color:var(--nexus-glow);}
+  header h1 span.s{color:var(--seeker-glow);}
+  header p{margin:0;color:var(--muted);font-size:.95rem;}
+
+  nav{
+    display:flex;gap:6px;flex-wrap:wrap;margin-bottom:22px;
+    border-bottom:1px solid var(--border);padding-bottom:10px;
+  }
+  nav button{
+    background:transparent;border:1px solid var(--border);color:var(--muted);
+    padding:8px 14px;border-radius:8px;cursor:pointer;font-size:.85rem;
+    transition:all .15s;
+  }
+  nav button:hover{color:var(--text);border-color:#39415a;}
+  nav button.active{
+    background:var(--panel);color:var(--text);border-color:#3a4faa;
+    box-shadow:0 0 0 1px #3a4faa inset;
+  }
+
+  .panel{display:none;animation:fade .2s ease;}
+  .panel.active{display:block;}
+  @keyframes fade{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:translateY(0);}}
+
+  .cards{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:18px;}
+  @media(max-width:720px){.cards{grid-template-columns:1fr;}}
+
+  .card{
+    background:var(--panel);border:1px solid var(--border);border-radius:14px;
+    padding:20px;position:relative;overflow:hidden;
+  }
+  .card.nexus{border-top:3px solid var(--nexus);}
+  .card.seeker{border-top:3px solid var(--seeker);}
+  .card h2{margin:0 0 4px;font-size:1.25rem;}
+  .card .role{color:var(--muted);font-size:.85rem;margin-bottom:14px;}
+  .card .blocs{display:flex;flex-direction:column;gap:10px;}
+  .bloc{font-size:.87rem;line-height:1.5;}
+  .bloc b{display:block;font-size:.72rem;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:2px;}
+  .card.nexus .bloc b{color:var(--nexus-glow);}
+  .card.seeker .bloc b{color:var(--seeker-glow);}
+
+  .tag{
+    display:inline-block;font-size:.72rem;padding:3px 9px;border-radius:99px;
+    background:var(--panel2);border:1px solid var(--border);color:var(--muted);margin-right:6px;margin-top:8px;
+  }
+
+  .section-title{font-size:1.05rem;margin:26px 0 10px;color:var(--text);border-left:3px solid #3a4faa;padding-left:10px;}
+
+  table{width:100%;border-collapse:collapse;background:var(--panel);border:1px solid var(--border);border-radius:10px;overflow:hidden;font-size:.85rem;}
+  th,td{padding:9px 12px;text-align:left;border-bottom:1px solid var(--border);}
+  th{background:var(--panel2);color:var(--muted);font-weight:600;font-size:.78rem;text-transform:uppercase;letter-spacing:.4px;}
+  tr:last-child td{border-bottom:none;}
+
+  pre{
+    background:#0a0d16;border:1px solid var(--border);border-radius:10px;
+    padding:14px;font-size:.78rem;line-height:1.55;overflow-x:auto;color:#c9d1e8;
+    white-space:pre-wrap;
+  }
+
+  .steps{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px;}
+  .steps li{
+    background:var(--panel);border:1px solid var(--border);border-radius:10px;
+    padding:10px 14px;font-size:.87rem;display:flex;gap:10px;align-items:flex-start;
+  }
+  .steps li .num{
+    flex:0 0 auto;width:22px;height:22px;border-radius:50%;background:#1c2440;
+    color:#9fb2ff;font-size:.75rem;display:flex;align-items:center;justify-content:center;font-weight:700;
+  }
+
+  .roadmap-phase{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px 18px;margin-bottom:14px;}
+  .roadmap-phase h3{margin:0 0 10px;font-size:.98rem;}
+  .roadmap-phase h3 .badge{font-size:.68rem;background:var(--panel2);color:var(--muted);padding:2px 8px;border-radius:99px;margin-left:8px;}
+  .check-item{display:flex;align-items:center;gap:9px;padding:5px 0;font-size:.86rem;}
+  .check-item input{width:16px;height:16px;accent-color:var(--seeker);cursor:pointer;}
+  .check-item label{cursor:pointer;}
+  .check-item.done label{color:var(--muted);text-decoration:line-through;}
+
+  .progress-wrap{display:flex;align-items:center;gap:10px;margin-bottom:20px;}
+  .progress-bar{flex:1;height:8px;background:var(--panel2);border-radius:99px;overflow:hidden;border:1px solid var(--border);}
+  .progress-fill{height:100%;background:linear-gradient(90deg,var(--nexus),var(--seeker));width:0%;transition:width .3s;}
+  .progress-label{font-size:.8rem;color:var(--muted);white-space:nowrap;}
+
+  .who-table td:first-child{color:var(--muted);}
+  .who-table tr td:last-child.n{color:var(--nexus-glow);font-weight:600;}
+  .who-table tr td:last-child.s{color:var(--seeker-glow);font-weight:600;}
+
+  .callout{
+    background:linear-gradient(135deg,rgba(59,109,216,.08),rgba(214,154,78,.08));
+    border:1px solid var(--border);border-radius:12px;padding:14px 16px;font-size:.87rem;margin:16px 0;
+  }
+
+  .reset-btn{
+    background:transparent;border:1px solid var(--border);color:var(--muted);
+    padding:6px 12px;border-radius:8px;font-size:.78rem;cursor:pointer;
+  }
+  .reset-btn:hover{color:var(--text);border-color:#39415a;}
+
+  footer{margin-top:40px;color:var(--muted);font-size:.78rem;text-align:center;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <h1><span class="n">NEXUS</span> &amp; <span class="s">SEEKER</span> — Pilotage des Agents 3D</h1>
+    <p>SEEKER AGENT OS · "Nexus : au-dessus, ce sont les étoiles." · Dashboard local — dernière mise à jour 2026-09-19</p>
+  </header>
+
+  <nav>
+    <button data-tab="overview" class="active">Vue d'ensemble</button>
+    <button data-tab="nexus">NEXUS</button>
+    <button data-tab="seeker">SEEKER</button>
+    <button data-tab="roadmap">Roadmap</button>
+    <button data-tab="modeemploi">Mode d'emploi</button>
+    <button data-tab="suivi">Suivi</button>
+  </nav>
+
+  <!-- OVERVIEW -->
+  <section class="panel active" id="overview">
+    <div class="cards">
+      <div class="card nexus">
+        <h2>NEXUS</h2>
+        <div class="role">Orchestrateur principal — masculin — partenaire technique historique</div>
+        <div class="blocs">
+          <div class="bloc"><b>Rôle</b>Connecte le code et la vision. Décompose, délègue, valide, tranche.</div>
+          <div class="bloc"><b>Ton</b>Direct, fiable, jamais de faux-semblant.</div>
+          <div class="bloc"><b>Expertise</b>Architecture, Solana/Anchor, coordination multi-agents.</div>
+          <div class="bloc"><b>Limites</b>Ne code pas lui-même, ne décide jamais seul d'une action critique.</div>
+        </div>
+        <span class="tag">Bleu nuit / graphite</span><span class="tag">Motif constellation/nœuds</span>
+      </div>
+      <div class="card seeker">
+        <h2>SEEKER</h2>
+        <div class="role">Orchestratrice adjointe — féminine — nom du projet incarné</div>
+        <div class="blocs">
+          <div class="bloc"><b>Rôle</b>Explore les chemins alternatifs, angles morts, priorisation.</div>
+          <div class="bloc"><b>Ton</b>Chaleureux mais précis, curieuse, jamais mielleuse.</div>
+          <div class="bloc"><b>Expertise</b>UX/produit, priorisation, pédagogie, synthèse.</div>
+          <div class="bloc"><b>Limites</b>Propose, n'impose pas ; ne tranche pas seule les sujets lourds.</div>
+        </div>
+        <span class="tag">Argent / bronze chaud</span><span class="tag">Motif boussole/chemin</span>
+      </div>
+    </div>
+
+    <div class="callout">
+      <b>Principe du duo :</b> NEXUS connecte et structure, SEEKER explore et questionne. Aucun des deux n'exécute une action critique et irréversible (trade, déploiement mainnet, envoi de fonds) sans ta confirmation explicite. Ensemble, ils forment littéralement le nom du projet : <i>Nexus Seeker Agent OS</i>.
+    </div>
+
+    <h3 class="section-title">Qui appeler ?</h3>
+    <table class="who-table">
+      <tr><th>Situation</th><th>Agent</th></tr>
+      <tr><td>Décomposer une demande complexe en tâches techniques</td><td class="n">NEXUS</td></tr>
+      <tr><td>Savoir ce que tu rates / un angle mort</td><td class="s">SEEKER</td></tr>
+      <tr><td>Conflit entre deux options techniques</td><td class="n">NEXUS tranche</td></tr>
+      <tr><td>Priorisation de sprint / roadmap</td><td class="s">SEEKER</td></tr>
+      <tr><td>Architecture, sécurité, arbitrage final</td><td class="n">NEXUS</td></tr>
+    </table>
+
+    <h3 class="section-title">Équipe cible</h3>
+    <table>
+      <tr><th>#</th><th>Nom</th><th>Rôle</th><th>Statut</th></tr>
+      <tr><td>1</td><td style="color:var(--nexus-glow)">NEXUS</td><td>Orchestrateur principal</td><td>🎯 En cours</td></tr>
+      <tr><td>2</td><td style="color:var(--seeker-glow)">SEEKER</td><td>Orchestratrice adjointe</td><td>🎯 En cours</td></tr>
+      <tr><td>3</td><td>CIPHER</td><td>Sécurité (veto)</td><td>À venir</td></tr>
+      <tr><td>4</td><td>RUSTIK</td><td>Smart contracts Solana</td><td>À venir</td></tr>
+      <tr><td>5</td><td>VERA</td><td>UX/UI (veto accessibilité)</td><td>À venir</td></tr>
+      <tr><td>6</td><td>LINGUA</td><td>i18n / traduction</td><td>À venir</td></tr>
+      <tr><td>7</td><td>ECHO</td><td>Growth / communication</td><td>À venir</td></tr>
+    </table>
+  </section>
+
+  <!-- NEXUS -->
+  <section class="panel" id="nexus">
+    <h2 style="color:var(--nexus-glow);margin-top:0;">NEXUS — Orchestrateur Principal</h2>
+    <p style="color:var(--muted);font-size:.9rem;">Fiche complète : <code>01-NEXUS-orchestrateur.md</code></p>
+
+    <h3 class="section-title">Prompt Forge (texte → TRELLIS)</h3>
+    <pre>Senior male AI orchestrator character, humanoid, standing neutral A-pose,
+dark navy and graphite armor-inspired tech suit with fine constellation and
+node-link engravings across chest and shoulders (connection motif, not
+circuitry), angular shoulder plating, no cape, no weapons, calm reliable
+posture, short structured hair, sharp jawline, deep blue optical accents on
+chest and forearms tracing a subtle node network (soft glow, not eyes),
+matte premium materials (brushed metal + dark fabric), clean simple
+background, front-facing, studio lighting, realistic proportions,
+character concept art, high detail</pre>
+
+    <h3 class="section-title">Étapes three.ws</h3>
+    <ul class="steps">
+      <li><span class="num">1</span>Forge : 3-4 variantes, garde la meilleure silhouette (test 64px).</li>
+      <li><span class="num">2</span>Rigger : squelette Mixamo auto + ARKit-52, vérifier le bind.</li>
+      <li><span class="num">3</span>Animer : posture de commandement accessible + 1-2 idles.</li>
+      <li><span class="num">4</span>Incarner : backend Claude, personnalité (4 blocs), voix posée/assurée testée.</li>
+      <li><span class="num">5</span>Déployer : page de test isolée, devnet-mindset, aucun wallet.</li>
+      <li><span class="num">6</span>Documenter : URL GLB + ID agent dans <code>agents-registry.md</code>.</li>
+    </ul>
+
+    <h3 class="section-title">Mapping vers ta bibliothèque</h3>
+    <table>
+      <tr><th>Domaine</th><th>NEXUS délègue à</th></tr>
+      <tr><td>Architecture logicielle</td><td>engineering-software-architect, engineering-backend-architect</td></tr>
+      <tr><td>Programme Solana/Anchor</td><td>solana-anchor-claude-skill, solana-dev-skill</td></tr>
+      <tr><td>Sécurité smart contract</td><td>blockchain-security-auditor, vulnhunter</td></tr>
+      <tr><td>Jeu Solana Mobile</td><td>mobile-development-for-solana-games, solana-game-skill</td></tr>
+      <tr><td>Revue de code</td><td>engineering-code-reviewer, code-review-and-quality</td></tr>
+      <tr><td>Coordination pipeline</td><td>agents-orchestrator</td></tr>
+    </table>
+  </section>
+
+  <!-- SEEKER -->
+  <section class="panel" id="seeker">
+    <h2 style="color:var(--seeker-glow);margin-top:0;">SEEKER — Orchestratrice Adjointe</h2>
+    <p style="color:var(--muted);font-size:.9rem;">Fiche complète : <code>02-SEEKER-orchestratrice.md</code></p>
+
+    <h3 class="section-title">Prompt Forge (texte → TRELLIS)</h3>
+    <pre>Senior female AI orchestrator character, humanoid, standing neutral A-pose,
+pale silver and warm bronze tech outfit with a fine compass-rose and pathway
+line pattern engraved on the shoulders and collar, flowing but structured
+long coat (not a cape, functional cut), confident open posture, long hair
+tied back, warm expressive face, subtle luminous amber accents along
+collarbone and wrists (soft glow, not eyes), matte premium materials with a
+few polished metal details, clean simple background, front-facing, studio
+lighting, realistic proportions, character concept art, high detail</pre>
+
+    <h3 class="section-title">Étapes three.ws</h3>
+    <ul class="steps">
+      <li><span class="num">1</span>Forge : 3-4 variantes, vérifier la distinction avec NEXUS à 64px.</li>
+      <li><span class="num">2</span>Rigger : squelette Mixamo + ARKit-52, vérifier le motif boussole après flexion des coudes.</li>
+      <li><span class="num">3</span>Animer : posture ouverte, mains visibles + idle regard.</li>
+      <li><span class="num">4</span>Incarner : backend Claude, personnalité (4 blocs), voix claire/curieuse testée.</li>
+      <li><span class="num">5</span>Déployer : même page de test que NEXUS, côte à côte.</li>
+      <li><span class="num">6</span>Documenter : même registre que NEXUS.</li>
+    </ul>
+
+    <h3 class="section-title">Mapping vers ta bibliothèque</h3>
+    <table>
+      <tr><th>Domaine</th><th>SEEKER mobilise</th></tr>
+      <tr><td>UX / design d'interface</td><td>design-ux-architect, design-ui-designer</td></tr>
+      <tr><td>Accessibilité</td><td>testing-accessibility-auditor</td></tr>
+      <tr><td>Priorisation produit</td><td>product-sprint-prioritizer, planning-and-task-breakdown</td></tr>
+      <tr><td>Pédagogie / documentation</td><td>engineering-technical-writer, documentation-and-adrs</td></tr>
+      <tr><td>Idée floue à structurer</td><td>idea-refine, interview-me</td></tr>
+    </table>
+  </section>
+
+  <!-- ROADMAP -->
+  <section class="panel" id="roadmap">
+    <h2 style="margin-top:0;">Feuille de route</h2>
+    <p style="color:var(--muted);font-size:.9rem;">Détail complet : <code>03-ROADMAP.md</code>. Coche au fil de ton avancement réel — c'est sauvegardé dans ce navigateur.</p>
+
+    <div class="progress-wrap">
+      <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+      <div class="progress-label" id="progress-label">0%</div>
+      <button class="reset-btn" id="reset-btn">Réinitialiser</button>
+    </div>
+
+    <div id="roadmap-phases"></div>
+  </section>
+
+  <!-- MODE D'EMPLOI -->
+  <section class="panel" id="modeemploi">
+    <h2 style="margin-top:0;">Mode d'emploi</h2>
+    <p style="color:var(--muted);font-size:.9rem;">Détail complet : <code>04-MODE-EMPLOI.md</code></p>
+
+    <h3 class="section-title">Formulations qui marchent</h3>
+    <ul class="steps">
+      <li><span class="num">✓</span>"NEXUS, décompose et organise [tâche]." → il répond avec un plan avant d'agir.</li>
+      <li><span class="num">✓</span>"SEEKER, qu'est-ce que je rate sur [sujet] ?" → elle répond en options.</li>
+      <li><span class="num">✓</span>"SEEKER, priorise-moi ça." → liste ordonnée avec raison de chaque rang.</li>
+      <li><span class="num">✓</span>"NEXUS et SEEKER, vous êtes d'accord là-dessus ?" → force le désaccord à sortir avant une décision importante.</li>
+    </ul>
+
+    <h3 class="section-title">Dépannage comportemental</h3>
+    <table>
+      <tr><th>Symptôme</th><th>Correctif</th></tr>
+      <tr><td>Réponses trop longues</td><td>Recoller le system prompt complet</td></tr>
+      <tr><td>Exécute sans confirmer</td><td>Vérifier le bloc "Limites" dans Agent Studio</td></tr>
+      <tr><td>SEEKER valide tout sans challenger</td><td>Retester avec une idée volontairement faible</td></tr>
+      <tr><td>Voix générique</td><td>Retester sur la phrase de référence de la fiche agent</td></tr>
+    </table>
+
+    <div class="callout">
+      Sources de vérité : system prompts dans les fiches <code>01-</code>/<code>02-</code>, avancement dans <code>05-SUIVI-CREATION.md</code> et <code>agents-registry.md</code>, bibliothèque complète dans <code>agent-skills/COMMANDES-ET-AGENTS.md</code> (267+ skills/agents).
+    </div>
+  </section>
+
+  <!-- SUIVI -->
+  <section class="panel" id="suivi">
+    <h2 style="margin-top:0;">Suivi de création</h2>
+    <p style="color:var(--muted);font-size:.9rem;">Détail complet et journal de bord : <code>05-SUIVI-CREATION.md</code>. Checklist qualité avant de considérer un agent "terminé".</p>
+
+    <div class="cards">
+      <div class="card nexus">
+        <h2 style="font-size:1.05rem;">NEXUS — Checklist qualité</h2>
+        <div id="nexus-checklist"></div>
+      </div>
+      <div class="card seeker">
+        <h2 style="font-size:1.05rem;">SEEKER — Checklist qualité</h2>
+        <div id="seeker-checklist"></div>
+      </div>
+    </div>
+  </section>
+
+  <footer>Dashboard local — projet SEEKER AGENT OS — dossier "Agents Skill 3D"</footer>
+</div>
+
+<script>
+(function(){
+  // Tab navigation
+  var buttons = document.querySelectorAll('nav button');
+  var panels = document.querySelectorAll('.panel');
+  buttons.forEach(function(btn){
+    btn.addEventListener('click', function(){
+      buttons.forEach(function(b){ b.classList.remove('active'); });
+      panels.forEach(function(p){ p.classList.remove('active'); });
+      btn.classList.add('active');
+      document.getElementById(btn.dataset.tab).classList.add('active');
+    });
+  });
+
+  // Storage helpers (this is a local file opened directly in the user's own
+  // browser, not an in-conversation preview, so localStorage persists reliably
+  // between sessions on this machine)
+  function safeGet(key, fallback){
+    try{
+      var v = localStorage.getItem(key);
+      return v ? JSON.parse(v) : fallback;
+    }catch(e){ return fallback; }
+  }
+  function safeSet(key, value){
+    try{ localStorage.setItem(key, JSON.stringify(value)); }catch(e){}
+  }
+
+  // Roadmap data
+  var roadmap = [
+    {title:"Phase 0 — Prérequis", items:[
+      "Compte three.ws créé (ou confirmé non nécessaire pour Forge)",
+      "Fiches NEXUS et SEEKER lues en entier",
+      "Décision : source de vérité des system prompts = ce dossier",
+      "agents-registry.md prêt à remplir"
+    ]},
+    {title:"Phase 1 — Corps 3D (Forge)", items:[
+      "NEXUS généré (3-4 variantes)",
+      "SEEKER générée (3-4 variantes)",
+      "Test de reconnaissance à 64px passé",
+      "Variantes finales choisies"
+    ]},
+    {title:"Phase 2 — Rig & animation", items:[
+      "NEXUS riggé, bind validé",
+      "SEEKER riggée, bind validé",
+      "NEXUS posé (commandement accessible + idles)",
+      "SEEKER posée (posture ouverte + idle regard)",
+      "Duo vérifié côte à côte"
+    ]},
+    {title:"Phase 3 — Cerveau & personnalité", items:[
+      "NEXUS connecté au backend Claude",
+      "System prompt NEXUS collé",
+      "SEEKER connectée au backend Claude",
+      "System prompt SEEKER collé",
+      "Voix NEXUS testée",
+      "Voix SEEKER testée",
+      "agents-registry.md rempli"
+    ]},
+    {title:"Phase 4 — Déploiement de test", items:[
+      "Page de test isolée, devnet-mindset",
+      "<agent-3d> NEXUS fonctionnel",
+      "<agent-3d> SEEKER fonctionnel",
+      "Dialogue test NEXUS validé",
+      "Dialogue test SEEKER validé",
+      "Test du duo validé"
+    ]},
+    {title:"Phase 5 — Validation (Go/No-Go)", items:[
+      "Comportement conforme aux 4 blocs de personnalité",
+      "Aucun bug bloquant identifié",
+      "Nommage cohérent three.ws / dossier",
+      "Décision explicite prise pour la suite"
+    ]}
+  ];
+
+  var roadmapState = safeGet('seeker_roadmap_v2', {});
+  var container = document.getElementById('roadmap-phases');
+
+  function render(){
+    container.innerHTML = '';
+    var total = 0, checked = 0;
+    roadmap.forEach(function(phase, pi){
+      var div = document.createElement('div');
+      div.className = 'roadmap-phase';
+      var doneCount = phase.items.filter(function(_, ii){ return roadmapState[pi+'-'+ii]; }).length;
+      div.innerHTML = '<h3>'+phase.title+' <span class="badge">'+doneCount+'/'+phase.items.length+'</span></h3>';
+      phase.items.forEach(function(item, ii){
+        total++;
+        var key = pi+'-'+ii;
+        var isDone = !!roadmapState[key];
+        if(isDone) checked++;
+        var row = document.createElement('div');
+        row.className = 'check-item' + (isDone ? ' done' : '');
+        var id = 'chk-'+key;
+        row.innerHTML = '<input type="checkbox" id="'+id+'" '+(isDone?'checked':'')+'><label for="'+id+'">'+item+'</label>';
+        row.querySelector('input').addEventListener('change', function(e){
+          roadmapState[key] = e.target.checked;
+          safeSet('seeker_roadmap_v2', roadmapState);
+          render();
+        });
+        div.appendChild(row);
+      });
+      container.appendChild(div);
+    });
+    var pct = total ? Math.round((checked/total)*100) : 0;
+    document.getElementById('progress-fill').style.width = pct + '%';
+    document.getElementById('progress-label').textContent = pct + '% (' + checked + '/' + total + ')';
+  }
+  render();
+
+  document.getElementById('reset-btn').addEventListener('click', function(){
+    roadmapState = {};
+    safeSet('seeker_roadmap_v2', roadmapState);
+    render();
+  });
+
+  // Quality checklists (NEXUS / SEEKER)
+  var nexusItems = [
+    "Silhouette reconnaissable à 64px",
+    "Rig ne déforme pas le costume aux articulations",
+    "Ton direct, fiable, pas répétitif (testé sur 3 échanges)",
+    "Refuse une action critique test sans confirmation",
+    "Délègue une question de code détaillé",
+    "Admet une incertitude plutôt que de bluffer (test)",
+    "Voix posée/assurée confirmée sur une phrase technique"
+  ];
+  var seekerItems = [
+    "Silhouette distincte de NEXUS à 64px",
+    "Rig ne déforme pas le motif boussole aux épaules",
+    "Pose une question de clarification sur une demande ambiguë",
+    "Challenge une proposition faible avec une alternative concrète",
+    "Ne tranche pas seule une décision technique lourde",
+    "Voix claire/curieuse confirmée sur une phrase réelle"
+  ];
+
+  function renderChecklist(containerId, storageKey, items){
+    var el = document.getElementById(containerId);
+    var state = safeGet(storageKey, {});
+    el.innerHTML = '';
+    items.forEach(function(item, i){
+      var isDone = !!state[i];
+      var row = document.createElement('div');
+      row.className = 'check-item' + (isDone ? ' done' : '');
+      var id = containerId+'-'+i;
+      row.innerHTML = '<input type="checkbox" id="'+id+'" '+(isDone?'checked':'')+'><label for="'+id+'">'+item+'</label>';
+      row.querySelector('input').addEventListener('change', function(e){
+        state[i] = e.target.checked;
+        safeSet(storageKey, state);
+        renderChecklist(containerId, storageKey, items);
+      });
+      el.appendChild(row);
+    });
+  }
+  renderChecklist('nexus-checklist', 'seeker_nexus_quality_v2', nexusItems);
+  renderChecklist('seeker-checklist', 'seeker_seeker_quality_v2', seekerItems);
+})();
+</script>
+</body>
+</html>

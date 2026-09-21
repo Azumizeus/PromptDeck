@@ -1,0 +1,16 @@
+{
+  "name": "megapack-menubar",
+  "version": "1.1.0",
+  "description": "MEGA PACK Skills & Agents — recherche globale et activation dans la barre de menus macOS",
+  "main": "main.js",
+  "scripts": {
+    "icon": "node build-icon.js",
+    "start": "electron .",
+    "build": "electron-packager . 'MEGA PACK' --platform=darwin --arch=x64 --icon=iconTemplate@2x.png --out=dist --overwrite",
+    "build:app": "bash build-app.sh"
+  },
+  "devDependencies": {
+    "electron": "^33.0.0",
+    "electron-packager": "^17.1.2"
+  }
+}

@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MEGA PACK — Mode d'emploi / User Guide</title>
+<style>
+:root{--bg:#0b0e14;--card:#161b28;--card2:#1c2233;--border:#252d40;--txt:#e8ecf4;--mut:#8b94a8;--acc:#7c6cff;--acc2:#00d4aa;--ko:#ff5c7a}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--txt);font:15px/1.6 -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;max-width:860px;margin:0 auto;padding:36px 22px 70px}
+header{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:6px}
+h1{font-size:24px}
+#langbtn{margin-left:auto;background:var(--card);border:1px solid var(--border);color:var(--mut);border-radius:99px;padding:8px 16px;font-size:13px;cursor:pointer;font-weight:600}
+#langbtn:hover{border-color:var(--acc);color:var(--txt)}
+.sub{color:var(--mut);font-size:13px;margin-bottom:20px}
+.pills{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px}
+.pill{background:linear-gradient(135deg,var(--acc),#5b8cff);color:#fff;font-size:12px;font-weight:600;padding:5px 14px;border-radius:99px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px 22px;margin:16px 0}
+h2{font-size:18px;margin-bottom:10px}
+h3{font-size:15px;margin-bottom:8px}
+.card p,.card li{font-size:13.5px;color:#c9d0de}
+.note{color:var(--mut);font-size:12.5px}
+code{background:var(--card2);padding:2px 7px;border-radius:6px;font:12.5px ui-monospace,monospace;color:var(--acc2)}
+.btn{display:inline-block;background:linear-gradient(135deg,var(--acc),#5b8cff);border:none;color:#fff;font-weight:600;font-size:13px;padding:10px 18px;border-radius:9px;cursor:pointer;text-decoration:none;margin:4px 6px 4px 0}
+.btn:hover{transform:translateY(-1px)}
+.btn.ghost{background:var(--card2);border:1px solid var(--border);color:var(--txt)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:680px){.grid2{grid-template-columns:1fr}}
+table{width:100%;border-collapse:collapse;font-size:13px;margin:8px 0}
+th,td{text-align:left;padding:7px 10px;border-bottom:1px solid var(--border)}
+th{color:var(--mut);font-size:11px;text-transform:uppercase;letter-spacing:.4px}
+.progress-wrap{background:var(--card2);border-radius:99px;height:10px;overflow:hidden;margin:8px 0 4px}
+.progress{height:100%;width:0;background:linear-gradient(90deg,var(--acc2),#5b8cff);transition:width .3s;border-radius:99px}
+.js-progress-label{font-size:12px;color:var(--mut)}
+.check{display:flex;gap:10px;align-items:flex-start;padding:7px 0;font-size:13.5px}
+.check input{width:17px;height:17px;accent-color:var(--acc2);margin-top:2px;cursor:pointer}
+.status{font-size:13px;font-weight:600;margin-top:8px}
+.status.ok{color:var(--acc2)}
+.status.ko{color:var(--ko)}
+.status.wait{color:var(--mut)}
+.d-item{background:var(--card2);border:1px solid var(--border);border-radius:9px;padding:8px 12px;margin-bottom:6px;cursor:pointer}
+.d-item:hover{border-color:var(--acc)}
+.d-item b{font-size:12.5px;display:block}
+.d-item span{font-size:11px;color:var(--mut)}
+.d-none{color:var(--mut);font-size:12.5px;padding:8px}
+input.js-demo-q{width:100%;background:var(--card2);border:1px solid var(--border);border-radius:9px;color:var(--txt);padding:9px 12px;font-size:13px;outline:none;margin-bottom:8px}
+input.js-demo-q:focus{border-color:var(--acc)}
+textarea.js-demo-out{width:100%;min-height:76px;background:#0d1119;border:1px solid var(--border);border-radius:9px;color:var(--acc2);font:12px ui-monospace,monospace;padding:10px;resize:vertical}
+details{border:1px solid var(--border);border-radius:10px;padding:10px 14px;margin:8px 0;background:var(--card2)}
+summary{cursor:pointer;font-size:13.5px;font-weight:600}
+details p{margin-top:8px}
+a{color:var(--acc)}
+ol,ul{padding-left:20px}
+li{margin:6px 0}
+.sep{height:1px;background:var(--border);margin:26px 0}
+</style>
+</head>
+<body>
+<header>
+  <h1>⚡ MEGA PACK — <span id="t-title">Mode d'emploi interactif</span></h1>
+  <button id="langbtn">🇬🇧 EN</button>
+</header>
+<p class="sub" id="t-sub">131 skills · 190 agents · tout LLM (Claude, ChatGPT, Gemini, Perplexity…)</p>
+
+<!-- ════════════════ FRANÇAIS ════════════════ -->
+<div id="fr">
+  <div class="pills"><span class="pill">🖱️ Launcher HTML</span><span class="pill">⚡ Panneau navigateur</span><span class="pill">🖥️ App menu-bar</span><span class="pill">🔗 Bookmarklet</span></div>
+
+  <div class="card">
+    <h2>🏁 Ta progression</h2>
+    <div class="check"><input type="checkbox" class="js-check" data-step="s1"><span>Launcher ouvert — <a href="mega-pack-launcher.html">mega-pack-launcher.html</a></span></div>
+    <div class="check"><input type="checkbox" class="js-check" data-step="s2"><span>Panneau installé dans Tampermonkey (version <code>mega-pack-panel-full.user.js</code> v1.2.1)</span></div>
+    <div class="check"><input type="checkbox" class="js-check" data-step="s3"><span>Prompt injecté dans un vrai chat LLM</span></div>
+    <div class="check"><input type="checkbox" class="js-check" data-step="s4"><span>App menu-bar lancée (optionnel) — <code>cd menubar-app &amp;&amp; npm start</code></span></div>
+    <div class="progress-wrap"><div class="progress js-progress"></div></div>
+    <span class="js-progress-label">0 / 4 étapes</span>
+    <p class="note">✓ Coches mémorisées dans le navigateur — tu peux fermer la page et revenir.</p>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <h3>🚀 Démarrer (Launcher — zéro installation)</h3>
+      <ol>
+        <li>Double-clique <code>mega-pack-launcher.html</code></li>
+        <li>Cherche un skill/agent (ex : « audit », « jupiter »)</li>
+        <li>Clique <b>⚡ Activer</b> → le prompt est copié</li>
+        <li>Colle-le dans n'importe quel chat LLM</li>
+      </ol>
+      <a class="btn" href="mega-pack-launcher.html">Ouvrir le Launcher</a>
+    </div>
+    <div class="card">
+      <h3>🧪 Test du serveur local</h3>
+      <p>Nécessaire uniquement pour le <b>bookmarklet</b> sur les sites https.</p>
+      <button class="btn ghost js-server">Tester maintenant</button>
+      <div class="js-server-status">non testé</div>
+      <p class="note">Si hors ligne : double-clique <code>MEGA-PACK-serveur.command</code> (il ouvre le launcher aussi).</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>⚡ Panneau permanent — Tampermonkey (recommandé)</h2>
+    <ol>
+      <li>Installe l'extension <a href="https://www.tampermonkey.net/" target="_blank">Tampermonkey</a> (gratuit sur Chrome/Arc/Edge · sur Safari : « Userscripts »)</li>
+      <li> icône Tampermonkey → <b>Tableau de bord</b> → <b>+</b> (nouveau script)</li>
+      <li>Ouvre <code>agent-skills/interface/mega-pack-panel-full.user.js</code> → <b>⌘A ⌘C</b> (tout copier)</li>
+      <li>Colle dans l'éditeur Tampermonkey → <b>⌘S</b></li>
+      <li>Va sur claude.ai ou chatgpt.com → bouton <b>⚡</b> en bas à droite (raccourci <code>Ctrl+Shift+K</code>)</li>
+    </ol>
+    <p class="note">⚠️ <b>Mise à jour :</b> après une régénération du catalogue (<code>build-interface.py</code>), <b>re-colle</b> le contenu de <code>mega-pack-panel-full.user.js</code> dans Tampermonkey — le catalogue est embarqué dedans. Version actuelle : <b>1.2.0</b>.</p>
+    <p class="note">🌐 Le panneau a un bouton <b>FR/EN</b> dans son en-tête : la langue des textes ET des prompts injectés suit ton choix (mémorisé par site).</p>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <h3>🖥️ App menu-bar (macOS)</h3>
+      <ol>
+        <li><code>cd menubar-app</code> puis <code>npm install</code></li>
+        <li><code>npm start</code> → icône ⚡ dans la barre de menus</li>
+        <li><b>⌘Espace</b> : recherche globale partout dans macOS</li>
+      </ol>
+      <button class="btn ghost js-copy" data-copy="cd menubar-app && npm install && npm start">📋 Copier npm start</button>
+      <button class="btn ghost js-copy" data-copy="cd menubar-app && npm run build">📋 Copier npm run build</button>
+      <table>
+        <tr><th>Raccourci</th><th>Action</th></tr>
+        <tr><td>⌘Espace / ⌘⇧Espace</td><td>Panneau / Réglages</td></tr>
+        <tr><td>↑↓ · ⏎ · ⌘⏎ · ⇧⏎</td><td>Naviguer · copier · Claude · ChatGPT</td></tr>
+        <tr><td>⌘A · Échap</td><td>Tout sélectionner · fermer</td></tr>
+      </table>
+    </div>
+    <div class="card">
+      <h3>🔗 Bookmarklet (sans extension)</h3>
+      <ol>
+        <li>Lance le serveur local (test ci-dessus)</li>
+        <li>Ouvre <a href="mega-pack-bookmarklet.html">mega-pack-bookmarklet.html</a></li>
+        <li>Glisse le bouton <b>⚡ MEGA PACK</b> dans la barre de favoris</li>
+        <li>Sur claude.ai : clique le favori → le panneau s'ouvre</li>
+      </ol>
+      <button class="btn ghost js-copy" data-copy="python3 -m http.server 8788 -d agent-skills/interface">📋 Copier la commande serveur</button>
+      <p class="note">⚠️ Sur macOS, les scripts <code>file://</code> sont bloqués depuis les pages https → le serveur local est obligatoire pour cette méthode.</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>🧪 Démo interactive — essaie le panneau ici</h2>
+    <p class="note">Une reproduction miniature : tape pour filtrer, clique un item, le prompt s'écrit dans la zone — exactement comme le vrai panneau dans ton chat.</p>
+    <input class="js-demo-q" type="text">
+    <div class="js-demo-list"></div>
+    <textarea class="js-demo-out" readonly placeholder="Clique un item ci-dessus → le prompt apparaît ici"></textarea>
+  </div>
+
+  <h2>🛠️ Dépannage</h2>
+  <details><summary>Le bouton ⚡ apparaît 2 fois</summary><p>Corrigé (garde anti-doublon + <code>@noframes</code> v1.2.1 — couvre aussi les iframes : artifacts Claude, canvas ChatGPT… et le cas de 2 userscripts installés ensemble). Si tu vois encore 2 boutons : tu as l'ancienne version dans Tampermonkey → re-colle la v1.2.1.</p></details>
+  <details><summary>« Catalogue vide » dans le panneau</summary><p>Corrigé (lecture paresseuse + auto-chargement). Si ça persiste : utilise <code>mega-pack-panel-full.user.js</code> (catalogue embarqué) au lieu de <code>mega-pack-panel.user.js</code>.</p></details>
+  <details><summary>Le prompt ne s'injecte pas dans le chat</summary><p>Le site a changé son DOM → le fallback copie dans le presse-papiers : colle manuellement (⌘V).</p></details>
+  <details><summary>Le bookmarklet ne charge rien</summary><p>Le serveur local est éteint → double-clique <code>MEGA-PACK-serveur.command</code>, puis reclique le favori.</p></details>
+
+  <h2>📁 Les fichiers</h2>
+  <table>
+    <tr><th>Fichier (dans <code>agent-skills/interface/</code>)</th><th>Rôle</th></tr>
+    <tr><td><code>MODE-DEMPLOI.html</code></td><td>Cette page — guide interactif FR/EN</td></tr>
+    <tr><td><code>mega-pack-launcher.html</code></td><td>Launcher autonome (catalogue embarqué)</td></tr>
+    <tr><td><code>mega-pack-panel-full.user.js</code></td><td>Userscript Tampermonkey avec catalogue embarqué — <b>recommandé</b></td></tr>
+    <tr><td><code>mega-pack-panel.user.js</code></td><td>Userscript léger (charge <code>catalog-full.js</code> à côté de lui)</td></tr>
+    <tr><td><code>mega-pack-bookmarklet.html</code></td><td>Page d'installation du bookmarklet</td></tr>
+    <tr><td><code>MEGA-PACK-serveur.command</code></td><td>Serveur local en double-clic (macOS)</td></tr>
+    <tr><td><code>catalog-full.js</code></td><td>Catalogue brut JSON (pour développeurs)</td></tr>
+  </table>
+</div>
+
+<!-- ════════════════ ENGLISH ════════════════ -->
+<div id="en" hidden>
+  <div class="pills"><span class="pill">🖱️ HTML Launcher</span><span class="pill">⚡ Browser panel</span><span class="pill">🖥️ Menu-bar app</span><span class="pill">🔗 Bookmarklet</span></div>
+
+  <div class="card">
+    <h2>🏁 Your progress</h2>
+    <div class="check"><input type="checkbox" class="js-check" data-step="s1"><span>Launcher opened — <a href="mega-pack-launcher.html">mega-pack-launcher.html</a></span></div>
+    <div class="check"><input type="checkbox" class="js-check" data-step="s2"><span>Panel installed in Tampermonkey (<code>mega-pack-panel-full.user.js</code> v1.2.0)</span></div>
+    <div class="check"><input type="checkbox" class="js-check" data-step="s3"><span>Prompt injected into a real LLM chat</span></div>
+    <div class="check"><input type="checkbox" class="js-check" data-step="s4"><span>Menu-bar app running (optional) — <code>cd menubar-app &amp;&amp; npm start</code></span></div>
+    <div class="progress-wrap"><div class="progress js-progress"></div></div>
+    <span class="js-progress-label">0 / 4 steps</span>
+    <p class="note">✓ Checkboxes are saved in your browser — close the page and come back anytime.</p>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <h3>🚀 Get started (Launcher — zero install)</h3>
+      <ol>
+        <li>Double-click <code>mega-pack-launcher.html</code></li>
+        <li>Search a skill/agent (e.g. "audit", "jupiter")</li>
+        <li>Click <b>⚡ Activate</b> → the prompt is copied</li>
+        <li>Paste it into any LLM chat</li>
+      </ol>
+      <a class="btn" href="mega-pack-launcher.html">Open the Launcher</a>
+    </div>
+    <div class="card">
+      <h3>🧪 Local server test</h3>
+      <p>Only needed for the <b>bookmarklet</b> on https sites.</p>
+      <button class="btn ghost js-server">Test now</button>
+      <div class="js-server-status">not tested</div>
+      <p class="note">If offline: double-click <code>MEGA-PACK-serveur.command</code> (it opens the launcher too).</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>⚡ Permanent panel — Tampermonkey (recommended)</h2>
+    <ol>
+      <li>Install the <a href="https://www.tampermonkey.net/" target="_blank">Tampermonkey</a> extension (free on Chrome/Arc/Edge · on Safari: "Userscripts")</li>
+      <li>Tampermonkey icon → <b>Dashboard</b> → <b>+</b> (new script)</li>
+      <li>Open <code>agent-skills/interface/mega-pack-panel-full.user.js</code> → <b>⌘A ⌘C</b> (copy all)</li>
+      <li>Paste into the Tampermonkey editor → <b>⌘S</b></li>
+      <li>Go to claude.ai or chatgpt.com → <b>⚡</b> button at the bottom right (shortcut <code>Ctrl+Shift+K</code>)</li>
+    </ol>
+    <p class="note">⚠️ <b>Updating:</b> after a catalog regeneration (<code>build-interface.py</code>), <b>re-paste</b> the content of <code>mega-pack-panel-full.user.js</code> into Tampermonkey — the catalog is embedded inside. Current version: <b>1.2.0</b>.</p>
+    <p class="note">🌐 The panel has a <b>FR/EN</b> toggle in its header: both the UI texts and the injected prompts follow your choice (remembered per site).</p>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <h3>🖥️ Menu-bar app (macOS)</h3>
+      <ol>
+        <li><code>cd menubar-app</code> then <code>npm install</code></li>
+        <li><code>npm start</code> → ⚡ icon in the menu bar</li>
+        <li><b>⌘Space</b>: global search anywhere in macOS</li>
+      </ol>
+      <button class="btn ghost js-copy" data-copy="cd menubar-app && npm install && npm start">📋 Copy npm start</button>
+      <button class="btn ghost js-copy" data-copy="cd menubar-app && npm run build">📋 Copy npm run build</button>
+      <table>
+        <tr><th>Shortcut</th><th>Action</th></tr>
+        <tr><td>⌘Space / ⌘⇧Space</td><td>Panel / Settings</td></tr>
+        <tr><td>↑↓ · ⏎ · ⌘⏎ · ⇧⏎</td><td>Navigate · copy · Claude · ChatGPT</td></tr>
+        <tr><td>⌘A · Esc</td><td>Select all · close</td></tr>
+      </table>
+    </div>
+    <div class="card">
+      <h3>🔗 Bookmarklet (no extension)</h3>
+      <ol>
+        <li>Start the local server (test above)</li>
+        <li>Open <a href="mega-pack-bookmarklet.html">mega-pack-bookmarklet.html</a></li>
+        <li>Drag the <b>⚡ MEGA PACK</b> button to your bookmarks bar</li>
+        <li>On claude.ai: click the bookmark → the panel opens</li>
+      </ol>
+      <button class="btn ghost js-copy" data-copy="python3 -m http.server 8788 -d agent-skills/interface">📋 Copy server command</button>
+      <p class="note">⚠️ On macOS, <code>file://</code> scripts are blocked from https pages → the local server is required for this method.</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>🧪 Interactive demo — try the panel right here</h2>
+    <p class="note">A miniature replica: type to filter, click an item, the prompt lands in the box — exactly like the real panel in your chat.</p>
+    <input class="js-demo-q" type="text">
+    <div class="js-demo-list"></div>
+    <textarea class="js-demo-out" readonly placeholder="Click an item above → the prompt appears here"></textarea>
+  </div>
+
+  <h2>🛠️ Troubleshooting</h2>
+  <details><summary>The ⚡ button appears twice</summary><p>Fixed (anti-duplicate guard + <code>@noframes</code> v1.2.1 — also covers iframes: Claude artifacts, ChatGPT canvas… and the case of 2 userscripts installed together). If you still see 2 buttons: you have the old version in Tampermonkey → re-paste v1.2.1.</p></details>
+  <details><summary>"Empty catalog" in the panel</summary><p>Fixed (lazy read + auto-load). If it persists: use <code>mega-pack-panel-full.user.js</code> (embedded catalog) instead of <code>mega-pack-panel.user.js</code>.</p></details>
+  <details><summary>The prompt is not injected into the chat</summary><p>The site changed its DOM → the clipboard fallback copies it: paste manually (⌘V).</p></details>
+  <details><summary>The bookmarklet loads nothing</summary><p>The local server is off → double-click <code>MEGA-PACK-serveur.command</code>, then click the bookmark again.</p></details>
+
+  <h2>📁 Files</h2>
+  <table>
+    <tr><th>File (in <code>agent-skills/interface/</code>)</th><th>Purpose</th></tr>
+    <tr><td><code>MODE-DEMPLOI.html</code></td><td>This page — interactive FR/EN guide</td></tr>
+    <tr><td><code>mega-pack-launcher.html</code></td><td>Self-contained launcher (embedded catalog)</td></tr>
+    <tr><td><code>mega-pack-panel-full.user.js</code></td><td>Tampermonkey userscript with embedded catalog — <b>recommended</b></td></tr>
+    <tr><td><code>mega-pack-panel.user.js</code></td><td>Light userscript (loads <code>catalog-full.js</code> next to it)</td></tr>
+    <tr><td><code>mega-pack-bookmarklet.html</code></td><td>Bookmarklet install page</td></tr>
+    <tr><td><code>MEGA-PACK-serveur.command</code></td><td>One-double-click local server (macOS)</td></tr>
+    <tr><td><code>catalog-full.js</code></td><td>Raw JSON catalog (for developers)</td></tr>
+  </table>
+</div>
+
+<script>
+(function () {
+  'use strict';
+  var btn = document.getElementById('langbtn');
+  var fr = document.getElementById('fr'), en = document.getElementById('en');
+  var tt = document.getElementById('t-title'), ts = document.getElementById('t-sub');
+  var LANG = 'fr';
+  try { LANG = localStorage.getItem('mgp.lang') || 'fr'; } catch (e) {}
+
+  function apply() {
+    var isEN = LANG === 'en';
+    fr.hidden = isEN; en.hidden = !isEN;
+    btn.textContent = isEN ? '🇫🇷 FR' : '🇬🇧 EN';
+    tt.textContent = isEN ? 'Interactive user guide' : "Mode d'emploi interactif";
+    ts.textContent = '131 skills · 190 agents · ' + (isEN ? 'any LLM' : 'tout LLM') + ' (Claude, ChatGPT, Gemini, Perplexity…)';
+    document.documentElement.lang = isEN ? 'en' : 'fr';
+    renderChecks(); renderDemos(); renderServer();
+  }
+  btn.addEventListener('click', function () {
+    LANG = LANG === 'fr' ? 'en' : 'fr';
+    try { localStorage.setItem('mgp.lang', LANG); } catch (e) {}
+    apply();
+  });
+
+  // ── Boutons de copie ──
+  document.querySelectorAll('.js-copy').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var txt = b.getAttribute('data-copy') || '';
+      var old = b.textContent;
+      function done() {
+        b.textContent = LANG === 'en' ? '✓ Copied!' : '✓ Copié !';
+        setTimeout(function () { b.textContent = old; }, 1400);
+      }
+      function fallback() {
+        var ta = document.createElement('textarea');
+        ta.value = txt; document.body.appendChild(ta); ta.select();
+        try { document.execCommand('copy'); } catch (e) {}
+        ta.remove(); done();
+      }
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(txt).then(done, fallback);
+      } else fallback();
+    });
+  });
+
+  // ── Test du serveur local (sonde <script> — marche aussi depuis file://) ──
+  var serverState = null;
+  function checkServer() {
+    serverState = null; renderServer();
+    var settled = false;
+    function finish(ok) { if (settled) return; settled = true; serverState = ok; s.remove(); renderServer(); }
+    var s = document.createElement('script');
+    s.src = 'http://localhost:8788/catalog-full.js?_=' + Date.now();
+    s.onload = function () { finish(true); };
+    s.onerror = function () { finish(false); };
+    document.head.appendChild(s);
+    setTimeout(function () { finish(false); }, 3000);
+  }
+  function renderServer() {
+    document.querySelectorAll('.js-server-status').forEach(function (el) {
+      if (serverState === null && !el.dataset.tested) {
+        el.textContent = LANG === 'en' ? 'not tested' : 'non testé';
+        el.className = 'js-server-status';
+      } else if (serverState === true) {
+        el.textContent = LANG === 'en' ? '✓ online — bookmarklet ready' : '✓ en ligne — bookmarklet prêt';
+        el.className = 'js-server-status ok'; el.dataset.tested = '1';
+      } else if (serverState === false) {
+        el.textContent = LANG === 'en' ? '✗ offline — double-click MEGA-PACK-serveur.command' : '✗ hors ligne — double-clique MEGA-PACK-serveur.command';
+        el.className = 'js-server-status ko'; el.dataset.tested = '1';
+      }
+    });
+  }
+  document.querySelectorAll('.js-server').forEach(function (b) { b.addEventListener('click', checkServer); });
+
+  // ── Checklist persistée ──
+  var KEY = 'mgp.guide.checks';
+  var state = {};
+  try { state = JSON.parse(localStorage.getItem(KEY) || '{}'); } catch (e) { state = {}; }
+  function renderChecks() {
+    document.querySelectorAll('.js-check').forEach(function (c) {
+      c.checked = !!state[c.getAttribute('data-step')];
+    });
+    document.querySelectorAll('.js-progress').forEach(function (p) {
+      var done = ['s1', 's2', 's3', 's4'].filter(function (k) { return state[k]; }).length;
+      p.style.width = Math.round(done / 4 * 100) + '%';
+      var lbl = p.closest('.card').querySelector('.js-progress-label');
+      if (lbl) lbl.textContent = done + ' / 4 ' + (LANG === 'en' ? 'steps' : 'étapes');
+    });
+  }
+  document.querySelectorAll('.js-check').forEach(function (c) {
+    c.addEventListener('change', function () {
+      state[c.getAttribute('data-step')] = c.checked;
+      try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {}
+      renderChecks();
+    });
+  });
+
+  // ── Mini démo du panneau ──
+  var ITEMS = [
+    { t: 's', name: 'debugging-and-error-recovery', path: 'skills/debugging-and-error-recovery/', desc: { fr: 'Debug systématique : trouver la cause racine avant de corriger.', en: 'Systematic root-cause debugging before fixing.' } },
+    { t: 's', name: 'frontend-ui-engineering', path: 'skills/frontend-ui-engineering/', desc: { fr: 'Interfaces web production, accessibles et responsives.', en: 'Production-quality, accessible, responsive web UIs.' } },
+    { t: 's', name: 'game-audio-direction', path: 'skills/game-design/game-audio-direction/', desc: { fr: 'Identité musicale cohérente : tonalité, tempos, motif.', en: 'Coherent musical identity: key, tempos, motif.' } },
+    { t: 'a', name: 'security-auditor', path: 'agents/security-auditor.md', desc: { fr: 'Audit sécurité : menaces, vulnérabilités, durcissement.', en: 'Security review: threats, vulnerabilities, hardening.' } },
+    { t: 'a', name: 'design-ui-designer', path: 'agents/design/design-ui-designer.md', desc: { fr: 'Design systems UI pixel-perfect et accessibles.', en: 'Pixel-perfect, accessible UI design systems.' } }
+  ];
+  function promptFor(it) {
+    if (it.t === 's') return LANG === 'en'
+      ? 'Use the skill "' + it.name + '" (' + it.path + '). Load and strictly follow its SKILL.md.'
+      : 'Utilise le skill "' + it.name + '" (' + it.path + '). Charge et suis son SKILL.md strictement.';
+    return LANG === 'en'
+      ? 'From now on, act as the agent "' + it.name + '" (' + it.path + '). Adopt this persona for the whole conversation.'
+      : 'Agis désormais comme l\'agent "' + it.name + '" (' + it.path + '). Adopte ce persona pour toute la conversation.';
+  }
+  function renderDemos() {
+    document.querySelectorAll('.js-demo-q').forEach(function (inp) {
+      inp.placeholder = LANG === 'en' ? '🔍 Search… (try "audit" or "ui")' : '🔍 Rechercher… (essaie « audit » ou « ui »)';
+    });
+    document.querySelectorAll('.js-demo').length; // (les démos vivent dans les .card parents)
+    document.querySelectorAll('.js-demo-list').forEach(function (list) {
+      var box = list.closest('.card');
+      var q = box.querySelector('.js-demo-q').value.toLowerCase();
+      var terms = q.split(/\s+/).filter(Boolean);
+      var items = ITEMS.filter(function (it) {
+        var hay = (it.name + ' ' + it.desc[LANG]).toLowerCase();
+        return terms.every(function (w) { return hay.indexOf(w) !== -1; });
+      });
+      list.innerHTML = items.length ? items.map(function (it) {
+        return '<div class="d-item" data-n="' + it.name + '"><b>' + (it.t === 's' ? '🛠 ' : '👤 ') + it.name + '</b><span>' + it.desc[LANG] + '</span></div>';
+      }).join('') : '<div class="d-none">' + (LANG === 'en' ? 'No results' : 'Aucun résultat') + '</div>';
+      list.querySelectorAll('.d-item').forEach(function (el) {
+        el.addEventListener('click', function () {
+          var it = ITEMS.filter(function (x) { return x.name === el.getAttribute('data-n'); })[0];
+          box.querySelector('.js-demo-out').value = promptFor(it);
+        });
+      });
+    });
+  }
+  document.querySelectorAll('.js-demo-q').forEach(function (i) { i.addEventListener('input', renderDemos); });
+
+  apply();
+})();
+</script>
+</body>
+</html>

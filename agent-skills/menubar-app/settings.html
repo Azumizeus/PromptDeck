@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'">
+<title>MEGA PACK — Réglages</title>
+<style>
+:root{--bg:#161b28;--card:#1c2233;--border:#252d40;--txt:#e8ecf4;--mut:#8b94a8;--acc:#7c6cff;--acc2:#00d4aa}
+body.light{--bg:#fff;--card:#eef1f8;--border:#d9deeb;--txt:#1a2030;--mut:#5b6478;--acc:#5b46e8;--acc2:#00a985}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font:13px/1.5 -apple-system,BlinkMacSystemFont,sans-serif;background:var(--bg);color:var(--txt);padding:18px}
+h2{font-size:15px;margin-bottom:4px}
+p.hint{color:var(--mut);font-size:11.5px;margin-bottom:16px}
+.row{display:flex;align-items:center;justify-content:space-between;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:11px 14px;margin-bottom:8px}
+.row b{font-size:13px}
+.row span.d{display:block;color:var(--mut);font-size:11px;font-weight:400;margin-top:2px}
+select{background:var(--bg);color:var(--txt);border:1px solid var(--border);border-radius:7px;padding:6px 10px;font-size:12px}
+
+.kbd{font:11px ui-monospace,monospace;background:var(--bg);border:1px solid var(--border);border-radius:5px;padding:2px 6px;color:var(--mut)}
+.btn{background:var(--card2);color:var(--txt);border:1px solid var(--border);border-radius:7px;padding:6px 12px;font-size:12px;cursor:pointer}
+.btn:hover{border-color:var(--acc)}
+.saved{position:fixed;bottom:14px;left:50%;transform:translateX(-50%);background:var(--acc2);color:#04281f;padding:7px 16px;border-radius:99px;font-weight:600;font-size:12px;opacity:0;transition:opacity .2s}
+.saved.show{opacity:1}
+</style>
+</head>
+<body>
+<h2 data-i18n="h2">⚡ MEGA PACK — Réglages</h2>
+<p class="hint"><span data-i18n="cat">Catalogue :</span> <span id="stats">…</span> <span data-i18n="genFrom">· généré depuis</span> <code>agent-skills/</code> <span id="buildinfo"></span></p>
+<div class="row"><b><span data-i18n="theme">Thème</span><span class="d" data-i18n="themeD">Appliqué au panneau et à cette fenêtre</span></b>
+  <select id="theme"><option value="dark" data-i18n="dark">🌙 Sombre</option><option value="light" data-i18n="light">☀️ Clair</option></select></div>
+<div class="row"><b><span data-i18n="lang">Langue</span><span class="d" data-i18n="langD">Interface du panneau</span></b>
+  <select id="lang"><option value="fr">🇫🇷 Français</option><option value="en">🇬🇧 English</option></select></div>
+<div class="row"><b><span data-i18n="gs">Recherche globale</span><span class="d" data-i18n="gsD">Raccourci système (⌘Espace est réservé par Spotlight)</span></b>
+  <select id="shortcut"><option value="Alt+Space">⌥Espace (recommandé)</option><option value="CommandOrControl+Space">⌘Espace</option><option value="Control+Space">⌃Espace</option></select></div>
+<div class="row"><b><span data-i18n="set">Réglages</span><span class="d" data-i18n="setD">Ouvrir cette fenêtre</span></b><span class="kbd">⌘⇧Espace</span></div>
+<div class="row"><b><span data-i18n="dllm">LLM par défaut</span><span class="d" data-i18n="dllmD">⌘⏎ dans le panneau ouvre ce chat</span></b>
+  <select id="dllm"><option value="claude">Claude</option><option value="chatgpt">ChatGPT</option><option value="perplexity">Perplexity</option><option value="copilot">Copilot</option><option value="deepseek">DeepSeek</option><option value="zai">Z.ai</option><option value="kimi">Kimi</option><option value="mammouth">Mammouth.ia</option><option value="freebuff">Freebuff (app)</option><option value="opencode-app">OpenCode (desktop)</option><option value="opencode">OpenCode (terminal)</option></select></div>
+<div class="row"><b><span data-i18n="auto">Lancement au démarrage</span><span class="d" data-i18n="autoD">Ouvre MEGA PACK à l'ouverture de session</span></b>
+  <input type="checkbox" id="autostart" style="width:18px;height:18px;accent-color:var(--acc)"></div>
+<div class="row"><b><span data-i18n="fsc">Raccourcis favoris</span><span class="d" data-i18n="fscD">⌘1 à ⌘9 lancent les 9 premiers favoris (menu du ⚡ ouvert)</span></b>
+  <input type="checkbox" id="favshortcuts" style="width:18px;height:18px;accent-color:var(--acc)"></div>
+<div class="row"><b><span data-i18n="cfg">Configuration</span><span class="d" data-i18n="cfgD">Favoris, récents et préférences en JSON</span></b>
+  <span style="display:flex;gap:6px"><button id="export" class="btn">⬇ Exporter</button><button id="import" class="btn">⬆ Importer</button></span></div>
+<div class="row"><b><span data-i18n="xp">Mes prompts ✍️</span><span class="d" data-i18n="xpD">Télécharge tous tes prompts en Markdown</span></b>
+  <button id="exportcustoms" class="btn">⬇ Exporter en .md</button></div>
+<div class="row"><b><span data-i18n="osel">Ouvrir la sélection</span><span class="d" data-i18n="oselD">Dans le panneau : ⏎ copie · ⌘⏎ LLM par défaut · ⇧⏎ ChatGPT</span></b><span class="kbd">⏎ / ⌘⏎ / ⇧⏎</span></div>
+<div class="saved" id="saved" data-i18n="saved">✓ Enregistré</div>
+<script src="settings.js"></script>
+</body>
+</html>

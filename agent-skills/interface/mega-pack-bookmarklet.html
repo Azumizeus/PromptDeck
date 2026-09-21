@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>MEGA PACK — Bookmarklet</title>
+<style>
+body{background:#0b0e14;color:#e8ecf4;font:15px/1.6 -apple-system,'Segoe UI',sans-serif;max-width:760px;margin:0 auto;padding:40px 22px}
+h1{font-size:24px;display:flex;align-items:center;flex-wrap:wrap;gap:10px}h1 span{font-size:12px;background:linear-gradient(135deg,#7c6cff,#5b8cff);padding:4px 12px;border-radius:99px;vertical-align:middle;margin-left:8px}
+#langbtn{margin-left:auto;background:#161b28;border:1px solid #252d40;color:#8b94a8;border-radius:99px;padding:7px 14px;font-size:12px;cursor:pointer;font-weight:600}
+#langbtn:hover{border-color:#7c6cff;color:#e8ecf4}
+.card{background:#161b28;border:1px solid #252d40;border-radius:14px;padding:22px;margin:18px 0}
+.bm{display:inline-block;background:linear-gradient(135deg,#7c6cff,#5b8cff);color:#fff;font-weight:700;padding:14px 26px;border-radius:99px;text-decoration:none;font-size:16px;box-shadow:0 6px 24px rgba(124,108,255,.4)}
+.bm:active{transform:scale(.98)}
+ol{padding-left:20px}li{margin:8px 0}
+code{background:#1c2233;padding:2px 7px;border-radius:6px;font-size:13px;color:#00d4aa}
+.note{color:#8b94a8;font-size:13px}
+</style>
+</head>
+<body>
+<h1>⚡ MEGA PACK Bookmarklet <span id="sub">sans extension</span><button id="langbtn">🇬🇧 EN</button></h1>
+
+<!-- ══════════ FRANÇAIS ══════════ -->
+<div id="fr">
+<p>Active le panneau <b>131 skills · 190 agents</b> dans <b>n'importe quelle conversation LLM</b> (Claude, ChatGPT, Gemini, Perplexity, Mistral, Le Chat…) via un simple favori de votre navigateur.</p>
+
+<div class="card">
+<h2>Installation (30 secondes)</h2>
+<ol>
+<li>Affichez la barre de favoris (<code>Cmd+Shift+B</code> sur Mac / <code>Ctrl+Shift+B</code> ailleurs).</li>
+<li><b>Glissez ce bouton</b> dans la barre de favoris :<br><br>
+<a class="bm" href="javascript:(function(){var s=document.createElement('script');s.src='http://localhost:8788/catalog-full.js';s.onload=function(){var u=document.createElement('script');u.src='http://localhost:8788/mega-pack-panel.user.js';document.body.appendChild(u);};document.body.appendChild(s);}());" onclick="alert('Glissez-moi dans la barre de favoris ! (clic maintenu)');return false;">⚡ MEGA PACK</a>
+</li>
+<li>Ouvrez <a href="https://claude.ai" target="_blank">claude.ai</a>, <a href="https://chatgpt.com" target="_blank">chatgpt.com</a>… puis cliquez le favori <b>⚡ MEGA PACK</b>.</li>
+<li>Cliquez le bouton ⚡ en bas à droite : cherchez un skill/agent, cliquez → le prompt d'activation est injecté dans la conversation. 🎉</li>
+</ol>
+</div>
+
+<div class="card">
+<h2>Panneau flottant (aperçu de son fonctionnement)</h2>
+<p>Le panneau s'ouvre aussi via <code>Ctrl+Shift+K</code> :</p>
+<p class="note">• Onglet 🛠 Skills → clic = injecte « Utilise le skill … » dans la zone de texte<br>
+• Onglet 👥 Agents → clic = injecte « Agis comme l'agent … »<br>
+• Si aucune zone de texte n'est détectée → copie dans le presse-papiers (collez manuellement).</p>
+</div>
+
+<div class="card">
+<h2>Alternative recommandée : userscript Tampermonkey</h2>
+<p>Pour un panneau <b>permanent sur tous les sites</b> (pas besoin de cliquer le favori) :</p>
+<ol>
+<li>Installez l'extension <a href="https://www.tampermonkey.net/" target="_blank">Tampermonkey</a>.</li>
+<li>Créez un nouveau script et collez le contenu de <code>interface/mega-pack-panel-full.user.js</code> (catalogue embarqué — fonctionne seul, sans serveur).</li>
+<li>Sauvegardez → le bouton ⚡ apparaît sur tous les sites de chat.</li>
+</ol>
+<p class="note">⚠️ Sur macOS, les navigateurs bloquent les scripts <code>file://</code> chargés depuis une page https (claude.ai, chatgpt.com…) → le favori a besoin du serveur local.<br>• Lancez le serveur en double-cliquant <code>MEGA-PACK-serveur.command</code> (ou : <code>python3 -m http.server 8788 -d agent-skills/interface</code>)<br>• <b>Sans serveur du tout</b> : installez <code>mega-pack-panel-full.user.js</code> dans Tampermonkey — c'est l'option la plus fiable.<br>• 📖 <a href="MODE-DEMPLOI.html">Mode d'emploi interactif</a></p>
+</div>
+</div>
+
+<!-- ══════════ ENGLISH ══════════ -->
+<div id="en" style="display:none">
+<p>Activate the <b>131 skills · 190 agents</b> panel in <b>any LLM conversation</b> (Claude, ChatGPT, Gemini, Perplexity, Mistral, Le Chat…) via a simple browser bookmark.</p>
+
+<div class="card">
+<h2>Installation (30 seconds)</h2>
+<ol>
+<li>Show the bookmarks bar (<code>Cmd+Shift+B</code> on Mac / <code>Ctrl+Shift+B</code> elsewhere).</li>
+<li><b>Drag this button</b> to your bookmarks bar:<br><br>
+<a class="bm" href="javascript:(function(){var s=document.createElement('script');s.src='http://localhost:8788/catalog-full.js';s.onload=function(){var u=document.createElement('script');u.src='http://localhost:8788/mega-pack-panel.user.js';document.body.appendChild(u);};document.body.appendChild(s);}());" onclick="alert('Drag me to your bookmarks bar! (press and hold)');return false;">⚡ MEGA PACK</a>
+</li>
+<li>Open <a href="https://claude.ai" target="_blank">claude.ai</a>, <a href="https://chatgpt.com" target="_blank">chatgpt.com</a>… then click the <b>⚡ MEGA PACK</b> bookmark.</li>
+<li>Click the ⚡ button at the bottom right: search a skill/agent, click → the activation prompt is injected into the conversation. 🎉</li>
+</ol>
+</div>
+
+<div class="card">
+<h2>Floating panel (how it works)</h2>
+<p>The panel also opens via <code>Ctrl+Shift+K</code>:</p>
+<p class="note">• 🛠 Skills tab → click = injects “Use the skill …” into the text box<br>
+• 👥 Agents tab → click = injects “Act as the agent …”<br>
+• If no text box is detected → copies to the clipboard (paste manually).</p>
+</div>
+
+<div class="card">
+<h2>Recommended alternative: Tampermonkey userscript</h2>
+<p>For a panel <b>permanent on every site</b> (no need to click the bookmark):</p>
+<ol>
+<li>Install the <a href="https://www.tampermonkey.net/" target="_blank">Tampermonkey</a> extension.</li>
+<li>Create a new script and paste the content of <code>interface/mega-pack-panel-full.user.js</code> (embedded catalogue — works standalone, no server).</li>
+<li>Save → the ⚡ button appears on every chat site.</li>
+</ol>
+<p class="note">⚠️ On macOS, browsers block <code>file://</code> scripts loaded from an https page (claude.ai, chatgpt.com…) → the bookmark needs the local server.<br>• Start the server by double-clicking <code>MEGA-PACK-serveur.command</code> (or: <code>python3 -m http.server 8788 -d agent-skills/interface</code>)<br>• <b>No server at all</b>: install <code>mega-pack-panel-full.user.js</code> in Tampermonkey — it is the most reliable option.<br>• 📖 <a href="MODE-DEMPLOI.html">Interactive user guide</a></p>
+</div>
+</div>
+
+<script>
+(function () {
+  var btn = document.getElementById('langbtn');
+  var fr = document.getElementById('fr'), en = document.getElementById('en');
+  var sub = document.getElementById('sub');
+  var LANG = 'fr';
+  try { LANG = localStorage.getItem('mgp.lang') || 'fr'; } catch (e) {}
+  function apply() {
+    var isEN = LANG === 'en';
+    fr.style.display = isEN ? 'none' : '';
+    en.style.display = isEN ? '' : 'none';
+    btn.textContent = isEN ? '🇫🇷 FR' : '🇬🇧 EN';
+    sub.textContent = isEN ? 'no extension needed' : 'sans extension';
+    document.documentElement.lang = isEN ? 'en' : 'fr';
+  }
+  btn.onclick = function () {
+    LANG = LANG === 'fr' ? 'en' : 'fr';
+    try { localStorage.setItem('mgp.lang', LANG); } catch (e) {}
+    apply();
+  };
+  apply();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,16 @@
+{
+  "name": "agent-skills",
+  "version": "0.7.0",
+  "description": "MEGA PACK: engineering lifecycle skills + 46 Solana protocol skills + 7 game-design skills + 190 agent personas.",
+  "author": {
+    "name": "Addy Osmani"
+  },
+  "homepage": "https://github.com/addyosmani/agent-skills",
+  "repository": "https://github.com/addyosmani/agent-skills",
+  "license": "MIT",
+  "commands": [
+    "./.claude/commands",
+    "./commands"
+  ],
+  "skills": "./skills"
+}

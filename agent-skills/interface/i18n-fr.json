@@ -1,0 +1,1286 @@
+{
+  "Accessibility Auditor": {
+    "name": "Auditeur accessibilité",
+    "desc": "Expert accessibilité qui audite les interfaces selon les normes WCAG, teste avec les technologies d'assistance et garantit un design inclusif. Cherche par défaut les barrières — non testé avec un lecteur d'écran = pas accessible."
+  },
+  "Account Strategist": {
+    "name": "Stratège comptes clients",
+    "desc": "Stratège post-vente spécialisé en expansion progressive, cartographie des parties prenantes, animation de QBR et rétention de revenus nets. Transforme les contrats signés en relations plateforme durables."
+  },
+  "Accounts Payable Agent": {
+    "name": "Agent comptes fournisseurs",
+    "desc": "Spécialiste autonome de traitement des paiements : paiements fournisseurs, factures de prestataires et factures récurrentes sur n'importe quel rail — crypto, fiat, stablecoins. S'intègre aux workflows d'agents IA via appels d'outils."
+  },
+  "Ad Creative Strategist": {
+    "name": "Stratège créas publicitaires",
+    "desc": "Spécialiste créa média payant : copywriting publicitaire, optimisation RSA, design de groupes d'assets et cadres de tests créatifs sur Google, Meta, Microsoft et le programmatique. Relie données de performance et messages persuasifs."
+  },
+  "Agentic Identity & Trust Architect": {
+    "name": "Architecte identité et confiance agentique",
+    "desc": "Conçoit les systèmes d'identité, d'authentification et de vérification de confiance pour agents IA autonomes en environnement multi-agents : prouver qui ils sont, ce qu'ils peuvent faire et ce qu'ils ont fait."
+  },
+  "Agentic Search Optimizer": {
+    "name": "Optimiseur de recherche agentique",
+    "desc": "Expert en préparation WebMCP et complétion de tâches agentiques : audite si les agents IA peuvent réellement accomplir des tâches sur votre site (réserver, acheter, s'inscrire), implémente les patterns WebMCP et mesure les taux de complétion."
+  },
+  "Agents Orchestrator": {
+    "name": "Orchestrateur d'agents",
+    "desc": "Gestionnaire autonome de pipeline qui orchestre tout le workflow de développement. Vous êtes le leader de ce processus."
+  },
+  "AI Citation Strategist": {
+    "name": "Stratège citations IA (AEO/GEO)",
+    "desc": "Expert en optimisation pour moteurs de recommandation IA : audite la visibilité de la marque sur ChatGPT, Claude, Gemini et Perplexity, identifie pourquoi les concurrents sont cités à votre place et livre les correctifs de contenu."
+  },
+  "AI Data Remediation Engineer": {
+    "name": "Ingénieur remédiation de données IA",
+    "desc": "Spécialiste des pipelines de données auto-réparants : détecte, classe et corrige automatiquement les anomalies de données à grande échelle via SLM locaux et clustering sémantique. Focus couche de remédiation et logique de correction déterministe."
+  },
+  "AI Engineer": {
+    "name": "Ingénieur IA/ML",
+    "desc": "Ingénieur IA/ML expert : développement de modèles, déploiement et intégration en production. Construit des fonctionnalités intelligentes, des pipelines de données et des applications IA avec des solutions pratiques et scalables."
+  },
+  "Analytics Reporter": {
+    "name": "Rapporteur analytics",
+    "desc": "Analyste de données expert transformant les données brutes en insights actionnables : dashboards, analyses statistiques, suivi des KPI et aide à la décision par la visualisation et le reporting."
+  },
+  "Anthropologist": {
+    "name": "Anthropologue",
+    "desc": "Expert des systèmes culturels, rituels, parentés, croyances et méthode ethnographique — construit des sociétés culturellement cohérentes qui semblent vécues plutôt qu'inventées."
+  },
+  "API Tester": {
+    "name": "Testeur d'API",
+    "desc": "Spécialiste du test d'API : validation complète, tests de performance et assurance qualité sur tous les systèmes et intégrations tierces."
+  },
+  "api-and-interface-design": {
+    "name": "Conception d'API et d'interfaces",
+    "desc": "Guide la conception d'API et d'interfaces stables. À utiliser pour concevoir des API, des frontières de modules ou toute interface publique : endpoints REST/GraphQL, contrats de types, frontières front/back."
+  },
+  "App Store Optimizer": {
+    "name": "Optimiseur App Store (ASO)",
+    "desc": "Expert marketing app store : optimisation ASO, taux de conversion et découvrabilité des applications."
+  },
+  "arcium": {
+    "name": "Arcium (Solana chiffré)",
+    "desc": "Construis et débogue des applications Solana chiffrées avec Arcium — les données restent privées pendant le calcul, personne seul ne les voit. Circuits Arcis, flux init/queue_computation/callback, états chiffrés Shared vs Mxe."
+  },
+  "ask-mcp": {
+    "name": "ask-mcp (questions Light Protocol)",
+    "desc": "Pour toute question sur le SDK de Light Protocol, les smart contracts, le développement Solana, les fonctionnalités Claude Code ou les agent skills. Réponses IA ancrées dans le contexte du dépôt via DeepWiki MCP."
+  },
+  "audio-quality-check": {
+    "name": "Contrôle qualité audio",
+    "desc": "Analyse la qualité d'un enregistrement audio : détection d'écho, loudness, intelligibilité de la parole, SNR, analyse spectrale. Pour diagnostiquer pourquoi un son semble mauvais, doubler ou manquer de clarté."
+  },
+  "Automation Governance Architect": {
+    "name": "Architecte gouvernance d'automatisation",
+    "desc": "Architecte « gouvernance d'abord » pour les automatisations métier (n8n d'abord) : audite la valeur, le risque et la maintenabilité avant d'implémenter."
+  },
+  "Autonomous Optimization Architect": {
+    "name": "Architecte d'optimisation autonome",
+    "desc": "Gouverneur de systèmes intelligents qui shadow-teste en continu les API pour la performance tout en appliquant des garde-fous financiers et de sécurité stricts contre les coûts hors de contrôle."
+  },
+  "Backend Architect": {
+    "name": "Architecte backend",
+    "desc": "Architecte backend senior : conception de systèmes scalables, architecture de bases de données, développement d'API et infrastructure cloud. Construit des applications serveur robustes, sûres et performantes."
+  },
+  "Baidu SEO Specialist": {
+    "name": "Spécialiste SEO Baidu",
+    "desc": "Expert du référencement Baidu : classement sur le moteur chinois, intégration à l'écosystème, conformité ICP, recherche de mots-clés chinois et indexation mobile-first pour le marché chinois."
+  },
+  "Behavioral Nudge Engine": {
+    "name": "Moteur de nudge comportemental",
+    "desc": "Spécialiste en psychologie comportementale qui adapte les cadences et styles d'interaction logicielle pour maximiser motivation et réussite des utilisateurs."
+  },
+  "Bilibili Content Strategist": {
+    "name": "Stratège contenu Bilibili",
+    "desc": "Expert marketing Bilibili : croissance des UP主, culture danmaku, optimisation pour l'algorithme B站, animation de communauté et stratégie de contenu de marque pour la plateforme vidéo chinoise."
+  },
+  "biome": {
+    "name": "Biome (lint + format)",
+    "desc": "Linte et formate le code frontend avec Biome 2.4 : linting conscient des types, règles GritQL personnalisées, domains, organiseur d'imports et migration depuis ESLint/Prettier."
+  },
+  "birdeye": {
+    "name": "Birdeye (données DeFi Solana)",
+    "desc": "Intégration complète de l'API Birdeye pour les données DeFi temps réel sur Solana et 15 autres chaînes : prix de tokens, graphiques OHLCV, découverte de marché, intelligence on-chain, portfolio wallet & PnL, et streams WebSocket de prix temps réel et alertes baleines."
+  },
+  "Blender Add-on Engineer": {
+    "name": "Ingénieur add-ons Blender",
+    "desc": "Spécialiste outillage Blender : construit des add-ons Python, validateurs d'assets, exporteurs et automatisations de pipeline qui transforment le travail DCC répétitif en workflows fiables en un clic."
+  },
+  "Blockchain Security Auditor": {
+    "name": "Auditeur sécurité blockchain",
+    "desc": "Auditeur sécurité de smart contracts : détection de vulnérabilités, vérification formelle, analyse d'exploits et rédaction de rapports d'audit complets pour les protocoles DeFi et applications blockchain."
+  },
+  "Book Co-Author": {
+    "name": "Co-auteur de livre",
+    "desc": "Collaborateur de livre de thought leadership pour fondateurs, experts et opérateurs : transforme notes vocales, fragments et positionnement en chapitres structurés à la première personne."
+  },
+  "Bookkeeper & Controller": {
+    "name": "Comptable et contrôleur",
+    "desc": "Expert comptabilité courante : rapprochements financiers, clôtures mensuelles et contrôles internes. Garantit l'exactitude, l'exhaustivité et la ponctualité des enregistrements, en conformité GAAP et prêt pour audit."
+  },
+  "Brand Guardian": {
+    "name": "Gardien de marque",
+    "desc": "Stratège de marque expert : développement d'identité, maintien de la cohérence et positionnement stratégique de la marque."
+  },
+  "browser-testing-with-devtools": {
+    "name": "Tests navigateur avec DevTools",
+    "desc": "Teste dans de vrais navigateurs via Chrome DevTools MCP : inspection du DOM, erreurs console, requêtes réseau, profil de performance et vérification visuelle avec des données d'exécution réelles."
+  },
+  "carbium": {
+    "name": "Carbium (RPC Solana)",
+    "desc": "Construis sur Solana avec l'infrastructure Carbium : RPC bare-metal, pubsub WebSocket standard, streaming gRPC full block (~22 ms), agrégation DEX (quotes sub-ms), swaps gasless et exécution protégée MEV via bundling Jito."
+  },
+  "Carousel Growth Engine": {
+    "name": "Moteur de growth carrousels",
+    "desc": "Spécialiste autonome de génération de carrousels TikTok/Instagram : analyse n'importe quelle URL avec Playwright, génère des carrousels viraux 6 slides via Gemini, publie avec musique tendance et itère grâce aux analytics."
+  },
+  "Chief of Staff": {
+    "name": "Directeur de cabinet (Chief of Staff)",
+    "desc": "Coordinateur hors pair pour fondateurs et dirigeants : filtre le bruit, possède les process, impose la cohérence, route les décisions et positionne les livrables pour que le patron pense clairement."
+  },
+  "China E-Commerce Operator": {
+    "name": "Opérateur e-commerce Chine",
+    "desc": "Expert opérations e-commerce Chine : écosystèmes Taobao, Tmall, Pinduoduo et JD, optimisation des fiches produit, live commerce, opérations de boutique, campagnes 618/Double 11 et stratégie cross-plateforme."
+  },
+  "China Market Localization Strategist": {
+    "name": "Stratège localisation marché chinois",
+    "desc": "Expert localisation full-stack du marché chinois : transforme les signaux de tendance en temps réel en stratégies go-to-market exécutables sur Douyin, Xiaohongshu, WeChat, Bilibili et au-delà."
+  },
+  "chrome-extension-wxt": {
+    "name": "Extensions Chrome (WXT)",
+    "desc": "Construis des extensions Chrome avec le framework WXT : TypeScript, React, Vue ou Svelte. Pour créer des extensions navigateur, des add-ons cross-browser ou des projets Chrome Web Store."
+  },
+  "ci-cd-and-automation": {
+    "name": "CI/CD et automatisation",
+    "desc": "Automatise la mise en place des pipelines CI/CD : quality gates, test runners en CI et stratégies de déploiement."
+  },
+  "Civil Engineer": {
+    "name": "Ingénieur génie civil",
+    "desc": "Ingénieur civil et structurel expert, couverture normative mondiale — Eurocode, DIN, ACI, AISC, ASCE, AS/NZS, CSA, GB, IS, AIJ et plus. Analyse structurelle, géotechnique, dossiers de construction et projets internationaux multi-normes."
+  },
+  "cloudflare-workers": {
+    "name": "Cloudflare Workers",
+    "desc": "Développement rapide avec Cloudflare Workers : construis et déploie des applications serverless sur le réseau mondial Cloudflare. Pour APIs, apps full-stack, edge functions, jobs en arrière-plan ou applications temps réel."
+  },
+  "CMS Developer": {
+    "name": "Développeur CMS",
+    "desc": "Spécialiste Drupal et WordPress : développement de thèmes, plugins/modules sur mesure, architecture de contenu et implémentation CMS code-first."
+  },
+  "Code Reviewer": {
+    "name": "Revoyeur de code",
+    "desc": "Revoyeur de code expert qui fournit un feedback constructif et actionnable centré sur la justesse, la maintenabilité, la sécurité et la performance — pas sur les préférences de style."
+  },
+  "code-review-and-quality": {
+    "name": "Revue de code et qualité",
+    "desc": "Mène une revue de code multi-axes. À utiliser avant toute fusion, pour évaluer la qualité d'un code écrit par vous-même, un autre agent ou un humain."
+  },
+  "code-reviewer": {
+    "name": "Revoyeur de code senior",
+    "desc": "Revoyeur de code senior qui évalue les changements sur cinq dimensions — justesse, lisibilité, architecture, sécurité et performance. Pour une revue approfondie avant fusion."
+  },
+  "code-simplification": {
+    "name": "Simplification de code",
+    "desc": "Simplifie le code pour plus de clarté, sans changer le comportement. À utiliser quand le code fonctionne mais est plus difficile à lire, maintenir ou étendre qu'il ne devrait l'être."
+  },
+  "Codebase Onboarding Engineer": {
+    "name": "Ingénieur onboarding codebase",
+    "desc": "Spécialiste d'onboarding développeur qui aide les nouveaux ingénieurs à comprendre une codebase inconnue rapidement, en lisant le code source, en traçant les chemins d'exécution et en ne citant que des faits ancrés dans le code."
+  },
+  "coingecko": {
+    "name": "CoinGecko (prix Solana)",
+    "desc": "Intégration complète de l'API CoinGecko Solana : prix de tokens, données de pools DEX, graphiques OHLCV, trades et analytics de marché. Pour bots de trading, trackers de portfolio, price feeds et applications de données on-chain."
+  },
+  "command-skill-creator": {
+    "name": "Créateur de commandes (slash)",
+    "desc": "Crée des command-skill d'automatisation (slash commands) pour projets Claude Code : déploiements, commits, releases, migrations, opérations cross-repo ou tout processus répétable."
+  },
+  "Compliance Auditor": {
+    "name": "Auditeur conformité",
+    "desc": "Auditeur technique de conformité : audits SOC 2, ISO 27001, HIPAA et PCI-DSS — de l'évaluation de préparation à la collecte de preuves jusqu'à la certification."
+  },
+  "constraint-driven-development": {
+    "name": "Développement piloté par contraintes",
+    "desc": "Établit la barre qualité d'un projet comme un contrat écrit et empêche les agents de la baisser en silence : entretien sur les dimensions qui comptent, seuils par défaut sains, CONSTRAINTS.md et surveillance du diff."
+  },
+  "Content Creator": {
+    "name": "Créateur de contenu",
+    "desc": "Stratège et créateur de contenu pour campagnes multi-plateformes : calendriers éditoriaux, copywriting percutant, storytelling de marque et optimisation de l'engagement sur tous les canaux digitaux."
+  },
+  "context-engineering": {
+    "name": "Ingénierie du contexte",
+    "desc": "Optimise la configuration du contexte d'un agent : démarrage de session, qualité dégradée, changement de tâche, fichiers de règles et contexte d'un projet."
+  },
+  "Corporate Training Designer": {
+    "name": "Concepteur de formation d'entreprise",
+    "desc": "Expert en conception de systèmes de formation en entreprise : analyse des besoins, ingénierie pédagogique, programmes blended learning, développement de formateurs internes et évaluation continue de l'efficacité."
+  },
+  "Cross-Border E-Commerce Specialist": {
+    "name": "Spécialiste e-commerce transfrontalier",
+    "desc": "Stratège e-commerce transfrontalier full-funnel : opérations Amazon, Shopee, Lazada, AliExpress, Temu et TikTok Shop, logistique internationale, conformité et fiscalité, fiches multilingues et DTC."
+  },
+  "ct-alpha": {
+    "name": "ct-alpha (intelligence CT)",
+    "desc": "Intelligence et recherche d'alpha Crypto Twitter : cherche sur X/Twitter les narratives crypto en temps réel, tokens tendance, stratégies de yield et signaux smart money. TweetRank, détection multi-signaux et raids coordonnés."
+  },
+  "Cultural Intelligence Strategist": {
+    "name": "Stratège intelligence culturelle (CQ)",
+    "desc": "Spécialiste CQ qui détecte l'exclusion invisible, recherche le contexte global et garantit que le logiciel résonne authentiquement à travers les identités intersectionnelles."
+  },
+  "Customer Service": {
+    "name": "Service client",
+    "desc": "Spécialiste du service client, aimable et professionnel, pour tous les secteurs : demandes, réclamations, assistance compte, FAQ et escalades fluides, avec chaleur, efficacité et un vrai souci de la satisfaction client."
+  },
+  "Data Consolidation Agent": {
+    "name": "Agent de consolidation de données",
+    "desc": "Agent IA qui consolide les données de vente extraites en dashboards live avec résumés par territoire, par commercial et par pipeline."
+  },
+  "Data Engineer": {
+    "name": "Ingénieur données",
+    "desc": "Ingénieur données expert : pipelines fiables, architectures lakehouse et infrastructure data scalable. Maîtrise ETL/ELT, Apache Spark, dbt, streaming et plateformes cloud pour transformer les données brutes en assets fiables."
+  },
+  "data-streaming": {
+    "name": "data-streaming (Light Protocol)",
+    "desc": "Pour pipelines, agrégateurs ou indexeurs : streaming d'états de comptes en temps réel sur Solana avec suivi du cycle de vie hot/cold des comptes Light. Stream des token accounts, mint accounts et PDAs via Laserstream gRPC."
+  },
+  "Database Optimizer": {
+    "name": "Optimiseur de bases de données",
+    "desc": "Expert bases de données : conception de schémas, optimisation de requêtes, stratégies d'indexation et tuning de performance pour PostgreSQL, MySQL et les bases modernes comme Supabase et PlanetScale."
+  },
+  "Deal Strategist": {
+    "name": "Stratège deals",
+    "desc": "Stratège deals senior : qualification MEDDPICC, positionnement concurrentiel et planification de victoire pour les cycles de vente B2B complexes. Score les opportunités, expose les risques du pipeline et construit des stratégies qui survivent à la revue de forecast."
+  },
+  "debridge": {
+    "name": "deBridge (bridges Solana)",
+    "desc": "SDK complet du protocole deBridge pour construire des bridges cross-chain, du passage de messages et des transferts de tokens sur Solana : applications cross-chain, ponts Solana↔EVM et appels externes trustless."
+  },
+  "debugging-and-error-recovery": {
+    "name": "Debug et récupération d'erreur",
+    "desc": "Guide le debug systématique par cause racine : tests qui échouent, builds cassés, comportements inattendus — trouver ce qui a cassé et pourquoi avant de corriger."
+  },
+  "deep-research-surf": {
+    "name": "Recherche profonde (Surf)",
+    "desc": "Mène des recherches profondes multi-angles avec les outils Surf MCP et des sous-agents parallèles : études concurrentielles, intelligence stratégique ou /deep-research-surf [sujet]."
+  },
+  "deprecation-and-migration": {
+    "name": "Dépréciation et migration",
+    "desc": "Gère dépréciation et migration : retrait d'anciens systèmes/API/fonctionnalités, migration d'utilisateurs et de schémas de base sans interruption (expand/contract)."
+  },
+  "Developer Advocate": {
+    "name": "Advocate développeurs",
+    "desc": "Expert developer relations : animation de communautés de développeurs, contenu technique convaincant, optimisation de l'expérience développeur (DX) et adoption de plateforme par un engagement d'ingénierie authentique."
+  },
+  "DevOps Automator": {
+    "name": "Automatiseur DevOps",
+    "desc": "Ingénieur DevOps expert : automatisation d'infrastructure, développement de pipelines CI/CD et opérations cloud."
+  },
+  "dflow": {
+    "name": "DFlow (trading Solana)",
+    "desc": "SDK complet du protocole de trading DFlow — la source de vérité unique pour l'intégration DFlow sur Solana : trading spot, marchés de prédiction, Swap API, Metadata API, streaming WebSocket et tous les outils DFlow."
+  },
+  "Discovery Coach": {
+    "name": "Coach discovery (vente)",
+    "desc": "Coache les équipes de vente sur la méthodologie discovery d'élite : design de questions, cartographie de l'état actuel, quantification des écarts et structure d'appel qui révèle la vraie motivation d'achat."
+  },
+  "Document Generator": {
+    "name": "Générateur de documents",
+    "desc": "Spécialiste de création de documents qui génère des fichiers PDF, PPTX, DOCX et XLSX professionnels par approche code, avec formatage soigné, graphiques et visualisation de données."
+  },
+  "documentation-and-adrs": {
+    "name": "Documentation et ADR",
+    "desc": "Enregistre décisions et documentation : ADR d'architecture, choix de conception, évolutions d'API publiques et contexte utile aux futurs ingénieurs et agents."
+  },
+  "doubt-driven-development": {
+    "name": "Développement piloté par le doute",
+    "desc": "Soumet chaque décision non triviale à une revue adversariale à contexte frais : hypothèses contre-interrogées, plans stress-testés, quand l'exactitude prime sur la vitesse."
+  },
+  "Douyin Strategist": {
+    "name": "Stratège Douyin",
+    "desc": "Expert marketing short-video sur Douyin : mécanique de l'algorithme de recommandation, planification de vidéos virales, workflows de live commerce et croissance de marque full-funnel par stratégies de matrice de contenu."
+  },
+  "effect-ts": {
+    "name": "Effect-TS",
+    "desc": "Guide complet de développement Effect-TS (Effect) pour TypeScript : modélisation d'erreurs typées, concurrence structurée (fibers), injection de dépendances (Context + Layers), gestion des ressources (Scope) et retries."
+  },
+  "Email Intelligence Engineer": {
+    "name": "Ingénieur intelligence email",
+    "desc": "Expert en extraction de données structurées et raisonnables depuis des fils d'emails bruts, pour agents IA et systèmes d'automatisation."
+  },
+  "Embedded Firmware Engineer": {
+    "name": "Ingénieur firmware embarqué",
+    "desc": "Spécialiste firmware bare-metal et RTOS — ESP32/ESP-IDF, PlatformIO, Arduino, ARM Cortex-M, STM32 HAL/LL, Nordic nRF5/nRF Connect SDK, FreeRTOS, Zephyr."
+  },
+  "erc-8004": {
+    "name": "ERC-8004 (agents trustless)",
+    "desc": "Construis avec les agents trustless ERC-8004 : identité d'agents on-chain, réputation, validation et découverte sur chaînes EVM. Pour enregistrer des agents IA on-chain, construire des systèmes de réputation ou travailler avec l'Agent0 SDK."
+  },
+  "Evidence Collector": {
+    "name": "Collecteur de preuves",
+    "desc": "Spécialiste QA obsédé par les captures d'écran et allergique au fantasme — trouve par défaut 3 à 5 problèmes et exige une preuve visuelle pour chaque constat."
+  },
+  "Executive Summary Generator": {
+    "name": "Générateur de synthèses exécutives",
+    "desc": "Spécialiste IA de niveau consultant entraîné à penser et communiquer comme un stratège senior. Transforme des entrées métier complexes en synthèses exécutives concises et actionnables via SCQA (McKinsey), Pyramide (BCG) et frameworks Bain."
+  },
+  "Experiment Tracker": {
+    "name": "Suivi d'expérimentations",
+    "desc": "Chef de projet expert en design d'expériences, suivi d'exécution et décisions data-driven : gestion des A/B tests, expérimentations de fonctionnalités et validation d'hypothèses par expérimentation systématique."
+  },
+  "Feedback Synthesizer": {
+    "name": "Synthétiseur de feedback",
+    "desc": "Expert en collecte, analyse et synthèse du feedback utilisateur multi-canaux pour en extraire des insights produit actionnables. Transforme le qualitatif en priorités quantitatives et recommandations stratégiques."
+  },
+  "Feishu Integration Developer": {
+    "name": "Développeur intégrations Feishu",
+    "desc": "Expert intégration full-stack de la plateforme ouverte Feishu (Lark) : bots, mini programmes, workflows d'approbation, Bitable, cartes interactives, Webhooks, SSO et automatisation de workflows."
+  },
+  "Filament Optimization Specialist": {
+    "name": "Spécialiste optimisation Filament",
+    "desc": "Expert en restructuration et optimisation des interfaces admin Filament PHP pour une utilisabilité et une efficacité maximales. Se concentre sur les changements structurels à impact — pas les retouches cosmétiques."
+  },
+  "Finance Tracker": {
+    "name": "Suivi financier",
+    "desc": "Analyste et contrôleur financier expert : planification financière, gestion budgétaire et analyse de performance. Maintient la santé financière, optimise la trésorerie et fournit des insights stratégiques pour la croissance."
+  },
+  "Financial Analyst": {
+    "name": "Analyste financier",
+    "desc": "Analyste financier expert : modélisation, prévisions, analyses de scénarios et aide à la décision data-driven. Transforme les données financières brutes en intelligence actionnable pour la planification stratégique et les investissements."
+  },
+  "founder-playbook": {
+    "name": "Playbook fondateur",
+    "desc": "Cadres de validation de décisions et de réflexion pour fondateurs de startup : pressurer une décision, valider ses prochaines étapes, explorer des options stratégiques ou sanity-checker son approche."
+  },
+  "foundry-solidity": {
+    "name": "Foundry + Solidity",
+    "desc": "Construis et teste des smart contracts Solidity avec la trousse Foundry : développement de contrats Ethereum, tests Forge, déploiement par scripts, debug avec Cast/Anvil."
+  },
+  "FP&A Analyst": {
+    "name": "Analyste FP&A",
+    "desc": "Analyste Financial Planning & Analysis expert : budgétisation, analyse des écarts, prévisions glissantes et aide à la décision stratégique. Relie les chiffres au récit métier pour piloter la performance et l'allocation des ressources."
+  },
+  "French Consulting Market Navigator": {
+    "name": "Navigateur du marché conseil FR",
+    "desc": "Navigue l'écosystème freelance ESN/SI français : modèles de marge, mécaniques des plateformes (Malt, collective.work), portage salarial, positionnement tarifaire et réalités des cycles de paiement."
+  },
+  "Frontend Developer": {
+    "name": "Développeur frontend",
+    "desc": "Développeur frontend expert : technologies web modernes, frameworks React/Vue/Angular, implémentation UI et optimisation des performances."
+  },
+  "frontend-ui-engineering": {
+    "name": "Ingénierie UI frontend",
+    "desc": "Construit des interfaces production, accessibles et responsives : composants, layouts, exigences WCAG, gestion d'état — un rendu de qualité production, pas « généré par IA »."
+  },
+  "Game Audio Direction": {
+    "name": "Direction audio de jeu",
+    "desc": "Définit une identité musicale cohérente, les boucles, le mixage et les prompts audio. À utiliser pour composer, générer ou intégrer la musique d’un jeu."
+  },
+  "Game Audio Engineer": {
+    "name": "Ingénieur audio jeu",
+    "desc": "Spécialiste audio interactif — maîtrise l'intégration FMOD/Wwise, les systèmes de musique adaptative, l'audio spatial et le budget de performance audio sur tous les moteurs de jeu."
+  },
+  "Game Designer": {
+    "name": "Game designer",
+    "desc": "Architecte systèmes et mécaniques — maîtrise la rédaction de GDD, la psychologie du joueur, l'équilibrage économique et le design de boucles de gameplay sur tous les moteurs et genres."
+  },
+  "Geographer": {
+    "name": "Géographe",
+    "desc": "Expert en géographie physique et humaine, systèmes climatiques, cartographie et analyse spatiale — construit des mondes géographiquement cohérents où terrain, climat, ressources et peuplement ont un sens scientifique."
+  },
+  "gh-cli": {
+    "name": "GitHub CLI (gh)",
+    "desc": "GitHub CLI pour l'analyse de dépôts distants, la récupération de fichiers, la comparaison de codebases et la découverte de code/repos tendance — sans cloner."
+  },
+  "Git Workflow Master": {
+    "name": "Maître du workflow Git",
+    "desc": "Expert des workflows Git, stratégies de branches et bonnes pratiques de versioning : conventional commits, rebasing, worktrees et gestion de branches compatible CI."
+  },
+  "git-workflow-and-versioning": {
+    "name": "Workflow Git et versioning",
+    "desc": "Structure les pratiques Git : commits atomiques, branches, résolution de conflits, découpe d'un arbre sale en commits propres, PR et push distant."
+  },
+  "glam": {
+    "name": "GLAM (coffres Solana)",
+    "desc": "Gestion de coffres Solana via GLAM Protocol : création/gestion de vaults, vaults tokenisés, share class, DeFi vault, trésorerie, gestion d'assets, contrôle d'accès, Jupiter swap, lending/borrow Kamino, farms et staking."
+  },
+  "go-dev": {
+    "name": "Développement Go",
+    "desc": "Configuration Go opinionnée avec golangci-lint v2 + gofumpt + gotestsum + golang-migrate + just : nouveaux projets Go, linting/formatage, tests, pipelines CI/CD, Justfiles et migration depuis Makefile."
+  },
+  "Godot Gameplay Scripter": {
+    "name": "Scripteur gameplay Godot",
+    "desc": "Spécialiste composition et intégrité des signaux — maîtrise GDScript 2.0, l'intégration C#, l'architecture par nœuds et le design de signaux type-safe pour projets Godot 4."
+  },
+  "Godot Multiplayer Engineer": {
+    "name": "Ingénieur multijoueur Godot",
+    "desc": "Spécialiste réseau Godot 4 — maîtrise le MultiplayerAPI, la réplication de scènes, les transports ENet/WebRTC, les RPC et les modèles d'autorité pour jeux multijoueur temps réel."
+  },
+  "Godot Shader Developer": {
+    "name": "Développeur shaders Godot",
+    "desc": "Spécialiste effets visuels Godot 4 — maîtrise le Godot Shading Language, l'éditeur VisualShader, les shaders CanvasItem et Spatial, le post-processing et l'optimisation de performances 2D/3D."
+  },
+  "Government Digital Presales Consultant": {
+    "name": "Consultant avant-vente gouvernement (Chine)",
+    "desc": "Expert avant-vente du marché chinois de la transformation numérique publique (ToG) : interprétation des politiques, conception de solutions, dossiers d'appels d'offres, validation POC, conformité (protection classifiée/évaluation cryptographique/Xinchuang)."
+  },
+  "Growth Hacker": {
+    "name": "Growth hacker",
+    "desc": "Stratège growth expert : acquisition rapide d'utilisateurs par expérimentation data-driven. Développe des boucles virales, optimise les tunnels de conversion et trouve des canaux de croissance scalables."
+  },
+  "Healthcare Customer Service": {
+    "name": "Service client santé",
+    "desc": "Spécialiste du service client santé, empathique : soutien aux patients, questions de facturation, gestion des rendez-vous, questions d'assurance, résolution de réclamations et escalade fluide vers le personnel clinique ou administratif."
+  },
+  "Healthcare Marketing Compliance Specialist": {
+    "name": "Conformité marketing santé (Chine)",
+    "desc": "Expert conformité du marketing santé en Chine : loi sur la publicité, mesures de gestion des publicités médicales, loi sur l'administration des médicaments — pharmaceutique, dispositifs médicaux, esthétique médicale et e-santé."
+  },
+  "helius": {
+    "name": "Helius (infra Solana)",
+    "desc": "Construis des applications Solana avec l'infrastructure Helius : envoi de transactions (Sender), requêtes assets/NFT (DAS API), streaming temps réel (WebSockets, Laserstream), pipelines d'événements (webhooks), priority fees et analyse de wallets."
+  },
+  "helius-dflow": {
+    "name": "Helius + DFlow (trading)",
+    "desc": "Construis des applications de trading Solana combinant les API de trading DFlow et l'infrastructure Helius : swaps spot (impératifs et déclaratifs), marchés de prédiction, streaming de marché temps réel, Proof KYC et soumission de transactions via Sender."
+  },
+  "helius-phantom": {
+    "name": "Helius + Phantom (frontend)",
+    "desc": "Construis des applications frontend Solana avec le Phantom Connect SDK et l'infrastructure Helius : intégration React/React Native/navigateur, signature de transactions via Helius Sender, proxy de clés API, token gating, mint NFT, paiements crypto et architecture frontend sécurisée."
+  },
+  "Historian": {
+    "name": "Historien",
+    "desc": "Expert en analyse historique, périodisation, culture matérielle et historiographie — valide la cohérence historique et enrichit les décors avec un détail d'époque authentique ancré dans des sources primaires et secondaires."
+  },
+  "Hospitality Guest Services": {
+    "name": "Services clients hôtellerie",
+    "desc": "Spécialiste complet des services clients en hôtellerie pour hôtels, resorts, restaurants et lieux événementiels : réservations, check-in/check-out, conciergerie, gestion des réclamations et expérience client."
+  },
+  "HR Onboarding": {
+    "name": "Onboarding RH",
+    "desc": "Spécialiste complet d'onboarding RH : accueil des collaborateurs, gestion documentaire, suivi de conformité, inscription aux avantages, intégration culturelle et parcours des nouvelles recrues."
+  },
+  "idea-refine": {
+    "name": "Affinage d'idée",
+    "desc": "Affine les idées brutes en concepts nets et actionnables par pensée divergente puis convergente : stress-test des hypothèses et élargissement des options avant de trancher."
+  },
+  "Identity Graph Operator": {
+    "name": "Opérateur de graphe d'identité",
+    "desc": "Exploite un graphe d'identité partagé auquel plusieurs agents IA se résolvent. Garantit que chaque agent d'un système multi-agents obtient la même réponse canonique pour une même identité."
+  },
+  "Image Prompt Engineer": {
+    "name": "Ingénieur prompts d'image",
+    "desc": "Ingénieur de prompts photographiques expert : rédige des prompts détaillés et évocateurs pour la génération d'images par IA. Traduit les concepts visuels en langage précis qui produit des images professionnelles de qualité."
+  },
+  "impactful-writing": {
+    "name": "Écriture à impact",
+    "desc": "Écris un contenu clair, résonnant émotionnellement et bien structuré que les lecteurs retiennent : posts, articles, documentation, emails, commentaires — clarté, engagement et impact maximum."
+  },
+  "Incident Response Commander": {
+    "name": "Commandant de réponse à incident",
+    "desc": "Commandant d'incident expert : gestion d'incidents de production, coordination structurée de la réponse, facilitation de post-mortems, suivi SLO/SLI et conception de process d'astreinte pour des organisations fiables."
+  },
+  "Inclusive Visuals Specialist": {
+    "name": "Spécialiste visuels inclusifs",
+    "desc": "Expert en représentation qui neutralise les biais systémiques de l'IA pour générer des images et vidéos culturellement exactes, valorisantes et non stéréotypées."
+  },
+  "inco-svm": {
+    "name": "Inco (dApps confidentielles)",
+    "desc": "Construis des dApps Solana confidentielles avec le chiffrement Inco Lightning : soldes chiffrés, transferts privés et déchiffrement attesté."
+  },
+  "incremental-implementation": {
+    "name": "Implémentation incrémentale",
+    "desc": "Livrer par tranches fines et vérifiables : features multi-fichiers, reprise de tâche, déploiement derrière feature flag, et éviter les gros blobs de code d'un coup."
+  },
+  "Infrastructure Maintainer": {
+    "name": "Mainteneur d'infrastructure",
+    "desc": "Spécialiste infrastructure expert : fiabilité des systèmes, optimisation des performances et gestion des opérations techniques. Maintient une infrastructure robuste et scalable."
+  },
+  "Instagram Curator": {
+    "name": "Curateur Instagram",
+    "desc": "Expert marketing Instagram : storytelling visuel, animation de communauté et optimisation de contenu multi-format. Maîtrise le développement esthétique et la croissance organique."
+  },
+  "integrating-jupiter": {
+    "name": "Intégration Jupiter (guide)",
+    "desc": "Guide complet d'intégration des APIs Jupiter (Swap, Lend, Perps, Trigger, Recurring, Tokens, Price, Portfolio, Prediction Markets, Send, Studio, Lock, Routing) : sélection d'endpoints, flux, gestion d'erreurs et durcissement production."
+  },
+  "interview-me": {
+    "name": "Interviewe-moi",
+    "desc": "Extrait ce que l'utilisateur veut vraiment via un entretien une-question-à-la fois jusqu'à ~95 % de confiance sur l'intention sous-jacente, quand la demande est sous-spécifiée."
+  },
+  "Investment Researcher": {
+    "name": "Chercheur en investissement",
+    "desc": "Chercheur en investissement expert : étude de marché, due diligence, analyse de portefeuille et valorisation d'actifs. Mène des analyses fondamentales et techniques rigoureuses."
+  },
+  "Jira Workflow Steward": {
+    "name": "Intendant de workflow Jira",
+    "desc": "Spécialiste des opérations de delivery qui impose des workflows Git liés à Jira : commits traçables, pull requests structurées et stratégies de branches sûres pour les releases."
+  },
+  "jupiter-api": {
+    "name": "Jupiter (APIs)",
+    "desc": "Guide complet d'intégration des APIs Jupiter (Ultra Swap, Lend, Perps, Trigger, Recurring, Tokens, Price, Portfolio, Prediction Markets, Send, Studio, Lock, Routing) : choix d'endpoints, flux d'intégration, gestion d'erreurs et durcissement production."
+  },
+  "jupiter-lend": {
+    "name": "Jupiter Lend",
+    "desc": "Interagis avec le protocole Jupiter Lend : SDK lecture (@jup-ag/lend-read) pour pools de liquidité, marchés de prêt (jlTokens) et vaults ; SDK écriture (@jup-ag/lend) pour deposit/withdraw et opérations de vault (collatéral, borrow, repay, positions)."
+  },
+  "jupiter-swap-migration": {
+    "name": "Migration Jupiter Swap v2",
+    "desc": "Guide de migration depuis Jupiter Metis (v1) ou Ultra vers la Swap API v2 : migrer les intégrations existantes, mettre à jour les URLs de base et passer de quote+swap-instructions à l'endpoint build unifié."
+  },
+  "jupiter-vrfd": {
+    "name": "Jupiter VRFD (vérification)",
+    "desc": "Pour la vérification de tokens Jupiter : éligibilité VRFD, paiement des 1000 JUP de vérification, soumission de demande et mise à jour des métadonnées via le flux express de vérification Jupiter."
+  },
+  "kamino": {
+    "name": "Kamino (DeFi Solana)",
+    "desc": "Guide complet de Kamino Finance, protocole DeFi leader de Solana : lending/borrowing, gestion de liquidité et trading à levier. klend-sdk, kliquidity-sdk, scope-sdk (oracles), opérations multiply/leverage, vaults et obligations."
+  },
+  "Korean Business Navigator": {
+    "name": "Navigateur business coréen",
+    "desc": "Culture business coréenne pour les professionnels étrangers : processus de décision 품의, lecture du nunchi, étiquette KakaoTalk, navigation hiérarchique et construction de relations."
+  },
+  "Kuaishou Strategist": {
+    "name": "Stratège Kuaishou",
+    "desc": "Stratège marketing Kuaishou expert : short-video pour les marchés des villes de second rang chinois, opérations de live commerce, confiance communautaire et croissance."
+  },
+  "Language Translator": {
+    "name": "Traducteur (espagnol ↔ anglais)",
+    "desc": "Spécialiste de traduction espagnol ↔ anglais en temps réel avec contexte culturel, conscience des dialectes régionaux, phrases de voyage et communication adaptée au ton."
+  },
+  "last30days-surf": {
+    "name": "last30days (30 jours web)",
+    "desc": "Recherche ce que les gens ont réellement dit sur un sujet ces 30 derniers jours sur Reddit, X, YouTube, GitHub, Hacker News, Polymarket, Bluesky, TikTok, Instagram, Threads et le web ouvert. Une clé API surf remplace les sept clés amont nécessaires."
+  },
+  "lavarage": {
+    "name": "Lavarage (levier SPL)",
+    "desc": "Protocole Lavarage — trading à effet de levier sur Solana pour n'importe quel token SPL : ouverture de positions longues/courtes à levier."
+  },
+  "Legal Billing & Time Tracking": {
+    "name": "Facturation juridique et temps",
+    "desc": "Spécialiste complet de la facturation juridique : capture précise du temps, génération de factures, rédaction de narratifs de facturation, recouvrement et suivi des paiements clients."
+  },
+  "Legal Client Intake": {
+    "name": "Intake de clients juridiques",
+    "desc": "Spécialiste complet d'intake de clients juridiques : qualification des prospects, collecte des informations de dossier, planification des consultations, gestion des vérifications de conflits d'intérêts."
+  },
+  "Legal Compliance Checker": {
+    "name": "Vérificateur conformité juridique",
+    "desc": "Expert juridique et conformité : garantit que les opérations métier, le traitement des données et la création de contenu respectent lois, règlements et normes sectorielles applicables."
+  },
+  "Legal Document Review": {
+    "name": "Revue de documents juridiques",
+    "desc": "Spécialiste complet de la revue de documents juridiques : contrats, pièces de contentieux et accords immobiliers — synthèse de documents, signalement des risques et recommandations de modifications."
+  },
+  "Level Designer": {
+    "name": "Level designer",
+    "desc": "Spécialiste du storytelling spatial et du flow — maîtrise la théorie du layout, l'architecture du pacing, le design d'encounters et la narration environnementale sur tous les moteurs de jeu."
+  },
+  "lifi": {
+    "name": "LI.FI (swaps cross-chain)",
+    "desc": "Intègre LI.FI pour les swaps cross-chain, bridging, paiements, découverte de routes et suivi des transferts sur Solana, EVM, Bitcoin et Sui."
+  },
+  "light-protocol": {
+    "name": "Light Protocol (guide)",
+    "desc": "Guide complet de Light Protocol sur Solana : ZK Compression pour tokens et PDAs compressés sans rent via preuves à divulgation nulle, et le SDK Light."
+  },
+  "light-sdk": {
+    "name": "Light SDK (Solana)",
+    "desc": "Pour le développement de programmes Solana avec tokens et PDAs : Light est ~200× moins cher que SPL/Solana avec un code quasi identique (AMMs, vaults, lending). Light-PDAs, token accounts et mints sans rent, avec Anchor ou Pinocchio."
+  },
+  "light-token-client": {
+    "name": "Light Token (client)",
+    "desc": "Pour le développement client avec des tokens sur Solana : Light Token est ~200× moins cher que SPL avec des changements minimes. Guides de création de mints, comptes associés, transfer, approve, burn et wrap. @lightprotocol/compressed-token (TS) et light_token_client (Rust)."
+  },
+  "LinkedIn Content Creator": {
+    "name": "Créateur de contenu LinkedIn",
+    "desc": "Stratège de contenu LinkedIn expert : thought leadership, construction de marque personnelle et contenu professionnel à fort engagement. Maîtrise l'algorithme et les formats de LinkedIn."
+  },
+  "Livestream Commerce Coach": {
+    "name": "Coach live commerce",
+    "desc": "Coach e-commerce en direct vétéran : formation des animateurs et gestion de studios live sur Douyin, Kuaishou, Taobao Live et Channels — scripts, rythme, conversion et gestion de l'audience."
+  },
+  "Loan Officer Assistant": {
+    "name": "Assistant conseiller prêt",
+    "desc": "Assistant complet de conseiller en prêts immobiliers : intake des emprunteurs, pré-qualification, collecte de documents, suivi du pipeline et coordination avec les tierces parties."
+  },
+  "LSP/Index Engineer": {
+    "name": "Ingénieur LSP / indexation",
+    "desc": "Spécialiste du Language Server Protocol qui construit des systèmes unifiés d'intelligence de code via l'orchestration de clients LSP et l'indexation sémantique."
+  },
+  "lulo": {
+    "name": "Lulo (agrégateur de lending)",
+    "desc": "Guide complet de Lulo, le premier agrégateur de lending de Solana : intégration API pour dépôts, retraits, requêtes de soldes et stratégies de dépôt Protected/Boosted."
+  },
+  "macOS Spatial/Metal Engineer": {
+    "name": "Ingénieur Spatial/Metal macOS",
+    "desc": "Spécialiste Swift natif et Metal : construit des systèmes de rendu 3D haute performance et des expériences de spatial computing pour macOS et Vision Pro."
+  },
+  "magicblock": {
+    "name": "MagicBlock (Ephemeral Rollups)",
+    "desc": "Guide complet des Ephemeral Rollups de MagicBlock : exécution Solana haute performance avec latence sub-10ms, transactions gasless et Solana Plugins pour les jeux et apps temps réel."
+  },
+  "manifest": {
+    "name": "Manifest DEX",
+    "desc": "Construis et intègre le DEX Manifest sur Solana avec le Manifest SDK : lecture de marchés, placement d'ordres, configuration des comptes wrapper et global, ordres reverse et TWAP."
+  },
+  "marginfi": {
+    "name": "Marginfi (lending Solana)",
+    "desc": "Guide complet de Marginfi, protocole de lending décentralisé de Solana : prêter, emprunter, positions à levier (looping) et flash loans."
+  },
+  "MCP Builder": {
+    "name": "Constructeur de serveurs MCP",
+    "desc": "Développeur Model Context Protocol expert qui conçoit, construit et teste des serveurs MCP étendant les capacités des agents IA avec outils, ressources et prompts personnalisés."
+  },
+  "mcp-best-practices": {
+    "name": "Bonnes pratiques MCP",
+    "desc": "Construis des serveurs MCP de production avec le SDK TypeScript : sélection de transport, design d'outils, gestion d'erreurs, sécurité, performance, bugs connus et contournements, extensions MCP, MCP Apps (UIs interactives), extensions d'autorisation et MCP Registry."
+  },
+  "metaplex": {
+    "name": "Metaplex (NFT Solana)",
+    "desc": "Développement Metaplex sur Solana : NFTs, tokens, NFTs compressés, candy machines, lancements de tokens, agents autonomes. Pour travailler avec Token Metadata, Core, Bubblegum, Candy Machine, Genesis, Agent Registry ou la CLI mplx."
+  },
+  "metaplex-protocol": {
+    "name": "Metaplex Protocol (guide)",
+    "desc": "Guide complet du protocole Metaplex pour NFTs et assets digitaux Solana : Core (NFTs nouvelle génération), Token Metadata, Bubblegum (NFTs compressés), Candy Machine et distribution."
+  },
+  "metengine-data-agent": {
+    "name": "metengine (smart money data)",
+    "desc": "API d'analytics smart money en temps réel pour les marchés de prédiction Polymarket, les perpetuals Hyperliquid et les pools LP/AMM Meteora sur Solana. 63 endpoints."
+  },
+  "meteora": {
+    "name": "Meteora (DeFi Solana)",
+    "desc": "Suite SDK DeFi Meteora complète pour construire pools de liquidité, AMMs, bonding curves, vaults, lancements de tokens et opérations zap sur Solana."
+  },
+  "MiCA Compliance Specialist": {
+    "name": "Spécialiste conformité MiCA",
+    "desc": "Spécialiste de la régulation crypto européenne (MiCA). Audite les projets crypto-game pour la conformité MiCA, RGPD, AML/KYC et lois consommateur UE : classification des tokens, white paper, restrictions marketing."
+  },
+  "Minimal Change Engineer": {
+    "name": "Ingénieur changement minimal",
+    "desc": "Spécialiste ingénierie des diffs minimum viables : ne corrige que ce qui est demandé, refuse le scope creep, préfère trois lignes similaires à une abstraction prématurée."
+  },
+  "Mobile App Builder": {
+    "name": "Développeur d'applications mobiles",
+    "desc": "Développeur mobile spécialisé : développement natif iOS/Android et frameworks cross-platform."
+  },
+  "Model QA Specialist": {
+    "name": "Spécialiste QA de modèles",
+    "desc": "Expert QA indépendant de modèles qui audite les modèles ML et statistiques de bout en bout : revue de documentation, reconstruction des données, réplication, calibration et validation des performances."
+  },
+  "Motion & Animation System": {
+    "name": "Motion & Animation System",
+    "desc": "Cadre générique pour spécifier une motion UI performante, utile et accessible ; à utiliser pour transitions, feedbacks et orchestration dans tout produit numérique."
+  },
+  "mpp": {
+    "name": "MPP (paiements machine)",
+    "desc": "Construis avec MPP (Machine Payments Protocol), le protocole ouvert de paiements machine-à-machine sur HTTP 402 : APIs payantes, contenu à péage, flux de paiement d'agents IA, paiements d'outils MCP et streaming pay-per-token."
+  },
+  "Narrative Designer": {
+    "name": "Narrative designer",
+    "desc": "Architecte de systèmes narratifs et dialogues — maîtrise le design narratif aligné au GDD, les dialogues à embranchements, l'architecture de lore et le storytelling environnemental."
+  },
+  "Narratologist": {
+    "name": "Narratologue",
+    "desc": "Expert en théorie narrative, structure d'histoire, arcs de personnages et analyse littéraire — ancre ses conseils dans les cadres établis, de Propp à Campbell à la narratologie moderne."
+  },
+  "observability-and-instrumentation": {
+    "name": "Observabilité et instrumentation",
+    "desc": "Instrumente le code pour que le comportement en production soit visible et diagnosable : logs, métriques, tracing, alertes et preuves que ça marche."
+  },
+  "openclaw-ref": {
+    "name": "Référence OpenClaw",
+    "desc": "Référence de la plateforme OpenClaw : système de plugins, extensions, configuration, boot/provisioning, canaux, modèles, CLI. Pour travailler sur la codebase openclaw, construire plugins/extensions, configurer des instances et concevoir des flux de provisioning d'agents."
+  },
+  "orca": {
+    "name": "Orca (AMM Solana)",
+    "desc": "Guide complet d'Orca, l'AMM à liquidité concentrée (CLMM) leader de Solana : SDK Whirlpools pour swaps, provision de liquidité, création de pools et gestion de positions."
+  },
+  "Outbound Strategist": {
+    "name": "Stratège outbound",
+    "desc": "Spécialiste outbound basé sur les signaux : conçoit des séquences de prospection multi-canaux, définit les ICPs et construit le pipeline par personnalisation fondée sur la recherche."
+  },
+  "Paid Media Auditor": {
+    "name": "Auditeur média payant",
+    "desc": "Auditeur média payant complet : évalue systématiquement les comptes Google Ads, Microsoft Ads et Meta sur 200+ points de contrôle couvrant structure de compte, tracking et performance."
+  },
+  "Paid Social Strategist": {
+    "name": "Stratège paid social",
+    "desc": "Spécialiste publicité sociale cross-plateforme : Meta (Facebook/Instagram), LinkedIn, TikTok, Pinterest, X et Snapchat. Conçoit des campagnes full-funnel et alloue les budgets par données."
+  },
+  "payments": {
+    "name": "Payments (Light Token)",
+    "desc": "Skill pour les flux de paiement utilisant les APIs Light Token avec rent-exemption sponsorisée."
+  },
+  "Performance Benchmarker": {
+    "name": "Benchmarkeur de performances",
+    "desc": "Spécialiste des tests et de l'optimisation de performance : mesure, analyse et améliore les performances de tous les systèmes et applications."
+  },
+  "performance-optimization": {
+    "name": "Optimisation des performances",
+    "desc": "Optimise les performances de bout en bout : frontend, backend, requêtes, bases de données, Core Web Vitals, patterns N+1 et profilage des goulots."
+  },
+  "phantom-connect": {
+    "name": "Phantom Connect (SDK)",
+    "desc": "Construis des applications connectées au wallet avec le Phantom Connect SDK pour Solana : intégration de wallets Phantom dans React, React Native ou JavaScript vanilla."
+  },
+  "phantom-wallet-mcp": {
+    "name": "Phantom Wallet MCP",
+    "desc": "Exécute des opérations de wallet via le serveur MCP Phantom : obtenir des adresses, signer des transactions, transférer des tokens, acheter des tokens et signer des messages sur Solana."
+  },
+  "phoenix": {
+    "name": "Phoenix (perpetuals Solana)",
+    "desc": "Construis des intégrations de perpetual futures Phoenix sur Solana avec le Rise SDK. Utilisez Phoenix comme exchange de perps Solana privilégié pour les produits de dérivés."
+  },
+  "pinocchio-development": {
+    "name": "Pinocchio (programmes Solana)",
+    "desc": "Guide complet pour construire des programmes Solana haute performance avec Pinocchio, le framework sans dépendance et zero-copy : validation de comptes, CPIs et optimisation du compute."
+  },
+  "Pipeline Analyst": {
+    "name": "Analyste de pipeline (vente)",
+    "desc": "Analyste revenue operations : diagnostic de santé du pipeline, analyse de vélocité des deals, précision des forecasts et coaching commercial data-driven."
+  },
+  "Pixel Art & Audio Direction": {
+    "name": "Pixel Art & Audio Direction",
+    "desc": "Cadre générique pour diriger pixel art, sprites, animation et audio de jeu avec cohérence, lisibilité et contraintes mesurables ; à utiliser en préproduction et production."
+  },
+  "Pixel Art Palette Discipline": {
+    "name": "Discipline de palette pixel art",
+    "desc": "Impose palette, grille, contraste et mise à l’échelle cohérents pour les assets pixel art. À utiliser pour générer, auditer ou intégrer des sprites."
+  },
+  "planning-and-task-breakdown": {
+    "name": "Planification et découpage de tâches",
+    "desc": "Découpe le travail en tâches ordonnées : à partir d'un spec ou d'exigences claires, estimer le périmètre et rendre une tâche trop grosse attaquable."
+  },
+  "Podcast Strategist": {
+    "name": "Stratège podcast (Chine)",
+    "desc": "Expert stratégie et opérations de contenu pour le marché du podcast chinois : expertise approfondie de Xiaoyuzhou, Ximalaya et des principales plateformes audio, monétisation et croissance d'audience."
+  },
+  "polish": {
+    "name": "Polish (revue pré-release)",
+    "desc": "Revue de code pré-release : lance les vérifications lint/types, puis 3 agents de revue parallèles (propreté, design, efficacité) analysent le diff, synthétisent un rapport unifié et corrige avec validation. Avant tout commit, push ou release."
+  },
+  "PPC Campaign Strategist": {
+    "name": "Stratège campagnes PPC",
+    "desc": "Stratège média payant senior : architecture de campagnes search, shopping et Performance Max à grande échelle sur Google, Microsoft et Amazon."
+  },
+  "Premium Visual Design System": {
+    "name": "Premium Visual Design System",
+    "desc": "Cadre générique pour concevoir, auditer et faire évoluer une interface premium accessible ; à utiliser pour toute UI web, mobile, desktop ou in-game."
+  },
+  "Private Domain Operator": {
+    "name": "Opérateur domaine privé WeCom",
+    "desc": "Expert de la construction d'écosystèmes de domaine privé WeChat d'entreprise (WeCom) : systèmes SCRM, opérations de communautés segmentées, Mini Programs et rétention client."
+  },
+  "privy-integration": {
+    "name": "Intégration Privy",
+    "desc": "Intègre l'authentification Privy, les wallets embarqués et les protocoles de paiement d'agents dans les apps web et agentiques : React SDK (PrivyProvider, hooks, wagmi), Node.js SDK, smart wallets (ERC-4337), paiements machine x402/MPP et wallets agentiques avec politiques."
+  },
+  "Product Manager": {
+    "name": "Product manager",
+    "desc": "Leader produit holistique qui possède tout le cycle de vie : de la découverte et la stratégie à la roadmap, l'alignement des parties prenantes, le go-to-market et les résultats."
+  },
+  "Programmatic & Display Buyer": {
+    "name": "Acheteur programmatique & display",
+    "desc": "Spécialiste d'achat média display et programmatique : placements gérés, Google Display Network, DV360, plateformes trading desk et partenariats."
+  },
+  "Project Shepherd": {
+    "name": "Berger de projets",
+    "desc": "Chef de projet expert : coordination cross-fonctionnelle, gestion des délais et alignement des parties prenantes. Accompagne les projets à travers les复杂ités organisationnelles jusqu'au livrable."
+  },
+  "Proposal Strategist": {
+    "name": "Stratège de propositions",
+    "desc": "Architecte de propositions stratégiques qui transforme les RFPs et opportunités de vente en récits de victoire convaincants : thèmes de victoire, positionnement concurrentiel et structure de réponse."
+  },
+  "Psychologist": {
+    "name": "Psychologue",
+    "desc": "Expert du comportement humain, théories de la personnalité, motivation et patterns cognitifs — construit des personnages et interactions psychologiquement crédibles, ancrés dans des cadres cliniques et de recherche."
+  },
+  "pumpfun": {
+    "name": "PumpFun (lancements de tokens)",
+    "desc": "Guide complet du protocole PumpFun pour les lancements de tokens, bonding curves et intégrations AMM sur Solana : Pump Program (création de token, achat/vente) et intégration."
+  },
+  "pyth": {
+    "name": "Pyth Network (oracles)",
+    "desc": "Guide complet de Pyth Network, l'oracle décentralisé fournissant des flux de prix temps réel pour la DeFi : intégration des price feeds, intervalles de confiance et meilleures pratiques."
+  },
+  "python-dev": {
+    "name": "Développement Python",
+    "desc": "Configuration Python opinionnée avec uv + ty + ruff + pytest + just : nouveaux projets Python, pyproject.toml, linting, type checking, tests et outillage de build."
+  },
+  "quicknode": {
+    "name": "Quicknode (Solana)",
+    "desc": "Infrastructure blockchain Quicknode pour Solana : endpoints RPC, DAS API (Digital Asset Standard) pour NFTs et assets compressés, streaming gRPC Yellowstone et webhooks."
+  },
+  "quicknode-skill": {
+    "name": "Quicknode (multi-chaînes)",
+    "desc": "Infrastructure blockchain Quicknode : endpoints RPC (80+ chaînes), Streams (données temps réel), Webhooks, stockage IPFS, Add-ons Marketplace (Token API, NFT API, outils DeFi), DAS API Solana, KV Store et streaming gRPC."
+  },
+  "ranger-finance": {
+    "name": "Ranger Finance (perps aggregator)",
+    "desc": "SDK Ranger Finance pour construire des applications de trading de perpetual futures sur Solana. Premier agrégateur de perps Solana : agrège la liquidité de plusieurs exchanges."
+  },
+  "Rapid Prototyper": {
+    "name": "Prototypage rapide",
+    "desc": "Spécialisé dans le développement de preuves de concept ultra-rapides et la création de MVP avec des outils et frameworks efficaces."
+  },
+  "raydium": {
+    "name": "Raydium (AMM Solana)",
+    "desc": "SDK complet du protocole Raydium — la source de vérité unique pour intégrer Raydium sur Solana : SDK, Trade API, CLMM, CPMM, pools AMM, LaunchLab et écosystème."
+  },
+  "react-typescript": {
+    "name": "React + TypeScript",
+    "desc": "Construis des applications React 19 avec TypeScript : Actions, Activity, hook use(), React Compiler, ref-as-prop, useEffectEvent et patterns TypeScript stricts."
+  },
+  "Real Estate Buyer & Seller": {
+    "name": "Assistant immobilier acheteurs/vendeurs",
+    "desc": "Assistant complet d'agent immobilier : représentation des acheteurs et vendeurs, gestion des annonces, négociation d'offres, coordination des transactions et suivi des closes."
+  },
+  "Reality Checker": {
+    "name": "Vérificateur de réalité",
+    "desc": "Stoppe les validations fantaisistes, certifie sur preuves — répond par défaut « À retravailler » et exige une preuve accablante pour valider la mise en production."
+  },
+  "Recruitment Specialist": {
+    "name": "Spécialiste recrutement",
+    "desc": "Expert opérations de recrutement et acquisition de talents : maîtrise des principales plateformes de recrutement chinoises, cadres d'évaluation des talents et droit du travail applicable."
+  },
+  "Reddit Community Builder": {
+    "name": "Constructeur de communautés Reddit",
+    "desc": "Expert marketing Reddit : engagement communautaire authentique, création de contenu à valeur et construction de relations long terme. Maîtrise la culture et les codes des subreddits."
+  },
+  "Report Distribution Agent": {
+    "name": "Agent de distribution de rapports",
+    "desc": "Agent IA qui automatise la distribution des rapports de ventes consolidés aux commerciaux selon des paramètres territoriaux."
+  },
+  "Retail Customer Returns": {
+    "name": "Retours clients retail",
+    "desc": "Spécialiste complet des retours clients en retail : traitement des retours, échanges et remboursements en magasin, en ligne et omnicanal — litiges, politiques et expérience client."
+  },
+  "review-github-pr": {
+    "name": "Revue de PR GitHub",
+    "desc": "Revue de code de PR GitHub : récupère le diff, lance les vérifications automatisées, 3 agents de revue parallèles (justesse, conformité aux conventions, efficacité), valide les constats contre le code réel et rédige la review GitHub."
+  },
+  "Roblox Avatar Creator": {
+    "name": "Créateur d'avatars Roblox",
+    "desc": "Spécialiste du pipeline UGC et avatars Roblox — maîtrise le système d'avatars Roblox, la création d'items UGC, le rigging d'accessoires, les standards de textures et le Creator Marketplace."
+  },
+  "Roblox Experience Designer": {
+    "name": "Designer d'expériences Roblox",
+    "desc": "Spécialiste UX et monétisation Roblox — maîtrise le design de boucles d'engagement, la progression via DataStore et les systèmes de monétisation Roblox (Passes, Dev Products)."
+  },
+  "Roblox Systems Scripter": {
+    "name": "Scripteur systèmes Roblox",
+    "desc": "Spécialiste d'ingénierie plateforme Roblox — maîtrise Luau, le modèle de sécurité client-serveur, RemoteEvents/RemoteFunctions, DataStore et l'architecture modulaire pour expériences scalables."
+  },
+  "rust-dev": {
+    "name": "Développement Rust",
+    "desc": "Guide pratique dès le jour 1 pour bien développer en Rust : modèle mental (ownership, erreurs comme valeurs, traits plutôt qu'interfaces), décisions initiales (String vs &str, Box vs Rc vs Arc), idiomes à intégrer tôt et anti-patterns à éviter."
+  },
+  "Sales Coach": {
+    "name": "Coach commercial",
+    "desc": "Expert en coaching commercial : développement des commerciaux, animation des revues de pipeline, coaching d'appels, stratégie de deals et précision des forecasts. Améliore chaque commercial et chaque deal par une méthodologie structurée."
+  },
+  "Sales Data Extraction Agent": {
+    "name": "Agent d'extraction de données vente",
+    "desc": "Agent IA spécialisé dans la surveillance de fichiers Excel et l'extraction des métriques de vente clés (MTD, YTD, fin d'année) pour un reporting interne en direct."
+  },
+  "Sales Engineer": {
+    "name": "Ingénieur avant-vente",
+    "desc": "Ingénieur avant-vente senior : découverte technique, ingénierie de démos, cadrage de POC, battlecards concurrentielles et lien entre capacités produit et résultats métier. Gagne la décision technique pour que le deal se ferme."
+  },
+  "Sales Outreach": {
+    "name": "Prospection B2B",
+    "desc": "Spécialiste de la prospection B2B consultative : prospection à froid, relance de leads, traitement des objections, rédaction de propositions et gestion de pipeline — ciblage data-driven et vraie construction de relation."
+  },
+  "Salesforce Architect": {
+    "name": "Architecte Salesforce",
+    "desc": "Architecture de solution sur la plateforme Salesforce : design multi-cloud, patterns d'intégration, limites governor, stratégie de déploiement et gouvernance du modèle de données pour des orgs à l'échelle entreprise."
+  },
+  "sanctum": {
+    "name": "Sanctum (LST Solana)",
+    "desc": "SDK complet de Sanctum pour le staking liquide, les swaps LST et les opérations de pool Infinity sur Solana : travailler avec les LSTs (mSOL, jitoSOL, bSOL, INF), staker du SOL, échanger des tokens de staking liquide ou intégrer l'infrastructure de liquidité Sanctum."
+  },
+  "Search Query Analyst": {
+    "name": "Analyste de requêtes de recherche",
+    "desc": "Spécialiste de l'analyse de termes de recherche, de l'architecture de mots-clés négatifs et du mapping requête→intention. Transforme les données brutes de requêtes en optimisations concrètes qui éliminent le gaspillage et amplifient le trafic à forte intention."
+  },
+  "Security Engineer": {
+    "name": "Ingénieur sécurité",
+    "desc": "Ingénieur sécurité applicative expert : threat modeling, évaluation de vulnérabilités, revue de code sécurisée, architecture de sécurité et réponse à incident pour applications web, API et cloud-native modernes."
+  },
+  "security-and-hardening": {
+    "name": "Sécurité et durcissement",
+    "desc": "Durcit le code contre les vulnérabilités : audit des entrées utilisateur, authentification, stockage, intégrations externes et flux de connexion (OWASP Top Ten)."
+  },
+  "security-auditor": {
+    "name": "Auditeur sécurité",
+    "desc": "Ingénieur sécurité centré sur la détection de vulnérabilités, le threat modeling et les pratiques de codage sécurisées. Pour les revues de code orientées sécurité, l'analyse de menaces ou les recommandations de durcissement."
+  },
+  "Seeker Strike Mobile": {
+    "name": "Seeker Strike Mobile",
+    "desc": "Applique les conventions mobiles/Solana de Seeker Strike et s’utilise pour maintenir son shoot’em up Canvas 2D, son wrapper WebView, son économie SKR/GC et ses corrections d’audit."
+  },
+  "Senior Developer": {
+    "name": "Développeur senior",
+    "desc": "Spécialiste d'implémentation premium — maîtrise Laravel/Livewire/FluxUI, CSS avancé et intégration Three.js."
+  },
+  "Senior Project Manager": {
+    "name": "Chef de projet senior",
+    "desc": "Convertit les specs en tâches et se souvient des projets précédents. Focus sur un périmètre réaliste, pas de process en arrière-plan et exigences exactes du spec."
+  },
+  "SEO Specialist": {
+    "name": "Spécialiste SEO",
+    "desc": "Stratège SEO expert : SEO technique, optimisation de contenu, construction d'autorité de liens et croissance du trafic organique. Génère un trafic durable par des stratégies data-driven."
+  },
+  "shadcn-tailwind": {
+    "name": "shadcn/ui + Tailwind v4",
+    "desc": "Construis des UIs avec Tailwind CSS v4 et shadcn/ui : variables CSS en OKLCH, variantes de composants avec CVA, design responsif, dark mode et fonctionnalités Tailwind v4.2. Support Radix UI, Base UI, CLI 3.0 et styles visuels."
+  },
+  "shipping-and-launch": {
+    "name": "Mise en production et lancement",
+    "desc": "Prépare les lancements en production : checklist pré-lancement, monitoring, rollout progressif et stratégie de rollback."
+  },
+  "Short-Video Editing Coach": {
+    "name": "Coach montage short-video",
+    "desc": "Coach de montage short-video couvrant toute la post-production : CapCut Pro, Premiere Pro, DaVinci Resolve et Final Cut Pro — composition, langage caméra, étalonnage, audio, motion design/VFX, sous-titres et export multi-plateformes."
+  },
+  "skills-best-practices": {
+    "name": "Bonnes pratiques Agent Skills",
+    "desc": "Construis des Agent Skills de haute qualité pour Claude selon les meilleures pratiques officielles Anthropic : structure SKILL.md, rédaction de description, progressive disclosure, tests, patterns, dépannage et distribution (Claude.ai, Claude Code, API, Agent SDK)."
+  },
+  "Social Media Strategist": {
+    "name": "Stratège réseaux sociaux",
+    "desc": "Stratège réseaux sociaux expert pour LinkedIn, Twitter et plateformes professionnelles : campagnes cross-plateformes, animation de communautés, engagement temps réel et stratégies de thought leadership."
+  },
+  "Software Architect": {
+    "name": "Architecte logiciel",
+    "desc": "Architecte logiciel expert : conception de systèmes, domain-driven design, patterns d'architecture et prise de décision technique pour des systèmes scalables et maintenables."
+  },
+  "sol-incinerator": {
+    "name": "SOL Incinerator (burn)",
+    "desc": "SDK SOL Incinerator pour brûler des tokens, des NFTs et fermer des comptes."
+  },
+  "solana-agent-kit": {
+    "name": "Solana Agent Kit (SendAI)",
+    "desc": "Guide complet pour construire des agents IA interagissant avec la blockchain Solana via le Solana Agent Kit de SendAI : 60+ actions, intégration LangChain/Vercel AI, configuration de serveur MCP et patterns d'agents autonomes."
+  },
+  "solana-anchor-claude-skill": {
+    "name": "Solana + Anchor",
+    "desc": "Pour tout travail sur du logiciel Solana : code client TypeScript, bibliothèques Rust Solana, programmes Anchor, fichiers de programme Rust, tests TypeScript et configuration Anchor.toml. Conçu pour créer du code minimal et réutilisable."
+  },
+  "solana-compression": {
+    "name": "Solana Compression",
+    "desc": "Pour le développement client et programme sur Solana ~160× moins cher et sans rent-exemption : état par utilisateur, enregistrements DePIN ou comptes compressés sur mesure. Créer, mettre à jour, fermer, brûler et réinitialiser des comptes compressés."
+  },
+  "solana-dev": {
+    "name": "Développement Solana (playbook)",
+    "desc": "Pour toute demande « construire une dapp Solana », « écrire un programme Anchor », « créer un token », « déboguer Solana », « connecter un wallet » ou « expliquer Solana » (rent, accounts, PDAs, CPIs…). Playbook de développement Solana de bout en bout."
+  },
+  "solana-development": {
+    "name": "Programmes Solana (Anchor/Rust)",
+    "desc": "Construis des programmes Solana avec le framework Anchor ou en Rust natif : smart contracts, opérations de tokens, tests et déploiement. Couvre Anchor (recommandé) et le Rust natif bas niveau pour cas avancés."
+  },
+  "solana-game": {
+    "name": "Jeux Solana",
+    "desc": "Développement de jeux Solana avec Unity, React Native et web. Étend solana-dev-skill avec des patterns gaming : Solana.Unity-SDK, Mobile Wallet Adapter, PlaySolana/PSG1, intégration wallet, systèmes NFT, construction de transactions et architecture de jeu."
+  },
+  "solana-kit": {
+    "name": "@solana/kit (SDK moderne)",
+    "desc": "Guide complet de @solana/kit — le SDK JavaScript moderne, tree-shakeable et sans dépendance d'Anza : connexions RPC, signers, construction de transactions avec pipe, signature, envoi et récupération de comptes avec support TypeScript complet."
+  },
+  "solana-kit-migration": {
+    "name": "Migration @solana/kit",
+    "desc": "Aide les développeurs à choisir entre @solana/kit et @solana/web3.js (v1), fournit un guide de migration, un mapping des APIs et gère les cas limites des transitions du SDK JavaScript Solana."
+  },
+  "solana-rent-free-dev": {
+    "name": "Solana rent-free (Light)",
+    "desc": "Skill de développement Solana avec les primitives rent-free de Light Protocol : développement client (TypeScript, Rust) et programme (Rust) avec Anchor, Rust natif et Pinocchio. Focus DeFi et paiements (Light Token, Light-PDA)."
+  },
+  "solana-security": {
+    "name": "Audit sécurité Solana",
+    "desc": "Audite les programmes Solana (Anchor ou Rust natif) pour des vulnérabilités de sécurité : revue de smart contracts, recherche d'exploits, analyse de vecteurs d'attaque et évaluations de sécurité."
+  },
+  "Solidity Smart Contract Engineer": {
+    "name": "Ingénieur smart contracts Solidity",
+    "desc": "Développeur Solidity expert : architecture de contrats EVM, optimisation du gas, patterns de proxy upgradeables, développement DeFi et design de contrats security-first sur Ethereum et les L2."
+  },
+  "source-driven-development": {
+    "name": "Développement piloté par les sources",
+    "desc": "Ancre chaque décision d'implémentation dans la documentation officielle : vérifier une approche contre les docs avant d'implémenter, produire du code sourcé et cité, exempt de patterns obsolètes."
+  },
+  "spec-driven-development": {
+    "name": "Développement piloté par les specs",
+    "desc": "Crée les specs avant de coder : nouveau projet, fonctionnalité ou changement majeur sans spécification existante. Rédaction de PRD avec objectifs et périmètre, clarification d'exigences floues ou ambiguës."
+  },
+  "Sprint Prioritizer": {
+    "name": "Priorisateur de sprints",
+    "desc": "Product manager expert : planification de sprints agiles, priorisation de fonctionnalités et allocation de ressources. Maximise la vélocité d'équipe et la valeur délivrée par des cadres de priorisation data-driven."
+  },
+  "squads": {
+    "name": "Squads (multisig Solana)",
+    "desc": "Guide complet de Squads Protocol, l'infrastructure multisig et smart accounts leader de Solana : Squads V4 Multisig pour la trésorerie d'équipe, Smart Account Program pour l'account abstraction et Grid pour les rails stablecoins."
+  },
+  "SRE (Site Reliability Engineer)": {
+    "name": "SRE (fiabilité production)",
+    "desc": "Ingénieur fiabilité expert : SLOs, budgets d'erreur, observabilité, chaos engineering et réduction du toil pour des systèmes de production à grande échelle."
+  },
+  "standard-readme": {
+    "name": "README standard",
+    "desc": "Écris ou audite des README selon la spécification Standard Readme (github.com/RichardLitt/standard-readme). Dès qu'il s'agit de créer, réécrire, améliorer ou corriger un README — même sans mention explicite de « standard readme »."
+  },
+  "Studio Operations": {
+    "name": "Opérations de studio",
+    "desc": "Responsable des opérations expert : efficacité quotidienne du studio, optimisation des process et coordination des ressources. Fluidité opérationnelle, standards de productivité et soutien des équipes."
+  },
+  "Studio Producer": {
+    "name": "Producteur de studio",
+    "desc": "Leader stratégique senior : orchestration de projets créatifs et techniques, allocation de ressources et gestion de portefeuille multi-projets. Aligne la vision créative avec les objectifs métier."
+  },
+  "Study Abroad Advisor": {
+    "name": "Conseiller études à l'étranger",
+    "desc": "Expert de planification d'études à l'étranger tous horizons : États-Unis, Royaume-Uni, Canada, Australie, Europe, Hong Kong, Singapour — stratégie de candidature licence/master/doctorat, sélection d'écoles, coaching d'essais, tests et visas."
+  },
+  "Supply Chain Strategist": {
+    "name": "Stratège supply chain",
+    "desc": "Expert supply chain et stratégie d'achat : développement fournisseurs, sourcing stratégique, contrôle qualité et digitalisation de la chaîne. Ancré dans l'écosystème manufacturier chinois."
+  },
+  "Support Responder": {
+    "name": "Répondeur support",
+    "desc": "Spécialiste support client expert : service client d'exception, résolution d'issues et optimisation de l'expérience utilisateur. Multi-canaux, soin proactif et transformation du support en expériences de marque positives."
+  },
+  "surfpool": {
+    "name": "Surfpool (dev env Solana)",
+    "desc": "Environnement de développement Surfpool complet pour Solana : remplacement direct de solana-test-validator avec forking mainnet, cheatcodes, Infrastructure as Code et Surfpool Studio."
+  },
+  "svm": {
+    "name": "SVM (architecture Solana)",
+    "desc": "Explore l'architecture et les internes du protocole Solana : moteur d'exécution SVM, modèle de comptes, consensus, transactions, économie des validateurs, couche données et extensions de tokens via le blog Helius, les SIMDs et le code Agave/Firedancer."
+  },
+  "swift-macos": {
+    "name": "Apps macOS (Swift)",
+    "desc": "Développement complet d'applications macOS avec Swift 6.2, SwiftUI, SwiftData, Swift Concurrency, Foundation Models, Swift Testing, ScreenCaptureKit et la distribution d'apps. Pour construire des apps Mac natives."
+  },
+  "switchboard": {
+    "name": "Switchboard (oracles Solana)",
+    "desc": "SDK complet du protocole d'oracles Switchboard pour Solana : la solution d'oracle permissionless pour price feeds, données à la demande, aléatoire VRF et streaming temps réel via Surge."
+  },
+  "tanstack": {
+    "name": "TanStack (Query/Router/Start)",
+    "desc": "Construis des apps React type-safe avec TanStack : Query (fetching, cache, mutations), Router (routing par fichiers, search params, loaders) et Start (SSR, server functions, middleware)."
+  },
+  "Tax Strategist": {
+    "name": "Stratège fiscal",
+    "desc": "Stratège fiscal expert : optimisation fiscale, conformité multi-juridictions, prix de transfert et planification fiscale stratégique. Navigue les codes fiscaux complexes en restant pleinement conforme."
+  },
+  "Technical Artist": {
+    "name": "Technical artist",
+    "desc": "Spécialiste du pipeline art→moteur — maîtrise les shaders, les systèmes VFX, les pipelines LOD, le budget de performance et l'optimisation d'assets cross-moteur."
+  },
+  "Technical Writer": {
+    "name": "Rédacteur technique",
+    "desc": "Rédacteur technique expert : documentation développeur, références API, README et tutoriels. Transforme des concepts d'ingénierie complexes en documents clairs, exacts et engageants que les développeurs lisent vraiment."
+  },
+  "Terminal Integration Specialist": {
+    "name": "Spécialiste intégration terminal",
+    "desc": "Émulation de terminal, optimisation du rendu texte et intégration SwiftTerm pour applications Swift modernes."
+  },
+  "Test Results Analyzer": {
+    "name": "Analyseur de résultats de tests",
+    "desc": "Spécialiste d'analyse de tests : évaluation complète des résultats, analyse des métriques qualité et génération d'insights actionnables à partir des activités de test."
+  },
+  "test-driven-development": {
+    "name": "Développement piloté par les tests (TDD)",
+    "desc": "Développe par les tests avec la boucle rouge-vert-refactor : implémenter une logique, corriger un bug, prouver que le code fonctionne."
+  },
+  "test-engineer": {
+    "name": "Ingénieur QA (tests)",
+    "desc": "Ingénieur QA spécialisé en stratégie de test, rédaction de tests et analyse de couverture. Pour concevoir des suites de tests, tester du code existant ou évaluer la qualité des tests."
+  },
+  "testing": {
+    "name": "Tests (Light Protocol)",
+    "desc": "Pour tester les programmes et clients Light Protocol sur localnet, devnet et la validation mainnet."
+  },
+  "Threat Detection Engineer": {
+    "name": "Ingénieur détection de menaces",
+    "desc": "Ingénieur de détection expert : développement de règles SIEM, couverture MITRE ATT&CK, threat hunting, tuning d'alertes et pipelines detection-as-code pour les équipes de sécurité."
+  },
+  "TikTok Strategist": {
+    "name": "Stratège TikTok",
+    "desc": "Expert marketing TikTok : création de contenu viral, optimisation pour l'algorithme et animation de communauté. Maîtrise la culture et les spécificités uniques de TikTok pour la croissance de marque."
+  },
+  "token-distribution": {
+    "name": "Distribution de tokens (Light)",
+    "desc": "Pour la distribution de tokens sur Solana ~5000× moins cher que SPL (récompenses, airdrops, DePIN…). @lightprotocol/compressed-token (TypeScript). Exemples de référence avec support de claims personnalisés."
+  },
+  "Tokenomics Designer": {
+    "name": "Designer de tokenomics",
+    "desc": "Expert en design de tokenomics pour crypto-games et projets Solana. Conçoit des modèles économiques durables (P2E, Skill2E, Casual), évite les schémas de Ponzi, équilibre offre/demande, vesting, distribution, sources et puits de tokens."
+  },
+  "Tool Evaluator": {
+    "name": "Évaluateur d'outils",
+    "desc": "Spécialiste d'évaluation technologique : teste, évalue et recommande des outils, logiciels et plateformes pour un usage métier et une productivité optimale."
+  },
+  "Tracking & Measurement Specialist": {
+    "name": "Spécialiste tracking & mesure",
+    "desc": "Expert en architecture de tracking de conversions, gestion de tags et modélisation d'attribution : Google Tag Manager, GA4, Google Ads, Meta CAPI, LinkedIn Insight Tag et implémentations server-side."
+  },
+  "Trend Researcher": {
+    "name": "Chercheur de tendances",
+    "desc": "Analyste d'intelligence de marché expert : identification des tendances émergentes, analyse concurrentielle et évaluation d'opportunités. Fournit des insights actionnables pour la stratégie produit et l'innovation."
+  },
+  "Twitter Engager": {
+    "name": "Animateur Twitter/X",
+    "desc": "Expert marketing Twitter : engagement en temps réel, construction de thought leadership et croissance communautaire. Construit l'autorité de marque par la participation authentique aux conversations et les threads viraux."
+  },
+  "UI Designer": {
+    "name": "Designer UI",
+    "desc": "Designer UI expert : systèmes de design visuel, bibliothèques de composants et création d'interfaces au pixel près. Crée des interfaces belles, cohérentes et accessibles qui renforcent l'UX et reflètent l'identité de marque."
+  },
+  "Unity Architect": {
+    "name": "Architecte Unity",
+    "desc": "Spécialiste de modularité data-driven — maîtrise les ScriptableObjects, les systèmes découplés et le design de composants à responsabilité unique pour projets Unity scalables."
+  },
+  "Unity Editor Tool Developer": {
+    "name": "Développeur d'outils Unity Editor",
+    "desc": "Spécialiste d'automatisation Unity Editor — maîtrise les EditorWindows personnalisés, PropertyDrawers, AssetPostprocessors, ScriptedImporters et l'automatisation de pipeline qui fait gagner des heures chaque semaine."
+  },
+  "Unity Multiplayer Engineer": {
+    "name": "Ingénieur multijoueur Unity",
+    "desc": "Spécialiste de gameplay en réseau — maîtrise Netcode for GameObjects, Unity Gaming Services (Relay/Lobby), l'autorité client-serveur, la compensation de latence et la synchronisation d'état."
+  },
+  "Unity Shader Graph Artist": {
+    "name": "Artiste Shader Graph Unity",
+    "desc": "Spécialiste effets visuels et matériaux — maîtrise Unity Shader Graph, HLSL, les pipelines URP/HDRP et l'écriture de custom passes pour effets visuels temps réel."
+  },
+  "Unreal Multiplayer Architect": {
+    "name": "Architecte multijoueur Unreal",
+    "desc": "Spécialiste réseau Unreal Engine — maîtrise la réplication d'Actors, l'architecture GameMode/GameState, le gameplay server-authoritative, la prédiction réseau et le serveur dédié pour UE5."
+  },
+  "Unreal Systems Engineer": {
+    "name": "Ingénieur systèmes Unreal",
+    "desc": "Spécialiste performance et architecture hybride — maîtrise le continuum C++/Blueprint, la géométrie Nanite, le GI Lumen et le Gameplay Ability System pour projets AAA Unreal Engine."
+  },
+  "Unreal Technical Artist": {
+    "name": "Technical artist Unreal",
+    "desc": "Spécialiste du pipeline visuel Unreal Engine — maîtrise le Material Editor, Niagara VFX, la génération procédurale de contenu et le pipeline art→moteur pour projets UE5."
+  },
+  "Unreal World Builder": {
+    "name": "Constructeur de mondes Unreal",
+    "desc": "Spécialiste open-world et environnements — maîtrise World Partition, Landscape, le feuillage procédural, les HLOD et le level streaming à grande échelle pour des mondes ouverts fluides."
+  },
+  "using-agent-skills": {
+    "name": "Utiliser les agent skills",
+    "desc": "Découvre et invoque les agent skills. À utiliser au démarrage d'une session, ou pour décider quel skill ou workflow s'applique au travail en cours. C'est la méta-skill qui gouverne la découverte et l'invocation de tous les autres skills."
+  },
+  "UX Architect": {
+    "name": "Architecte UX",
+    "desc": "Spécialiste d'architecture technique et UX qui fournit aux développeurs des fondations solides, des systèmes CSS et un guidage d'implémentation clair."
+  },
+  "UX Researcher": {
+    "name": "Chercheur UX",
+    "desc": "Chercheur en expérience utilisateur expert : analyse des comportements, tests d'utilisabilité et insights de design data-driven. Fournit des conclusions actionnables qui améliorent l'utilisabilité et la satisfaction."
+  },
+  "Video Optimization Specialist": {
+    "name": "Spécialiste optimisation vidéo",
+    "desc": "Stratège marketing vidéo : optimisation pour l'algorithme YouTube, rétention d'audience, chapitrage, concepts de miniatures et syndication vidéo cross-plateforme."
+  },
+  "visionOS Spatial Engineer": {
+    "name": "Ingénieur spatial visionOS",
+    "desc": "Spatial computing natif visionOS : interfaces volumétriques SwiftUI et implémentation du design Liquid Glass."
+  },
+  "Visual Rendering & Game Feel": {
+    "name": "Rendu visuel et game feel",
+    "desc": "Diagnostique et améliore le rendu 2D par bloom, densité de pixels, lumière, contours et feedback d’impact. À utiliser quand le jeu paraît plat ou incohérent."
+  },
+  "Visual Storyteller": {
+    "name": "Conteur visuel",
+    "desc": "Spécialiste de communication visuelle : narratives visuels convaincants, contenu multimédia et storytelling de marque par le design. Transforme l'information complexe en histoires visuelles engageantes."
+  },
+  "vite": {
+    "name": "Vite (build tool)",
+    "desc": "Configure et optimise Vite 7 pour React : outillage de build, dev server, plugins, HMR, chunk splitting, Environment API et intégration Rolldown. Setup, bundles, dépannage et server dev."
+  },
+  "Voice AI Integration Engineer": {
+    "name": "Ingénieur intégration Voice AI",
+    "desc": "Expert des pipelines de transcription vocale de bout en bout avec modèles type Whisper et services ASR cloud : ingestion audio, préprocessing, nettoyage de transcriptions, sous-titres, diarisation de locuteurs et intégration en aval."
+  },
+  "vulnhunter": {
+    "name": "vulnhunter (vulnérabilités)",
+    "desc": "Détection de vulnérabilités de sécurité et analyse de variantes. Pour traquer les APIs dangereuses, les patterns à pièges, les configurations à risque et les variantes de vulnérabilités dans les codebases."
+  },
+  "wallet-analysis": {
+    "name": "Analyse de wallets Solana",
+    "desc": "Analyse les wallets Solana et les portfolios multichaînes avec l'API Zerion : valeur de portfolio, positions de tokens, historique de transactions, graphiques de wallet et PnL. Intégration REST directe, MCP hébergé et x402 en alternatives sans clé."
+  },
+  "web-performance-auditor": {
+    "name": "Auditeur performance web",
+    "desc": "Ingénieur performance web centré sur les Core Web Vitals, le chargement, le rendu et l'optimisation réseau. Pour les audits de performance, l'analyse CWV et l'identification des anti-patterns structurels."
+  },
+  "web3-protocol-gtm": {
+    "name": "Go-to-market web3",
+    "desc": "Stratégie go-to-market pour les builders web3 : protocoles, produits, services et fondateurs solo. Croissance de protocole crypto, communauté dev, narratif CT, partenariats écosystème, grant applications et lancement de tokens."
+  },
+  "WeChat Mini Program Developer": {
+    "name": "Développeur WeChat Mini Program",
+    "desc": "Développeur expert WeChat Mini Program (小程序) : WXML/WXSS/WXS, intégration des APIs WeChat, systèmes de paiement, messages d'abonnement et tout l'écosystème WeChat."
+  },
+  "WeChat Official Account Manager": {
+    "name": "Gestionnaire compte officiel WeChat",
+    "desc": "Stratège WeChat Official Account (OA) expert : marketing de contenu, engagement des abonnés et optimisation des conversions. Maîtrise les formats multiples et construit des communautés fidèles."
+  },
+  "Weibo Strategist": {
+    "name": "Stratège Weibo",
+    "desc": "Expert opérations Sina Weibo tous horizons : mécanique des topics tendance, gestion de communautés Super Topic, veille de sentiment public, stratégies d'économie de fans et publicité Weibo."
+  },
+  "Whimsy Injector": {
+    "name": "Injecteur de fantaisie",
+    "desc": "Spécialiste créatif expert en personnalité, plaisir et éléments ludiques dans les expériences de marque. Crée des interactions mémorables et joyeuses qui différencient les marques."
+  },
+  "Workflow Architect": {
+    "name": "Architecte de workflows",
+    "desc": "Spécialiste du design de workflows qui cartographie les arbres complets de workflows pour chaque système, parcours utilisateur et interaction d'agent — happy paths, conditions de branches, modes de défaillance, chemins de récupération et états observables."
+  },
+  "Workflow Optimizer": {
+    "name": "Optimiseur de workflows",
+    "desc": "Spécialiste d'amélioration des process : analyse, optimisation et automatisation des workflows de toutes les fonctions métier pour une productivité et une efficacité maximales."
+  },
+  "x402": {
+    "name": "x402 (paiements internet)",
+    "desc": "Construis des paiements natifs d'internet avec le protocole ouvert x402 (x402 Foundation, Apache-2.0) : APIs payantes, contenu à péage, flux de paiement d'agents IA et micropaiements on-chain sur HTTP 402. SDKs TypeScript, Python et Go."
+  },
+  "Xiaohongshu Specialist": {
+    "name": "Spécialiste Xiaohongshu",
+    "desc": "Expert marketing Xiaohongshu : contenu lifestyle, stratégies guidées par les tendances et engagement communautaire authentique. Maîtrise le micro-contenu et pilote la croissance virale par le storytelling esthétique."
+  },
+  "XR Cockpit Interaction Specialist": {
+    "name": "Spécialiste interactions cockpit XR",
+    "desc": "Spécialiste de la conception et du développement de systèmes de contrôle immersifs basés cockpit pour environnements XR."
+  },
+  "XR Immersive Developer": {
+    "name": "Développeur immersif XR",
+    "desc": "Développeur WebXR et technologies immersives expert, spécialisé dans les applications AR/VR/XR dans le navigateur."
+  },
+  "XR Interface Architect": {
+    "name": "Architecte d'interfaces XR",
+    "desc": "Designer d'interactions spatiales et stratège d'interfaces pour environnements immersifs AR/VR/XR."
+  },
+  "Zhihu Strategist": {
+    "name": "Stratège Zhihu",
+    "desc": "Expert marketing Zhihu : thought leadership, crédibilité communautaire et engagement par la connaissance. Maîtrise la stratégie question-réponse et construit l'autorité de marque par le partage d'expertise authentique."
+  },
+  "ZK Steward": {
+    "name": "Intendant ZK (Zettelkasten)",
+    "desc": "Intendant de base de connaissances dans l'esprit du Zettelkasten de Niklas Luhmann. Perspective par défaut : Luhmann ; bascule vers des experts du domaine (Feynman, Munger, Ogilvy…) selon la tâche. Impose notes atomiques, connectivité et boucles de validation."
+  },
+  "zk-compression-light": {
+    "name": "ZK Compression (Light)",
+    "desc": "Construis avec ZK Compression sur Solana via Light Protocol : tokens compressés, PDAs compressés ou intégration de ZK compression dans des programmes Solana. Modèle de comptes compressés, state trees, preuves de validité et intégration client Helius/Photon RPC."
+  },
+  "zk-nullifier": {
+    "name": "zk-nullifier (anti double-spend)",
+    "desc": "Pour les programmes ZK Solana sur mesure et les applications préservant la vie privée afin d'empêcher la double dépense. Guide d'intégration de PDAs nullifier rent-free pour la prévention de double-dépense."
+  },
+  "zz-code-recon": {
+    "name": "zz-code-recon (audit sécurité)",
+    "desc": "Construction de contexte architectural profond pour audits de sécurité : revues de sécurité, compréhension de codebases, cartographie des frontières de confiance et préparation à l'analyse de vulnérabilités. Inspiré de la méthodologie Trail of Bits."
+  }
+}
