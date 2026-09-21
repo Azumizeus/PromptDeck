@@ -60,7 +60,7 @@ if [[ $SKIP_DMG -eq 0 ]]; then
   mkdir -p "$RELEASE_DIR"
   SHIPPED=0
   for arch in x64 arm64 universal; do
-    dmg=$(find "$DIST" -maxdepth 1 -name "MEGA PACK-darwin-$arch.dmg" 2>/dev/null | head -1)
+    dmg=$(find "$DIST" -maxdepth 1 -name "*-${arch}.dmg" 2>/dev/null | head -1)
     [[ -n "$dmg" ]] || continue
     zipname="PromptDeck-v$VERSION-$arch.zip"
     if [[ $DRY_RUN -eq 1 ]]; then
