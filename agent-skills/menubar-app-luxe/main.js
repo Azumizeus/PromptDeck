@@ -19,20 +19,22 @@ const I18N = {
   fr: { open: 'Ouvrir le panneau', launcher: 'Ouvrir le Launcheur HTML', help: 'Aide (mode d\'emploi)', settings: 'Réglages…', quit: 'Quitter', openIn: 'Ouvrir dans', settingsTitle: 'MEGA PACK — Réglages',
     descClaude: 'Claude (web)', descChatgpt: 'ChatGPT (web)', descPerplexity: 'Perplexity (web)', descCopilot: 'Copilot (web)',
     descDeepseek: 'DeepSeek (web)', descZai: 'Z.ai (web)', descKimi: 'Kimi (web)', descMammouth: 'Mammouth.ia — multi-modèles',
+    descLlmApi: 'Chat IA via clé API (Atelier · Réglages → Intelligence) — le prompt est copié',
     descFreebuff: 'App Freebuff — collez le prompt dans le chat', descOpencodeApp: 'App desktop OpenCode', descOpencode: 'OpenCode dans un nouveau Terminal',    descClipboard: 'Copie seule — collez où vous voulez' },
   en: { open: 'Open the panel', launcher: 'Open the HTML Launcher', help: 'Help (user guide)', settings: 'Settings…', quit: 'Quit', openIn: 'Open in', settingsTitle: 'MEGA PACK — Settings',
     descClaude: 'Claude (web)', descChatgpt: 'ChatGPT (web)', descPerplexity: 'Perplexity (web)', descCopilot: 'Copilot (web)',
     descDeepseek: 'DeepSeek (web)', descZai: 'Z.ai (web)', descKimi: 'Kimi (web)', descMammouth: 'Mammouth.ia — multi-model',
+    descLlmApi: 'AI chat via API key (Workshop · Settings → Intelligence) — the prompt is copied',
     descFreebuff: 'Freebuff app — paste the prompt in its chat', descOpencodeApp: 'OpenCode desktop app', descOpencode: 'OpenCode in a new Terminal window',    descClipboard: 'Copy only — paste anywhere' },
 };
 let LANG = 'fr';
 const T = () => I18N[LANG] || I18N.fr;
 function prefsPath() { return path.join(app.getPath('userData'), 'mgp-prefs.json'); }
 // Préférences persistées : langue, favoris, récents, LLM par défaut, raccourci, auto-boot, géométrie
-let PREFS = { lang: 'fr', favorites: [], recents: [], customs: [], defaultLLM: 'claude', sendTargets: [], promptDir: '', shortcut: 'Alt+Space', autostart: false, favShortcuts: true, bounds: null };
+let PREFS = { lang: 'fr', favorites: [], recents: [], customs: [], defaultLLM: 'claude', sendTargets: [], promptDir: '', shortcut: 'Alt+Space', autostart: false, favShortcuts: true, bounds: null, apiDefaultModel: '' };
 
-// ── Ateliers (agents / skills créés dans l'app) — persistés à côté des prefs ──
-function workshopsPath(kind) { return path.join(app.getPath('userData'), kind === 'agent' ? 'my-agents.json' : 'my-skills.json'); }
+// ── Ateliers (agents / skills / équipes créés dans l'app) — persistés à côté des prefs ──
+function workshopsPath(kind) { return path.join(app.getPath('userData'), kind === 'agent' ? 'my-agents.json' : kind === 'skill' ? 'my-skills.json' : 'my-teams.json'); }
 function loadWorkshops(kind) {
   try { const a = JSON.parse(fs.readFileSync(workshopsPath(kind), 'utf8')); return Array.isArray(a) ? a : []; } catch (e) { return []; }
 }
@@ -112,6 +114,16 @@ function extractJson(text) {
   return JSON.parse(m[0]);
 }
 
+// 🕸 Équipes multi-agents : le modèle renvoie un orchestrateur + 2-5 agents + un workflow
+function teamSystemPrompt(lang) {
+  const fr = lang !== 'en';
+  return [
+    fr ? 'Tu es un architecte d\'ÉQUIPES d\'agents IA. Conçois une équipe multi-agents supervisée par un SUPER-ORCHESTRATEUR.' : 'You are an AI TEAM architect. Design a multi-agent team supervised by a SUPER-ORCHESTRATOR.',
+    fr ? 'Réponds STRICTEMENT en JSON : {"team":"nom de l\'équipe","desc":"mission en 1-2 phrases","orchestrator":{"name":"…","system":"rôle, mission, méthode de coordination, arbitrage des conflits, garanties qualité, format du rapport final — 600 à 1200 caractères","skills":["…"]},"agents":[{"name":"…","role":"spécialité en 3-6 mots","desc":"1-2 phrases","system":"prompt système 500 à 1000 caractères","skills":["…"],"deliverable":"ce que cet agent remonte à l\'orchestrateur"}],"workflow":["étape 1 — qui fait quoi, avec quels critères de passage à l\'étape suivante", "…"]}' : 'Answer STRICTLY as JSON: {"team":"team name","desc":"mission in 1-2 sentences","orchestrator":{"name":"…","system":"role, mission, coordination method, conflict arbitration, quality guarantees, final report format — 600-1200 characters","skills":["…"]},"agents":[{"name":"…","role":"specialty in 3-6 words","desc":"1-2 sentences","system":"system prompt 500-1000 characters","skills":["…"],"deliverable":"what this agent reports to the orchestrator"}],"workflow":["step 1 — who does what, with the criteria to move to the next step", "…"]}',
+    fr ? '2 à 5 agents, complémentaires, sans doublon de rôle. L\'orchestrateur ne fait pas le travail : il distribue, vérifie, arbitre, consolide. Le workflow cite les agents par leur nom.' : '2 to 5 agents, complementary, no duplicated role. The orchestrator does not do the work: it distributes, checks, arbitrates, consolidates. The workflow cites agents by name.',
+  ].join('\n');
+}
+
 // ── Dossier « MEGA PROMPT » : arborescence .md du catalogue sur le disque ──
 // skills/<catégorie>/<nom>.md · agents/<catégorie>/<nom>.md · perso/<tag ou racine>/<nom>.md
 const fr = () => LANG !== 'en';
@@ -147,12 +159,76 @@ function writeItemMd(it, dir) {
   fs.writeFileSync(abs, mdForItem(it), 'utf8');
   return abs;
 }
+// ── 🕸 Équipes multi-agents : dossier equipes/<nom>/ (ORCHESTRATEUR.md, WORKFLOW.md, agents/) ──
+function teamMd(t) {
+  const ag = (t.agents || []).map((a) => `
+### ${a.name} — ${a.role || ''}
+
+> ${a.desc || ''}
+
+- **Compétences** : ${(a.skills || []).join(', ') || '—'}
+- **Livrable** : ${a.deliverable || '—'}
+
+#### Prompt d'activation
+
+\`\`\`
+${a.system || ''}
+\`\`\`
+`).join('');
+  const wf = (t.workflow || []).map((s, i) => `${i + 1}. ${s}`).join('\n');
+  return `# 🕸 Équipe ${t.team || t.name}
+
+> ${t.desc || ''}
+
+## 👔 ORCHESTRATEUR — ${t.orchestrator?.name || ''}
+
+#### Prompt d'activation
+
+\`\`\`
+${t.orchestrator?.system || ''}
+\`\`\`
+
+## 👥 Agents (${(t.agents || []).length})
+${ag}
+## 🔁 WORKFLOW — protocole de coordination
+
+${wf}
+`;
+}
+function writeTeamMd(t, dir) {
+  const base = path.join(dir || promptDir(), 'equipes', mdSafe(t.team || t.name || 'equipe'));
+  fs.mkdirSync(path.join(base, 'agents'), { recursive: true });
+  fs.writeFileSync(path.join(base, 'ORCHESTRATEUR.md'), teamMd(t), 'utf8');
+  for (const a of (t.agents || [])) {
+    fs.writeFileSync(path.join(base, 'agents', `${mdSafe(a.name)}.md`), `# 👤 ${a.name} — ${a.role || ''}
+
+> ${a.desc || ''}
+
+- **Équipe** : ${t.team || t.name}
+- **Livrable à l'orchestrateur** : ${a.deliverable || '—'}
+
+## Prompt d'activation
+
+\`\`\`
+${a.system || ''}
+\`\`\`
+`, 'utf8');
+  }
+  fs.writeFileSync(path.join(base, 'WORKFLOW.md'), `# 🔁 Workflow — ${t.team || t.name}
+
+> ${t.desc || ''}
+
+${(t.workflow || []).map((s, i) => `${i + 1}. ${s}`).join('\n')}
+`, 'utf8');
+  return base;
+}
 function syncPromptTree(dir) {
   const base = dir || promptDir();
   let n = 0;
   for (const s of MCAT.skills) { writeItemMd({ x: s, k: 'skill' }, base); n++; }
   for (const a of MCAT.agents) { writeItemMd({ x: a, k: 'agent' }, base); n++; }
   for (const c of (PREFS.customs || [])) { writeItemMd({ x: c, k: 'custom' }, base); n++; }
+  for (const t of loadWorkshops('team')) { try { writeTeamMd(t, base); n += 1 + (t.agents || []).length; } catch (e) { /* best effort */ } }
   const readme = path.join(base, 'LISEZMOI.md');
   try {
     fs.writeFileSync(readme, `# ⚡ MEGA PROMPT — bibliothèque de prompts\n\nGénérée par MEGA PACK Édition Luxe le ${new Date().toLocaleString('fr-FR')}.\n\n- **skills/** — ${MCAT.skills.length} procédures expertes, par catégorie\n- **agents/** — ${MCAT.agents.length} personas experts, par catégorie\n- **perso/** — tes prompts ✍️ (par tag)\n\nChaque fichier .md contient la fiche de l'item + le **prompt d'activation** prêt à coller dans n'importe quel LLM.\n`, 'utf8');
@@ -251,6 +327,7 @@ function openInSubmenu(x, isSkill) {
     ['zai', 'Z.ai', 'descZai'],
     ['kimi', 'Kimi', 'descKimi'],
     ['mammouth', 'Mammouth.ia', 'descMammouth'],
+    ['llm-api', LANG === 'en' ? '🔑 API (integrated)' : '🔑 API (intégré)', 'descLlmApi'],
     ['freebuff', 'Freebuff (app)', 'descFreebuff'],
     ['opencode-app', 'OpenCode (desktop)', 'descOpencodeApp'],
     ['opencode', 'OpenCode (terminal)', 'descOpencode'],
@@ -489,6 +566,13 @@ function openLLM(target, prompt) {
     mammouth: 'https://mammouth.ai/',
   };
   if (target === 'freebuff') { shell.openExternal('freebuff://'); return; } // app native — coller le prompt dans le chat
+  if (target === 'llm-api') { // panneau API (Atelier/Réglages) : le prompt est copié, on ouvre le chat intégré
+    try {
+      const { Notification } = require('electron');
+      new Notification({ title: 'MEGA PACK', body: LANG === 'en' ? '⚡ Prompt copied — paste it in the AI chat' : '⚡ Prompt copié — colle-le dans le chat IA', silent: true }).show();
+    } catch (e) { /* best effort */ }
+    return;
+  }
   if (target === 'opencode-app') { // App desktop OpenCode (schéma opencode://, repli : lancement direct)
     shell.openExternal('opencode://')
       .catch(() => shell.openPath('/Applications/OpenCode.app').catch(() => {}));
@@ -746,10 +830,18 @@ ipcMain.on('settings-changed', (e, { theme, lang, defaultLLM, sendTargets, autos
   applyAutostart();
   if (tray) tray.setToolTip('MEGA PACK — Skills & Agents');
   if (settings && !settings.isDestroyed()) settings.setTitle(T().settingsTitle);
-  if (win && !win.isDestroyed()) win.webContents.send('settings-changed', { theme, lang });
+  // Propage le LLM par défaut au panneau (sélecteur du footer synchronisé entre fenêtres)
+  if (win && !win.isDestroyed()) win.webContents.send('settings-changed', { theme, lang, defaultLLM: PREFS.defaultLLM });
 });
 ipcMain.on('get-prefs', (e) => {
-  e.returnValue = { defaultLLM: PREFS.defaultLLM, sendTargets: PREFS.sendTargets || [], shortcut: PREFS.shortcut, autostart: !!PREFS.autostart, favShortcuts: PREFS.favShortcuts !== false, favorites: PREFS.favorites, recents: PREFS.recents, customs: PREFS.customs, hasApi: Object.fromEntries(Object.keys(PROVIDERS).map((k) => [k, !!apiKeyFor(k)])) };
+  e.returnValue = { defaultLLM: PREFS.defaultLLM, sendTargets: PREFS.sendTargets || [], shortcut: PREFS.shortcut, autostart: !!PREFS.autostart, favShortcuts: PREFS.favShortcuts !== false, favorites: PREFS.favorites, recents: PREFS.recents, customs: PREFS.customs, hasApi: Object.fromEntries(Object.keys(PROVIDERS).map((k) => [k, !!apiKeyFor(k)])), apiDefaultModel: PREFS.apiDefaultModel || '' };
+});
+// Sélecteur du LLM dans la barre du bas : changement instantané, persisté, propagé
+ipcMain.on('set-default-llm', (e, llm) => {
+  if (typeof llm !== 'string' || !llm) return;
+  PREFS.defaultLLM = llm;
+  savePrefs();
+  if (win && !win.isDestroyed()) win.webContents.send('settings-changed', { theme: PREFS.theme, lang: LANG, defaultLLM: PREFS.defaultLLM });
 });
 
 // ── Atelier : création d'agents & skills (persistance + génération IA) ──
@@ -861,17 +953,198 @@ ipcMain.handle('prompt-dir-open', async (e, sub) => {
   await shell.openPath(target);
   return true;
 });
+ipcMain.handle('prompt-md-open', async (e, sub) => {
+  // Ouvre le FICHIER .md dans l'éditeur par défaut (garde anti-traversal : pas de .., reste sous la racine)
+  if (!sub || typeof sub !== 'string' || sub.includes('..')) return false;
+  const target = path.join(promptDir(), sub);
+  if (!target.startsWith(promptDir())) return false;
+  await shell.openPath(target);
+  return true;
+});
 ipcMain.handle('prompt-tree-sync', (e, dir) => {
   try { return { ok: true, count: syncPromptTree(dir) }; }
   catch (err) { return { ok: false, error: String(err.message || err) }; }
 });
-ipcMain.handle('workshop-md-create', (e, { kind, name }) => {
+// ── Arborescence du dossier MEGA PROMPT : vue d'ensemble pour le popup clic droit ──
+function treeOverview() {
+  const root = promptDir();
+  const tree = { root, groups: [] };
+  const walk = (abs, rel, depth, bucket) => {
+    let entries = [];
+    try { entries = fs.readdirSync(abs, { withFileTypes: true }); } catch (e) { return; }
+    for (const ent of entries.sort((a, b) => a.name.localeCompare(b.name))) {
+      if (ent.name.startsWith('.')) continue;
+      const r = rel ? `${rel}/${ent.name}` : ent.name;
+      if (ent.isDirectory()) {
+        const g = { kind: 'dir', name: ent.name, rel: r, depth, children: [] };
+        bucket.push(g);
+        if (depth < 4) walk(path.join(abs, ent.name), r, depth + 1, g.children);
+      } else if (ent.name.toLowerCase().endsWith('.md')) {
+        bucket.push({ kind: 'file', name: ent.name, rel: r, depth });
+      }
+    }
+  };
+  walk(root, '', 0, tree.groups);
+  return tree;
+}
+ipcMain.handle('prompt-tree-overview', () => {
+  try { return { ok: true, tree: treeOverview() }; }
+  catch (err) { return { ok: false, error: String(err.message || err) }; }
+});ipcMain.handle('workshop-md-create', (e, { kind, name }) => {
   try {
     const w = loadWorkshops(kind === 'agent' ? 'agent' : 'skill').find((x) => x.name === name);
     if (!w) return { ok: false, error: 'création introuvable' };
     const abs = writeItemMd({ x: w, k: kind === 'agent' ? 'agent' : 'skill' });
     return { ok: true, path: abs };
+  } catch (err) { return { ok: false, error: String(err.message || err) };
+  }
+});
+
+// ── 🕸 Équipes multi-agents (super-orchestrateur + agents + workflow) ──
+ipcMain.handle('team-list', () => loadWorkshops('team'));
+// ▶ Exécution RÉELLE d'une mission : orchestrateur → agents (API) → rapport consolidé
+ipcMain.handle('team-run', async (e, p) => {
+  const payload = p || {};
+  const t = payload.team || {};
+  const lang = payload.lang === 'en' ? 'en' : 'fr';
+  const fr = lang !== 'en';
+  const mission = String(payload.mission || '').slice(0, 4000) || (fr ? 'Exécute la mission de l\'équipe.' : 'Execute the team mission.');
+  const provider = PROVIDERS[payload.provider] ? payload.provider : 'groq';
+  const model = String(payload.model || '').trim().slice(0, 120) || (PREFS.apiModels && PREFS.apiModels[provider]) || (provider === 'groq' ? 'llama-3.3-70b-versatile' : '');
+  if (!apiKeyFor(provider) && provider !== 'ollama') return { ok: false, error: fr ? 'Ajoute une clé API dans Réglages → Intelligence' : 'Add an API key in Settings → Intelligence' };
+  const call = async (system, user, maxTokens) => (await llmChat({ provider, model, maxTokens: maxTokens || 2048, messages: [{ role: 'system', content: system }, { role: 'user', content: user }] })).text;
+  try {
+    const t0 = Date.now();
+    // 1) L'orchestrateur découpe la mission en tâches individuelles
+    const planText = await call(
+      t.orchestrator?.system || (fr ? 'Tu es un super-orchestrateur d\'équipe.' : 'You are a team super-orchestrator.'),
+      (fr ? `Mission de l\'équipe : ${mission}\n\nAgents disponibles :\n` : `Team mission: ${mission}\n\nAvailable agents:\n`)
+      + (t.agents || []).map((a) => `- ${a.name} (${a.role || fr ? 'agent' : 'agent'}) : ${a.desc || ''}${a.deliverable ? ` — ${fr ? 'livrable' : 'deliverable'} : ${a.deliverable}` : ''}`).join('\n')
+      + '\n\n' + (fr ? 'Réponds STRICTEMENT en JSON : {"tasks":[{"agent":"nom exact de l\'agent","task":"sa tâche précise"}]}' : 'Answer STRICTLY as JSON: {"tasks":[{"agent":"exact agent name","task":"its precise task"}]}'),
+      1500,
+    );
+    const plan = extractJson(planText);
+    const tasks = (Array.isArray(plan.tasks) ? plan.tasks : []).slice(0, 10)
+      .map((x) => ({ agent: String(x.agent || '').trim(), task: String(x.task || '').trim().slice(0, 2000) }))
+      .filter((x) => x.agent && x.task);
+    if (!tasks.length) throw new Error(fr ? 'Aucune tâche planifiée' : 'No task planned');
+    // 2) Chaque agent exécute sa tâche (en parallèle, tolérant aux échecs individuels)
+    const results = await Promise.all(tasks.map(async (tk) => {
+      const a = (t.agents || []).find((x) => x.name === tk.agent)
+        || (t.agents || []).find((x) => (x.name || '').toLowerCase() === tk.agent.toLowerCase());
+      if (!a) return { agent: tk.agent, task: tk.task, output: `⚠ ${fr ? 'agent introuvable' : 'agent not found'} : ${tk.agent}` };
+      try {
+        const out = await call(
+          a.system || (fr ? `Tu es l'agent ${a.name}.` : `You are agent ${a.name}.`),
+          (fr ? `Ta tâche (mission d\'équipe) : ${tk.task}\nContexte global : ${mission}` : `Your task (team mission): ${tk.task}\nGlobal context: ${mission}`),
+          2600,
+        );
+        return { agent: tk.agent, task: tk.task, output: out };
+      } catch (err) { return { agent: tk.agent, task: tk.task, output: `⚠ ${fr ? 'échec' : 'failed'} : ${String(err.message || err)}` }; }
+    }));
+    // 3) L'orchestrateur consolide le rapport final
+    const report = await call(
+      t.orchestrator?.system || (fr ? 'Tu es un super-orchestrateur.' : 'You are a super-orchestrator.'),
+      (fr ? `Mission : ${mission}\n\nLivrables des agents :\n\n` : `Mission: ${mission}\n\nAgent deliverables:\n\n`)
+      + results.map((r) => `## ${r.agent}\nTâche : ${r.task}\n\n${r.output}`).join('\n\n---\n\n')
+      + '\n\n' + (fr ? 'Rédige le RAPPORT FINAL consolidé : synthèse exécutive, points clés par agent, risques, prochaines actions. Markdown structuré.' : 'Write the consolidated FINAL REPORT: executive summary, key points per agent, risks, next actions. Structured markdown.'),
+      3000,
+    );
+    return { ok: true, report, latency: Date.now() - t0, tasks: results.length, model: model };
+  } catch (err) {
+    return { ok: false, error: String(err.message || err) };
+  }
+});
+// 💾 Enregistrement du rapport de mission en .md (boîte de sauvegarde)
+ipcMain.handle('report-save', async (e, { team, md } = {}) => {
+  const r = await dialog.showSaveDialog({
+    title: fr() ? 'Enregistrer le rapport de mission' : 'Save the mission report',
+    defaultPath: `${slug(team || 'equipe')}-RAPPORT-${new Date().toISOString().slice(0, 10)}.md`,
+    filters: [{ name: 'Markdown', extensions: ['md'] }],
+  });
+  if (r.canceled || !r.filePath) return { ok: false };
+  try { fs.writeFileSync(r.filePath, String(md || ''), 'utf8'); return { ok: true, path: r.filePath }; } catch (err) { return { ok: false, error: String(err.message || err) }; }
+});
+ipcMain.handle('team-delete', (e, name) => {
+  if (typeof name !== 'string' || !name) return false;
+  const list = loadWorkshops('team');
+  const i = list.findIndex((t) => (t.team || t.name) === name);
+  if (i < 0) return false;
+  list.splice(i, 1);
+  saveWorkshops('team', list);
+  return true;
+});
+ipcMain.handle('team-export', async (e, name) => {
+  const t = loadWorkshops('team').find((x) => (x.team || x.name) === name);
+  if (!t) return false;
+  const r = await dialog.showSaveDialog({
+    title: LANG === 'en' ? 'Export team' : 'Exporter l\'équipe',
+    defaultPath: `${slug(t.team || t.name)}-equipe.md`,
+    filters: [{ name: 'Markdown', extensions: ['md'] }],
+  });
+  if (r.canceled || !r.filePath) return false;
+  try { fs.writeFileSync(r.filePath, teamMd(t)); return true; } catch (err) { return false; }
+});
+ipcMain.handle('team-md-create', (e, name) => {
+  try {
+    const t = loadWorkshops('team').find((x) => (x.team || x.name) === name);
+    if (!t) return { ok: false, error: 'équipe introuvable' };
+    const base = writeTeamMd(t);
+    return { ok: true, path: base };
   } catch (err) { return { ok: false, error: String(err.message || err) }; }
+});
+ipcMain.handle('team-generate', async (e, p) => {
+  const payload = p || {};
+  const lang = payload.lang === 'en' ? 'en' : 'fr';
+  const intent = String(payload.intent || '').slice(0, 2000);
+  if (!intent.trim()) return { ok: false, error: lang === 'en' ? 'Describe the team mission' : 'Décris la mission de l\'équipe' };
+  const provider = PROVIDERS[payload.provider] ? payload.provider : 'groq';
+  const model = String(payload.model || '').trim().slice(0, 120) || (PREFS.apiModels && PREFS.apiModels[provider]) || (provider === 'groq' ? 'llama-3.3-70b-versatile' : '');
+  if (!apiKeyFor(provider) && provider !== 'ollama') return { ok: false, error: lang === 'en' ? 'Add an API key in Settings → Intelligence' : 'Ajoute une clé API dans Réglages → Intelligence' };
+  if (payload.saveApiChoice) {
+    PREFS.apiProvider = provider;
+    if (payload.model) PREFS.apiDefaultModel = String(payload.model).trim().slice(0, 120);
+    savePrefs();
+  }
+  try {
+    const userMsg = (lang === 'en' ? `Build the multi-agent team for this mission: « ${intent} »` : `Construis l\'équipe multi-agents pour cette mission : « ${intent} »`);
+    const { text, model: usedModel, latency } = await llmChat({
+      provider, model,
+      messages: [
+        { role: 'system', content: teamSystemPrompt(lang) },
+        { role: 'user', content: userMsg },
+      ],
+    });
+    const j = extractJson(text);
+    const team = {
+      team: String(j.team || j.name || slug(intent)).trim().slice(0, 80),
+      desc: String(j.desc || intent.slice(0, 200)).trim().slice(0, 400),
+      generatedAt: new Date().toISOString(),
+      orchestrator: {
+        name: String(j.orchestrator?.name || 'Orchestrateur').trim().slice(0, 80),
+        system: String(j.orchestrator?.system || '').trim().slice(0, 8000),
+        skills: (Array.isArray(j.orchestrator?.skills) ? j.orchestrator.skills : []).map((s) => String(s).slice(0, 80)).slice(0, 12),
+      },
+      agents: (Array.isArray(j.agents) ? j.agents : []).slice(0, 5).map((a) => ({
+        name: String(a.name || 'agent').trim().slice(0, 80),
+        role: String(a.role || '').trim().slice(0, 60),
+        desc: String(a.desc || '').trim().slice(0, 400),
+        system: String(a.system || '').trim().slice(0, 8000),
+        skills: (Array.isArray(a.skills) ? a.skills : []).map((s) => String(s).slice(0, 80)).slice(0, 12),
+        deliverable: String(a.deliverable || '').trim().slice(0, 200),
+      })).filter((a) => a.name && a.system),
+      workflow: (Array.isArray(j.workflow) ? j.workflow : []).map((s) => String(s).slice(0, 400)).slice(0, 10),
+    };
+    if (!team.orchestrator.system) throw new Error(lang === 'en' ? 'Empty orchestrator prompt' : 'Prompt orchestrateur vide');
+    if (!team.agents.length) throw new Error(lang === 'en' ? 'The team has no agent' : 'L\'équipe n\'a aucun agent');
+    const list = loadWorkshops('team');
+    const i = list.findIndex((w) => (w.team || w.name) === team.team);
+    if (i >= 0) list[i] = team; else list.push(team);
+    saveWorkshops('team', list);
+    return { ok: true, item: team, model: usedModel, latency };
+  } catch (err) {
+    return { ok: false, error: String(err.message || err) };
+  }
 });
 
 ipcMain.handle('llm-test', async (e, p) => {

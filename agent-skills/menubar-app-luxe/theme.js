@@ -86,6 +86,8 @@ body{font:13.5px/1.45 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-se
 .it.k-custom .mid b::after{content:'·';color:var(--line2);margin-left:8px}
 .it.selc{background:rgba(153,69,255,.10)}
 .it.selc .mid b{color:var(--vio)}
+.it.k-team .mid b{color:var(--grn)}
+.tk-team{color:var(--grn)}
 
 /* ── footer ── */
 #foot{display:flex;gap:13px;align-items:center;padding:8px 14px;border-top:1px solid var(--line);
@@ -128,6 +130,25 @@ body{font:13.5px/1.45 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-se
 #ctx button:hover{background:var(--card2);color:var(--txt)}
 #ctx .csep{height:1px;background:var(--line);margin:5px 4px}
 
+/* ── arborescence MEGA PROMPT (popup clic droit) ── */
+#ctx .ctx-treehead{padding-top:7px}
+#ctx .tree{display:block;max-height:200px;overflow-y:auto;margin:2px 2px 4px;
+  background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:3px;scrollbar-width:thin}
+#ctx .tree-root{display:flex;width:100%;font-size:11px;font-weight:700;color:var(--txt);
+  padding:5px 8px;border-radius:7px;cursor:pointer;align-items:center}
+#ctx .tree-root:hover{background:var(--card2)}
+#ctx .trow-dir{display:flex;width:100%;font-size:11.5px;font-weight:600;color:var(--txt);
+  padding:4px 8px;border-radius:7px;cursor:pointer;align-items:center;gap:6px;border:none;background:none;text-align:left}
+#ctx .trow-dir:hover{background:var(--card2)}
+#ctx .trow-dir i{font-style:normal;color:var(--grn);margin-left:auto;font-weight:700}
+#ctx .trow-file{display:flex;width:100%;padding:2px 8px 2px 26px;border-radius:7px;
+  cursor:pointer;border:none;background:none;text-align:left;align-items:center}
+#ctx .trow-file:hover{background:var(--card2)}
+#ctx .trow-file .tfn{font-size:11px;color:var(--txt2);white-space:nowrap;overflow:hidden;
+  text-overflow:ellipsis}
+#ctx .trow-file:hover .tfn{color:var(--txt)}
+#ctx .tree-empty{display:block;padding:9px 8px;color:var(--mut);font-size:11.5px}
+
 /* ── toast ── */
 #toast{position:absolute;left:50%;bottom:44px;transform:translateX(-50%);z-index:80;
   background:var(--card);color:var(--txt);border:1px solid var(--line2);border-radius:99px;
@@ -136,6 +157,50 @@ body{font:13.5px/1.45 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-se
 #toast[hidden]{display:none}
 #toast.ok{border-color:rgba(20,241,149,.5);color:var(--grn)}
 #toast.err{border-color:rgba(255,107,107,.5);color:#ff8a8a}
+
+/* ── 🎓 visite guidée (pop-up flottant étape par étape) ── */
+#tour{position:fixed;inset:0;background:rgba(5,6,10,.45);backdrop-filter:blur(4px);
+  display:flex;align-items:flex-end;justify-content:center;padding:0 14px 64px;z-index:90}
+#tour[hidden]{display:none}
+#tourcard{width:min(460px,100%);background:var(--card);border:1px solid var(--line2);
+  border-radius:16px;padding:16px 18px;box-shadow:0 24px 70px rgba(0,0,0,.55);
+  display:flex;flex-direction:column;gap:8px;animation:tourin .25s ease-out}
+@keyframes tourin{from{transform:translateY(14px);opacity:0}to{transform:none;opacity:1}}
+#tourcard h3{font-size:14.5px;font-weight:800;margin:0}
+#tourcard p{margin:0;font-size:12.5px;line-height:1.55;color:var(--txt2)}
+#tourhelp{color:var(--grn)!important;font-size:11.5px!important}
+.tstepnum{font-size:10px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;color:var(--vio)}
+#tourtact{display:flex;align-items:center;gap:10px;margin-top:4px}
+#tourtact button{border:1px solid var(--line);background:none;color:var(--txt2);cursor:pointer;
+  font:inherit;font-size:11.5px;font-weight:600;padding:5px 12px;border-radius:99px}
+#tourtact button:hover{border-color:var(--line2);color:var(--txt)}
+#tourtact .pri{background:var(--grad);border:none;color:#0b0c10}
+#tourtact .pri:hover{filter:brightness(1.08);color:#0b0c10}
+#tourdots{display:flex;gap:4px;align-items:center}
+#tourdots i{width:6px;height:6px;border-radius:99px;background:var(--line2)}
+#tourdots i.on{background:var(--grn);width:16px;transition:width .2s}
+.tour-hl{outline:2px solid var(--vio)!important;outline-offset:2px;border-radius:10px;
+  animation:tourpulse 1.4s ease-in-out infinite}
+@keyframes tourpulse{0%,100%{outline-color:var(--vio)}50%{outline-color:var(--grn)}}
+
+/* ── sélecteur de LLM (footer) + menu déroulant ── */
+#llmwrap{position:relative;display:flex}
+#llmbtn{border:1px solid var(--line);background:none;color:var(--txt2);cursor:pointer;
+  font:inherit;font-size:11px;font-weight:600;padding:3px 9px;border-radius:99px;
+  transition:border-color .15s,color .15s;white-space:nowrap}
+#llmbtn:hover,#llmbtn[aria-expanded="true"]{border-color:var(--grn);color:var(--txt)}
+#llmbtn b{color:var(--grn);font-weight:700}
+#llmmenu{position:absolute;bottom:calc(100% + 8px);right:0;z-index:80;min-width:190px;
+  padding:6px;border-radius:12px;background:var(--card);border:1px solid var(--line2);
+  box-shadow:0 18px 50px rgba(0,0,0,.5)}
+#llmmenu[hidden]{display:none}
+#llmmenu button{display:flex;width:100%;border:none;background:none;color:var(--txt2);cursor:pointer;
+  text-align:left;font:inherit;font-size:12px;padding:6px 9px;border-radius:8px;align-items:center;gap:4px}
+#llmmenu button:hover{background:var(--card2);color:var(--txt)}
+#llmmenu button.on{color:var(--grn);font-weight:700}
+#llmmenu .csec{font-size:9.5px;font-weight:800;letter-spacing:1px;text-transform:uppercase;
+  color:var(--mut);padding:4px 9px 3px;display:block}
+#llmmenu .llmwarn{color:var(--amb);text-transform:none;letter-spacing:0;font-weight:600}
 
 /* ── bouton atelier (footer) ── */
 #atb{border:1px solid var(--line);background:none;color:var(--txt2);cursor:pointer;
@@ -164,6 +229,21 @@ body{font:13.5px/1.45 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-se
 #w-intent::placeholder{color:var(--mut)}
 .wchk{display:flex;gap:8px;align-items:center;font-size:11.5px;color:var(--txt2);cursor:pointer}
 .wchk input{accent-color:var(--vio);width:15px;height:15px}
+.wk select{background:var(--card2);color:var(--txt);border:1px solid var(--line);
+  border-radius:8px;font:inherit;font-size:11.5px;padding:3px 6px;max-width:150px}
+.wk input[type="text"]{background:var(--card2);color:var(--txt);border:1px solid var(--line);
+  border-radius:8px;font:inherit;font-size:11.5px;padding:3px 8px}
+#w-runlist{display:flex;flex-direction:column;gap:4px}
+#w-runlist .wact2 button{border:1px solid var(--grn);color:var(--grn);border-radius:8px;
+  font-size:10.5px;font-weight:700;padding:3px 8px;cursor:pointer;background:none;white-space:nowrap}
+#w-runlist .wact2 button:hover{background:rgba(20,241,149,.12)}
+#w-runlist .wact2 button:disabled{opacity:.55;cursor:default}
+#w-report{border-top:1px solid var(--line);padding-top:9px;display:flex;flex-direction:column;gap:7px}
+#w-report[hidden]{display:none}
+#w-report > b{font-size:12px}
+#w-report pre{white-space:pre-wrap;word-break:break-word;background:var(--panel);
+  border:1px solid var(--line);border-radius:10px;padding:10px;max-height:180px;overflow-y:auto;
+  font-size:11px;line-height:1.5;margin:0;scrollbar-width:thin}
 .wact{display:flex;gap:8px;align-items:center}
 .wact button{border:1px solid var(--line);background:none;color:var(--txt2);cursor:pointer;
   font:inherit;font-size:12px;font-weight:600;padding:7px 14px;border-radius:8px;

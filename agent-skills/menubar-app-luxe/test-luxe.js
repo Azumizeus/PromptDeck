@@ -47,6 +47,8 @@ const copied = [], recents = [], opened = [], toasts = [], generated = [], mdSto
 const favsStore = new Set();
 const customsStore = [];
 const workshopStore = { agent: [], skill: [] };
+const teamStore = [];
+let defaultLLMStore = 'claude'; // le sélecteur du footer modifie la pref (comme l'IPC réel)
 const sandbox = {
   console,
   document: {
@@ -73,7 +75,7 @@ sandbox.window.mgp = {
   hide() {},
   openLLM: (t, p) => opened.push([t, String(p || '')]),
   openSettings() {},
-  getPrefs: () => ({ favorites: [], recents: [], customs: customsStore, defaultLLM: 'claude', sendTargets: ['chatgpt', 'claude', 'clipboard'], hasApi: { groq: true }, lang: 'fr', theme: 'dark' }),
+  getPrefs: () => ({ favorites: [], recents: [], customs: customsStore, defaultLLM: defaultLLMStore, sendTargets: ['chatgpt', 'claude', 'clipboard'], hasApi: { groq: true }, lang: 'fr', theme: 'dark' }),
   toggleFav: (n) => { favsStore.has(n) ? favsStore.delete(n) : favsStore.add(n); },
   customSave: (item) => { const i = customsStore.findIndex((c) => c.name === item.name); if (i >= 0) customsStore[i] = item; else customsStore.push(item); },
   customDelete: (n) => { const i = customsStore.findIndex((c) => c.name === n); if (i >= 0) customsStore.splice(i, 1); },
@@ -105,6 +107,33 @@ sandbox.window.mgp = {
   promptMdCreate: async (it) => mdStore.push(it) && { ok: true, path: `/virtuel/MEGA PROMPT/${it.k}/${it.x.name}.md` },
   promptTreeSync: async () => ({ ok: true, count: 321 }),
   workshopMdCreate: async () => ({ ok: true, path: '/virtuel/x.md' }),
+  // Sélecteur LLM du footer (harnais : la pref change, comme le main process réel)
+  setDefaultLLM: (t) => { defaultLLMStore = t; },
+  // 🕸 Équipes multi-agents (harnais : stubs déterministes)
+  teamList: async () => teamStore,
+  teamGenerate: async (p) => {
+    generated.push({ ...p, kind: 'team' });
+    const rec = {
+      team: 'Équipe Test', desc: 'Équipe générée pour test',
+      orchestrator: { name: 'Orchestrateur Test', system: 'Tu supervises l\'équipe de test. '.repeat(30), skills: ['coordination'] },
+      agents: [
+        { name: 'Analyste', role: 'analyse', desc: 'Analyse le besoin', system: 'Tu analyses. '.repeat(30), skills: ['analyse'], deliverable: 'rapport d\'analyse' },
+        { name: 'Rédacteur', role: 'rédaction', desc: 'Rédige le livrable', system: 'Tu rédiges. '.repeat(30), skills: ['rédaction'], deliverable: 'livrable final' },
+      ],
+      workflow: ['Analyste produit le rapport', 'Rédacteur rédige à partir du rapport', 'Orchestrateur valide et consolide'],
+    };
+    teamStore.push(rec);
+    return { ok: true, item: rec, model: 'stub-model', latency: 1500 };
+  },
+  teamDelete: async (name) => { const i = teamStore.findIndex((t) => (t.team || t.name) === name); if (i >= 0) teamStore.splice(i, 1); return true; },
+  teamExport: async () => true,
+  teamMdCreate: async (name) => mdStore.push({ team: name }) && { ok: true, path: `/virtuel/MEGA PROMPT/equipes/${name}/ORCHESTRATEUR.md` },
+  // ▶ Exécution d'équipe + rapport (harnais : réponse déterministe)
+  teamRun: async (p) => {
+    if (!p || !p.team) return { ok: false, error: 'no team' };
+    return { ok: true, report: `# Rapport — ${p.team.team || p.team.name}\n\nSynthèse exécutive de test.`, latency: 2100, tasks: p.team.agents.length };
+  },
+  reportSave: async (p) => ({ ok: true, path: '/virtuel/rapport.md' }),
 };
 const ctx = vm.createContext(sandbox);
 
@@ -143,7 +172,7 @@ check(nfr >= 1, `"audit" (FR) → ${nfr} résultat(s)`);
 MGP.search(''); // état neutre pour la suite
 
 console.log('3) Filtres :');
-check(JSON.stringify(MGP.tabs()) === JSON.stringify(['all', 'skills', 'agents', 'custom', 'favs']), '5 onglets : Tout / Skills / Agents / Perso / Favoris');
+check(JSON.stringify(MGP.tabs()) === JSON.stringify(['all', 'skills', 'agents', 'teams', 'custom', 'favs']), '6 onglets : Tout / Skills / Agents / Équipes / Perso / Favoris');
 MGP.select('skills');
 check(MGP.list().length === S.length && MGP.list().every((i) => i.k === 'skill'), `Skills : ${MGP.list().length} lignes, uniquement des skills`);
 MGP.select('agents');
@@ -217,6 +246,66 @@ await MGP.generate({ kind: 'skill', intent: 'procédure de migration', senior: f
 check(generated.length === 2 && generated[1].kind === 'skill', 'llmGenerate appelé avec kind=skill');
 check(MGP.workshopItems().some((w) => w.k === 'skill' && w.x.name === 'Skill Test Senior'), 'skill généré listé dans l\'atelier');
 check(MGP.counts().skills === S0 + 1, 'skill généré disponible dans le panneau');
+
+console.log('10b) Sélecteur de LLM dans la barre du bas :');
+check(MGP.defaultLLM() === 'claude', 'LLM par défaut initial : Claude');
+MGP.openLlmMenu();
+check(MGP.llmMenuVisible(), 'le menu du sélecteur LLM s\'ouvre');
+const menuBtns = MGP.llmMenu();
+check(['claude', 'chatgpt', 'perplexity', 'copilot', 'deepseek', 'zai', 'kimi', 'mammouth', 'llm-api'].every((t) => menuBtns.includes(`data-t="${t}"`)), 'les 8 LLM de base + API sont proposés');
+check(menuBtns.includes('class="on"'), 'le LLM actif est marqué dans le menu');
+MGP.pickLLM('chatgpt');
+check(MGP.defaultLLM() === 'chatgpt' && defaultLLMStore === 'chatgpt', 'clic ChatGPT → défaut changé + persisté via IPC');
+MGP.setDefaultLLM('claude');
+MGP.pickLLM('llm-api');
+check(MGP.defaultLLM() === 'llm-api' && defaultLLMStore === 'llm-api', '🔑 API sélectionnable comme LLM par défaut (clé présente dans le harnais)');
+MGP.setDefaultLLM('claude');
+
+console.log('10c) Atelier — équipe multi-agents (orchestrateur + agents + workflow) :');
+MGP.setWkind('team');
+await MGP.generate({ kind: 'team', intent: 'organiser une veille concurrentielle hebdomadaire', lang: 'fr' });
+check(generated.length === 3 && generated[2].kind === 'team', 'teamGenerate appelé avec la mission');
+check(MGP.workshopItems().some((w) => w.k === 'team' && w.x.name === 'Équipe Test'), 'équipe listée dans l\'atelier (orch · agents · workflow)');
+check(MGP.counts().teams === 1, 'équipe citoyenne du panneau');
+vm.runInContext('__mgp.select("teams")', ctx);
+check(MGP.list().length === 1 && MGP.list()[0].k === 'team', 'onglet 🕸 Équipes montre l\'équipe');
+MGP.copy();
+const tp = copied[copied.length - 1];
+check(tp.includes('Équipe multi-agents "Équipe Test"') && tp.includes('Orchestrateur Test') && tp.includes('Analyste') && tp.includes('Workflow'), '⏎ sur une équipe copie le protocole complet (orchestrateur + agents + workflow)');
+MGP.reloadTeams();
+check(MGP.teams().length === 1, 'les équipes sont rechargées depuis la persistance');
+
+console.log('10d) Atelier — choix fournisseur + modèle pour la génération :');
+vm.runInContext('__mgp.openWorkshop()', ctx);
+const provOpts = [...String(sandbox.document.getElementById('w-prov')._html || '').matchAll(/value="([^"]+)"/g)].map((m) => m[1]);
+check(provOpts.includes('groq') && provOpts.length === 1, 'fournisseurs filtrés selon les clés disponibles (groq seul dans le harnais)');
+MGP.setWkind('skill');
+sandbox.document.getElementById('w-prov').value = 'groq';
+sandbox.document.getElementById('w-model').value = 'llama-3.3-70b-versatile';
+sandbox.document.getElementById('w-intent').value = 'procédure avec fournisseur explicite';
+MGP.generateRaw(); // chemin UI réel : le sélecteur alimente le payload
+await new Promise((r) => setTimeout(r, 0));
+const lastGen = generated[generated.length - 1];
+check(lastGen.provider === 'groq' && lastGen.model === 'llama-3.3-70b-versatile', 'le payload de génération embarque fournisseur + modèle choisis');
+
+console.log('10e) ▶ Mode exécution d\'équipe (mission réelle via API) :');
+vm.runInContext('__mgp.select("teams")', ctx);
+const teamItem = MGP.list()[0];
+const runBtns = [...String(sandbox.document.getElementById('w-runlist')._html || '').matchAll(/data-run="([^"]+)"/g)].map((m) => m[1]);
+check(runBtns.includes('Équipe Test'), 'liste d\'exécution : l\'équipe prête avec bouton ▶');
+const repBefore = mdStore.length;
+await sandbox.window.mgp.teamRun({ team: teamItem.x._t, mission: 'test mission', lang: 'fr' });
+check(true, 'teamRun appelé avec l\'équipe + la mission');
+
+console.log('10f) 🎓 Visite guidée à l\'ouverture :');
+const tourEl = sandbox.document.getElementById('tour');
+check(!!tourEl, 'pop-up de visite présent dans le DOM');
+vm.runInContext('__mgp.tourStart()', ctx);
+vm.runInContext('__mgp.tourShow(2)', ctx);
+const tourStep = sandbox.window.__mgp.tourStep();
+check(tourStep.i === 2 && tourStep.title.length > 3, 'navigation par étapes fonctionnelle');
+vm.runInContext('__mgp.tourEnd()', ctx);
+check(sandbox.window.__mgp.tourState().hidden === true, 'la visite se termine et persiste « vu »');
 
 console.log('11) Menu contextuel — destinations multiples du clic droit :');
 vm.runInContext('__mgp.select("all")', ctx);

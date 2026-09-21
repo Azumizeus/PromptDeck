@@ -50,5 +50,18 @@ contextBridge.exposeInMainWorld('mgp', {
   promptMdCreate: (item) => ipcRenderer.invoke('prompt-md-create', item),
   promptDirOpen: (sub) => ipcRenderer.invoke('prompt-dir-open', sub),
   promptTreeSync: (dir) => ipcRenderer.invoke('prompt-tree-sync', dir),
+  // ── Arborescence MEGA PROMPT : vue d'ensemble + ouverture dossier/fichier (popup clic droit) ──
+  promptTreeOverview: () => ipcRenderer.invoke('prompt-tree-overview'),
+  promptMdOpen: (sub) => ipcRenderer.invoke('prompt-md-open', sub),
   workshopMdCreate: (kind, name) => ipcRenderer.invoke('workshop-md-create', { kind, name }),
+  // ── LLM par défaut : sélecteur rapide dans la barre du bas du panneau ──
+  setDefaultLLM: (llm) => ipcRenderer.send('set-default-llm', llm),
+  // ── 🕸 Équipes multi-agents (super-orchestrateur + agents + workflow) ──
+  teamList: () => ipcRenderer.invoke('team-list'),
+  teamGenerate: (payload) => ipcRenderer.invoke('team-generate', payload),
+  teamRun: (payload) => ipcRenderer.invoke('team-run', payload),
+  reportSave: (p) => ipcRenderer.invoke('report-save', p),
+  teamDelete: (name) => ipcRenderer.invoke('team-delete', name),
+  teamExport: (name) => ipcRenderer.invoke('team-export', name),
+  teamMdCreate: (name) => ipcRenderer.invoke('team-md-create', name),
 });
