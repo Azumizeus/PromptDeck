@@ -38,9 +38,9 @@ Le tout **100 % local** : pas de compte, pas de télémétrie, aucun envoi de do
 
 ## 📸 Aperçu
 
-| Recherche bilingue (⌥Espace) | Menu clic droit ⚡ |
-|:---:|:---:|
-| ![Panneau de recherche PromptDeck](docs/captures/panneau.png) | ![Menu clic droit de l'icône ⚡](docs/captures/menu-clic-droit.png) |
+| Recherche bilingue (⌥Espace) | Menu clic droit ⚡ | Réglages |
+|:---:|:---:|:---:|
+| ![Panneau de recherche PromptDeck](docs/captures/panneau.png) | ![Menu clic droit de l’icône ⚡](docs/captures/menu-clic-droit.png) | ![Fenêtre de réglages](docs/captures/reglages.png) |
 
 *Régénérables à tout moment : `./build-app.sh` puis `npx electron . --capture-panel --capture-menu` depuis `agent-skills/menubar-app/` (rendu automatique dans `docs/captures/`).*
 

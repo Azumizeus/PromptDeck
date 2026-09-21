@@ -499,9 +499,38 @@ function captureShots() {
     });
   });
 
+  // Réglages : fenêtre non-redimensionnable, rendue en repli visible (capturePage fiable ici)
+  const captureSettings = () => new Promise((resolve) => {
+    const w = new BrowserWindow({
+      width: 500, height: 660, show: false, resizable: false, minimizable: false,
+      fullscreenable: false, title: T().settingsTitle,
+      icon: nativeImage.createFromPath(APPICON),
+      webPreferences: {
+        preload: path.join(__dirname, 'preload.js'), contextIsolation: true, nodeIntegration: false, sandbox: false,
+      },
+    });
+    w.loadFile('settings.html');
+    w.webContents.once('did-finish-load', async () => {
+      setTimeout(async () => {
+        try {
+          w.showInactive(); // settings.html n'a pas d'effet de flou dépendant de l'offscreen
+          await new Promise((r2) => setTimeout(r2, 1200));
+          const img = await w.webContents.capturePage();
+          if (img && !img.isEmpty()) {
+            fs.writeFileSync(path.join(shotsDir, 'reglages.png'), img.toPNG());
+            console.log('✓ reglages.png écrit dans', shotsDir);
+          } else { console.error('✗ capture réglages : image vide'); }
+        } catch (err) { console.error('✗ capture réglages :', err.message); }
+        if (!w.isDestroyed()) w.destroy();
+        resolve();
+      }, 900);
+    });
+  });
+
   (async () => {
     if (process.argv.includes('--capture-panel')) await capturePanel();
     if (process.argv.includes('--capture-menu')) await captureMenu();
+    if (process.argv.includes('--capture-settings')) await captureSettings();
     setTimeout(() => app.quit(), 300);
   })();
 }
@@ -518,7 +547,7 @@ function createTray() {
 
 // Mono-instance : un second lancement révèle le panneau au lieu d'un doublon
 // (sauf en mode capture, qui doit pouvoir tourner même si l'app est déjà lancée)
-const CAPTURE_MODE = process.argv.includes('--capture-panel') || process.argv.includes('--capture-menu');
+const CAPTURE_MODE = process.argv.includes('--capture-panel') || process.argv.includes('--capture-menu') || process.argv.includes('--capture-settings');
 if (!CAPTURE_MODE && !app.requestSingleInstanceLock()) {
   app.quit();
 } else {
@@ -539,7 +568,7 @@ if (!CAPTURE_MODE && !app.requestSingleInstanceLock()) {
     app.on('activate', () => createPanel());
 
     // ── Mode capture (docs/README) : rend la fenêtre/popup hors écran puis PNG ──
-    if (process.argv.includes('--capture-panel') || process.argv.includes('--capture-menu')) {
+    if (process.argv.includes('--capture-panel') || process.argv.includes('--capture-menu') || process.argv.includes('--capture-settings')) {
       captureShots(); // pas de tray ni de panneau visible pendant une capture
     } else {
       createTray();

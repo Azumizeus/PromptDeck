@@ -48,13 +48,9 @@ jobs:
           node test-custom.js
 
   build-macos:
-    name: Build macOS — ${{ matrix.arch }}
+    name: Build macOS — DMG x64 + arm64 + universel
     needs: tests
     runs-on: macos-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        arch: [x64, arm64]
 
     steps:
       - uses: actions/checkout@v4
@@ -64,24 +60,32 @@ jobs:
         with:
           node-version: 22
 
+      - name: Cache npm
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: npm-macos-node22-${{ hashFiles('agent-skills/menubar-app/package-lock.json') }}
+          restore-keys: |
+            npm-macos-node22-
+
       - name: Cache Electron runtimes
         uses: actions/cache@v4
         with:
           path: ~/.cache/megapack
-          key: megapack-${{ matrix.arch }}-v33
+          key: megapack-universal-v33
 
       - name: Installer les dépendances
         working-directory: agent-skills/menubar-app
         run: npm ci
 
-      - name: Build + DMG (${{ matrix.arch }})
+      - name: Build + DMG (x64 + arm64 + universel)
         working-directory: agent-skills/menubar-app
-        run: ./build-app.sh --arch ${{ matrix.arch }} --no-launch
+        run: ./build-app.sh --arch both --no-launch
 
-      - name: Upload du DMG
+      - name: Upload des DMG
         uses: actions/upload-artifact@v4
         with:
-          name: PromptDeck-${{ matrix.arch }}
+          name: PromptDeck-dmg
           path: agent-skills/menubar-app/dist/*.dmg
           retention-days: 7
           if-no-files-found: error
