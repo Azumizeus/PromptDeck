@@ -139,18 +139,36 @@ async function llmChat({ provider = 'groq', model = '', apiKey = '', messages, m
   const target = prov.style === 'anthropic' ? 'https://api.anthropic.com/v1/messages' : (prov.base || 'https://api.groq.com/openai/v1/chat/completions');
   if (prov.style !== 'anthropic' && !/ollama|127\.0\.0\.1|localhost/.test(target) && !key) throw new Error((LANG === 'en' ? 'No API key for ' : 'Pas de clé API pour ') + prov.label);
   const started = Date.now();
+  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
   let res;
-  try {
-    res = await fetch(target, {
-      method: 'POST',
-      headers: prov.style === 'anthropic'
-        ? { 'content-type': 'application/json', 'x-api-key': key, 'anthropic-version': '2023-06-01' }
-        : { 'content-type': 'application/json', ...(key ? { authorization: 'Bearer ' + key } : {}) },
-      body: JSON.stringify(prov.style === 'anthropic'
-        ? { model, max_tokens: maxTokens, temperature, messages }
-        : { model, messages, max_tokens: maxTokens, temperature }),
-    });
-  } catch (e) { throw new Error((LANG === 'en' ? 'Network error: ' : 'Erreur réseau : ') + e.message); }
+  let attempt = 0;
+  for (;;) {
+    try {
+      res = await fetch(target, {
+        method: 'POST',
+        headers: prov.style === 'anthropic'
+          ? { 'content-type': 'application/json', 'x-api-key': key, 'anthropic-version': '2023-06-01' }
+          : { 'content-type': 'application/json', ...(key ? { authorization: 'Bearer ' + key } : {}) },
+        body: JSON.stringify(prov.style === 'anthropic'
+          ? { model, max_tokens: maxTokens, temperature, messages }
+          : { model, messages, max_tokens: maxTokens, temperature }),
+      });
+    } catch (e) { throw new Error((LANG === 'en' ? 'Network error: ' : 'Erreur réseau : ') + e.message); }
+    // Reprise sur 429 : les plafonds gratuits (ex. Groq 8000 tokens/min) sont transitoires — on attend et on retente.
+    if (res.status !== 429 || attempt >= 2) break;
+    attempt += 1;
+    let waitMs = 8000;
+    const ra = parseFloat(res.headers.get('retry-after'));
+    if (Number.isFinite(ra) && ra > 0) waitMs = Math.ceil(ra * 1000);
+    else {
+      try {
+        const j = await res.json();
+        const m = /try again in ([\d.]+)\s*s/i.exec(String((j && j.error && (j.error.message || j.error)) || ''));
+        if (m) waitMs = Math.ceil(parseFloat(m[1]) * 1000);
+      } catch (e) { /* corps non JSON : garde par défaut */ }
+    }
+    await sleep(Math.min(waitMs, 60000));
+  }
   const latency = Date.now() - started;
   if (!res.ok) {
     let detail = '';
@@ -1090,7 +1108,7 @@ ipcMain.handle('team-run', async (e, p) => {
       (fr ? `Mission de l\'équipe : ${mission}\n\nAgents disponibles :\n` : `Team mission: ${mission}\n\nAvailable agents:\n`)
       + (t.agents || []).map((a) => `- ${a.name} (${a.role || fr ? 'agent' : 'agent'}) : ${a.desc || ''}${a.deliverable ? ` — ${fr ? 'livrable' : 'deliverable'} : ${a.deliverable}` : ''}`).join('\n')
       + '\n\n' + (fr ? 'Réponds STRICTEMENT en JSON : {"tasks":[{"agent":"nom exact de l\'agent","task":"sa tâche précise"}]}' : 'Answer STRICTLY as JSON: {"tasks":[{"agent":"exact agent name","task":"its precise task"}]}'),
-      1500,
+      2048,
     );
     const plan = extractJson(planText);
     const tasks = (Array.isArray(plan.tasks) ? plan.tasks : []).slice(0, 10)
@@ -1117,7 +1135,7 @@ ipcMain.handle('team-run', async (e, p) => {
       (fr ? `Mission : ${mission}\n\nLivrables des agents :\n\n` : `Mission: ${mission}\n\nAgent deliverables:\n\n`)
       + results.map((r) => `## ${r.agent}\nTâche : ${r.task}\n\n${r.output}`).join('\n\n---\n\n')
       + '\n\n' + (fr ? 'Rédige le RAPPORT FINAL consolidé : synthèse exécutive, points clés par agent, risques, prochaines actions. Markdown structuré.' : 'Write the consolidated FINAL REPORT: executive summary, key points per agent, risks, next actions. Structured markdown.'),
-      3000,
+      4096,
     );
     return { ok: true, report, latency: Date.now() - t0, tasks: results.length, model: model };
   } catch (err) {
@@ -1179,6 +1197,7 @@ ipcMain.handle('team-generate', async (e, p) => {
     const userMsg = (lang === 'en' ? `Build the multi-agent team for this mission: « ${intent} »` : `Construis l\'équipe multi-agents pour cette mission : « ${intent} »`);
     const { text, model: usedModel, latency } = await llmChat({
       provider, model,
+      maxTokens: 8192, // l'équipe complète (orchestrateur + agents + workflow) dépasse le plafond 2048 → JSON tronqué
       messages: [
         { role: 'system', content: teamSystemPrompt(lang) },
         { role: 'user', content: userMsg },
