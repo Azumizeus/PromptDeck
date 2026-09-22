@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         MEGA PACK Panel Luxe — Skills, Agents & Équipes pour tout LLM
 // @namespace    mega-pack
-// @version      2.4.1
+// @version      2.5.0
 // @description  Panneau flottant Édition Luxe dans une fenêtre macOS : 131 skills + 190 agents + 🕸 équipes + ✍️ prompts perso + ★ favoris, recherche instantanée, tooltip expert, clic droit multi-LLM, sélecteur de LLM par défaut, composeur ⌘-clic — injectable dans n'importe quelle conversation LLM (Claude, ChatGPT, Gemini, Perplexity, Mistral, OpenCode Web…)
 // @author       MEGA PACK
 // @match        *://*/*
@@ -36,11 +36,21 @@
       mName: 'Nom', mPrompt: 'Prompt', mSave: 'Enregistrer', mDel: 'Supprimer', mCancel: 'Annuler',
       count: (n) => n + ' résultat' + (n > 1 ? 's' : ''),
       llm: 'LLM',
-      settings: '⚙ Réglages', settingsTitle: 'Réglages — LLM par défaut et destinations du clic droit',
-      setLlm: 'LLM par défaut (⌘⏎)', setSend: 'Destinations du clic droit (dans l\'ordre)',
-      setSendHint: 'Coche une ou plusieurs — l\'ordre des clics = priorité du menu',
+      settings: '⚙ Réglages', settingsTitle: 'Réglages — comme l\'app macOS',
+      setTitle: '⚡ MEGA PACK — Réglages',
+      setTheme: 'Thème', setThemeD: 'Appliqué au panneau, aux menus et à ce réglage',
+      setLang: 'Langue', setLangD: 'Interface du panneau',
+      setLlm: 'LLM par défaut', setLlmD: '⌘⏎ dans le panneau ouvre ce chat',
+      setSend: 'Destinations du clic droit',
+      setSendHint: 'Coche une ou plusieurs — l\'ordre des clics = priorité du menu « Envoyer à »',
+      setFsc: 'Raccourcis favoris', setFscD: '⌘1 à ⌘9 injectent les 9 premiers favoris',
+      setCfg: 'Configuration', setCfgD: 'Favoris, prompts perso, équipes et préférences en JSON',
+      setExport: '⬇ Exporter', setImport: '⬆ Importer', setImported: '✓ Configuration importée', setImportErr: '✗ Fichier invalide',
+      setXp: 'Mes prompts ✍️', setXpD: 'Télécharge tous tes prompts en Markdown',
+      setXpBtn: '⬇ Exporter en .md', setXpNone: 'Aucun prompt perso',
       setDone: 'Enregistrer', setClose: 'Fermer',
       saved: '✓ Réglages enregistrés',
+      clipboard: 'Presse-papiers',
       sendTo: 'Envoyer à',
       copyPrompt: '⧉ Copier le prompt',
       favAdd: '★ Ajouter aux favoris', favDel: '☆ Retirer des favoris',
@@ -79,11 +89,21 @@
       mName: 'Name', mPrompt: 'Prompt', mSave: 'Save', mDel: 'Delete', mCancel: 'Cancel',
       count: (n) => n + ' result' + (n > 1 ? 's' : ''),
       llm: 'LLM',
-      settings: '⚙ Settings', settingsTitle: 'Settings — default LLM and right-click destinations',
-      setLlm: 'Default LLM (⌘⏎)', setSend: 'Right-click destinations (in order)',
-      setSendHint: 'Check one or more — click order = menu priority',
+      settings: '⚙ Settings', settingsTitle: 'Settings — same as the macOS app',
+      setTitle: '⚡ MEGA PACK — Settings',
+      setTheme: 'Theme', setThemeD: 'Applied to the panel, menus and this dialog',
+      setLang: 'Language', setLangD: 'Panel interface',
+      setLlm: 'Default LLM', setLlmD: '⌘⏎ in the panel opens this chat',
+      setSend: 'Right-click destinations',
+      setSendHint: 'Check one or more — click order = “Send to” menu priority',
+      setFsc: 'Favorite shortcuts', setFscD: '⌘1 to ⌘9 inject the first 9 favorites',
+      setCfg: 'Configuration', setCfgD: 'Favorites, custom prompts, teams and preferences as JSON',
+      setExport: '⬇ Export', setImport: '⬆ Import', setImported: '✓ Configuration imported', setImportErr: '✗ Invalid file',
+      setXp: 'My prompts ✍️', setXpD: 'Download all your prompts as Markdown',
+      setXpBtn: '⬇ Export as .md', setXpNone: 'No custom prompts',
       setDone: 'Save', setClose: 'Close',
       saved: '✓ Settings saved',
+      clipboard: 'Clipboard',
       sendTo: 'Send to',
       copyPrompt: '⧉ Copy prompt',
       favAdd: '★ Add to favorites', favDel: '☆ Remove from favorites',
@@ -218,6 +238,7 @@
   };
   function openLLM(kind, txt) {
     copy(txt); // le prompt est toujours copié, quelle que soit la destination
+    if (kind === 'clipboard') return; // presse-papiers : la copie suffit
     const q = encodeURIComponent(txt);
     window.open((LLM_URLS[kind] || LLM_URLS.claude) + q, '_blank', 'noopener');
   }
@@ -235,7 +256,7 @@
   #mgp-panel.open{display:flex}
   #mgp-panel.min{height:38px !important}
   #mgp-panel.min #mgp-head,#mgp-panel.min #mgp-qrow,#mgp-panel.min #mgp-tabs,#mgp-panel.min #mgp-selrow,
-  #mgp-panel.min #mgp-list,#mgp-panel.min #mgp-foot,#mgp-panel.min #mgp-rsz{display:none !important}
+  #mgp-panel.min #mgp-list,#mgp-panel.min #mgp-foot,#mgp-panel.min #mgp-rsz,#mgp-panel.min #mgp-setdlg{display:none !important}
   #mgp-rsz{position:absolute;top:0;left:0;width:16px;height:16px;cursor:nwse-resize;z-index:5}
   #mgp-rsz::after{content:'';position:absolute;bottom:3px;left:3px;width:8px;height:8px;
     border-left:2px solid #3a3e4c;border-bottom:2px solid #3a3e4c;border-radius:2px}
@@ -255,19 +276,67 @@
     font:600 10.5px/1 -apple-system,sans-serif;padding:4px 9px;border-radius:99px}
   #mgp-macbar .lx button:hover{border-color:#9945ff;color:#eef0f6}
   #mgp-set{font-size:13px;line-height:1}
-  #mgp-setdlg{display:none;flex-direction:column;gap:10px}
+  #mgp-setdlg{display:none;flex-direction:column;gap:0;overflow-y:auto;max-height:calc(100% - 46px);margin:0 10px 10px;
+    border:1px solid #31343f;border-radius:12px;background:#14151c}
   #mgp-setdlg.open{display:flex}
-  #mgp-setdlg .sc{display:flex;flex-direction:column;gap:6px}
-  #mgp-setdlg .sc b{font-size:11.5px;color:#a8adbd}
+  #mgp-setdlg .sttl{font-size:13.5px;font-weight:700;padding:13px 14px 3px}
+  #mgp-setdlg .shint{font-size:10.5px;color:#6b7080;padding:0 14px 10px;border-bottom:1px solid #23252f}
+  #mgp-setdlg .row{display:flex;align-items:center;justify-content:space-between;gap:10px;
+    padding:10px 14px;border-bottom:1px solid #23252f}
+  #mgp-setdlg .row.col{flex-direction:column;align-items:stretch;gap:7px}
+  #mgp-setdlg .row b{font-size:12.5px;font-weight:600}
+  #mgp-setdlg .row .d{display:block;font-size:10.5px;color:#6b7080;font-weight:400;margin-top:2px}
+  #mgp-setdlg select{background:#191b24;border:1px solid #31343f;border-radius:8px;color:#eef0f6;font:inherit;font-size:12px;padding:5px 9px;outline:none}
+  #mgp-setdlg select:focus{border-color:#9945ff}
   #mgp-setdlg .hint{font-size:10.5px;color:#6b7080;font-weight:400}
   #mgp-setdlg .chips{display:flex;flex-wrap:wrap;gap:6px}
   #mgp-setdlg .chips button{border:1px solid #31343f;background:none;color:#a8adbd;cursor:pointer;font:inherit;font-size:11.5px;font-weight:600;padding:5px 11px;border-radius:99px}
   #mgp-setdlg .chips button:hover{border-color:#9945ff;color:#eef0f6}
   #mgp-setdlg .chips button.on{background:#9945ff;border-color:#9945ff;color:#fff}
-  #mgp-setdlg .srow{display:flex;gap:8px;justify-content:flex-end}
-  #mgp-setdlg .srow button{border:1px solid #23252f;background:none;color:#a8adbd;cursor:pointer;font:inherit;font-size:12px;font-weight:600;padding:7px 14px;border-radius:8px}
+  #mgp-setdlg .srow{display:flex;gap:8px;justify-content:flex-end;padding:11px 14px}
+  #mgp-setdlg .btn{border:1px solid #31343f;background:none;color:#a8adbd;cursor:pointer;font:inherit;font-size:12px;font-weight:600;padding:6px 12px;border-radius:8px}
+  #mgp-setdlg .btn:hover{border-color:#9945ff;color:#eef0f6}
   #mgp-setdlg .srow button.prim{background:#9945ff;border-color:#9945ff;color:#fff}
   #mgp-setdlg .srow button:hover{border-color:#9945ff;color:#eef0f6}
+  #mgp-setdlg .sfoot{font-size:10.5px;color:#6b7080;padding:0 14px 11px;font-weight:400}
+  /* ── Thème clair (aligné app macOS : body.light) ── */
+  #mgp-panel.light{background:#f6f7fd;border-color:#dfe4f3;color:#131a2e}
+  #mgp-panel.light #mgp-macbar{background:linear-gradient(#ffffff,#f0f1f9);border-bottom-color:#dfe4f3}
+  #mgp-panel.light #mgp-macbar .ttl{color:#5d6885}
+  #mgp-panel.light #mgp-macbar .lx button{border-color:#c5cfeb;color:#5d6885}
+  #mgp-panel.light #mgp-macbar .lx button:hover{border-color:#9945ff;color:#131a2e}
+  #mgp-panel.light #mgp-head{border-bottom-color:#dfe4f3}
+  #mgp-panel.light #mgp-head .c{color:#5d6885}
+  #mgp-panel.light #mgp-qrow,#mgp-panel.light .mgp-item:hover,#mgp-panel.light .mgp-item.on{background:#f4f6fd}
+  #mgp-panel.light #mgp-qrow{border-color:#dfe4f3}
+  #mgp-panel.light #mgp-q{color:#131a2e}
+  #mgp-panel.light #mgp-q::placeholder{color:#5d6885}
+  #mgp-panel.light .mgp-tab{color:#5d6885}
+  #mgp-panel.light .mgp-tab:hover,#mgp-panel.light .mgp-tab.on{background:#eceefb;color:#131a2e}
+  #mgp-panel.light .mgp-item b{color:#131a2e}
+  #mgp-panel.light .mgp-item .d{color:#5d6885}
+  #mgp-panel.light .mgp-item .fb,#mgp-panel.light .mgp-item .fv{color:#8a90a5}
+  #mgp-panel.light .mgp-item .fb:hover,#mgp-panel.light .mgp-item .fv{color:#d4a017}
+  #mgp-panel.light #mgp-foot{border-top-color:#dfe4f3;color:#5d6885}
+  #mgp-panel.light #mgp-foot .n{color:#5d6885}
+  #mgp-panel.light #mgp-llmbtn{border-color:#c5cfeb;color:#5d6885}
+  #mgp-panel.light #mgp-llmbtn b{color:#0a9d68}
+  #mgp-panel.light #mgp-llmmenu,body.mgp-light #mgp-ctx,body.mgp-light #mgp-tip{background:#ffffff;border-color:#c5cfeb;box-shadow:0 18px 50px rgba(20,25,50,.18)}
+  #mgp-panel.light #mgp-llmmenu button,body.mgp-light #mgp-ctx button{color:#2c3556}
+  #mgp-panel.light #mgp-llmmenu button:hover,body.mgp-light #mgp-ctx button:hover{background:#f4f6fd;color:#131a2e}
+  body.mgp-light #mgp-tip p{color:#2c3556}
+  body.mgp-light #mgp-tip .tc{color:#5d6885}
+  #mgp-panel.light .mgp-item.selc{background:rgba(107,70,242,.08)}
+  #mgp-panel.light .mgp-item.selc b{color:#6b46f2}
+  #mgp-panel.light #mgp-setdlg{background:#ffffff;border-color:#dfe4f3}
+  #mgp-panel.light #mgp-setdlg .row{border-bottom-color:#e8ebf7}
+  #mgp-panel.light #mgp-setdlg .row .d,#mgp-panel.light #mgp-setdlg .hint,
+  #mgp-panel.light #mgp-setdlg .shint,#mgp-panel.light #mgp-setdlg .sfoot{color:#5d6885}
+  #mgp-panel.light #mgp-setdlg select,#mgp-panel.light #mgp-setdlg .chips button{background:#f4f6fd;border-color:#c5cfeb;color:#2c3556}
+  #mgp-panel.light #mgp-setdlg .chips button.on{background:#6b46f2;border-color:#6b46f2;color:#fff}
+  #mgp-panel.light #mgp-setdlg .btn{border-color:#c5cfeb;color:#2c3556}
+  #mgp-panel.light #mgp-setdlg .srow button{border-color:#dfe4f3;color:#2c3556}
+  #mgp-panel.light #mgp-setdlg .srow button.prim{background:#6b46f2;border-color:#6b46f2;color:#fff}
   #mgp-head{padding:9px 14px;border-bottom:1px solid #23252f;display:flex;justify-content:space-between;align-items:center}
   #mgp-head b{font-size:12.5px;letter-spacing:.4px}
   #mgp-head .c{font-size:11px;color:#6b7080;margin-left:8px;font-variant-numeric:tabular-nums}
@@ -426,7 +495,8 @@
       tgts.map(function (t) { return '<button data-t="' + t + '">▸ ' + (LLM_LABEL[t] || t) + '</button>'; }).join(''),
       '<span class="cs">···</span>',
       '<button data-a="copy">' + T().copyPrompt + '</button>',
-      '<button data-a="fav">' + (isFav(x.name) ? T().favDel : T().favAdd) + '</button>'
+      '<button data-a="fav">' + (isFav(x.name) ? T().favDel : T().favAdd) + '</button>',
+      '<button data-t="clipboard">▸ ⧉ ' + T().clipboard + '</button>'
     ).join('');
     ctx.innerHTML = items;
     ctx.style.display = 'block';
@@ -450,13 +520,15 @@
 
   // ── Sélecteur de LLM (barre du bas) ───────────────────────────────────────
   function renderLlmBtn() {
-    panel.querySelector('#mgp-llmbtn').innerHTML = '⌨ ' + T().llm + ' <b>' + (LLM_LABEL[defaultLLM()] || defaultLLM()) + '</b> ▾';
+    const cur = defaultLLM();
+  panel.querySelector('#mgp-llmbtn').innerHTML = '⌨ ' + T().llm + ' <b>' + (cur === 'clipboard' ? T().clipboard : (LLM_LABEL[cur] || cur)) + '</b> ▾';
   }
   function renderLlmMenu() {
     const m = panel.querySelector('#mgp-llmmenu');
-    m.innerHTML = LLMS.map(function (t) {
+    m.innerHTML = LLMS.concat(['clipboard']).map(function (t) {
+      const lb = t === 'clipboard' ? '⧉ ' + T().clipboard : (LLM_LABEL[t] || t);
       return '<button data-t="' + t + '" class="' + (t === defaultLLM() ? 'on' : '') + '">' +
-        (t === defaultLLM() ? '✓ ' : '▸ ') + (LLM_LABEL[t] || t) + '</button>';
+        (t === defaultLLM() ? '✓ ' : '▸ ') + lb + '</button>';
     }).join('');
     m.querySelectorAll('button').forEach(function (b) {
       b.onclick = function () {
@@ -627,6 +699,21 @@
 
   // ── Ouverture / fermeture + clavier (aligné Luxe) ──────────────────────────
   function openPanel() { panel.classList.add('open'); renderCounts(); renderTabs(); renderSelRow(); renderLlmBtn(); render(); panel.querySelector('#mgp-q').focus(); }
+  // Raccourcis favoris ⌘1-9 : injecte les 9 premiers favoris (option ⚙)
+  document.addEventListener('keydown', function (e) {
+    if (!panel.classList.contains('open')) return; // comme l'app : ⚡ ouvert
+    if (!(e.metaKey || e.ctrlKey) || e.shiftKey || e.altKey) return;
+    const n = parseInt(e.key, 10);
+    if (!n || n < 1 || n > 9) return;
+    if (!store.get('favShortcuts', true)) return;
+    const f = favs();
+    if (n > f.length) return;
+    const it = ALL().find(function (x) { return x.x.name === f[n - 1]; });
+    if (!it) return;
+    e.preventDefault();
+    activate(it, null);
+    flash(btn, '⌘' + n + ' → ' + lname(it.x));
+  });
   function closePanel() { panel.classList.remove('open'); }
   // 🔴 fermer = ferme le panneau · 🟡 réduire = replie vers la barre titre · 🟢 élargir = cycle de tailles
   panel.querySelector('.l-close').onclick = closePanel;
@@ -691,39 +778,110 @@
     const cs = store.get('customSize', null);
     if (cs) { panel.style.width = cs.w + 'px'; panel.style.height = cs.h + 'px'; }
   })();
-  // ── Réglages (⚙) : LLM par défaut + destinations du clic droit ──────────
+  // ── Réglages (⚙) — même panneau que l'app macOS ──────────────────────────
   const sendTargets = () => store.get('sendTargets', ['claude', 'chatgpt']);
-  function renderSetDlg() {
+  function theme() { return store.get('theme', 'dark'); }
+  function isLight() { return theme() === 'light'; }
+  function applyTheme() {
+    panel.classList.toggle('light', isLight());
+    document.body.classList.toggle('mgp-light', isLight());
+  }
+  function dlMd(name, txt, mime) {
+    const b = new Blob([txt], { type: mime || 'text/plain;charset=utf-8' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(b); a.download = name;
+    document.body.appendChild(a); a.click();
+    setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 400);
+  }
+  function buildSetDlg() {
     const dlg = panel.querySelector('#mgp-setdlg');
     const cur = defaultLLM();
     const tgts = sendTargets();
+    const opts = LLMS.concat(['clipboard']).map(function (t) {
+      const lb = t === 'clipboard' ? T().clipboard : (LLM_LABEL[t] || t);
+      return '<option value="' + t + '"' + (t === cur ? ' selected' : '') + '>' + lb + '</option>';
+    }).join('');
     dlg.innerHTML =
-      '<div class="sc"><b>' + T().setLlm + '</b><span class="chips" id="mgp-s-llm">' +
-        LLMS.map(function (t) { return '<button data-t="' + t + '" class="' + (t === cur ? 'on' : '') + '">' + (LLM_LABEL[t] || t) + '</button>'; }).join('') +
-      '</span></div>' +
-      '<div class="sc"><b>' + T().setSend + '</b><span class="hint">' + T().setSendHint + '</span>' +
+      '<span class="sttl">' + T().setTitle + '</span>' +
+      '<span class="shint">' + (LANG === 'fr' ? 'Catalogue : ' : 'Catalog: ') + cat().skills.length + ' skills · ' + cat().agents.length + ' ' + T().agentsN + ' — ' + (LANG === 'fr' ? 'tout est enregistré automatiquement' : 'everything is saved automatically') + '</span>' +
+      '<div class="row"><b>' + T().setTheme + '<span class="d">' + T().setThemeD + '</span></b>' +
+        '<select id="mgp-s-theme"><option value="dark">🌙 ' + (LANG === 'fr' ? 'Sombre' : 'Dark') + '</option><option value="light"' + (isLight() ? ' selected' : '') + '>☀️ ' + (LANG === 'fr' ? 'Clair' : 'Light') + '</option></select></div>' +
+      '<div class="row"><b>' + T().setLang + '<span class="d">' + T().setLangD + '</span></b>' +
+        '<select id="mgp-s-lang"><option value="fr">🇫🇷 Français</option><option value="en"' + (LANG === 'en' ? ' selected' : '') + '>🇬🇧 English</option></select></div>' +
+      '<div class="row"><b>' + T().setLlm + '<span class="d">' + T().setLlmD + '</span></b>' +
+        '<select id="mgp-s-llm">' + opts + '</select></div>' +
+      '<div class="row col"><b>' + T().setSend + '</b><span class="hint">' + T().setSendHint + '</span>' +
         '<span class="chips" id="mgp-s-send">' +
-        LLMS.map(function (t) { return '<button data-t="' + t + '" class="' + (tgts.indexOf(t) >= 0 ? 'on' : '') + '">' + (LLM_LABEL[t] || t) + '</button>'; }).join('') +
+        LLMS.concat(['clipboard']).map(function (t) {
+          const lb = t === 'clipboard' ? '⧉ ' + T().clipboard : (LLM_LABEL[t] || t);
+          return '<button data-t="' + t + '" class="' + (tgts.indexOf(t) >= 0 ? 'on' : '') + '">' + lb + '</button>';
+        }).join('') +
       '</span></div>' +
-      '<div class="srow"><button id="mgp-s-close">' + T().setClose + '</button><button id="mgp-s-done" class="prim">' + T().setDone + '</button></div>';
-    dlg.querySelectorAll('#mgp-s-llm button').forEach(function (b) {
-      b.onclick = function () { store.set('defaultLLM', b.dataset.t); renderLlmBtn(); renderSetDlg(); };
-    });
+      '<div class="row"><b>' + T().setFsc + '<span class="d">' + T().setFscD + '</span></b>' +
+        '<input type="checkbox" id="mgp-s-fsc" style="width:17px;height:17px;accent-color:#9945ff"' + (store.get('favShortcuts', true) ? ' checked' : '') + '></div>' +
+      '<div class="row"><b>' + T().setCfg + '<span class="d">' + T().setCfgD + '</span></b>' +
+        '<span style="display:flex;gap:6px"><button class="btn" id="mgp-s-exp">' + T().setExport + '</button><button class="btn" id="mgp-s-imp">' + T().setImport + '</button></span></div>' +
+      '<div class="row"><b>' + T().setXp + '<span class="d">' + T().setXpD + '</span></b>' +
+        '<button class="btn" id="mgp-s-xp">' + T().setXpBtn + '</button></div>' +
+      '<div class="srow"><button class="btn" id="mgp-s-close">' + T().setClose + '</button><button class="btn prim" id="mgp-s-done">' + T().setDone + '</button></div>' +
+      '<span class="sfoot">⚙ ' + (LANG === 'fr' ? 'Stockage local du site — rien n\'est envoyé en ligne' : 'Local site storage — nothing is sent online') + '</span>';
+    dlg.querySelector('#mgp-s-theme').onchange = function (e) { store.set('theme', e.target.value); applyTheme(); };
+    dlg.querySelector('#mgp-s-lang').onchange = function (e) { LANG = e.target.value; store.set('lang', LANG); applyLang(); buildSetDlg(); };
+    dlg.querySelector('#mgp-s-llm').onchange = function (e) { store.set('defaultLLM', e.target.value); renderLlmBtn(); };
     dlg.querySelectorAll('#mgp-s-send button').forEach(function (b) {
       b.onclick = function () {
         const arr = sendTargets(); const p = arr.indexOf(b.dataset.t);
         if (p >= 0) arr.splice(p, 1); else arr.push(b.dataset.t);
         store.set('sendTargets', arr);
-        renderSetDlg();
+        buildSetDlg();
       };
     });
+    dlg.querySelector('#mgp-s-fsc').onchange = function (e) { store.set('favShortcuts', e.target.checked); };
+    dlg.querySelector('#mgp-s-exp').onclick = function () {
+      dlMd('megapack-config.json', JSON.stringify({
+        version: 1, favs: favs(), customs: customs(), teams: teams(),
+        defaultLLM: defaultLLM(), sendTargets: sendTargets(),
+        favShortcuts: store.get('favShortcuts', true), theme: theme(), lang: LANG,
+      }, null, 2), 'application/json');
+    };
+    dlg.querySelector('#mgp-s-imp').onclick = function () {
+      const inp = document.createElement('input'); inp.type = 'file'; inp.accept = '.json,application/json';
+      inp.onchange = function () {
+        const f = inp.files[0]; if (!f) return;
+        const rd = new FileReader();
+        rd.onload = function () {
+          try {
+            const j = JSON.parse(rd.result);
+            if (Array.isArray(j.favs)) store.set('favs', j.favs);
+            if (Array.isArray(j.customs)) store.set('customs', j.customs);
+            if (Array.isArray(j.teams)) store.set('teams', j.teams);
+            if (typeof j.defaultLLM === 'string') store.set('defaultLLM', j.defaultLLM);
+            if (Array.isArray(j.sendTargets)) store.set('sendTargets', j.sendTargets);
+            if (typeof j.favShortcuts === 'boolean') store.set('favShortcuts', j.favShortcuts);
+            if (j.theme === 'light' || j.theme === 'dark') { store.set('theme', j.theme); applyTheme(); }
+            if (j.lang === 'fr' || j.lang === 'en') { LANG = j.lang; store.set('lang', LANG); applyLang(); }
+            renderLlmBtn(); buildSetDlg(); flash(dlg, T().setImported);
+          } catch (e) { flash(dlg, T().setImportErr); }
+        };
+        rd.readAsText(f);
+      };
+      inp.click();
+    };
+    dlg.querySelector('#mgp-s-xp').onclick = function () {
+      const cs = customs();
+      if (!cs.length) { flash(dlg, T().setXpNone); return; }
+      const md = '# Mes prompts ✍️ — MEGA PACK\n\n' + cs.map(function (c) {
+        return '## ' + c.name + '\n\n' + (c.desc || '') + '\n';
+      }).join('\n');
+      dlMd('mes-prompts-megapack.md', md, 'text/markdown;charset=utf-8');
+    };
     dlg.querySelector('#mgp-s-close').onclick = function () { dlg.classList.remove('open'); };
     dlg.querySelector('#mgp-s-done').onclick = function () { dlg.classList.remove('open'); flash(panel.querySelector('#mgp-set'), T().saved); };
   }
   panel.querySelector('#mgp-set').onclick = function () {
     const dlg = panel.querySelector('#mgp-setdlg');
     if (dlg.classList.contains('open')) { dlg.classList.remove('open'); return; }
-    renderSetDlg();
+    buildSetDlg();
     dlg.classList.add('open');
   };
   btn.onclick = function () { panel.classList.contains('open') ? closePanel() : openPanel(); };
@@ -791,5 +949,6 @@
   document.body.appendChild(panel);
   document.body.appendChild(tip);
   document.body.appendChild(ctx);
+  applyTheme();
   applyLang();
 })();

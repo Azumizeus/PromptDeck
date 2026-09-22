@@ -3,6 +3,22 @@
 Toutes les évolutions notables de **PromptDeck** (anciennement MEGA PACK) sont documentées ici.
 Format inspiré de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), versionnement [SemVer](https://semver.org/lang/fr/).
 
+## [2.5.2] - 2026-09-22
+
+### ⚙ Userscript 2.5.0 — le même panneau Réglages que l'app macOS
+- **⚙ Réglages reconstruit à l'identique de l'app** : rangées Thème, Langue, LLM par
+  défaut, Destinations du clic droit, Raccourcis favoris, Configuration, Mes prompts ✍️
+- **Thème clair ☀️** complet (panneau, barre titre, menus, tooltip, réglages — palette
+  identique à l'app `body.light`) + **thème sombre** par défaut, mémorisé par site
+- **Presse-papiers** comme destination et comme LLM par défaut (⧉ — copie sans ouvrir de chat)
+- **Raccourcis favoris ⌘1-9** fonctionnels : injecte les 9 premiers favoris (option activable,
+  panneau ouvert — comportement de l'app)
+- **Exporter / Importer la configuration** en JSON (favoris, ✍️, 🕸 équipes, LLM, destinations,
+  thème, langue) : la config voyage entre navigateurs et avec l'app
+- **Export « Mes prompts ✍️ » en Markdown** téléchargé (`mes-prompts-megapack.md`)
+- Banc d'essai inline régénéré (panel-demo-inline.html) — validé en live : 7 rangées,
+  9 chips destinations, thème clair actif, ⌘1 injectant le favori
+
 ## [2.5.1] - 2026-09-21
 
 ### 🪟 Userscript 2.4.1 — fenêtre manipulable + ⚙ Réglages intégrés
