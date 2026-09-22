@@ -5,6 +5,15 @@ Format inspiré de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), ver
 
 ## [2.5.1] - 2026-09-21
 
+### 🪟 Userscript 2.4.1 — fenêtre manipulable + ⚙ Réglages intégrés
+- **Bouton ⚙ Réglages dans la barre titre** : choix du **LLM par défaut** et des
+  **destinations du clic droit** (chips à choix multiple, l'ordre des clics = priorité du
+  menu) — persisté par site, le menu « Envoyer à » reflète immédiatement la sélection
+- **Déplacement** : la fenêtre se déplace en glissant la barre titre (position mémorisée)
+- **Redimensionnement** : poignée en haut à gauche (320×220 minimum, taille mémorisée)
+- **Minimiser réel** : 🟡 replie la fenêtre vers la barre titre seule (40 px), état mémorisé
+- **Élargir** : 🟢 cycle de tailles préréglées (420 → 560 → 680 px), mémorisé
+
 ### 🔧 Robustesse LLM — plafonds de tokens et reprise sur 429
 - **team-generate : plafond 8 192 tokens** — l'équipe complète (orchestrateur + agents +
   workflow) dépassait le plafond 2 048 et sortait un JSON tronqué inexploitable

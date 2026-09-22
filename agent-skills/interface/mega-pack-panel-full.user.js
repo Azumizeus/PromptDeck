@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         MEGA PACK Panel Luxe — Skills, Agents & Équipes pour tout LLM
 // @namespace    mega-pack
-// @version      2.4.0
+// @version      2.4.1
 // @description  Panneau flottant Édition Luxe dans une fenêtre macOS : 131 skills + 190 agents + 🕸 équipes + ✍️ prompts perso + ★ favoris, recherche instantanée, tooltip expert, clic droit multi-LLM, sélecteur de LLM par défaut, composeur ⌘-clic — injectable dans n'importe quelle conversation LLM (Claude, ChatGPT, Gemini, Perplexity, Mistral, OpenCode Web…)
 // @author       MEGA PACK
 // @match        *://*/*
@@ -3002,6 +3002,11 @@ window.MEGA_CATALOG = MEGA_CATALOG; // une const globale n'existe pas sur window
       mName: 'Nom', mPrompt: 'Prompt', mSave: 'Enregistrer', mDel: 'Supprimer', mCancel: 'Annuler',
       count: (n) => n + ' résultat' + (n > 1 ? 's' : ''),
       llm: 'LLM',
+      settings: '⚙ Réglages', settingsTitle: 'Réglages — LLM par défaut et destinations du clic droit',
+      setLlm: 'LLM par défaut (⌘⏎)', setSend: 'Destinations du clic droit (dans l\'ordre)',
+      setSendHint: 'Coche une ou plusieurs — l\'ordre des clics = priorité du menu',
+      setDone: 'Enregistrer', setClose: 'Fermer',
+      saved: '✓ Réglages enregistrés',
       sendTo: 'Envoyer à',
       copyPrompt: '⧉ Copier le prompt',
       favAdd: '★ Ajouter aux favoris', favDel: '☆ Retirer des favoris',
@@ -3040,6 +3045,11 @@ window.MEGA_CATALOG = MEGA_CATALOG; // une const globale n'existe pas sur window
       mName: 'Name', mPrompt: 'Prompt', mSave: 'Save', mDel: 'Delete', mCancel: 'Cancel',
       count: (n) => n + ' result' + (n > 1 ? 's' : ''),
       llm: 'LLM',
+      settings: '⚙ Settings', settingsTitle: 'Settings — default LLM and right-click destinations',
+      setLlm: 'Default LLM (⌘⏎)', setSend: 'Right-click destinations (in order)',
+      setSendHint: 'Check one or more — click order = menu priority',
+      setDone: 'Save', setClose: 'Close',
+      saved: '✓ Settings saved',
       sendTo: 'Send to',
       copyPrompt: '⧉ Copy prompt',
       favAdd: '★ Add to favorites', favDel: '☆ Remove from favorites',
@@ -3189,6 +3199,13 @@ window.MEGA_CATALOG = MEGA_CATALOG; // une const globale n'existe pas sur window
     background:#12131c;border:1px solid #31343f;border-radius:12px;display:none;flex-direction:column;
     box-shadow:0 24px 70px rgba(0,0,0,.6);font:13.5px/1.45 -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#eef0f6;overflow:hidden}
   #mgp-panel.open{display:flex}
+  #mgp-panel.min{height:38px !important}
+  #mgp-panel.min #mgp-head,#mgp-panel.min #mgp-qrow,#mgp-panel.min #mgp-tabs,#mgp-panel.min #mgp-selrow,
+  #mgp-panel.min #mgp-list,#mgp-panel.min #mgp-foot,#mgp-panel.min #mgp-rsz{display:none !important}
+  #mgp-rsz{position:absolute;top:0;left:0;width:16px;height:16px;cursor:nwse-resize;z-index:5}
+  #mgp-rsz::after{content:'';position:absolute;bottom:3px;left:3px;width:8px;height:8px;
+    border-left:2px solid #3a3e4c;border-bottom:2px solid #3a3e4c;border-radius:2px}
+  #mgp-rsz:hover::after{border-color:#9945ff}
   /* barre titre macOS : 3 feux + titre + boutons */
   #mgp-macbar{height:38px;flex:none;background:linear-gradient(#262833,#1d1f28);border-bottom:1px solid #101018;
     display:flex;align-items:center;gap:8px;padding:0 12px;user-select:none}
@@ -3203,6 +3220,20 @@ window.MEGA_CATALOG = MEGA_CATALOG; // une const globale n'existe pas sur window
   #mgp-macbar .lx button{border:1px solid #31343f;background:none;color:#a8adbd;cursor:pointer;
     font:600 10.5px/1 -apple-system,sans-serif;padding:4px 9px;border-radius:99px}
   #mgp-macbar .lx button:hover{border-color:#9945ff;color:#eef0f6}
+  #mgp-set{font-size:13px;line-height:1}
+  #mgp-setdlg{display:none;flex-direction:column;gap:10px}
+  #mgp-setdlg.open{display:flex}
+  #mgp-setdlg .sc{display:flex;flex-direction:column;gap:6px}
+  #mgp-setdlg .sc b{font-size:11.5px;color:#a8adbd}
+  #mgp-setdlg .hint{font-size:10.5px;color:#6b7080;font-weight:400}
+  #mgp-setdlg .chips{display:flex;flex-wrap:wrap;gap:6px}
+  #mgp-setdlg .chips button{border:1px solid #31343f;background:none;color:#a8adbd;cursor:pointer;font:inherit;font-size:11.5px;font-weight:600;padding:5px 11px;border-radius:99px}
+  #mgp-setdlg .chips button:hover{border-color:#9945ff;color:#eef0f6}
+  #mgp-setdlg .chips button.on{background:#9945ff;border-color:#9945ff;color:#fff}
+  #mgp-setdlg .srow{display:flex;gap:8px;justify-content:flex-end}
+  #mgp-setdlg .srow button{border:1px solid #23252f;background:none;color:#a8adbd;cursor:pointer;font:inherit;font-size:12px;font-weight:600;padding:7px 14px;border-radius:8px}
+  #mgp-setdlg .srow button.prim{background:#9945ff;border-color:#9945ff;color:#fff}
+  #mgp-setdlg .srow button:hover{border-color:#9945ff;color:#eef0f6}
   #mgp-head{padding:9px 14px;border-bottom:1px solid #23252f;display:flex;justify-content:space-between;align-items:center}
   #mgp-head b{font-size:12.5px;letter-spacing:.4px}
   #mgp-head .c{font-size:11px;color:#6b7080;margin-left:8px;font-variant-numeric:tabular-nums}
@@ -3300,7 +3331,8 @@ window.MEGA_CATALOG = MEGA_CATALOG; // une const globale n'existe pas sur window
       '<button class="l l-min" title="' + (LANG === 'fr' ? 'Réduire' : 'Minimize') + '"></button>' +
       '<button class="l l-max" title="' + (LANG === 'fr' ? 'Élargir / réduire' : 'Widen / shrink') + '"></button>' +
       '</span><span class="ttl">⚡ MEGA PACK — Édition Luxe</span>' +
-      '<span class="lx"><button id="mgp-newp" title="' + T().newpTitle + '">' + T().newp + '</button>' +
+      '<span class="lx"><button id="mgp-set" title="' + T().settingsTitle + '">' + T().settings + '</button>' +
+      '<button id="mgp-newp" title="' + T().newpTitle + '">' + T().newp + '</button>' +
       '<button id="mgp-lang">' + LANG.toUpperCase() + '</button></span></div>' +
     '<div id="mgp-head"><b>⚡ MEGA PACK</b><span class="c" id="mgp-counts"></span></div>' +
     '<div id="mgp-qrow"><span class="l">⌕</span><input id="mgp-q"></div>' +
@@ -3309,6 +3341,7 @@ window.MEGA_CATALOG = MEGA_CATALOG; // une const globale n'existe pas sur window
     '<div id="mgp-list"></div>' +
     '<div id="mgp-foot"><span id="mgp-llmwrap"><button id="mgp-llmbtn"></button><span id="mgp-llmmenu"></span></span>' +
       '<span>' + T().foot + '</span><span class="n" id="mgp-n"></span></div>' +
+    '<div id="mgp-setdlg"></div>' +
     '<div id="mgp-modal"><div id="mgp-mbox">' +
       '<h3>✍️ ' + (LANG === 'fr' ? 'Nouveau prompt' : 'New prompt') + '</h3>' +
       '<label>' + T().mName + '<input id="mgp-e-name" maxlength="60"></label>' +
@@ -3352,10 +3385,11 @@ window.MEGA_CATALOG = MEGA_CATALOG; // une const globale n'existe pas sur window
   // ── Menu contextuel (clic droit) ───────────────────────────────────────────
   function openCtx(el, it, cx, cy) {
     const x = it.x;
+    const tgts = sendTargets().length ? sendTargets() : [defaultLLM()]; // repli : LLM par défaut
     const items = [].concat(
       '<span class="ch">' + lname(x) + '</span>',
       '<span class="cs">' + T().sendTo + '</span>',
-      LLMS.map(function (t) { return '<button data-t="' + t + '">▸ ' + (LLM_LABEL[t] || t) + '</button>'; }).join(''),
+      tgts.map(function (t) { return '<button data-t="' + t + '">▸ ' + (LLM_LABEL[t] || t) + '</button>'; }).join(''),
       '<span class="cs">···</span>',
       '<button data-a="copy">' + T().copyPrompt + '</button>',
       '<button data-a="fav">' + (isFav(x.name) ? T().favDel : T().favAdd) + '</button>'
@@ -3560,12 +3594,103 @@ window.MEGA_CATALOG = MEGA_CATALOG; // une const globale n'existe pas sur window
   // ── Ouverture / fermeture + clavier (aligné Luxe) ──────────────────────────
   function openPanel() { panel.classList.add('open'); renderCounts(); renderTabs(); renderSelRow(); renderLlmBtn(); render(); panel.querySelector('#mgp-q').focus(); }
   function closePanel() { panel.classList.remove('open'); }
-  // 🔴 fermer = ferme le panneau · 🟡 réduire = idem · 🟢 élargir = fenêtre plus large
+  // 🔴 fermer = ferme le panneau · 🟡 réduire = replie vers la barre titre · 🟢 élargir = cycle de tailles
   panel.querySelector('.l-close').onclick = closePanel;
-  panel.querySelector('.l-min').onclick = closePanel;
+  panel.querySelector('.l-min').onclick = function () {
+    panel.classList.toggle('min');
+    store.set('minimized', panel.classList.contains('min'));
+  };
+  if (store.get('minimized', false)) panel.classList.add('min');
+  const SIZES = [[420, '74vh'], [560, '80vh'], [680, '90vh'], [420, '74vh']];
+  let sizeIdx = store.get('sizeIdx', 0);
   panel.querySelector('.l-max').onclick = function () {
-    panel.style.width = panel.style.width === '640px' ? '' : '640px';
-    panel.style.height = panel.style.height === '90vh' ? '' : '90vh';
+    sizeIdx = (sizeIdx + 1) % (SIZES.length - 1);
+    store.set('sizeIdx', sizeIdx);
+    panel.style.width = SIZES[sizeIdx][0] + 'px';
+    panel.style.height = SIZES[sizeIdx][1];
+  };
+  if (sizeIdx > 0) { panel.style.width = SIZES[sizeIdx][0] + 'px'; panel.style.height = SIZES[sizeIdx][1]; }
+  // ── Déplacement : glisser la barre titre ──────────────────────────────────
+  (function () {
+    const bar = panel.querySelector('#mgp-macbar');
+    let sx = 0, sy = 0, sl = null, st = null, dragging = false;
+    bar.addEventListener('pointerdown', function (e) {
+      if (e.target.closest('button')) return; // les boutons restent cliquables
+      const r = panel.getBoundingClientRect();
+      sx = e.clientX; sy = e.clientY; sl = r.left; st = r.top; dragging = true;
+      panel.style.left = r.left + 'px'; panel.style.top = r.top + 'px';
+      panel.style.right = 'auto'; panel.style.bottom = 'auto';
+      bar.setPointerCapture(e.pointerId);
+    });
+    bar.addEventListener('pointermove', function (e) {
+      if (!dragging) return;
+      const l = Math.max(4, Math.min(e.clientX - sx + sl, window.innerWidth - 60));
+      const t = Math.max(4, Math.min(e.clientY - sy + st, window.innerHeight - 40));
+      panel.style.left = l + 'px'; panel.style.top = t + 'px';
+    });
+    bar.addEventListener('pointerup', function () {
+      if (!dragging) return;
+      dragging = false;
+      const r = panel.getBoundingClientRect();
+      store.set('pos', { left: r.left, top: r.top });
+    });
+    const pos = store.get('pos', null);
+    if (pos && pos.left != null) { panel.style.left = pos.left + 'px'; panel.style.top = pos.top + 'px'; panel.style.right = 'auto'; panel.style.bottom = 'auto'; }
+  })();
+  // ── Redimensionnement : poignée en haut à gauche (la fenêtre s'ouvre vers le bas-droite) ──
+  (function () {
+    const h = document.createElement('div'); h.id = 'mgp-rsz'; panel.appendChild(h);
+    let sx = 0, sy = 0, sw = 0, sh = 0, rs = false;
+    h.addEventListener('pointerdown', function (e) {
+      e.preventDefault(); e.stopPropagation();
+      const r = panel.getBoundingClientRect();
+      sx = e.clientX; sy = e.clientY; sw = r.width; sh = r.height; rs = true;
+      h.setPointerCapture(e.pointerId);
+    });
+    h.addEventListener('pointermove', function (e) {
+      if (!rs) return;
+      const w = Math.max(320, Math.min(sw + (sx - e.clientX), window.innerWidth - 24));
+      const ht = Math.max(220, Math.min(sh + (sy - e.clientY), window.innerHeight - 24));
+      panel.style.width = w + 'px'; panel.style.height = ht + 'px';
+    });
+    h.addEventListener('pointerup', function () { if (rs) { rs = false; store.set('customSize', { w: panel.offsetWidth, h: panel.offsetHeight }); } });
+    const cs = store.get('customSize', null);
+    if (cs) { panel.style.width = cs.w + 'px'; panel.style.height = cs.h + 'px'; }
+  })();
+  // ── Réglages (⚙) : LLM par défaut + destinations du clic droit ──────────
+  const sendTargets = () => store.get('sendTargets', ['claude', 'chatgpt']);
+  function renderSetDlg() {
+    const dlg = panel.querySelector('#mgp-setdlg');
+    const cur = defaultLLM();
+    const tgts = sendTargets();
+    dlg.innerHTML =
+      '<div class="sc"><b>' + T().setLlm + '</b><span class="chips" id="mgp-s-llm">' +
+        LLMS.map(function (t) { return '<button data-t="' + t + '" class="' + (t === cur ? 'on' : '') + '">' + (LLM_LABEL[t] || t) + '</button>'; }).join('') +
+      '</span></div>' +
+      '<div class="sc"><b>' + T().setSend + '</b><span class="hint">' + T().setSendHint + '</span>' +
+        '<span class="chips" id="mgp-s-send">' +
+        LLMS.map(function (t) { return '<button data-t="' + t + '" class="' + (tgts.indexOf(t) >= 0 ? 'on' : '') + '">' + (LLM_LABEL[t] || t) + '</button>'; }).join('') +
+      '</span></div>' +
+      '<div class="srow"><button id="mgp-s-close">' + T().setClose + '</button><button id="mgp-s-done" class="prim">' + T().setDone + '</button></div>';
+    dlg.querySelectorAll('#mgp-s-llm button').forEach(function (b) {
+      b.onclick = function () { store.set('defaultLLM', b.dataset.t); renderLlmBtn(); renderSetDlg(); };
+    });
+    dlg.querySelectorAll('#mgp-s-send button').forEach(function (b) {
+      b.onclick = function () {
+        const arr = sendTargets(); const p = arr.indexOf(b.dataset.t);
+        if (p >= 0) arr.splice(p, 1); else arr.push(b.dataset.t);
+        store.set('sendTargets', arr);
+        renderSetDlg();
+      };
+    });
+    dlg.querySelector('#mgp-s-close').onclick = function () { dlg.classList.remove('open'); };
+    dlg.querySelector('#mgp-s-done').onclick = function () { dlg.classList.remove('open'); flash(panel.querySelector('#mgp-set'), T().saved); };
+  }
+  panel.querySelector('#mgp-set').onclick = function () {
+    const dlg = panel.querySelector('#mgp-setdlg');
+    if (dlg.classList.contains('open')) { dlg.classList.remove('open'); return; }
+    renderSetDlg();
+    dlg.classList.add('open');
   };
   btn.onclick = function () { panel.classList.contains('open') ? closePanel() : openPanel(); };
   panel.querySelector('#mgp-newp').onclick = function () { openModal(null); };
