@@ -3,6 +3,18 @@
 Toutes les évolutions notables de **PromptDeck** (anciennement MEGA PACK) sont documentées ici.
 Format inspiré de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), versionnement [SemVer](https://semver.org/lang/fr/).
 
+## [2.8.0] - 2026-09-22
+
+### 🧠 Atelier IA dans Tampermonkey — clés API + « ✨ Générer » (userscript)
+- **⚙ Réglages → 🧠 Intelligence** : choix du fournisseur (**Groq, OpenAI, Anthropic, OpenRouter,
+  Mistral, Cerebras, Gemini**), **clé API** et modèle optionnel — la clé est stockée via `GM_setValue`
+  (**partagée entre tous tes sites**, hors du localStorage de chaque page) avec repli localStorage
+- **✍️ Créateur → bouton « ✨ Générer avec l'IA »** : décrit un besoin, l'IA rédige le prompt complet
+  (system-prompt senior 150-350 mots), tu relis, ajustes, enregistres — comme l'Atelier de l'app macOS
+- Requêtes via `GM_xmlhttpRequest` (passe les CORS, y compris Anthropic) + `@connect` déclarés ;
+  **garde-fou** : message explicite si le script n'est pas mis à jour dans Tampermonkey
+- **App macOS** : croix ✕ « Fermer » en haut à droite de l'Atelier (en plus du bouton Fermer)
+
 ## [2.7.0] - 2026-09-22
 
 ### 🎓 Visite enrichie (userscript) : équipes + création d'experts, icône 🎓 — push initial du repo

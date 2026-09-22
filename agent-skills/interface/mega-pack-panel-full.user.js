@@ -1,11 +1,22 @@
 // ==UserScript==
 // @name         MEGA PACK Panel Luxe — Skills, Agents & Équipes pour tout LLM
 // @namespace    mega-pack
-// @version      2.7.0
+// @version      2.8.0
 // @description  Panneau flottant Édition Luxe dans une fenêtre macOS : 131 skills + 190 agents + 🕸 équipes + ✍️ prompts perso + ★ favoris, recherche instantanée, tooltip expert, clic droit multi-LLM, sélecteur de LLM par défaut, composeur ⌘-clic — injectable dans n'importe quelle conversation LLM (Claude, ChatGPT, Gemini, Perplexity, Mistral, OpenCode Web…)
 // @author       MEGA PACK
 // @match        *://*/*
-// @grant        none
+// @grant        GM_xmlhttpRequest
+// @grant        GM_setValue
+// @grant        GM_getValue
+// @grant        GM_deleteValue
+// @connect      api.groq.com
+// @connect      api.openai.com
+// @connect      api.anthropic.com
+// @connect      openrouter.ai
+// @connect      api.mistral.ai
+// @connect      api.cerebras.ai
+// @connect      api.cohere.com
+// @connect      generativelanguage.googleapis.com
 // @run-at       document-idle
 // @noframes
 // ==/UserScript==
@@ -2983,7 +2994,60 @@ window.MEGA_CATALOG = MEGA_CATALOG; // une const globale n'existe pas sur window
   const store = {
     get(k, d) { try { const v = localStorage.getItem('mgp.' + k); return v ? JSON.parse(v) : d; } catch (e) { return d; } },
     set(k, v) { try { localStorage.setItem('mgp.' + k, JSON.stringify(v)); } catch (e) {} },
+    del(k) { try { localStorage.removeItem('mgp.' + k); } catch (e) {} },
   };
+  // 🔑 Clés API : stockées via GM_* (partagées entre TOUS les sites, hors localStorage du site)
+  // Fallback localStorage si GM_* indisponible (page sans Tampermonkey, anciens gestionnaires)
+  const gm = {
+    get(k, d) { try { if (typeof GM_getValue === 'function') { const v = GM_getValue('mgp.' + k); return v === undefined ? d : v; } } catch (e) {} return store.get('gm.' + k, d); },
+    set(k, v) { try { if (typeof GM_setValue === 'function') return void GM_setValue('mgp.' + k, v); } catch (e) {} store.set('gm.' + k, v); },
+    del(k) { try { if (typeof GM_deleteValue === 'function') return void GM_deleteValue('mgp.' + k); } catch (e) {} store.del('gm.' + k); },
+  };
+
+  // ── 🧠 Atelier IA : fournisseurs (comme l'app, Réglages → Intelligence) ──
+  const AI_PROVIDERS = [
+    { id: 'groq', label: 'Groq (gratuit, ultra-rapide)', url: 'https://api.groq.com/openai/v1/chat/completions', model: 'llama-3.3-70b-versatile', kind: 'openai' },
+    { id: 'openai', label: 'OpenAI (GPT-4o…)', url: 'https://api.openai.com/v1/chat/completions', model: 'gpt-4o-mini', kind: 'openai' },
+    { id: 'anthropic', label: 'Anthropic (Claude…)', url: 'https://api.anthropic.com/v1/messages', model: 'claude-3-5-haiku-latest', kind: 'anthropic' },
+    { id: 'openrouter', label: 'OpenRouter (multi-modèles)', url: 'https://openrouter.ai/api/v1/chat/completions', model: 'anthropic/claude-3.5-haiku', kind: 'openai' },
+    { id: 'mistral', label: 'Mistral AI', url: 'https://api.mistral.ai/v1/chat/completions', model: 'mistral-small-latest', kind: 'openai' },
+    { id: 'cerebras', label: 'Cerebras (gratuit, rapide)', url: 'https://api.cerebras.ai/v1/chat/completions', model: 'llama-3.3-70b', kind: 'openai' },
+    { id: 'gemini', label: 'Google Gemini', url: 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions', model: 'gemini-1.5-flash', kind: 'openai' },
+  ];
+  function aiProvider() {
+    const id = gm.get('ai.provider', 'groq');
+    return AI_PROVIDERS.find(function (p) { return p.id === id; }) || AI_PROVIDERS[0];
+  }
+  function aiKey() { return String(gm.get('ai.key', '') || '').trim(); }
+  function aiModel() { return String(gm.get('ai.model', '') || '').trim() || aiProvider().model; }
+  function aiReady() { return !!aiKey(); }
+  // Appel LLM unifié (GM_xmlhttpRequest → passe les CORS, nécessaire pour Anthropic)
+  function aiGenerate(system, user, cb) {
+    const p = aiProvider();
+    const key = aiKey();
+    if (!key) return cb({ error: 'nokey' });
+    if (typeof GM_xmlhttpRequest !== 'function') return cb({ error: "GM_xmlhttpRequest indisponible — mets à jour le script dans Tampermonkey (>= 2.8.0, grants GM_* requis)" });
+    const body = p.kind === 'anthropic'
+      ? { model: aiModel(), max_tokens: 2048, system: system, messages: [{ role: 'user', content: user }] }
+      : { model: aiModel(), max_tokens: 2048, messages: [{ role: 'system', content: system }, { role: 'user', content: user }] };
+    const headers = { 'Content-Type': 'application/json' };
+    if (p.kind === 'anthropic') { headers['x-api-key'] = key; headers['anthropic-version'] = '2023-06-01'; headers['anthropic-dangerous-direct-browser-access'] = 'true'; }
+    else headers['Authorization'] = 'Bearer ' + key;
+    GM_xmlhttpRequest({
+      method: 'POST', url: p.url, headers: headers, data: JSON.stringify(body), timeout: 60000,
+      onload: function (r) {
+        try {
+          const j = JSON.parse(r.responseText);
+          if (r.status >= 400) return cb({ error: (j.error && (j.error.message || j.error.type)) || ('HTTP ' + r.status) });
+          const txt = (j.choices && j.choices[0] && j.choices[0].message && j.choices[0].message.content)
+            || (j.content && j.content[0] && j.content[0].text) || '';
+          cb({ text: txt });
+        } catch (e) { cb({ error: 'Réponse illisible (HTTP ' + r.status + ')' }); }
+      },
+      onerror: function () { cb({ error: 'Réseau bloqué — vérifie la connexion' }); },
+      ontimeout: function () { cb({ error: 'Délai dépassé (60 s)' }); },
+    });
+  }
   let LANG = store.get('lang', 'fr');
 
   const I18N = {
@@ -3000,6 +3064,13 @@ window.MEGA_CATALOG = MEGA_CATALOG; // une const globale n'existe pas sur window
       compose: '✚ Composer ({n})',
       newp: '＋', newpTitle: 'Nouveau prompt ✍️',
       mName: 'Nom', mPrompt: 'Prompt', mSave: 'Enregistrer', mDel: 'Supprimer', mCancel: 'Annuler',
+      setAi: '🧠 Intelligence — clé API', setAiD: 'Pour le bouton ✨ Générer : l\'IA rédige tes agents, skills et prompts',
+      setAiProv: 'Fournisseur', setAiKey: 'Clé API', setAiModel: 'Modèle (option)', setAiSave: 'Enregistrer', setAiDel: 'Effacer',
+      setAiOk: '✓ Clé enregistrée — ✨ Générer est actif dans le créateur ✍️', setAiCleared: 'Clé effacée', setAiPlaceholder: 'gsk_… / sk-… (stockée hors du site, partagée entre tes sites)',
+      aiBtn: '✨ Générer avec l\'IA', aiBusy: '⏳ Génération…', aiDone: '✓ Généré — relis, ajuste puis enregistre',
+      aiErr: '✗ Échec IA', aiNeedKey: 'Ajoute une clé API dans ⚙ Réglages → Intelligence',
+      aiSys: 'Tu es un expert senior en création de prompts système pour agents IA et skills (procédures d\'expertise). Rédige en français clair et actionnable. Réponds UNIQUEMENT avec le contenu demandé, sans préambule ni balises markdown de code.',
+      aiUser: 'Rédige le prompt (system-prompt complet, 150-350 mots) pour cet expert : « {NAME} ».\nBesoin décrit par l\'utilisateur : {DESC}',
       count: (n) => n + ' résultat' + (n > 1 ? 's' : ''),
       llm: 'LLM',
       settings: '⚙ Réglages', settingsTitle: 'Réglages — comme l\'app macOS',
@@ -3058,6 +3129,13 @@ window.MEGA_CATALOG = MEGA_CATALOG; // une const globale n'existe pas sur window
       compose: '✚ Compose ({n})',
       newp: '＋', newpTitle: 'New prompt ✍️',
       mName: 'Name', mPrompt: 'Prompt', mSave: 'Save', mDel: 'Delete', mCancel: 'Cancel',
+      setAi: '🧠 Intelligence — API key', setAiD: 'For the ✨ Generate button: the AI writes your agents, skills and prompts',
+      setAiProv: 'Provider', setAiKey: 'API key', setAiModel: 'Model (optional)', setAiSave: 'Save', setAiDel: 'Clear',
+      setAiOk: '✓ Key saved — ✨ Generate is active in the ✍️ creator', setAiCleared: 'Key cleared', setAiPlaceholder: 'gsk_… / sk-… (stored off-site, shared across your sites)',
+      aiBtn: '✨ Generate with AI', aiBusy: '⏳ Generating…', aiDone: '✓ Generated — review, adjust, then save',
+      aiErr: '✗ AI failed', aiNeedKey: 'Add an API key in ⚙ Settings → Intelligence',
+      aiSys: 'You are a senior expert at writing system prompts for AI agents and skills (expertise procedures). Write in clear, actionable English. Reply ONLY with the requested content, no preamble, no code fences.',
+      aiUser: 'Write the full system prompt (150-350 words) for this expert: "{NAME}".\nUser-described need: {DESC}',
       count: (n) => n + ' result' + (n > 1 ? 's' : ''),
       llm: 'LLM',
       settings: '⚙ Settings', settingsTitle: 'Settings — same as the macOS app',
@@ -3449,7 +3527,7 @@ window.MEGA_CATALOG = MEGA_CATALOG; // une const globale n'existe pas sur window
       '<h3>✍️ ' + (LANG === 'fr' ? 'Nouveau prompt' : 'New prompt') + '</h3>' +
       '<label>' + T().mName + '<input id="mgp-e-name" maxlength="60"></label>' +
       '<label>' + T().mPrompt + '<textarea id="mgp-e-txt" rows="7" maxlength="2000"></textarea></label>' +
-      '<div id="mgp-erow"><button id="mgp-e-save">' + T().mSave + '</button><button id="mgp-e-del">' + T().mDel + '</button><span style="flex:1"></span><button id="mgp-e-x">' + T().mCancel + '</button></div>' +
+      '<div id="mgp-erow"><button id="mgp-e-ai" title="' + T().setAiD + '">' + T().aiBtn + '</button><button id="mgp-e-save">' + T().mSave + '</button><button id="mgp-e-del">' + T().mDel + '</button><span style="flex:1"></span><button id="mgp-e-x">' + T().mCancel + '</button></div>' +
     '</div></div>';
 
   const tip = document.createElement('div');
@@ -3698,6 +3776,23 @@ window.MEGA_CATALOG = MEGA_CATALOG; // une const globale n'existe pas sur window
     closeModal(); render();
   };
   panel.querySelector('#mgp-e-x').onclick = closeModal;
+  // ✨ Générer avec l'IA : remplit le prompt depuis le nom + une description libre
+  panel.querySelector('#mgp-e-ai').onclick = function () {
+    const btn = panel.querySelector('#mgp-e-ai');
+    const name = panel.querySelector('#mgp-e-name').value.trim();
+    const desc = panel.querySelector('#mgp-e-txt').value.trim();
+    if (!name && !desc) { flash(panel.querySelector('#mgp-modal'), T().aiNeedKey === undefined ? '' : (LANG === 'fr' ? 'Donne au moins un nom ou décris le besoin' : 'Give at least a name or describe the need')); return; }
+    if (!aiReady()) { flash(panel.querySelector('#mgp-modal'), T().aiNeedKey); return; }
+    const old = btn.textContent;
+    btn.disabled = true; btn.textContent = T().aiBusy;
+    const user = T().aiUser.replace('{NAME}', name || desc.slice(0, 60)).replace('{DESC}', desc || name);
+    aiGenerate(T().aiSys, user, function (r) {
+      btn.disabled = false; btn.textContent = old;
+      if (r.error) { flash(panel.querySelector('#mgp-modal'), T().aiErr + ' — ' + r.error); return; }
+      panel.querySelector('#mgp-e-txt').value = String(r.text || '').trim().slice(0, 2000);
+      flash(panel.querySelector('#mgp-modal'), T().aiDone);
+    });
+  };
   panel.querySelector('#mgp-modal').addEventListener('click', function (e) { if (e.target.id === 'mgp-modal') closeModal(); });
   panel.querySelector('#mgp-e-txt').addEventListener('keydown', function (e) {
     if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') panel.querySelector('#mgp-e-save').onclick();
@@ -3829,6 +3924,16 @@ window.MEGA_CATALOG = MEGA_CATALOG; // une const globale n'existe pas sur window
         '<span style="display:flex;gap:6px"><button class="btn" id="mgp-s-exp">' + T().setExport + '</button><button class="btn" id="mgp-s-imp">' + T().setImport + '</button></span></div>' +
       '<div class="row"><b>' + T().setXp + '<span class="d">' + T().setXpD + '</span></b>' +
         '<button class="btn" id="mgp-s-xp">' + T().setXpBtn + '</button></div>' +
+      '<div class="row col"><b>' + T().setAi + '<span class="d">' + T().setAiD + '</span></b>' +
+        '<span class="chips" style="flex-wrap:wrap;gap:6px">' +
+          '<select id="mgp-s-aiprov" style="flex:1;min-width:150px">' + AI_PROVIDERS.map(function (p) {
+            return '<option value="' + p.id + '"' + (p.id === aiProvider().id ? ' selected' : '') + '>' + p.label + '</option>';
+          }).join('') + '</select>' +
+          '<input id="mgp-s-aikey" type="password" placeholder="' + T().setAiPlaceholder + '" value="' + (aiKey() ? '••••••••' : '') + '" style="flex:1;min-width:150px">' +
+          '<input id="mgp-s-aimodel" placeholder="' + T().setAiModel + ' : ' + aiProvider().model + '" value="' + (gm.get('ai.model', '') || '') + '" style="flex:1;min-width:130px">' +
+          '<button class="btn" id="mgp-s-aisave">' + T().setAiSave + '</button>' +
+          (aiKey() ? '<button class="btn" id="mgp-s-aidel">' + T().setAiDel + '</button>' : '') +
+        '</span></div>' +
       '<div class="srow"><button class="btn" id="mgp-s-close">' + T().setClose + '</button><button class="btn prim" id="mgp-s-done">' + T().setDone + '</button></div>' +
       '<span class="sfoot">⚙ ' + (LANG === 'fr' ? 'Stockage local du site — rien n\'est envoyé en ligne' : 'Local site storage — nothing is sent online') + '</span>';
     dlg.querySelector('#mgp-s-theme').onchange = function (e) { store.set('theme', e.target.value); applyTheme(); };
@@ -3873,6 +3978,17 @@ window.MEGA_CATALOG = MEGA_CATALOG; // une const globale n'existe pas sur window
       };
       inp.click();
     };
+    dlg.querySelector('#mgp-s-aisave').onclick = function () {
+      const k = dlg.querySelector('#mgp-s-aikey').value.trim();
+      const m = dlg.querySelector('#mgp-s-aimodel').value.trim();
+      if (k && k !== '••••••••') gm.set('ai.key', k);
+      gm.set('ai.model', m);
+      gm.set('ai.provider', dlg.querySelector('#mgp-s-aiprov').value);
+      flash(dlg, aiReady() ? T().setAiOk : T().aiNeedKey);
+      buildSetDlg();
+    };
+    const aidel = dlg.querySelector('#mgp-s-aidel');
+    if (aidel) aidel.onclick = function () { gm.del('ai.key'); flash(dlg, T().setAiCleared); buildSetDlg(); };
     dlg.querySelector('#mgp-s-xp').onclick = function () {
       const cs = customs();
       if (!cs.length) { flash(dlg, T().setXpNone); return; }

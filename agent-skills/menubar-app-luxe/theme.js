@@ -215,7 +215,10 @@ body{font:13.5px/1.45 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-se
 #wbox{width:min(500px,94%);max-height:92%;overflow-y:auto;background:var(--card);
   border:1px solid var(--line2);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:11px;
   box-shadow:0 24px 70px rgba(0,0,0,.5);scrollbar-width:thin}
-#wbox h3{font-size:14px;font-weight:700}
+#wbox h3{font-size:14px;font-weight:700;display:flex;align-items:center;gap:8px}
+#w-close{margin-left:auto;border:1px solid var(--line);background:none;color:var(--txt2);cursor:pointer;
+  font:700 12px/1 inherit;padding:5px 10px;border-radius:99px;flex:none}
+#w-close:hover{border-color:#e5484d;color:#e5484d;background:rgba(229,72,77,.08)}
 .wk{display:flex;align-items:center;gap:10px}
 .wl{font-size:11.5px;color:var(--txt2);font-weight:600;flex:none}
 .wseg{display:flex;border:1px solid var(--line);border-radius:9px;overflow:hidden}

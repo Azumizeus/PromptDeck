@@ -262,7 +262,7 @@ APP_PARENT.insertAdjacentHTML('afterbegin', `
   <div id="toast" role="status" aria-live="polite" hidden></div>
   <div id="wmodal" role="dialog" aria-modal="true" aria-label="${T.atelierT}" hidden>
     <div id="wbox">
-      <h3>${T.atelierT}</h3>
+      <h3>${T.atelierT}<button id="w-close" title="${LANG === 'fr' ? 'Fermer l\'atelier (Échap)' : 'Close the workshop (Esc)'}" aria-label="${LANG === 'fr' ? 'Fermer' : 'Close'}">✕</button></h3>
       <div class="wk">
         <span class="wl">${T.atelierKind}</span>
         <span class="wseg" role="radiogroup">
@@ -934,6 +934,7 @@ let currentRunTeam = '';
 function closeWorkshop() { wmodal.hidden = true; }
 $('atb').onclick = openWorkshop;
 $('w-x').onclick = closeWorkshop;
+$('w-close').onclick = closeWorkshop;
 
 wgen.onclick = async (payload) => {
   if (W.busy) return;
