@@ -5,7 +5,7 @@ const fs = require('fs');
 const path = require('path');
 
 // Le probe remplace main.js : il doit tenir le MÊME contrat IPC que lui
-const PREFS = { favorites: [], recents: [], customs: [], defaultLLM: 'claude', lang: 'fr', theme: 'dark', hasApi: { groq: true } };
+const PREFS = { favorites: [], recents: [], customs: [], defaultLLM: 'claude', lang: 'fr', theme: 'dark', hasApi: { groq: true, mistral: true, cerebras: true, cohere: true } };
 ipcMain.on('copy', (e, t) => clipboard.writeText(String(t)));
 ipcMain.on('hide', () => {});
 ipcMain.on('open-llm', () => {});

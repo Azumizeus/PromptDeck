@@ -224,9 +224,11 @@ body{font:13.5px/1.45 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-se
 .wseg button[aria-checked="true"]{background:var(--card2);color:var(--txt)}
 .wl2{display:flex;flex-direction:column;gap:5px;font-size:11.5px;color:var(--txt2);font-weight:600}
 #w-intent{background:var(--card2);border:1px solid var(--line);border-radius:8px;color:var(--txt);
-  font:inherit;font-size:12.5px;padding:8px 10px;outline:none;resize:vertical;min-height:58px}
+  font:inherit;font-size:12.5px;padding:8px 10px;outline:none;resize:vertical;min-height:110px;
+  line-height:1.5;scrollbar-width:thin}
 #w-intent:focus{border-color:var(--vio)}
-#w-intent::placeholder{color:var(--mut)}
+#w-intent::placeholder{color:var(--mut);white-space:pre-line}
+#w-intent-help button:hover{border-color:var(--vio);color:var(--txt)}
 .wchk{display:flex;gap:8px;align-items:center;font-size:11.5px;color:var(--txt2);cursor:pointer}
 .wchk input{accent-color:var(--vio);width:15px;height:15px}
 .wk select{background:var(--card2);color:var(--txt);border:1px solid var(--line);

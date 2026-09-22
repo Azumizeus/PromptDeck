@@ -1,10 +1,11 @@
 // MEGA PACK Menu Bar App — process principal Electron (macOS)
 // Panneau flottant sous la barre de menus : raccourci global (⌥Espace par défaut) → recherche globale,
 // ⏎ copie le prompt, ⌘⏎ ouvre Claude, ⇧⏎ ouvre ChatGPT.
-const { app, BrowserWindow, Tray, Menu, globalShortcut, clipboard, shell, screen, nativeImage, dialog } = require('electron');
+const { app, BrowserWindow, Tray, Menu, globalShortcut, clipboard, shell, screen, nativeImage, dialog, ipcMain } = require('electron');
 const { execFile } = require('child_process');
 const fs = require('fs');
 const path = require('path');
+const os = require('os');
 
 // V2 : dossier de données isolé de la V1 — les deux versions peuvent tourner côte à côte
 // (sinon le verrou mono-instance de la V1 fait quitter la V2 en silence !).
@@ -42,9 +43,52 @@ function saveWorkshops(kind, list) {
   try { fs.writeFileSync(workshopsPath(kind), JSON.stringify(list, null, 2)); } catch (e) { /* best effort */ }
 }
 
+// ── Clés du shell : lance depuis le Finder, l'app ne voit pas le .zshrc →
+// on le charge une fois au boot (variables déjà présentes : on n'écrase pas).
+(function loadShellKeys() {
+  try {
+    const rc = fs.readFileSync(path.join(os.homedir(), '.zshrc'), 'utf8');
+    const re = /^\s*export\s+([A-Z0-9_]+)="?([^"\n#]+)"?/gm;
+    let m, n = 0;
+    while ((m = re.exec(rc))) {
+      const v = m[2].trim();
+      if (v && !process.env[m[1]]) { process.env[m[1]] = v; n++; }
+    }
+    if (n) console.log(`[mgp] ${n} variable(s) de shell chargée(s) depuis ~/.zshrc`);
+  } catch (e) { /* pas de .zshrc : tant pis */ }
+})();
+
+// ── Clés partagées avec OpenCode (~/.config/opencode + auth.json) : Gemini,
+// omniroute, FreeLLM… La config opencode.json passe avant auth.json (clés plus fraîches).
+const OPENCODE_KEYS = {};
+(function loadOpenCodeKeys() {
+  const home = os.homedir();
+  const push = (k, v) => { if (v && !OPENCODE_KEYS[k]) OPENCODE_KEYS[k] = v; };
+  try {
+    const oc = JSON.parse(fs.readFileSync(path.join(home, '.config/opencode/opencode.json'), 'utf8'));
+    for (const [name, p] of Object.entries(oc.provider || {})) {
+      const k = p && p.options && p.options.apiKey;
+      if (typeof k === 'string' && k) push(name.replace(/-direct$/, ''), k);
+    }
+  } catch (e) { /* pas de config opencode */ }
+  try {
+    const au = JSON.parse(fs.readFileSync(path.join(home, '.local/share/opencode/auth.json'), 'utf8'));
+    for (const [name, rec] of Object.entries(au || {})) {
+      const k = rec && typeof rec === 'object' ? (rec.key || rec.access || rec.api_key || (rec.tokens || {}).access) : '';
+      if (k) push(name === 'google' ? 'gemini' : name.replace(/-direct$/, ''), k);
+    }
+  } catch (e) { /* pas d'auth.json */ }
+})();
+
 // ── Fournisseurs LLM (API clé) — tous en OpenAI-compatible sauf Anthropic ──
 const PROVIDERS = {
-  groq: { label: 'Groq', base: 'https://api.groq.com/openai/v1/chat/completions', models: 'llama-3.3-70b-versatile, llama3-8b-8192, mixtral-8x7b-32768', style: 'openai' },
+  groq: { label: 'Groq', base: 'https://api.groq.com/openai/v1/chat/completions', models: 'openai/gpt-oss-120b, openai/gpt-oss-20b, groq/compound, qwen/qwen3.8-27b', style: 'openai' },
+  gemini: { label: 'Google Gemini', base: 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions', models: 'gemini-3.6-flash, gemini-flash-latest, gemini-flash-lite-latest', style: 'openai' },
+  omniroute: { label: 'OmniRoute (routeur local)', base: 'http://127.0.0.1:20128/v1/chat/completions', models: 'auto/best-coding, auto/best-reasoning, auto/best-fast, felo/felo-search', style: 'openai' },
+  mistral: { label: 'Mistral AI', base: 'https://api.mistral.ai/v1/chat/completions', models: 'mistral-medium-latest, mistral-small-latest, magistral-small-latest', style: 'openai' },
+  cerebras: { label: 'Cerebras', base: 'https://api.cerebras.ai/v1/chat/completions', models: 'gpt-oss-120b, qwen-3.8-27b', style: 'openai' },
+  cohere: { label: 'Cohere', base: 'https://api.cohere.com/compatibility/v1/chat/completions', models: 'command-a-03-2025, command-r-plus-08-2024, c4ai-aya-expanse-32b', style: 'openai' },
+  freellm: { label: 'FreeLLM API (routeur local)', base: 'http://127.0.0.1:8000/v1/chat/completions', models: 'auto (route le catalogue du routeur)', style: 'openai' },
   openai: { label: 'OpenAI', base: 'https://api.openai.com/v1/chat/completions', models: 'gpt-4o-mini, gpt-4o', style: 'openai' },
   anthropic: { label: 'Anthropic (Claude)', base: 'https://api.anthropic.com/v1/messages', models: 'claude-sonnet-4-20250514, claude-haiku-4-20250514', style: 'anthropic' },
   openrouter: { label: 'OpenRouter (multi-modèles)', base: 'https://openrouter.ai/api/v1/chat/completions', models: 'meta-llama/llama-3.3-70b-instruct, anthropic/claude-3.5-haiku', style: 'openai' },
@@ -53,7 +97,8 @@ const PROVIDERS = {
 };
 // Clé API : variable d'environnement d'abord (jamais persistée), sinon pref chiffrable par l'OS
 function apiKeyFor(provider) {
-  const envs = { groq: 'GROQ_API_KEY', openai: 'OPENAI_API_KEY', anthropic: 'ANTHROPIC_API_KEY', openrouter: 'OPENROUTER_API_KEY' };
+  const envs = { groq: 'GROQ_API_KEY', gemini: 'GEMINI_API_KEY', mistral: 'MISTRAL_API_KEY', cerebras: 'CEREBRAS_API_KEY', cohere: 'COHERE_API_KEY', freellm: 'FREELLMAPI_API_KEY', openai: 'OPENAI_API_KEY', anthropic: 'ANTHROPIC_API_KEY', openrouter: 'OPENROUTER_API_KEY' };
+  if (provider === 'gemini' && (process.env.GOOGLE_API_KEY || process.env.GEMINI_API_KEY)) return process.env.GOOGLE_API_KEY || process.env.GEMINI_API_KEY;
   if (envs[provider] && process.env[envs[provider]]) return process.env[envs[provider]];
   try {
     const { safeStorage } = require('electron');
@@ -61,11 +106,35 @@ function apiKeyFor(provider) {
       return safeStorage.decryptString(Buffer.from(PREFS.apiKeys[provider]));
     }
   } catch (e) { /* repli : pref en clair */ }
-  return (PREFS.apiKeys && PREFS.apiKeys[provider]) || '';
+  return (PREFS.apiKeys && PREFS.apiKeys[provider]) || OPENCODE_KEYS[provider] || '';
 }
+
+// Liste dynamique des modèles d'un fournisseur (GET /v1/models, comme OpenCode)
+ipcMain.handle('models-list', async (e, provider) => {
+  const prov = PROVIDERS[provider];
+  if (!prov || !prov.base) return { ok: false, error: 'fournisseur inconnu' };
+  const base = prov.base.replace(/\/chat\/completions$/, '');
+  try {
+    const key = apiKeyFor(provider);
+    const headers = {};
+    if (key) headers.authorization = 'Bearer ' + key;
+    const res = await fetch(base + '/models', { headers });
+    if (!res.ok) return { ok: false, error: 'HTTP ' + res.status };
+    const d = await res.json();
+    const ids = (d.data || [])
+      .map((m) => String(m.id || '').replace(/^models\//, ''))
+      .filter((id) => id && !/tts|whisper|embed|image|audio|video|transcribe|guard|orpheus|moderation|prompt-guard/i.test(id))
+      .slice(0, 80);
+    return { ok: true, models: ids };
+  } catch (err) { return { ok: false, error: String(err.message || err).slice(0, 120) };
+  }
+});
 
 async function llmChat({ provider = 'groq', model = '', apiKey = '', messages, maxTokens = 2048, temperature = 0.7 }) {
   const prov = PROVIDERS[provider] || PROVIDERS.groq;
+  // Migration : modèles retirés des catalogues (ex. retrait llama-3.3 chez Groq) → équivalents actuels
+  const LEGACY = { 'llama-3.3-70b-versatile': 'openai/gpt-oss-120b', 'llama3-8b-8192': 'openai/gpt-oss-20b', 'mixtral-8x7b-32768': 'openai/gpt-oss-120b', 'gemini-2.5-flash': 'gemini-3.6-flash', 'gemini-2.5-pro': 'gemini-3.6-flash', 'gemini-2.5-flash-lite': 'gemini-flash-lite-latest' };
+  if (LEGACY[model]) model = LEGACY[model];
   const key = apiKey || apiKeyFor(provider);
   const target = prov.style === 'anthropic' ? 'https://api.anthropic.com/v1/messages' : (prov.base || 'https://api.groq.com/openai/v1/chat/completions');
   if (prov.style !== 'anthropic' && !/ollama|127\.0\.0\.1|localhost/.test(target) && !key) throw new Error((LANG === 'en' ? 'No API key for ' : 'Pas de clé API pour ') + prov.label);
@@ -799,7 +868,7 @@ if (!CAPTURE_MODE && !app.requestSingleInstanceLock()) {
 }
 
 // IPC
-const { ipcMain, Notification } = require('electron');
+const { Notification } = require('electron');
 ipcMain.on('copy', (e, text) => {
   clipboard.writeText(text);
   // Retour visuel : le panneau se cache à chaque copie, une notification confirme l'action
@@ -876,10 +945,10 @@ ipcMain.handle('llm-generate', async (e, payload) => {
   const p = payload || {};
   const kind = p.kind === 'agent' ? 'agent' : 'skill';
   const lang = p.lang === 'en' ? 'en' : 'fr';
-  const intent = String(p.intent || '').slice(0, 2000);
+  const intent = String(p.intent || '').slice(0, 60000); // mission aussi longue que voulu (60 000 car. max)
   if (!intent.trim()) return { ok: false, error: lang === 'en' ? 'Describe what the ' + kind + ' should do' : 'Décris ce que le ' + (kind === 'agent' ? 'agent doit faire' : 'skill doit faire') };
   const provider = PROVIDERS[p.provider] ? p.provider : 'groq';
-  const model = String(p.model || '').trim().slice(0, 120) || (PREFS.apiModels && PREFS.apiModels[provider]) || (provider === 'groq' ? 'llama-3.3-70b-versatile' : '');
+  const model = String(p.model || '').trim().slice(0, 120) || (PREFS.apiModels && PREFS.apiModels[provider]) || (provider === 'groq' ? 'openai/gpt-oss-120b' : provider === 'freellm' ? 'auto' : '');
   const senior = !!p.senior;
   try {
     const userMsg = (lang === 'en'
@@ -1008,9 +1077,9 @@ ipcMain.handle('team-run', async (e, p) => {
   const t = payload.team || {};
   const lang = payload.lang === 'en' ? 'en' : 'fr';
   const fr = lang !== 'en';
-  const mission = String(payload.mission || '').slice(0, 4000) || (fr ? 'Exécute la mission de l\'équipe.' : 'Execute the team mission.');
+  const mission = String(payload.mission || '').slice(0, 60000) || (fr ? 'Exécute la mission de l\'équipe.' : 'Execute the team mission.');
   const provider = PROVIDERS[payload.provider] ? payload.provider : 'groq';
-  const model = String(payload.model || '').trim().slice(0, 120) || (PREFS.apiModels && PREFS.apiModels[provider]) || (provider === 'groq' ? 'llama-3.3-70b-versatile' : '');
+  const model = String(payload.model || '').trim().slice(0, 120) || (PREFS.apiModels && PREFS.apiModels[provider]) || (provider === 'groq' ? 'openai/gpt-oss-120b' : provider === 'freellm' ? 'auto' : '');
   if (!apiKeyFor(provider) && provider !== 'ollama') return { ok: false, error: fr ? 'Ajoute une clé API dans Réglages → Intelligence' : 'Add an API key in Settings → Intelligence' };
   const call = async (system, user, maxTokens) => (await llmChat({ provider, model, maxTokens: maxTokens || 2048, messages: [{ role: 'system', content: system }, { role: 'user', content: user }] })).text;
   try {
@@ -1096,10 +1165,10 @@ ipcMain.handle('team-md-create', (e, name) => {
 ipcMain.handle('team-generate', async (e, p) => {
   const payload = p || {};
   const lang = payload.lang === 'en' ? 'en' : 'fr';
-  const intent = String(payload.intent || '').slice(0, 2000);
+  const intent = String(payload.intent || '').slice(0, 60000); // mission aussi longue que voulu
   if (!intent.trim()) return { ok: false, error: lang === 'en' ? 'Describe the team mission' : 'Décris la mission de l\'équipe' };
   const provider = PROVIDERS[payload.provider] ? payload.provider : 'groq';
-  const model = String(payload.model || '').trim().slice(0, 120) || (PREFS.apiModels && PREFS.apiModels[provider]) || (provider === 'groq' ? 'llama-3.3-70b-versatile' : '');
+  const model = String(payload.model || '').trim().slice(0, 120) || (PREFS.apiModels && PREFS.apiModels[provider]) || (provider === 'groq' ? 'openai/gpt-oss-120b' : provider === 'freellm' ? 'auto' : '');
   if (!apiKeyFor(provider) && provider !== 'ollama') return { ok: false, error: lang === 'en' ? 'Add an API key in Settings → Intelligence' : 'Ajoute une clé API dans Réglages → Intelligence' };
   if (payload.saveApiChoice) {
     PREFS.apiProvider = provider;
@@ -1152,7 +1221,7 @@ ipcMain.handle('llm-test', async (e, p) => {
   try {
     const { text, model, latency } = await llmChat({
       provider,
-      model: String((p && p.model) || '').trim() || (PREFS.apiModels && PREFS.apiModels[provider]) || (provider === 'groq' ? 'llama-3.3-70b-versatile' : ''),
+      model: String((p && p.model) || '').trim() || (PREFS.apiModels && PREFS.apiModels[provider]) || (provider === 'groq' ? 'openai/gpt-oss-120b' : provider === 'freellm' ? 'auto' : ''),
       maxTokens: 12,
       temperature: 0,
       messages: [{ role: 'user', content: 'Reply with exactly: OK' }],

@@ -16,6 +16,7 @@ const T = LANG === 'fr' ? {
   agents: 'Agents', perso: '✍️ Perso', favs: '★ Favoris', results: 'résultats',
   copy: '⧉ Copier', open: '⌘⏎ Ouvrir dans {x}', gpt: '⇧⏎ ChatGPT',
   empty: 'Aucun résultat — essaie un autre mot', recents: '🕘 Récents',
+  noTeams: '🕸 Aucune équipe — ouvre 🛠 Atelier → « 🕸 Une équipe », décris une mission puis génère.',
   selected: 'sél.', compose: '✚ Composer ({n})', newp: 'Nouveau prompt ✍️',
   noFav: (n) => `Pas de favori n°${n}`, hello: 'Bonjour ! Voici mon besoin : ',
   selHint: '⌘-clic pour sélectionner · ⌥⏎ compose les {n} sélectionnés',
@@ -40,7 +41,7 @@ const T = LANG === 'fr' ? {
   atelier: 'Atelier',
   atelierT: '🛠 Atelier — créer un agent ou un skill',
   atelierKind: 'Je crée', atelierKindA: '👤 Un agent (persona expert)', atelierKindS: '🛠 Un skill (procédure)',
-  atelierIntent: "Ce qu'il doit faire", atelierIntentPh: 'Ex : un agent senior qui supervise la revue de code, coordonne les experts sécurité et perf, et rend un rapport priorisé…',
+  atelierIntent: "Ce qu'il doit faire — décris librement, aussi long que tu veux", atelierIntentPh: 'Ex : un agent senior qui supervise la revue de code, coordonne les experts sécurité et perf, rend un rapport priorisé… plus tu es précis (contexte, contraintes, format attendu, exemples), meilleur sera le résultat — aucun maximum.',
   atelierSenior: 'Niveau senior orchestrateur (supervise, coordonne, garantit la qualité)',
   atelierGen: "✨ Générer avec l'IA",
   atelierGenApi: 'Générer (API)',
@@ -91,6 +92,7 @@ const T = LANG === 'fr' ? {
   agents: 'Agents', perso: '✍️ Custom', favs: '★ Favorites', results: 'results',
   copy: '⧉ Copy', open: '⌘⏎ Open in {x}', gpt: '⇧⏎ ChatGPT',
   empty: 'No results — try another word', recents: '🕘 Recent',
+  noTeams: '🕸 No team yet — open 🛠 Workshop → “🕸 A team”, describe a mission, then generate.',
   selected: 'sel.', compose: '✚ Compose ({n})', newp: 'New prompt ✍️',
   noFav: (n) => `No favorite #${n}`, hello: 'Hello! Here is my need: ',
   selHint: '⌘-click to select · ⌥⏎ composes the {n} selected',
@@ -115,7 +117,7 @@ const T = LANG === 'fr' ? {
   atelier: 'Workshop',
   atelierT: '🛠 Workshop — build an agent or a skill',
   atelierKind: 'I am building', atelierKindA: '👤 An agent (expert persona)', atelierKindS: '🛠 A skill (procedure)',
-  atelierIntent: 'What it should do', atelierIntentPh: 'E.g.: a senior agent supervising code review, coordinating security and perf experts, delivering a prioritized report…',
+  atelierIntent: 'What it should do — describe freely, as long as you like', atelierIntentPh: 'E.g.: a senior agent supervising code review, coordinating security and perf experts, delivering a prioritized report… the more precise (context, constraints, expected format, examples), the better — no limit.',
   atelierSenior: 'Senior orchestrator level (supervises, coordinates, owns quality)',
   atelierGen: '✨ Generate with AI',
   atelierGenApi: 'Generate (API)',
@@ -265,13 +267,23 @@ document.body.innerHTML = `
         </span>
       </div>
       <label class="wl2">${T.atelierIntent}
-        <textarea id="w-intent" rows="3" maxlength="1200" placeholder="${T.atelierIntentPh}"></textarea>
+        <textarea id="w-intent" rows="8" placeholder="${T.atelierIntentPh}"></textarea>
+        <span id="w-intent-help" style="display:flex;gap:8px;align-items:center;font-weight:500;font-size:10.5px;color:var(--mut)">
+          <span id="w-intent-count">0 car. — aucun maximum</span>
+          <span style="flex:1"></span>
+          <span style="color:var(--mut)">⌘⏎ ${LANG === 'fr' ? 'générer' : 'generate'}</span>
+          <button id="w-intent-clear" type="button" style="border:1px solid var(--line);background:none;color:var(--txt2);
+            cursor:pointer;font:600 10px/1 inherit;padding:3px 8px;border-radius:99px">${LANG === 'fr' ? 'Effacer' : 'Clear'}</button>
+          <button id="w-intent-big" type="button" title="${LANG === 'fr' ? 'Agrandir / réduire la zone' : 'Grow / shrink the field'}" aria-label="${LANG === 'fr' ? 'Agrandir / réduire la zone' : 'Grow / shrink the field'}"
+            style="border:1px solid var(--line);background:none;color:var(--txt2);cursor:pointer;font:600 11px/1 inherit;padding:3px 8px;border-radius:99px">⤢</button>
+        </span>
       </label>
       <div class="wk">
         <span class="wl">${T.wProvider}</span>
         <select id="w-prov" aria-label="${T.wProvider}"></select>
         <span class="wl">${T.wModel}</span>
-        <input id="w-model" type="text" placeholder="auto" aria-label="${T.wModel}" maxlength="120" style="flex:1">
+        <input id="w-model" type="text" placeholder="auto" aria-label="${T.wModel}" maxlength="120" list="w-model-list" style="flex:1">
+        <datalist id="w-model-list"></datalist>
       </div>
       <label class="wchk"><input type="checkbox" id="w-senior" checked> ${T.atelierSenior}</label>
       <div class="wact">
@@ -510,7 +522,8 @@ const itEmoji = (k) => k === 'agent' ? '👤' : k === 'custom' ? '✍️' : k ==
 function render() {
   compute();
   if (!results.length) {
-    list.innerHTML = `<div id="void">${T.empty}</div>`;
+    const voidMsg = (filter === 'teams' && !query && !TEAMS.length) ? T.noTeams : T.empty;
+    list.innerHTML = `<div id="void">${voidMsg}</div>`;
   } else {
     list.innerHTML = results.map((it, i) => {
       const n = it.x.name;
@@ -594,7 +607,7 @@ function activate(it, el) {
 }
 function openSelection(target) {
   const items = [...sel].map((n) => findItem(n)).filter(Boolean);
-  const prompt = items.length ? buildCombo(items.map((f) => ({ x: f.x, k: f.k })))
+  const prompt = items.length ? buildCombo(items.map((f) => f.x))
     : (q.value.trim() || T.hello);
   window.mgp.openLLM(target, prompt);
 }
@@ -651,6 +664,7 @@ composeBtn.onclick = () => openSelection(DEFAULT_LLM || 'claude');
 
 // ---------- Clavier ----------
 document.addEventListener('keydown', (e) => {
+  if (!$('tour').hidden) return; // 🎓 la visite guidée capte le clavier (pas d'action du panneau en arrière-plan)
   if (!$('modal').hidden) {
     if (e.key === 'Escape') { closeModal(); return; }
     return;
@@ -701,7 +715,17 @@ applyTheme();
 // ────────────────────────────────────────────────────────────────────────────
 const W = { kind: 'agent', items: [], busy: false };
 // ── Fournisseur/modèle pour la génération (persistés dans les prefs si demandé) ──
-const PROV_LABELS = { groq: 'Groq', openai: 'OpenAI', anthropic: 'Anthropic (Claude)', openrouter: 'OpenRouter', ollama: 'Ollama (local)', custom: 'Endpoint perso' };
+const PROV_LABELS = { groq: 'Groq', gemini: 'Google Gemini', omniroute: 'OmniRoute (local)', mistral: 'Mistral AI', cerebras: 'Cerebras', cohere: 'Cohere', freellm: 'FreeLLM (local)', openai: 'OpenAI', anthropic: 'Anthropic (Claude)', openrouter: 'OpenRouter', ollama: 'Ollama (local)', custom: 'Endpoint perso' };
+// Modèles chargés en direct depuis l'API du fournisseur (GET /models, comme OpenCode)
+async function refreshModelList(provider) {
+  const dl = $('w-model-list');
+  if (!dl || !window.mgp.modelsList) return;
+  dl.innerHTML = '';
+  try {
+    const r = await window.mgp.modelsList(provider);
+    if (r && r.ok && r.models.length) dl.innerHTML = r.models.map((m) => `<option value="${esc(m)}">`).join('');
+  } catch (e) { /* liste vide : l'input reste libre */ }
+}
 function fillProviders() {
   const sel = $('w-prov');
   if (!sel) return;
@@ -712,11 +736,30 @@ function fillProviders() {
   const savedM = (SYS.apiDefaultModel || '').trim();
   if (savedP && list.includes(savedP)) sel.value = savedP;
   $('w-model').value = savedM || '';
+  refreshModelList(sel.value);
+  sel.onchange = () => refreshModelList(sel.value); // re-charge la liste /models à chaque changement
 }
 function wgenPayload(intent) {
   return { intent, lang: LANG, provider: $('w-prov') ? $('w-prov').value : undefined, model: ($('w-model').value || '').trim() || undefined };
 }
 const wmodal = $('wmodal'), wlist = $('w-list'), wcount = $('w-count'), wgen = $('w-gen'), wintent = $('w-intent');
+// Zone de mission sans limite : compteur live, bouton ⤢ (agrandir/réduire), Effacer.
+(function intentAids() {
+  if (!wintent) return;
+  const counter = $('w-intent-count');
+  const update = () => { if (counter) counter.textContent = String((wintent.value || '').length) + ' car. — ' + (LANG === 'fr' ? 'aucun maximum' : 'no limit'); };
+  wintent.addEventListener('input', update);
+  update();
+  const big = $('w-intent-big');
+  if (big) big.onclick = () => {
+    const grown = wintent.rows > 8; // ⤢ : bascule 8 ↔ 26 lignes
+    wintent.rows = grown ? 8 : 26;
+    wintent.style.minHeight = grown ? '110px' : '';
+    wintent.focus();
+  };
+  const clr = $('w-intent-clear');
+  if (clr) clr.onclick = () => { wintent.value = ''; update(); wintent.focus(); };
+})();
 async function refreshWorkshop() {
   if (!window.mgp.workshopList) return;
   try {
@@ -732,6 +775,7 @@ async function refreshWorkshop() {
     ];
   } catch (e) { W.items = []; }
   renderWorkshop();
+  renderRunlist(); // les équipes fraîchement générées deviennent exécutables sans rouvrir l'Atelier
 }
 function renderWorkshop() {
   const n = W.items.length;

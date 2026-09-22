@@ -97,15 +97,22 @@ try {
 } catch (e) { /* défauts */ }
 renderTargets();
 
-// Compte du catalogue (lecture directe du fichier généré)
-fetch('../interface/catalog-full.js')
-  .then((r) => r.text())
-  .then((code) => {
-    const fn = new Function(code + '\n;return MEGA_CATALOG;');
-    const cat = fn();
-    stats.textContent = `${cat.skills.length} skills · ${cat.agents.length} agents · v${cat.meta.version}`;
-  })
-  .catch(() => { stats.textContent = (I18N[LANG] || I18N.fr).noCat; });
+// Compte du catalogue : via le bridge IPC (window.mgp.catalog, déjà chargé par preload)
+// d'abord — le fetch('../interface/') échoue en file:// (Electron) → « catalogue introuvable ».
+(function () {
+  const fill = (cat) => { stats.textContent = `${cat.skills.length} skills · ${cat.agents.length} agents · v${cat.meta.version}`; };
+  try {
+    if (window.mgp && window.mgp.catalog && Array.isArray(window.mgp.catalog.skills)) { fill(window.mgp.catalog); return; }
+  } catch (e) { /* repli fetch ci-dessous */ }
+  fetch('../interface/catalog-full.js')
+    .then((r) => r.text())
+    .then((code) => {
+      const fn = new Function(code + '\n;return MEGA_CATALOG;');
+      const cat = fn();
+      fill(cat);
+    })
+    .catch(() => { stats.textContent = (I18N[LANG] || I18N.fr).noCat; });
+})();
 
 // Version + date de build (build.json écrit par build-app.sh au packaging)
 fetch('build.json')
@@ -146,7 +153,13 @@ favShortcutsCb.onchange = persist;
 
 // ── Intelligence : clé API + test de connexion (via main process) ──
 const MODELS_HINT = {
-  groq: 'Modèles conseillés : llama-3.3-70b-versatile · llama3-8b-8192 · mixtral-8x7b-32768',
+  groq: 'Modèles conseillés : openai/gpt-oss-120b · openai/gpt-oss-20b · groq/compound · qwen/qwen3.8-27b',
+  gemini: 'Modèles conseillés : gemini-3.6-flash · gemini-flash-latest · gemini-flash-lite-latest (clé partagée avec OpenCode si configurée)',
+  omniroute: 'Routeur local omniroute sur 127.0.0.1:20128 — modèles auto/best-coding, auto/best-reasoning… (clé récupérée depuis OpenCode)',
+  mistral: 'Modèles conseillés : mistral-medium-latest · mistral-small-latest · magistral-small-latest',
+  cerebras: 'Modèles conseillés : gpt-oss-120b · qwen-3.8-27b',
+  cohere: 'Modèles conseillés : command-a-03-2025 · command-r-plus-08-2024 · c4ai-aya-expanse-32b',
+  freellm: 'Routeur local FreeLLM/omniroute sur 127.0.0.1:20128 — modèle « auto » : il route tout le catalogue (laisser le champ vide)',
   openai: 'Modèles conseillés : gpt-4o-mini · gpt-4o',
   anthropic: 'Modèles conseillés : claude-sonnet-4-20250514 · claude-haiku-4-20250514',
   openrouter: 'Modèles : meta-llama/llama-3.3-70b-instruct · anthropic/claude-3.5-haiku…',

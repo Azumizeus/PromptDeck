@@ -57,6 +57,7 @@ contextBridge.exposeInMainWorld('mgp', {
   // ── LLM par défaut : sélecteur rapide dans la barre du bas du panneau ──
   setDefaultLLM: (llm) => ipcRenderer.send('set-default-llm', llm),
   // ── 🕸 Équipes multi-agents (super-orchestrateur + agents + workflow) ──
+  modelsList: (provider) => ipcRenderer.invoke('models-list', provider),
   teamList: () => ipcRenderer.invoke('team-list'),
   teamGenerate: (payload) => ipcRenderer.invoke('team-generate', payload),
   teamRun: (payload) => ipcRenderer.invoke('team-run', payload),

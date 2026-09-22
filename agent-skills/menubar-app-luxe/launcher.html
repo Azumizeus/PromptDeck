@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self' https://api.groq.com https://api.openai.com https://api.anthropic.com https://openrouter.ai http://127.0.0.1:11434">
+<meta name="mgp-window" content="mac">
+<title>MEGA PACK — Luxe (launcher)</title>
+<style>
+  html, body { margin:0; min-height:100vh; background:#14151d radial-gradient(ellipse at 30% 15%, #22253c 0%, #171821 55%, #101118 100%); }
+  #stage{min-height:100vh;display:flex;align-items:flex-start;justify-content:center;padding:42px 20px 70px}
+  /* ── Fenêtre macOS ─────────────────────────────────────────────────── */
+  .macwin{position:relative;width:min(600px,96vw);height:calc(100vh - 128px);min-height:520px;
+    border-radius:12px;overflow:hidden;background:#0b0c10;
+    box-shadow:0 32px 90px rgba(0,0,0,.62), 0 0 0 1px rgba(255,255,255,.05);
+    display:flex;flex-direction:column;
+    transition:transform .28s cubic-bezier(.4,0,.2,1), opacity .28s}
+  .macwin.folded{transform:scaleY(.04);opacity:.32;pointer-events:none}
+  .macbar{height:42px;flex:none;background:linear-gradient(#2a2c38,#20222c);border-bottom:1px solid #101018;
+    display:flex;align-items:center;gap:8px;padding:0 13px;user-select:none}
+  .macbar .lights{display:flex;gap:8px;width:64px;flex:none}
+  .macbar .l{width:12.5px;height:12.5px;border-radius:50%;cursor:pointer;border:none;padding:0;
+    box-shadow:inset 0 0 0 .5px rgba(0,0,0,.28);transition:filter .15s}
+  .macbar .l:hover{filter:brightness(1.18)}
+  .l-close{background:#ff5f57}.l-min{background:#febc2e}.l-max{background:#28c840}
+  .macbar .ttl{flex:1;text-align:center;font:600 13px/1 -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    color:#9298a9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .macbar .ghost{width:100px;flex:none}
+  /* Les boutons d'en-tête Luxe vivent DANS la barre mac (à droite) */
+  .macbar .lx{display:flex;gap:7px;align-items:center;flex:none}
+  .macbar .lx button{border:1px solid #31343f;background:none;color:#a8adbd;cursor:pointer;
+    font:600 11px/1 -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    padding:5px 10px;border-radius:99px;transition:border-color .15s,color .15s}
+  .macbar .lx button:hover{border-color:#9945ff;color:#eef0f6}
+  .macbar .lx #newp{min-width:29px}
+  /* ── Le panneau Luxe (#app, recréé par renderer.js en position:fixed)
+        est re-cadré DANS la fenêtre mac ───────────────────────────────── */
+  body.has-mac #app{position:absolute;inset:0;width:100%;max-width:none;border-radius:0;
+    box-shadow:none;background:#0b0c10;min-height:0}
+  /* ── Dock sous la fenêtre (créé par mac-chrome.js) ─────────────────── */
+  #dock{width:min(600px,96vw);margin:16px auto 0;display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+  #dock a,#dock button{border:1px solid #2e3140;background:#181a24;border-radius:99px;
+    padding:6px 13px;font:600 12px/1.4 -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    color:#a8adbd;cursor:pointer;text-decoration:none}
+  #dock a:hover,#dock button:hover{border-color:#9945ff;color:#eef0f6}
+  #dock .lbl{color:#5d6272;font-weight:600;padding:6px 2px}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="macwin" id="macwin">
+    <div class="macbar" id="macbar">
+      <div class="lights">
+        <button class="l l-close" title="Fermer (replie la fenêtre)" aria-label="Fermer"></button>
+        <button class="l l-min" title="Réduire" aria-label="Réduire"></button>
+        <button class="l l-max" title="Agrandir / restaurer" aria-label="Agrandir"></button>
+      </div>
+      <span class="ttl" id="mac-ttl">⚡ MEGA PACK — Édition Luxe</span>
+      <span class="lx">
+        <button id="newp" title="Nouveau prompt ✍️" aria-label="Nouveau prompt ✍️">＋</button>
+        <button id="langb" title="FR/EN" aria-label="FR/EN">FR</button>
+      </span>
+      <span class="ghost"></span>
+    </div>
+    <!-- #app sera injecté ici par renderer.js (au-dessus de la barre mac) -->
+  </div>
+</div>
+<script src="../interface/catalog-full.js"></script>
+<script src="demo-shim.js"></script>
+<script src="theme.js"></script>
+<script src="renderer.js"></script>
+<script src="mac-chrome.js"></script>
+</body>
+</html>

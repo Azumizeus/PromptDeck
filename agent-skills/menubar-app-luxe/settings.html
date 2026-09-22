@@ -63,6 +63,12 @@ input[type=checkbox]{accent-color:var(--vio)}
   <div class="apirow">
     <select id="apiProv">
       <option value="groq">Groq</option>
+      <option value="gemini">Google Gemini</option>
+      <option value="omniroute">OmniRoute (routeur local)</option>
+      <option value="mistral">Mistral AI</option>
+      <option value="cerebras">Cerebras</option>
+      <option value="cohere">Cohere</option>
+      <option value="freellm">FreeLLM API (routeur local)</option>
       <option value="openai">OpenAI</option>
       <option value="anthropic">Anthropic (Claude)</option>
       <option value="openrouter">OpenRouter</option>
@@ -70,7 +76,7 @@ input[type=checkbox]{accent-color:var(--vio)}
       <option value="custom">Endpoint compatible OpenAI</option>
     </select>
     <input id="apiKey" type="password" placeholder="sk-…" autocomplete="off">
-    <input id="apiModel" type="text" placeholder="modèle (ex : llama-3.3-70b-versatile)">
+    <input id="apiModel" type="text" placeholder="modèle (ex : openai/gpt-oss-120b)">
   </div>
   <div class="apirow2">
     <button id="apiSave" class="btn">💾 <span data-i18n="apiSave">Enregistrer la clé</span></button>

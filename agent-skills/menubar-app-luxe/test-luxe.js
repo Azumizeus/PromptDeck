@@ -230,8 +230,27 @@ vm.runInContext(`
     const items = sel.map(n => __mgp.list().find(i => i.x.name === n)).filter(Boolean);
     window.mgp.openLLM('claude', 'Voici ' + items.length + ' modules');
   })();
-`, ctx);
-check(opened.length === 1 && opened[0][1].includes('2 modules'), '⌥⏎ compose la sélection vers le LLM');
+`, ctx);check(opened.length === 1 && opened[0][1].includes('2 modules'), '⌥⏎ compose la sélection vers le LLM');
+
+console.log('9b) 🛡 Régression composeur — le prompt combiné ne contient jamais « undefined » :');
+// Déclenche le VRAI chemin du bouton (composeBtn.onclick → openSelection → buildCombo).
+// Régression du 2026-09-22 : buildCombo recevait des wrappers {x,k} au lieu des objets
+// du catalogue → « 1. **undefined** — » dans le prompt combiné.
+for (const n of sandbox.window.__mgp.selection()) sandbox.window.__mgp.toggleSel(n); // sélection déterministe
+sandbox.window.__mgp.toggleSel(L[0].x.name);
+sandbox.window.__mgp.toggleSel(L[1].x.name);
+sandbox.window.__mgp.search(''); // pas de repli sur la requête : les 2 modules doivent composer
+const catName = (x) => (x.name_fr || x.name);
+const catDesc = (x) => ((x.desc_fr || x.desc) || '').trim();
+opened.length = 0;
+sandbox.document.getElementById('compose').onclick();
+check(opened.length === 1, '✚ Composer (clic réel) appelle openLLM avec la sélection');
+const comboPrompt = opened[opened.length - 1] ? opened[opened.length - 1][1] : '';
+check(/\bundefined\b/.test(comboPrompt) === false, 'aucun « undefined » dans le prompt combiné');
+check(comboPrompt.includes(catName(L[0].x)) && comboPrompt.includes(catName(L[1].x)), 'les noms réels des 2 modules figurent dans le prompt');
+check((comboPrompt.match(/\d+\. \*\*/g) || []).length === 2, 'les 2 modules sont listés au format « N. **nom** — description »');
+check(comboPrompt.includes(catDesc(L[0].x).slice(0, 24)) && comboPrompt.includes(catDesc(L[1].x).slice(0, 24)), 'les descriptions du catalogue sont embarquées (pas de champs perdus)');
+for (const n of sandbox.window.__mgp.selection()) sandbox.window.__mgp.toggleSel(n); // nettoyage
 
 console.log('10) Atelier — génération d\'agent et de skill par IA :');
 const A0 = A.length, S0 = S.length; // le panneau mute A/S en ajoutant les créations

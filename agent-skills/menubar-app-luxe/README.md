@@ -21,9 +21,24 @@ on lit, on tire le prompt. Rien d'autre.
   l'orchestrateur planifie les tâches, chaque agent les exécute **via l'API**, puis
   l'orchestrateur **consolide le rapport final** (synthèse, points clés, risques,
   prochaines actions) : copiable ou enregistrable en `.md`
-- **Choix du fournisseur + modèle** dans l'Atelier (Groq, OpenAI, Anthropic,
-  OpenRouter, Ollama, endpoint perso) — utilisables pour générer et pour exécuter,
-  mémorisables pour toutes les générations
+- **Choix du fournisseur + modèle** dans l'Atelier (Groq, **Google Gemini**,
+  **OmniRoute local**, Mistral, Cerebras, Cohere, FreeLLM API local, OpenAI,
+  Anthropic, OpenRouter, Ollama, endpoint perso) — utilisables pour générer et
+  pour exécuter, mémorisables pour toutes les générations
+- **📋 Modèles dynamiques** : la liste des modèles est chargée en direct depuis
+  l'API du fournisseur (`GET /v1/models`, filtrage des modèles non-chat) —
+  toujours à jour, comme dans OpenCode
+- **🔑 Clés reconnues automatiquement** : au lancement, l'app charge les `export`
+  de ton `~/.zshrc` (GROQ_API_KEY, MISTRAL_API_KEY, CEREBRAS_API_KEY, COHERE_API_KEY,
+  FREELLMAPI_API_KEY…) **et les clés de ta config OpenCode** (`opencode.json` +
+  `auth.json` : Google/Gemini, OmniRoute, FreeLLM, Copilot…) — même lancée depuis
+  le Finder. Tu peux aussi coller une clé dans Réglages → Intelligence (chiffrée
+  par le trousseau macOS). Modèles à jour (openai/gpt-oss-120b, gemini-3.6-flash…)
+  avec **migration automatique** des modèles retirés
+- **✍️ Mission sans limite de longueur** : la zone « Ce qu'il doit faire » accepte
+  autant de texte que tu veux (contexte, contraintes, exemples, cahier des charges
+  complet) — compteur de caractères, bouton ⤢ pour agrandir la zone, ⌘⏎ pour
+  générer, Effacer en un clic
 - **🎓 Visite guidée interactive** au premier lancement : pop-up flottant pas à pas
   (7 étapes, surbrillance des éléments concernés, astuces) — rejouable en effaçant
   la clé `mgp.tour.done` du localStorage
