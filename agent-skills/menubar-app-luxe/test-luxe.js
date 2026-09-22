@@ -28,6 +28,7 @@ function makeEl(tag) {
     set value(v) { this._val = v; }, get value() { return this._val; },
     set hidden(v) { this._hidden = !!v; }, get hidden() { return !!this._hidden; },
     appendChild(c) { this.children.push(c); return c; },
+    insertAdjacentHTML() {},
     addEventListener(ev, fn) { (this._handlers[ev] ||= []).push(fn); },
     getContext() { return null; },
     scrollIntoView() {}, focus() {}, blur() {}, closest() { return null; },
@@ -56,6 +57,7 @@ const sandbox = {
     body: makeEl('body'), head: makeEl('head'),
     createElement: (t) => makeEl(t),
     getElementById: (id) => byId(id),
+    querySelector: () => null, // pas de .macwin dans la sandbox → chemin panneau standard
     querySelectorAll: () => [],
     addEventListener() {},
     addEventListener() {},
@@ -340,6 +342,19 @@ const target = MGP.list()[0];
 await sandbox.window.mgp.promptMdCreate({ x: target.x, k: target.k });
 check(mdStore.length === 1 && mdStore[0].x.name === target.x.name, 'le .md de la cible est créé via promptMdCreate');
 check(MGP.ctxButtons().length >= 6, 'menu contextuel complet (destinations + .md + dossier + copier + favori)');
+
+console.log('13) Recherche par tags — « ux/ui », multi-mots :');
+vm.runInContext('__mgp.select("all")', ctx);
+const nUxUi = MGP.search('ux/ui');
+check(nUxUi > 0, '« ux/ui » (avec slash) trouve des résultats : ' + nUxUi);
+const nUxSpaceUi = MGP.search('ux ui');
+check(nUxSpaceUi === nUxUi, '« ux ui » (espaces) équivalent à « ux/ui » : ' + nUxSpaceUi);
+const nUx = MGP.search('ux');
+check(nUx > 0 && nUxUi >= nUx, '« ux/ui » (union des tags) au moins aussi large que « ux » (' + nUx + ' → ' + nUxUi + ')');
+const topUxUi = MGP.list().slice(0, 3).map((r) => (r.x.name_fr || r.x.name)).join(' | ');
+check(MGP.search('design interface') > 0, 'multi-tags « design interface » : items liés aux deux');
+check(MGP.search('') === MGP.counts().all, 'vidage : retour au catalogue complet (' + MGP.counts().all + ' items, créations de l\'Atelier incluses)');
+console.log('   top « ux/ui » : ' + topUxUi);
 
 console.log('');
 if (fail) { console.log(`❌ ${fail} test(s) en échec`); process.exit(1); }

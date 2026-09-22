@@ -15,7 +15,7 @@ bad()  { echo "  ✗ $*"; FAIL=1; }
 try()  { if "$@" >/dev/null 2>&1; then ok "$*"; else bad "$*"; fi }
 
 section "1. Syntaxe (node --check + bash -n)"
-for f in main.js renderer.js preload.js settings.js test-fr.js test-custom.js build-icon.js; do
+for f in main.js renderer.js preload.js settings.js test-fr.js test-custom.js test-galaxy.js build-icon.js; do
   try node --check "$f"
 done
 try bash -n build-app.sh
@@ -23,6 +23,7 @@ try bash -n build-app.sh
 section "2. Tests logiques sur le code réel (sandbox)"
 node test-fr.js  >/dev/null && ok "test-fr.js    (i18n FR + recherche bilingue)" || bad "test-fr.js"
 node test-custom.js >/dev/null && ok "test-custom.js (prompts ✍️ bout en bout)" || bad "test-custom.js"
+node test-galaxy.js >/dev/null && ok "test-galaxy.js (galaxie 3D + pont de commandement)" || bad "test-galaxy.js"
 
 section "3. App packagée — fichiers critiques embarqués"
 APP="dist/MEGA PACK-darwin-x64/MEGA PACK.app/Contents/Resources/app"

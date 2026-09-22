@@ -3,6 +3,51 @@
 Toutes les évolutions notables de **PromptDeck** (anciennement MEGA PACK) sont documentées ici.
 Format inspiré de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), versionnement [SemVer](https://semver.org/lang/fr/).
 
+## [2.5.1] - 2026-09-21
+
+### 🔧 Robustesse LLM — plafonds de tokens et reprise sur 429
+- **team-generate : plafond 8 192 tokens** — l'équipe complète (orchestrateur + agents +
+  workflow) dépassait le plafond 2 048 et sortait un JSON tronqué inexploitable
+- **llmChat : reprise automatique sur HTTP 429** — respect de `Retry-After` (ou du délai
+  annoncé par le fournisseur), 2 tentatives max, garde 8 s / plafond 60 s : les quotas
+  gratuits (Groq 8 000 tokens/min) ne cassent plus les missions
+- **e2e-groq.js** : driver E2E bout-en-bout (fenêtre cachée + preload de production,
+  vrai bridge IPC → main → API Groq) : préflight clés, team-generate, team-run,
+  vérifications du rapport, verdict JSON
+- Validé en réel (clé Groq personnelle) : équipe « AuditStakingSolana » générée en 4,7 s,
+  mission exécutée en 42,7 s avec reprise 429 — rapport consolidé de 9 851 caractères
+
+## [2.5.0] - 2026-09-21
+
+### 🗝️ Clés auto-chargées, launcher navigateur, 5 correctifs
+- **Clés auto-chargées au lancement** : exports du `~/.zshrc` + configs OpenCode
+  (`opencode.json`, `auth.json`) → l'Atelier est opérationnel sans aucun réglage
+- **Boot réparé** : `require('os')` manquant (crash silencieux du loader de clés) et
+  `ipcMain` déclaré avant usage (crash au démarrage)
+- **Composeur réparé** : le prompt combiné n'est plus rempli de « undefined » (`buildCombo`
+  recevait des wrappers `{x,k}` au lieu des objets du catalogue)
+- **Visite guidée** : elle capte le clavier, le panneau n'agit plus en arrière-plan
+- **Onglet Équipes vide** : message guidé vers l'Atelier au lieu de « Aucun résultat »
+- **Réglages** : « catalogue introuvable » corrigé (bridge `window.mgp.catalog` au lieu du
+  fetch `../interface/`, bloqué en `file://`)
+- `test-luxe.js` : section 9b — régression composeur (le vrai `onclick` est exercé)
+
+## [2.4.0] - 2026-09-21
+
+### 🕸 Équipes multi-agents exécutables + sélecteur de LLM
+- **Équipes exécutables** : l'Atelier génère une **équipe complète** (orchestrateur senior +
+  agents + workflow en tâches séquencées) — onglet « 🕸 Équipes », lancement de mission avec
+  exécution réelle des tâches via le LLM configuré et **rapport consolidé**
+- **Sélecteur de LLM permanent** : choix du modèle **depuis le footer** de l'app et dans les
+  Réglages — mémorisé entre les sessions, utilisé par l'Atelier et les équipes
+- **Arborescence au clic droit** : le menu contextuel révèle le chemin du dossier
+  MEGA PROMPT et l'entrée « Ouvrir le dossier » passe au premier plan
+- **Visite guidée** : tour interactif des nouveautés au premier lancement (rejouable)
+- **Launcher navigateur** : ouverture du panneau Luxe dans le navigateur (`standalone.html`)
+- **Userscript Tampermonkey 2.4.0** : onglet Équipes, tooltip expert, clic droit multi-LLM,
+  sélecteur de LLM — le panneau flottant rattrape l'app
+- `test-luxe.js` étendu (équipes, sélecteur) ; `e2e-groq.js` en préparation
+
 ## [2.3.0] - 2026-09-21
 
 ### 📄 Dossier MEGA PROMPT — le catalogue en fichiers .md sur le disque

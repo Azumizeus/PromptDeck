@@ -300,9 +300,7 @@ function createPanel() {
     skipTaskbar: true,
     alwaysOnTop: true,
     hasShadow: true,
-    transparent: false,
-    vibrancy: 'under-window',
-    visualEffectState: 'active',
+    transparent: true, // vrai verre : le panneau flotte au-dessus du bureau et des apps (AEGIS)
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,

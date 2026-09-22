@@ -216,7 +216,12 @@ let idx = 0;
 const $ = (id) => document.getElementById(id);
 
 // ---------- DOM ----------
-document.body.innerHTML = `
+// Launcher : si la page fournit une fenêtre mac (.macwin), l'app s'intègre dedans
+// (au-dessus de la barre mac) au lieu d'écraser le body — la chrome mac survit.
+const MAC_HOST = document.querySelector('.macwin');
+const APP_PARENT = MAC_HOST || document.body;
+if (!MAC_HOST) document.body.innerHTML = ''; // ne vide le body QUE hors launcher
+APP_PARENT.insertAdjacentHTML('afterbegin', `
 <main id="app" role="application" aria-label="MEGA PACK">
   <header id="top">
     <span id="brand">⚡ <b>MEGA&nbsp;PACK</b></span>
@@ -334,7 +339,7 @@ document.body.innerHTML = `
       </div>
     </div>
   </div>
-</main>`;
+</main>`);
 
 const q = $('q'), list = $('list'), cnt = $('cnt'), sels = $('sels'), composeBtn = $('compose');
 
@@ -478,6 +483,19 @@ document.addEventListener('click', (e) => { if (!ctx.hidden && !e.target.closest
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !ctx.hidden) hideCtx(); });
 window.addEventListener('blur', () => { hideCtx(); hideTip(); });
 
+// ── Scroll page → liste ──
+// L'app est une app menu-bar : la page ne défile jamais, seul #list défile.
+// Hors launcher, toute la molette en dehors d'un popup est donc relayée à #list,
+// sinon un scroll sur l'en-tête/pied semble « ne rien faire ».
+document.addEventListener('wheel', (e) => {
+  if (document.querySelector('.macwin')) return; // launcher : la page défile normalement
+  if (e.target.closest('#ctx, #llmmenu, #tip, #wmodal, #tour, #modal')) return; // popups à scroll propre
+  const l = $('list');
+  if (!l || l.scrollHeight <= l.clientHeight) return;
+  e.preventDefault();
+  l.scrollTop += e.deltaY;
+}, { passive: false });
+
 // ────────────────────────────────────────────────────────────────────────────
 //  Toast — retour discret (génération IA, erreurs)
 // ────────────────────────────────────────────────────────────────────────────
@@ -498,10 +516,15 @@ const ALL = [
   ...CUSTOMS.map((x) => ({ x, k: 'custom' })),
 ];
 const findItem = (n) => ALL.find((i) => i.x.name === n);
+// Recherche par tags : la requête est découpée sur espaces, / et virgules
+// (« ux/ui », « ux ui design »…) — un item passe s'il correspond à AU MOINS UN
+// token ; le classement fait remonter ceux qui en correspondent au plus.
+const qTokens = () => query.split(/[\s,/]+/).filter(Boolean);
+const hayOf = (it) => (it.x.name + ' ' + lname(it.x) + ' ' + (it.x.category || '') + ' ' + (ldesc(it.x) || '')).toLowerCase();
 const match = (it) => {
   if (!query) return true;
-  const x = it.x;
-  return (x.name + ' ' + lname(x) + ' ' + (x.category || '') + ' ' + (ldesc(x) || '')).toLowerCase().includes(query);
+  const hay = hayOf(it);
+  return qTokens().some((t) => hay.includes(t));
 };
 const byFilter = (it) => {
   if (filter === 'skills') return it.k === 'skill';
@@ -513,7 +536,16 @@ const byFilter = (it) => {
 };
 function compute() {
   results = ALL.filter(byFilter).filter(match);
-  if (query) results.sort((a, b) => (lname(a.x).toLowerCase().startsWith(query) ? -1 : 0) - (lname(b.x).toLowerCase().startsWith(query) ? -1 : 0) || lname(a.x).localeCompare(lname(b.x)));
+  if (query) {
+    const toks = qTokens();
+    const score = (it) => {
+      const hay = hayOf(it);
+      let s = toks.filter((t) => hay.includes(t)).length * 10;
+      if (lname(it.x).toLowerCase().startsWith(toks[0])) s += 50;
+      return s;
+    };
+    results.sort((a, b) => score(b) - score(a) || lname(a.x).localeCompare(lname(b.x)));
+  }
   idx = Math.min(idx, Math.max(0, results.length - 1));
 }
 

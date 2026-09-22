@@ -18,6 +18,8 @@
   const langb = document.getElementById('langb');
   const lx = macbar.querySelector('.lx');
   if (top && lx && newp && langb) {
+    // les placeholders statiques du launcher cèdent la place aux vrais boutons du renderer
+    lx.querySelectorAll('#newp, #langb').forEach((b) => { if (b !== newp && b !== langb) b.remove(); });
     lx.appendChild(newp);
     lx.appendChild(langb);
     const topRight = top.querySelector('span[style*="flex"]');

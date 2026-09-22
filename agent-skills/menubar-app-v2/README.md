@@ -1,6 +1,34 @@
-# ⚡ MEGA PACK — App menu-bar macOS
+# ⚡ MEGA PACK V3 « Constellation » — App menu-bar macOS
 
-Recherche globale et activation des **131 skills + 190 agents** depuis la barre de menus.
+> **Deux éditions monovue existent aussi** : [`../menubar-app-galaxy`](../menubar-app-galaxy)
+> (🌌 Galaxie 3D seule) et [`../menubar-app-bridge`](../menubar-app-bridge)
+> (🛰 Pont de commandement seul) — même moteur, une seule expérience chacune.
+
+Deux vues inédites pour activer les **131 skills + 190 agents + tes prompts perso** :
+
+## 🌌 Galaxie 3D
+Toute la bibliothèque en étoiles navigables : **agents en orbite verte**, **skills en anneau
+violet**, **✍️ perso au centre**, **⭐ favoris en constellation polaire reliée par des fils d'or**.
+Fond de nébuleuses + champ d'étoiles scintillantes. La recherche déclenche un **hyper-saut** :
+la caméra plonge vers les étoiles trouvées, qui se mettent à pulser.
+
+- **⌥-glisser** (ou glisser) : incliner / orbiter · **molette** : zoom · **double-clic** : recentrer
+- **Clic** sur une étoile : tirer le prompt (copié) · **⌥-clic** : ⭐ favori · **⌘-clic** : composer
+- **← →** : cibler l'étoile suivante (cadre blanc pulsant) · **⏎** : tirer
+
+## 🛰 Pont de commandement
+HUD radial façon vaisseau : **4 arcs-secteurs** (👥 Agents · 🛠 Skills · ✍️ Perso · ⭐ Favoris),
+cœur pulsant **MEGA PACK**, et un **CADRAN ORBITAL** : les items défilent sur un anneau sous
+un réticule ▼, comme une turret de ciblage.
+
+- **← → ou molette ou glisser** : viser · **Tab** : changer de secteur · **⏎** : tirer le prompt
+- **Clic sur une chip** : tirer · **⌥-clic** : ⭐ favori · **⌘-clic** : composer
+
+## Tiroir de résultats
+La recherche ouvre un **tiroir** en surimpression (précision liste classique) ; ferme-le avec
+**✕** ou **Échap** pour revenir à la scène. Tout le moteur est conservé : prompts bilingues
+FR/EN, favoris ⭐, récents, composeur ⌘A, import glisser-déposer `.md`/`.txt`, collage direct,
+12 destinations « Ouvrir dans », thèmes sombre/clair/contraste, ARIA.
 
 🇬🇧 Version anglaise : [`README-EN.md`](README-EN.md)
 
@@ -13,13 +41,17 @@ npm start
 
 → une icône **⚡** apparaît dans la menu bar et dans le Dock.
 
+## Choisir sa vue
+Bascule **🌌 Galaxie / 🛰 Pont** en haut du panneau (mémorisée). Recherche, favoris et
+sélection sont partagés entre les deux vues.
+
 ## Raccourcis
 
 | Raccourci | Action |
 |---|---|
 | **⌥Espace** | Ouvrir/fermer le panneau (n'importe où dans macOS — modifiable dans les Réglages) |
 | **⌘⇧Espace** | Fenêtre Réglages |
-| **↑ / ↓** | Naviguer dans les résultats |
+| **↑ / ↓** | Naviguer dans les résultats (tiroir) · cibler étoile/chip (scène) |
 | **⏎** | Copier le prompt d'activation de l'élément sélectionné |
 | **⌘⏎** | Ouvrir la sélection dans le **LLM par défaut** (Réglages) |
 | **⇧⏎** | Ouvrir dans ChatGPT |
@@ -66,6 +98,15 @@ certains environnements) : `npm run build` via electron-packager.
 
 Build configuré pour **Intel x64** (votre machine). Pour Apple Silicon :
 `--arch=arm64` dans `package.json`.
+
+## Tests
+
+```bash
+./test-all.sh   # syntaxe + suites logiques (FR, customs, galaxie/pont) + smoke Electron offscreen
+```
+
+- `test-galaxy.js` : logique V3 en sandbox VM — hyper-saut, cadran, ciblage, tiroir
+- `probe-v3.js` : smoke réel (`--shots` pour écrire `dist/probe-galaxy.png` / `probe-bridge.png`)
 
 ## Dépannage
 

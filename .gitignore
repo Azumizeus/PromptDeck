@@ -10,3 +10,10 @@ dist/
 
 # Métadonnées locales Freebuff
 .freebuff/
+
+# Kit de génération Groq (usage local, pas de push)
+/docs/GROQ-KIT-V4.md
+
+# Assets vectoriels générés (locaux, volumineux, itérables)
+agent-skills/menubar-app-bridge/assets/
+agent-skills/menubar-app-galaxy/assets/

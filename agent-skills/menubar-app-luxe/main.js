@@ -808,7 +808,7 @@ function captureShots() {
   // Réglages : fenêtre non-redimensionnable, rendue en repli visible (capturePage fiable ici)
   const captureSettings = () => new Promise((resolve) => {
     const w = new BrowserWindow({
-      width: 500, height: 660, show: false, resizable: false, minimizable: false,
+      width: 500, height: 1030, show: false, resizable: false, minimizable: false,
       fullscreenable: false, title: T().settingsTitle,
       icon: nativeImage.createFromPath(APPICON),
       webPreferences: {

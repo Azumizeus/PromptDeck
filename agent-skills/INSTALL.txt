@@ -1,0 +1,83 @@
+═══════════════════════════════════════════════════════════════════
+  MEGA PACK SKILLS & AGENTS — GUIDE D'INSTALLATION
+  131 skills · 190 agents · 100 % bilingue FR/EN
+═══════════════════════════════════════════════════════════════════
+
+Démarrage en 4 étapes. Le guide interactif complet est ici :
+→ interface/MODE-DEMPLOI.html (double-clique dessus pour l'ouvrir)
+
+
+───────────────────────────────────────────────────────────────────
+ÉTAPE 1 — OUVRIR LE LAUNCHER (zéro installation)
+───────────────────────────────────────────────────────────────────
+Double-clique sur :  interface/mega-pack-launcher.html
+
+Il s'ouvre dans ton navigateur avec les 321 items (skills + agents).
+Recherche, filtres, badges FR/EN, bascule de langue 🇫🇷/🇬🇧 en haut.
+
+
+───────────────────────────────────────────────────────────────────
+ÉTAPE 2 — LE PANNEAU PERMANENT DANS TON NAVIGATEUR  ⭐ recommandé
+───────────────────────────────────────────────────────────────────
+Installe le bouton ⚡ sur claude.ai, chatgpt.com, etc. — le
+catalogue complet (traductions FR incluses) est EMBARQUÉ dans le
+script : aucun serveur ni fichier externe nécessaire.
+
+  1. Installe l'extension Tampermonkey
+     (Chrome / Edge / Arc : tampermonkey.net — Safari : app « Userscripts »)
+  2. Icône Tampermonkey → Tableau de bord → « + » (créer un script)
+  3. Ouvre  interface/mega-pack-panel-full.user.js  dans un éditeur
+     de texte → ⌘A (tout sélectionner) → ⌘C (copier)
+  4. Dans l'éditeur Tampermonkey : ⌘A → ⌘V (remplace tout) → ⌘S
+  5. Va sur claude.ai → le bouton ⚡ apparaît en bas à droite.
+     Raccourci clavier : Ctrl+Shift+K.
+
+⚠️ À refaire après chaque mise à jour du catalogue (le script
+contient une copie du catalogue : ⌘A ⌘V ⌘S suffit pour remplacer).
+
+
+───────────────────────────────────────────────────────────────────
+ÉTAPE 3 — LE SERVEUR LOCAL POUR LE BOOKMARKLET (macOS)
+───────────────────────────────────────────────────────────────────
+Le favori (bookmarklet) charge le panneau depuis un serveur local —
+les navigateurs bloquent les scripts file:// sur les pages https.
+
+  Double-clique sur :  interface/MEGA-PACK-serveur.command
+
+Il démarre http://localhost:8788 et ouvre le launcher.
+⚠️ Première fois : clic droit → « Ouvrir » (macOS bloque les
+fichiers non signés téléchargés sur le premier lancement).
+
+Ensuite, glisse le bouton ⚡ de la page  mega-pack-bookmarklet.html
+vers la barre de favoris de ton navigateur.
+
+
+───────────────────────────────────────────────────────────────────
+ÉTAPE 4 — L'APP MENU BAR (optionnel, macOS)
+───────────────────────────────────────────────────────────────────
+Recherche globale dans la barre de menus (⌘Espace-like) + Réglages
+bilingues. Le fichier .app compilé est déjà fourni dans :
+  menubar-app/dist/MEGA PACK-darwin-x64/MEGA PACK.app
+
+Pour le lancer : double-clique sur MEGA PACK.app.
+⚠️ Première fois : clic droit → « Ouvrir ».
+
+Pour recompiler depuis les sources :
+  cd menubar-app
+  npm install
+  npm run build        → sortie dans dist/
+
+
+───────────────────────────────────────────────────────────────────
+AUTRES FICHIERS UTILES
+───────────────────────────────────────────────────────────────────
+  interface/MODE-DEMPLOI.html          Guide interactif bilingue
+                                       (checklist, tests, démo)
+  interface/LISEZMOI-INTERFACE.md      Doc FR détaillée
+  interface/README-EN.md               Doc EN détaillée
+  menubar-app/README.md                Doc app FR / README-EN.md EN
+  skills/  agents/                     Sources .md des 321 items
+  interface/i18n-fr.json               Traductions FR du catalogue
+
+Besoin d'aide ? Ouvre interface/MODE-DEMPLOI.html — tout y est
+expliqué, avec dépannage dépliable et tests en 1 clic.
