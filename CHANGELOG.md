@@ -3,6 +3,21 @@
 Toutes les évolutions notables de **PromptDeck** (anciennement MEGA PACK) sont documentées ici.
 Format inspiré de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), versionnement [SemVer](https://semver.org/lang/fr/).
 
+## [2.6.0] - 2026-09-22
+
+### 🎓 Mode d'emploi interactif — relançable depuis les Réglages (app + userscript)
+- **Réglages → 🎓 Mode d'emploi interactif → ▶ Relancer la visite** (les deux plateformes) :
+  la visite guidée 7 étapes repart de zéro dans le panneau, sans réinstaller ni effacer ses données
+- **App macOS** : nouvelle rangée dans la fenêtre Réglages + IPC `restart-tour`
+  (montre le panneau s'il est caché, supprime le marqueur « vue », affiche l'étape 1)
+- **Userscript Tampermonkey 2.6.0** : la visite guidée arrive dans le panneau web —
+  7 étapes alignées sur l'app (recherche, onglets, LLM, clic droit, favoris/⌘1-9, réglages,
+  conclusion), carte flottante + surbrillance verte de l'élément concerné, progression par points,
+  EN/FR ; s'ouvre automatiquement à la première visite, relançable via ⚙
+- MODE-DEMPLOI.html mis à jour (versions 2.6.0 + note visite guidée)
+- Validation : `test-luxe.js` 13/13 sections vertes ; banc d'essai live — auto-ouverture,
+  avancer/terminer, bouton ⚙ de relance, marqueur `mgp.tour.done` persisté
+
 ## [2.5.2] - 2026-09-22
 
 ### ⚙ Userscript 2.5.0 — le même panneau Réglages que l'app macOS

@@ -904,6 +904,12 @@ ipcMain.on('open-llm', (e, { target, prompt }) => {
   openLLM(target, prompt);
 });
 ipcMain.on('open-settings', createSettings);
+ipcMain.on('restart-tour', () => {
+  if (win && !win.isDestroyed()) {
+    win.show();
+    win.webContents.send('restart-tour');
+  }
+});
 ipcMain.on('settings-changed', (e, { theme, lang, defaultLLM, sendTargets, autostart, favShortcuts, shortcut } = {}) => {
   LANG = lang === 'en' ? 'en' : 'fr';
   PREFS.lang = LANG;

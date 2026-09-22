@@ -26,6 +26,8 @@ contextBridge.exposeInMainWorld('mgp', {
   hide: () => ipcRenderer.send('hide'),
   openLLM: (target, prompt) => ipcRenderer.send('open-llm', { target, prompt }),
   openSettings: () => ipcRenderer.send('open-settings'),
+  restartTour: () => ipcRenderer.send('restart-tour'),
+  onRestartTour: (cb) => ipcRenderer.on('restart-tour', () => cb()),
   onSettingsChange: (prefs) => ipcRenderer.send('settings-changed', prefs),
   onSettings: (cb) => ipcRenderer.on('settings-changed', (e, prefs) => cb(prefs)),
   getPrefs: () => ipcRenderer.sendSync('get-prefs'),

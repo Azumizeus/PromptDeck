@@ -1062,6 +1062,8 @@ function tourMaybeStart() {
   }
 }
 setTimeout(tourMaybeStart, 600); // laisse le premier rendu se poser avant le pop-up
+// Relance depuis Réglages → 🎓 Mode d'emploi (supprime le marqueur « vue »)
+try { window.mgp.onRestartTour && window.mgp.onRestartTour(() => { try { localStorage.removeItem(TOUR_SEEN_KEY); } catch (e) {} tourShow(0); }); } catch (e) {}
 
 render();
 window.__mgp = {

@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         MEGA PACK Panel Luxe — Skills, Agents & Équipes pour tout LLM
 // @namespace    mega-pack
-// @version      2.5.0
+// @version      2.6.0
 // @description  Panneau flottant Édition Luxe dans une fenêtre macOS : 131 skills + 190 agents + 🕸 équipes + ✍️ prompts perso + ★ favoris, recherche instantanée, tooltip expert, clic droit multi-LLM, sélecteur de LLM par défaut, composeur ⌘-clic — injectable dans n'importe quelle conversation LLM (Claude, ChatGPT, Gemini, Perplexity, Mistral, OpenCode Web…)
 // @author       MEGA PACK
 // @match        *://*/*
@@ -48,6 +48,11 @@
       setExport: '⬇ Exporter', setImport: '⬆ Importer', setImported: '✓ Configuration importée', setImportErr: '✗ Fichier invalide',
       setXp: 'Mes prompts ✍️', setXpD: 'Télécharge tous tes prompts en Markdown',
       setXpBtn: '⬇ Exporter en .md', setXpNone: 'Aucun prompt perso',
+      setTour: "🎓 Mode d'emploi interactif", setTourD: 'Revoit la visite guidée : recherche, onglets, LLM, clic droit…',
+      setTourBtn: 'Relancer la visite',
+      tourTitle: 'Visite guidée',
+      tourSkip: 'Passer la visite', tourNext: 'Suivant →', tourDone: 'Terminer',
+      tourStepN: (i, n) => 'Étape ' + i + '/' + n,
       setDone: 'Enregistrer', setClose: 'Fermer',
       saved: '✓ Réglages enregistrés',
       clipboard: 'Presse-papiers',
@@ -101,6 +106,11 @@
       setExport: '⬇ Export', setImport: '⬆ Import', setImported: '✓ Configuration imported', setImportErr: '✗ Invalid file',
       setXp: 'My prompts ✍️', setXpD: 'Download all your prompts as Markdown',
       setXpBtn: '⬇ Export as .md', setXpNone: 'No custom prompts',
+      setTour: '🎓 Interactive guide', setTourD: 'Replays the guided tour: search, tabs, LLM, right-click…',
+      setTourBtn: 'Replay the tour',
+      tourTitle: 'Guided tour',
+      tourSkip: 'Skip tour', tourNext: 'Next →', tourDone: 'Done',
+      tourStepN: (i, n) => 'Step ' + i + '/' + n,
       setDone: 'Save', setClose: 'Close',
       saved: '✓ Settings saved',
       clipboard: 'Clipboard',
@@ -337,6 +347,27 @@
   #mgp-panel.light #mgp-setdlg .btn{border-color:#c5cfeb;color:#2c3556}
   #mgp-panel.light #mgp-setdlg .srow button{border-color:#dfe4f3;color:#2c3556}
   #mgp-panel.light #mgp-setdlg .srow button.prim{background:#6b46f2;border-color:#6b46f2;color:#fff}
+  /* visite guidée (alignée app : carte flottante + surbrillance de l'élément) */
+  #mgp-tour{position:fixed;z-index:1000003;inset:0;display:none;background:rgba(5,6,10,.45)}
+  #mgp-tour.open{display:block}
+  #mgp-tourcard{position:absolute;max-width:330px;background:#14151c;border:1px solid #31343f;border-radius:14px;
+    padding:14px 16px;box-shadow:0 24px 70px rgba(0,0,0,.55);font:13px/1.5 -apple-system,sans-serif;color:#eef0f6}
+  #mgp-tourcard .tstepnum{font-size:10px;font-weight:800;letter-spacing:1px;color:#14f195;text-transform:uppercase}
+  #mgp-tourcard h3{margin:4px 0 6px;font-size:14.5px}
+  #mgp-tourcard p{margin:0 0 4px;color:#a8adbd;font-size:12.5px}
+  #mgp-tourcard .thelp{color:#6b7080;font-size:11.5px}
+  #mgp-tourcard .trow{display:flex;align-items:center;gap:8px;margin-top:11px}
+  #mgp-tourcard .trow button{border:1px solid #31343f;background:none;color:#a8adbd;cursor:pointer;font:inherit;
+    font-size:12px;font-weight:600;padding:6px 12px;border-radius:8px}
+  #mgp-tourcard .trow button:hover{border-color:#9945ff;color:#eef0f6}
+  #mgp-tourcard .trow button.pri{background:#9945ff;border-color:#9945ff;color:#fff}
+  #mgp-tourcard .trow .dots{display:flex;gap:4px;margin:0 auto}
+  #mgp-tourcard .trow .dots i{width:6px;height:6px;border-radius:50%;background:#31343f}
+  #mgp-tourcard .trow .dots i.on{background:#14f195}
+  .mgp-tour-hl{position:relative;z-index:1000004;box-shadow:0 0 0 3px #14f195,0 0 24px rgba(20,241,149,.5) !important;border-radius:10px}
+  body.mgp-light #mgp-tourcard{background:#ffffff;border-color:#c5cfeb;color:#131a2e}
+  body.mgp-light #mgp-tourcard p{color:#2c3556}
+  body.mgp-light #mgp-tourcard .thelp{color:#5d6885}
   #mgp-head{padding:9px 14px;border-bottom:1px solid #23252f;display:flex;justify-content:space-between;align-items:center}
   #mgp-head b{font-size:12.5px;letter-spacing:.4px}
   #mgp-head .c{font-size:11px;color:#6b7080;margin-left:8px;font-variant-numeric:tabular-nums}
@@ -456,6 +487,12 @@
   tip.id = 'mgp-tip';
   const ctx = document.createElement('div');
   ctx.id = 'mgp-ctx';
+  const tour = document.createElement('div');
+  tour.id = 'mgp-tour';
+  tour.innerHTML = '<div id="mgp-tourcard">' +
+    '<span class="tstepnum"></span><h3></h3><p></p><p class="thelp"></p>' +
+    '<div class="trow"><button class="tskip"></button><span class="dots"></span><button class="tpri"></button></div>' +
+    '</div>';
 
   // ── Tooltip expert (survol) ────────────────────────────────────────────────
   let tipTimer = null, tipFor = null;
@@ -884,6 +921,77 @@
     buildSetDlg();
     dlg.classList.add('open');
   };
+
+  // ── 🎓 Visite guidée (alignée app : 7 étapes, surbrillance, relançable) ──
+  function tourSteps() {
+    const fr = LANG === 'fr';
+    return [
+      { title: fr ? '⚡ Bienvenue !' : '⚡ Welcome!', desc: fr ? '321 experts prêts à l\'emploi : 131 skills 🛠 et 190 agents 👤. Tape quelques lettres : la liste filtre instantanément.' : '321 ready-to-use experts: 131 skills 🛠 and 190 agents 👤. Type a few letters: the list filters instantly.', help: fr ? '💡 ↑↓ naviguent, ⏎ injecte dans la conversation.' : '💡 ↑↓ navigate, ⏎ injects into the conversation.', target: null },
+      { title: fr ? '🗂 Les onglets' : '🗂 Tabs', desc: fr ? 'Tout, Skills, Agents, 🕸 Équipes, ✍️ Perso, ★ Favoris : chaque clic filtre le catalogue.' : 'All, Skills, Agents, 🕸 Teams, ✍️ Custom, ★ Favorites: each click filters the catalog.', help: fr ? '💡 ⌘-clic sélectionne plusieurs experts pour les composer ensemble (⌥⏎).' : '💡 ⌘-click selects several experts to compose them together (⌥⏎).', target: 'mgp-tabs' },
+      { title: fr ? '⌨ Le LLM par défaut' : '⌨ The default LLM', desc: fr ? 'En bas, le bouton « ⌨ LLM » choisit la destination par défaut : Claude, ChatGPT, Perplexity… (règlable aussi dans ⚙).' : 'At the bottom, the « ⌨ LLM » button picks the default destination: Claude, ChatGPT, Perplexity… (also in ⚙).', help: fr ? '💡 ⌘⏎ envoie vers ce LLM · ⇧⏎ force ChatGPT.' : '💡 ⌘⏎ sends there · ⇧⏎ forces ChatGPT.', target: 'mgp-foot' },
+      { title: fr ? '🖱 Le clic droit' : '🖱 Right-click', desc: fr ? 'Clic droit sur un expert : Envoyer à (tes destinations ⚙), ⧉ copier, ★ favori, presse-papiers.' : 'Right-click an expert: Send to (your ⚙ destinations), ⧉ copy, ★ favorite, clipboard.', help: fr ? '💡 Les destinations se choisissent dans ⚙ Réglages.' : '💡 Pick destinations in ⚙ Settings.', target: 'mgp-list' },
+      { title: fr ? '★ Favoris & ⌘1-9' : '★ Favorites & ⌘1-9', desc: fr ? '★ sur une ligne = favori. Avec le panneau ouvert, ⌘1 à ⌘9 injectent tes 9 premiers favoris (option ⚙).' : '★ on a row = favorite. With the panel open, ⌘1-⌘9 inject your first 9 favorites (⚙ option).', help: fr ? '💡 La fenêtre se déplace (barre titre), se redimensionne (poignée) et se replie (🟡).' : '💡 The window drags (title bar), resizes (handle) and collapses (🟡).', target: 'mgp-newp' },
+      { title: fr ? '⚙ Réglages complets' : '⚙ Full settings', desc: fr ? 'Thème clair/sombre, langue, LLM par défaut, destinations, export/import de ta config, export ✍️ en .md — comme l\'app macOS.' : 'Light/dark theme, language, default LLM, destinations, config export/import, ✍️ .md export — like the macOS app.', help: fr ? '💡 Tout est local : rien n\'est envoyé en ligne.' : '💡 Everything is local: nothing is sent online.', target: 'mgp-set' },
+      { title: fr ? '✅ Tu sais tout !' : '✅ You are all set!', desc: fr ? 'Ctrl+Shift+K ouvre le panneau depuis n\'importe quelle page. Clic droit sur un expert pour l\'envoyer vers un LLM. Bonne exploration ! ⚡' : 'Ctrl+Shift+K opens the panel on any page. Right-click an expert to send it to an LLM. Happy exploring! ⚡', help: '', target: null },
+    ];
+  }
+  let TOUR_I = 0;
+  const TOUR_SEEN_KEY = 'tour.done';
+  function tourShow(i) {
+    const steps = tourSteps();
+    TOUR_I = Math.max(0, Math.min(i, steps.length - 1));
+    const st = steps[TOUR_I];
+    tour.querySelector('.tstepnum').textContent = T().tourStepN(TOUR_I + 1, steps.length);
+    tour.querySelector('h3').textContent = st.title;
+    tour.querySelector('p').textContent = st.desc;
+    tour.querySelector('.thelp').textContent = st.help || '';
+    tour.querySelector('.dots').innerHTML = steps.map(function (_, j) { return '<i class="' + (j === TOUR_I ? 'on' : '') + '"></i>'; }).join('');
+    tour.querySelector('.tpri').textContent = TOUR_I === steps.length - 1 ? T().tourDone : T().tourNext;
+    tour.querySelector('.tskip').textContent = T().tourSkip;
+    tour.classList.add('open');
+    const card = tour.querySelector('#mgp-tourcard');
+    card.style.left = Math.max(10, Math.min(window.innerWidth - 350, window.innerWidth / 2 - 165)) + 'px';
+    card.style.top = Math.max(10, window.innerHeight / 2 - 120) + 'px';
+    document.querySelectorAll('.mgp-tour-hl').forEach(function (n) { n.classList.remove('mgp-tour-hl'); });
+    const el = st.target ? panel.querySelector('#' + st.target) : null;
+    if (el && panel.classList.contains('open')) el.classList.add('mgp-tour-hl');
+  }
+  function tourAdvance() { if (TOUR_I >= tourSteps().length - 1) return tourEnd(); tourShow(TOUR_I + 1); }
+  function tourEnd() {
+    tour.classList.remove('open');
+    document.querySelectorAll('.mgp-tour-hl').forEach(function (n) { n.classList.remove('mgp-tour-hl'); });
+    store.set('tour.done', true);
+  }
+  tour.querySelector('.tpri').onclick = tourAdvance;
+  tour.querySelector('.tskip').onclick = tourEnd;
+  tour.addEventListener('click', function (e) { if (e.target === tour) tourEnd(); });
+  document.addEventListener('keydown', function (e) {
+    if (!tour.classList.contains('open')) return;
+    if (e.key === 'Escape' || e.key === 'Enter') { e.preventDefault(); tourAdvance(); }
+  });
+  function tourMaybeStart() {
+    if (!store.get('tour.done', false)) {
+      panel.classList.add('open');
+      renderCounts(); renderTabs(); renderLlmBtn(); render();
+      tourShow(0);
+    }
+  }
+  if (store.get('tour.done', false) === false) setTimeout(tourMaybeStart, 500);
+  // Rangée 🎓 dans ⚙ — relance
+  const tourRow = function () {
+    return '<div class="row"><b>' + T().setTour + '<span class="d">' + T().setTourD + '</span></b>' +
+      '<button class="btn" id="mgp-s-tour">▶ ' + T().setTourBtn + '</button></div>';
+  };
+  const _buildSetDlg = buildSetDlg;
+  buildSetDlg = function () {
+    _buildSetDlg();
+    const dlg = panel.querySelector('#mgp-setdlg');
+    dlg.querySelector('.row:nth-of-type(6)').insertAdjacentHTML('afterend', tourRow());
+    dlg.querySelector('#mgp-s-tour').onclick = function () {
+      dlg.classList.remove('open');
+      tourShow(0);
+    };
+  };
   btn.onclick = function () { panel.classList.contains('open') ? closePanel() : openPanel(); };
   panel.querySelector('#mgp-newp').onclick = function () { openModal(null); };
   panel.querySelector('#mgp-q').oninput = function (e) { q = e.target.value; idx = 0; render(); };
@@ -949,6 +1057,7 @@
   document.body.appendChild(panel);
   document.body.appendChild(tip);
   document.body.appendChild(ctx);
+  document.body.appendChild(tour);
   applyTheme();
   applyLang();
 })();
