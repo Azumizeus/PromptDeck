@@ -1046,6 +1046,20 @@ ipcMain.handle('prompt-dir-open', async (e, sub) => {
   await shell.openPath(target);
   return true;
 });
+// 📂 Révèle dans le Finder le .md SOURCE d'un expert du catalogue (SKILL.md ou fiche agent)
+ipcMain.handle('source-reveal', (e, p) => {
+  try {
+    if (!p || typeof p !== 'string' || p.includes('..')) return { ok: false, error: 'chemin invalide' };
+    const abs = path.isAbsolute(p) ? p : path.join(process.cwd(), '..', p);
+    const norm = path.resolve(abs);
+    const root = path.resolve(process.cwd(), '..'); // racine agent-skills
+    if (!norm.startsWith(root)) return { ok: false, error: 'hors du dépôt' };
+    if (!fs.existsSync(norm)) return { ok: false, error: 'fichier absent' };
+    shell.showItemInFolder(norm); // ouvre le dossier parent ET sélectionne le fichier
+    return { ok: true, path: norm };
+  } catch (err) { return { ok: false, error: String(err.message || err) };
+  }
+});
 ipcMain.handle('prompt-md-open', async (e, sub) => {
   // Ouvre le FICHIER .md dans l'éditeur par défaut (garde anti-traversal : pas de .., reste sous la racine)
   if (!sub || typeof sub !== 'string' || sub.includes('..')) return false;

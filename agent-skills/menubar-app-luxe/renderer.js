@@ -404,6 +404,7 @@ function ctxHtml(it) {
     ${targets.map((t) => `<button role="menuitem" data-t="${esc(t)}">▸ ${esc(tgtLabel(t))}</button>`).join('')}
     <span class="csep"></span>
     <button role="menuitem" data-a="md">${T.mdCreate}</button>
+    ${it.x.path ? `<button role="menuitem" data-a="reveal">📂 ${LANG === 'fr' ? 'Ouvrir le .md source' : 'Open source .md'}</button>` : ''}
     <span class="csec ctx-treehead">${T.treeHead}</span>
     <span class="tree" id="ctx-tree"><span class="tree-empty">${T.treeLoading}</span></span>
     <button role="menuitem" data-a="opendir">📂 ${LANG === 'fr' ? 'Ouvrir le dossier MEGA PROMPT' : 'Open the MEGA PROMPT folder'}</button>
@@ -437,6 +438,11 @@ function openCtx(el, it, cx, cy) {
         });
       } else if (b.dataset.a === 'opendir') {
         window.mgp.promptDirOpen();
+      } else if (b.dataset.a === 'reveal') {
+        window.mgp.sourceReveal(it.x.path).then((r) => {
+          if (r && r.ok) showToast(LANG === 'fr' ? '📂 Dossier ouvert, fichier sélectionné' : '📂 Folder opened, file selected', 'ok');
+          else showToast(`📂 — ${(r && r.error) || '?'}`, 'err');
+        });
       } else if (b.dataset.a === 'copy') activate(it);
       else if (b.dataset.a === 'fav') toggleFav(it.x.name);
     };

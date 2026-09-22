@@ -44,7 +44,7 @@ const byId = (id) => (ids[id] ||= makeEl('div'));
 const inputEl = makeEl('input');
 ids.q = inputEl;
 
-const copied = [], recents = [], opened = [], toasts = [], generated = [], mdStore = [];
+const copied = [], recents = [], opened = [], toasts = [], generated = [], mdStore = [], revealed = [];
 const favsStore = new Set();
 const customsStore = [];
 const workshopStore = { agent: [], skill: [] };
@@ -107,6 +107,7 @@ sandbox.window.mgp = {
   promptDirChoose: async () => '/virtuel/MEGA PROMPT',
   promptDirOpen: async () => true,
   promptMdCreate: async (it) => mdStore.push(it) && { ok: true, path: `/virtuel/MEGA PROMPT/${it.k}/${it.x.name}.md` },
+  sourceReveal: async (p) => revealed.push(p) && { ok: true, path: p },
   promptTreeSync: async () => ({ ok: true, count: 321 }),
   workshopMdCreate: async () => ({ ok: true, path: '/virtuel/x.md' }),
   // Sélecteur LLM du footer (harnais : la pref change, comme le main process réel)
@@ -355,6 +356,35 @@ const topUxUi = MGP.list().slice(0, 3).map((r) => (r.x.name_fr || r.x.name)).joi
 check(MGP.search('design interface') > 0, 'multi-tags « design interface » : items liés aux deux');
 check(MGP.search('') === MGP.counts().all, 'vidage : retour au catalogue complet (' + MGP.counts().all + ' items, créations de l\'Atelier incluses)');
 console.log('   top « ux/ui » : ' + topUxUi);
+
+console.log('14) Catalogue ↔ fichiers .md — cohérence + révélation du dossier source :');
+// a) chaque item du CATALOGUE (skills/agents, hors créations Atelier qui n'ont pas de .md source) a un path existant
+const catItems = MGP.list().filter((r) => (r.k === 'skill' || r.k === 'agent') && r.x.path); // créations Atelier : sans path, hors périmètre
+const genItems = MGP.list().filter((r) => (r.k === 'skill' || r.k === 'agent') && !r.x.path);
+check(catItems.length === 321, 'catalogue : 321 experts avec path (' + catItems.length + ', créations Atelier hors périmètre : ' + genItems.length + ')');
+const fsReal = require('fs'), pathReal = require('path');
+const repoRoot = pathReal.resolve(__dirname, '..');
+const missingFiles = catItems.filter((r) => { try { fsReal.accessSync(pathReal.join(repoRoot, r.x.path)); return false; } catch (e) { return true; } });
+check(missingFiles.length === 0, missingFiles.length ? 'fichiers .md manquants : ' + missingFiles.slice(0, 3).map((r) => r.x.path).join(', ') : 'chaque path du catalogue pointe vers un .md existant sur le disque (' + catItems.length + '/' + catItems.length + ')');
+// b) le clic droit expose « Ouvrir le .md source » (menu HTML) pour skills et agents
+vm.runInContext('__mgp.select("all")', ctx);
+const idxSkill = MGP.list().findIndex((r) => r.k === 'skill' && r.x.path);
+MGP.openCtxAt(idxSkill);
+const ctxHtmlStr = String(sandbox.document.getElementById('ctx')._html || '');
+check(ctxHtmlStr.includes('data-a="reveal"'), 'menu clic droit : entrée « Ouvrir le .md source » présente pour un skill');
+const idxAgent = MGP.list().findIndex((r) => r.k === 'agent' && r.x.path);
+MGP.openCtxAt(idxAgent);
+check(String(sandbox.document.getElementById('ctx')._html || '').includes('data-a="reveal"'), 'entrée « Ouvrir le .md source » présente aussi pour un agent');
+// c) l'IPC sourceReveal révèle le fichier (harnais : capture le path demandé)
+const revTarget = MGP.list()[idxSkill];
+sandbox.window.mgp.sourceReveal(revTarget.x.path);
+check(revealed.length === 1 && revealed[0] === revTarget.x.path, 'sourceReveal appelé avec le path du fichier choisi : ' + revealed[0]);
+// d) les ✍️ et équipes n'ont pas d'entrée reveal (pas de .md source)
+const idxCustom = MGP.list().findIndex((r) => r.k === 'custom');
+if (idxCustom >= 0) {
+  MGP.openCtxAt(idxCustom);
+  check(!String(sandbox.document.getElementById('ctx')._html || '').includes('data-a="reveal"'), 'pas d\'entrée « .md source » pour les ✍️ (créations locales)');
+}
 
 console.log('');
 if (fail) { console.log(`❌ ${fail} test(s) en échec`); process.exit(1); }

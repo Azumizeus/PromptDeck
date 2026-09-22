@@ -51,6 +51,7 @@ contextBridge.exposeInMainWorld('mgp', {
   promptDirChoose: () => ipcRenderer.invoke('promptdir-choose'),
   promptMdCreate: (item) => ipcRenderer.invoke('prompt-md-create', item),
   promptDirOpen: (sub) => ipcRenderer.invoke('prompt-dir-open', sub),
+  sourceReveal: (p) => ipcRenderer.invoke('source-reveal', p),
   promptTreeSync: (dir) => ipcRenderer.invoke('prompt-tree-sync', dir),
   // ── Arborescence MEGA PROMPT : vue d'ensemble + ouverture dossier/fichier (popup clic droit) ──
   promptTreeOverview: () => ipcRenderer.invoke('prompt-tree-overview'),
