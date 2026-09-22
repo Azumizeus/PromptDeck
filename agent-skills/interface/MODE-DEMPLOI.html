@@ -106,7 +106,7 @@ li{margin:6px 0}
       <li>Colle dans l'éditeur Tampermonkey → <b>⌘S</b></li>
       <li>Va sur claude.ai ou chatgpt.com → bouton <b>⚡</b> en bas à droite (raccourci <code>Ctrl+Shift+K</code>)</li>
     </ol>
-    <p class="note">⚠️ <b>Mise à jour :</b> après une régénération du catalogue (<code>build-interface.py</code>), <b>re-colle</b> le contenu de <code>mega-pack-panel-full.user.js</code> dans Tampermonkey — le catalogue est embarqué dedans. Version actuelle : <b>2.6.0</b>.</p>
+    <p class="note">⚠️ <b>Mise à jour :</b> après une régénération du catalogue (<code>build-interface.py</code>), <b>re-colle</b> le contenu de <code>mega-pack-panel-full.user.js</code> dans Tampermonkey — le catalogue est embarqué dedans. Version actuelle : <b>2.7.0</b>.</p>
     <p class="note">🌐 Le panneau a un bouton <b>FR/EN</b> dans son en-tête : la langue des textes ET des prompts injectés suit ton choix (mémorisé par site).</p>
     <p class="note">🎓 À la première ouverture, une <b>visite guidée en 7 étapes</b> défile (recherche, onglets, LLM, clic droit, favoris, réglages). Pour la revoir : <b>⚙ Réglages → 🎓 Mode d'emploi → ▶ Relancer la visite</b>.</p>
   </div>
@@ -150,7 +150,7 @@ li{margin:6px 0}
   </div>
 
   <h2>🛠️ Dépannage</h2>
-  <details><summary>Le bouton ⚡ apparaît 2 fois</summary><p>Corrigé (garde anti-doublon + <code>@noframes</code> — couvre aussi les iframes : artifacts Claude, canvas ChatGPT… et le cas de 2 userscripts installés ensemble). Si tu vois encore 2 boutons : tu as l'ancienne version dans Tampermonkey → re-colle la v2.6.0.</p></details>
+  <details><summary>Le bouton ⚡ apparaît 2 fois</summary><p>Corrigé (garde anti-doublon + <code>@noframes</code> — couvre aussi les iframes : artifacts Claude, canvas ChatGPT… et le cas de 2 userscripts installés ensemble). Si tu vois encore 2 boutons : tu as l'ancienne version dans Tampermonkey → re-colle la v2.7.0.</p></details>
   <details><summary>« Catalogue vide » dans le panneau</summary><p>Corrigé (lecture paresseuse + auto-chargement). Si ça persiste : utilise <code>mega-pack-panel-full.user.js</code> (catalogue embarqué) au lieu de <code>mega-pack-panel.user.js</code>.</p></details>
   <details><summary>Le prompt ne s'injecte pas dans le chat</summary><p>Le site a changé son DOM → le fallback copie dans le presse-papiers : colle manuellement (⌘V).</p></details>
   <details><summary>Le bookmarklet ne charge rien</summary><p>Le serveur local est éteint → double-clique <code>MEGA-PACK-serveur.command</code>, puis reclique le favori.</p></details>

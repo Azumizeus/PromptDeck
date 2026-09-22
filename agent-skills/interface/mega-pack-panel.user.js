@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         MEGA PACK Panel Luxe — Skills, Agents & Équipes pour tout LLM
 // @namespace    mega-pack
-// @version      2.6.0
+// @version      2.7.0
 // @description  Panneau flottant Édition Luxe dans une fenêtre macOS : 131 skills + 190 agents + 🕸 équipes + ✍️ prompts perso + ★ favoris, recherche instantanée, tooltip expert, clic droit multi-LLM, sélecteur de LLM par défaut, composeur ⌘-clic — injectable dans n'importe quelle conversation LLM (Claude, ChatGPT, Gemini, Perplexity, Mistral, OpenCode Web…)
 // @author       MEGA PACK
 // @match        *://*/*
@@ -286,6 +286,8 @@
     font:600 10.5px/1 -apple-system,sans-serif;padding:4px 9px;border-radius:99px}
   #mgp-macbar .lx button:hover{border-color:#9945ff;color:#eef0f6}
   #mgp-set{font-size:13px;line-height:1}
+  #mgp-tourbtn{font-size:13px;line-height:1}
+  #mgp-tourbtn:hover{border-color:#14f195 !important;color:#14f195 !important}
   #mgp-setdlg{display:none;flex-direction:column;gap:0;overflow-y:auto;max-height:calc(100% - 46px);margin:0 10px 10px;
     border:1px solid #31343f;border-radius:12px;background:#14151c}
   #mgp-setdlg.open{display:flex}
@@ -465,7 +467,8 @@
       '<button class="l l-min" title="' + (LANG === 'fr' ? 'Réduire' : 'Minimize') + '"></button>' +
       '<button class="l l-max" title="' + (LANG === 'fr' ? 'Élargir / réduire' : 'Widen / shrink') + '"></button>' +
       '</span><span class="ttl">⚡ MEGA PACK — Édition Luxe</span>' +
-      '<span class="lx"><button id="mgp-set" title="' + T().settingsTitle + '">' + T().settings + '</button>' +
+      '<span class="lx"><button id="mgp-tourbtn" title="' + T().tourTitle + '">🎓</button>' +
+      '<button id="mgp-set" title="' + T().settingsTitle + '">' + T().settings + '</button>' +
       '<button id="mgp-newp" title="' + T().newpTitle + '">' + T().newp + '</button>' +
       '<button id="mgp-lang">' + LANG.toUpperCase() + '</button></span></div>' +
     '<div id="mgp-head"><b>⚡ MEGA PACK</b><span class="c" id="mgp-counts"></span></div>' +
@@ -930,7 +933,9 @@
       { title: fr ? '🗂 Les onglets' : '🗂 Tabs', desc: fr ? 'Tout, Skills, Agents, 🕸 Équipes, ✍️ Perso, ★ Favoris : chaque clic filtre le catalogue.' : 'All, Skills, Agents, 🕸 Teams, ✍️ Custom, ★ Favorites: each click filters the catalog.', help: fr ? '💡 ⌘-clic sélectionne plusieurs experts pour les composer ensemble (⌥⏎).' : '💡 ⌘-click selects several experts to compose them together (⌥⏎).', target: 'mgp-tabs' },
       { title: fr ? '⌨ Le LLM par défaut' : '⌨ The default LLM', desc: fr ? 'En bas, le bouton « ⌨ LLM » choisit la destination par défaut : Claude, ChatGPT, Perplexity… (règlable aussi dans ⚙).' : 'At the bottom, the « ⌨ LLM » button picks the default destination: Claude, ChatGPT, Perplexity… (also in ⚙).', help: fr ? '💡 ⌘⏎ envoie vers ce LLM · ⇧⏎ force ChatGPT.' : '💡 ⌘⏎ sends there · ⇧⏎ forces ChatGPT.', target: 'mgp-foot' },
       { title: fr ? '🖱 Le clic droit' : '🖱 Right-click', desc: fr ? 'Clic droit sur un expert : Envoyer à (tes destinations ⚙), ⧉ copier, ★ favori, presse-papiers.' : 'Right-click an expert: Send to (your ⚙ destinations), ⧉ copy, ★ favorite, clipboard.', help: fr ? '💡 Les destinations se choisissent dans ⚙ Réglages.' : '💡 Pick destinations in ⚙ Settings.', target: 'mgp-list' },
-      { title: fr ? '★ Favoris & ⌘1-9' : '★ Favorites & ⌘1-9', desc: fr ? '★ sur une ligne = favori. Avec le panneau ouvert, ⌘1 à ⌘9 injectent tes 9 premiers favoris (option ⚙).' : '★ on a row = favorite. With the panel open, ⌘1-⌘9 inject your first 9 favorites (⚙ option).', help: fr ? '💡 La fenêtre se déplace (barre titre), se redimensionne (poignée) et se replie (🟡).' : '💡 The window drags (title bar), resizes (handle) and collapses (🟡).', target: 'mgp-newp' },
+      { title: fr ? '🕸 Les équipes d\'experts' : '🕸 Expert teams', desc: fr ? 'Onglet 🕸 Équipes : une équipe = un super-orchestrateur + ses agents + un workflow. Un clic sur une équipe injecte le protocole complet dans la conversation : l\'orchestrateur distribue les tâches, les agents exécutent, lui consolide le rapport final.' : 'The 🕸 Teams tab: a team = a super-orchestrator + its agents + a workflow. Clicking a team injects the full protocol into the conversation: the orchestrator distributes tasks, agents execute, it consolidates the final report.', help: fr ? '💡 Survol d\'une équipe : la composition s\'affiche (orchestrateur, agents, workflow).' : '💡 Hover a team: the composition shows up (orchestrator, agents, workflow).', target: 'mgp-tabs' },
+      { title: fr ? '🛠 Crée tes propres experts' : '🛠 Build your own experts', desc: fr ? 'Le bouton « ＋ » ouvre le créateur : décris un besoin, donne un tag, rédige le prompt — ton expert rejoint l\'onglet ✍️ Perso, exportable en .md depuis ⚙.' : 'The « ＋ » button opens the creator: describe a need, give it a tag, write the prompt — your expert joins the ✍️ Custom tab, exportable as .md from ⚙.', help: fr ? '💡 Les ✍️ se combinent aussi avec les experts du catalogue (⌘-clic + ⌥⏎).' : '💡 Custom prompts also compose with catalog experts (⌘-click + ⌥⏎).', target: 'mgp-newp' },
+      { title: fr ? '★ Favoris & ⌘1-9' : '★ Favorites & ⌘1-9', desc: fr ? '★ sur une ligne = favori. Avec le panneau ouvert, ⌘1 à ⌘9 injectent tes 9 premiers favoris (option ⚙).' : '★ on a row = favorite. With the panel open, ⌘1-⌘9 inject your first 9 favorites (⚙ option).', help: fr ? '💡 La fenêtre se déplace (barre titre), se redimensionne (poignée) et se replie (🟡).' : '💡 The window drags (title bar), resizes (handle) and collapses (🟡).', target: 'mgp-foot' },
       { title: fr ? '⚙ Réglages complets' : '⚙ Full settings', desc: fr ? 'Thème clair/sombre, langue, LLM par défaut, destinations, export/import de ta config, export ✍️ en .md — comme l\'app macOS.' : 'Light/dark theme, language, default LLM, destinations, config export/import, ✍️ .md export — like the macOS app.', help: fr ? '💡 Tout est local : rien n\'est envoyé en ligne.' : '💡 Everything is local: nothing is sent online.', target: 'mgp-set' },
       { title: fr ? '✅ Tu sais tout !' : '✅ You are all set!', desc: fr ? 'Ctrl+Shift+K ouvre le panneau depuis n\'importe quelle page. Clic droit sur un expert pour l\'envoyer vers un LLM. Bonne exploration ! ⚡' : 'Ctrl+Shift+K opens the panel on any page. Right-click an expert to send it to an LLM. Happy exploring! ⚡', help: '', target: null },
     ];
@@ -993,6 +998,7 @@
     };
   };
   btn.onclick = function () { panel.classList.contains('open') ? closePanel() : openPanel(); };
+  panel.querySelector('#mgp-tourbtn').onclick = function () { tourShow(0); };
   panel.querySelector('#mgp-newp').onclick = function () { openModal(null); };
   panel.querySelector('#mgp-q').oninput = function (e) { q = e.target.value; idx = 0; render(); };
 

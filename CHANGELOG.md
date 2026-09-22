@@ -3,6 +3,16 @@
 Toutes les évolutions notables de **PromptDeck** (anciennement MEGA PACK) sont documentées ici.
 Format inspiré de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), versionnement [SemVer](https://semver.org/lang/fr/).
 
+## [2.7.0] - 2026-09-22
+
+### 🎓 Visite enrichie (userscript) : équipes + création d'experts, icône 🎓 — push initial du repo
+- **Userscript Tampermonkey 2.7.0** — la visite guidée passe à **9 étapes**, alignée sur l'app macOS :
+  - 🕸 **Les équipes d'experts** : ce qu'est une équipe (orchestrateur + agents + workflow) et ce que fait
+    un clic (injection du protocole complet dans la conversation)
+  - 🛠 **Crée tes propres experts** : le bouton « ＋ » et l'onglet ✍️ Perso, export .md depuis ⚙
+- **Icône 🎓 dans la barre titre** du panneau : relance la visite à tout moment, sans passer par ⚙
+- Push des **8 commits locaux** vers `origin/master` (première publication du repo)
+
 ## [2.6.0] - 2026-09-22
 
 ### 🎓 Mode d'emploi interactif — relançable depuis les Réglages (app + userscript)
