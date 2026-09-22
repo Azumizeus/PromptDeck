@@ -17,3 +17,4 @@ dist/
 # Assets vectoriels générés (locaux, volumineux, itérables)
 agent-skills/menubar-app-bridge/assets/
 agent-skills/menubar-app-galaxy/assets/
+node_modules/
