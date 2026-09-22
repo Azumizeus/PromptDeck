@@ -44,6 +44,11 @@ for dep in auto-launch; do
   fi
 done
 
+# Catalogue embarqué : interface/catalog-full.js attendu dans Contents/Resources/interface
+# (candidat n°2 de preload.js en mode packagé)
+mkdir -p "$CONTENTS/Resources/interface"
+cp "../interface/catalog-full.js" "$CONTENTS/Resources/interface/catalog-full.js"
+
 # 4. Binaire renommé (le nom du process = nom de l'app dans la barre des menus)
 echo "• Binaire $APP_NAME…"
 cp "$ELECTRON_CONT/MacOS/Electron" "$CONTENTS/MacOS/$APP_NAME"
