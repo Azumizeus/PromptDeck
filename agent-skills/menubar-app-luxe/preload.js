@@ -38,6 +38,8 @@ contextBridge.exposeInMainWorld('mgp', {
   // ── 💾 Sauvegarde portable (cadenas + corbeille + ateliers) ──
   backupExport: () => ipcRenderer.invoke('backup-export'),
   backupImport: () => ipcRenderer.invoke('backup-import'),
+  backupStatus: () => ipcRenderer.invoke('backup-status'),
+  backupAutoNow: () => ipcRenderer.invoke('backup-auto-now'),
   customSave: (item) => ipcRenderer.send('custom-save', item),
   customDelete: (name) => ipcRenderer.send('custom-delete', name),
   exportCustoms: () => ipcRenderer.invoke('export-customs'),
@@ -49,6 +51,7 @@ contextBridge.exposeInMainWorld('mgp', {
   workshopCreate: (kind, rec) => ipcRenderer.invoke('workshop-create', { kind, rec }),
   workshopLock: (kind, name, locked) => ipcRenderer.invoke('workshop-lock', { kind, name, locked }),
   workshopHistory: (kind, name) => ipcRenderer.invoke('workshop-history', { kind, name }),
+  workshopRestoreVersion: (kind, name, at) => ipcRenderer.invoke('workshop-restore-version', { kind, name, at }),
   workshopDelete: (kind, name) => ipcRenderer.invoke('workshop-delete', { kind, name }),
   workshopExport: (kind, name) => ipcRenderer.invoke('workshop-export', { kind, name }),
   llmGenerate: (payload) => ipcRenderer.invoke('llm-generate', payload),

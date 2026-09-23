@@ -935,6 +935,7 @@ if (!CAPTURE_MODE && !app.requestSingleInstanceLock()) {
   app.whenReady().then(() => {
     loadPrefs();
     seedCustoms(); // exemples ✍️ au premier lancement (une seule fois)
+    setTimeout(() => { try { maybeAutoBackup(); } catch (e) { /* silencieux : jamais de crash au démarrage */ } }, 8000); // 💾 auto-backup hebdo, hors chemin critique
 
     // Icône ⚡ visible dans le Dock (l'app devient aussi retrouvable via ⌘Tab)
     if (process.platform === 'darwin' && app.dock) {
@@ -1066,10 +1067,12 @@ ipcMain.handle('workshop-save', (e, { kind, name, patch }) => {
     if (nn !== name && list.some((w, j) => j !== i && w.name === nn)) return { ok: false, error: 'name-exists' };
     rec.name = nn;
   }
-  // 🕘 Historique : champs réellement modifiés + horodatage (gardé sur l'enregistrement,
-  // voyage avec lui — export de sauvegarde inclus). 30 entrées max par item.
+  // 🕘 Historique : champs modifiés + **avant-valeurs** (pour ⏪ Restaurer cette version).
+  // 30 entrées max par item ; voyage avec l'enregistrement (sauvegarde incluse).
   const changed = Object.keys(patch).filter((k) => JSON.stringify(list[i][k]) !== JSON.stringify(patch[k]));
-  rec.history = [{ at: new Date().toISOString(), action: 'edit', fields: changed }, ...(list[i].history || [])].slice(0, 30);
+  const before = {};
+  for (const k of changed) before[k] = list[i][k];
+  rec.history = [{ at: new Date().toISOString(), action: 'edit', fields: changed, before }, ...(list[i].history || [])].slice(0, 30);
   list[i] = rec;
   saveWorkshops(wk, list);
   return { ok: true, item: rec };
@@ -1278,6 +1281,16 @@ const TEAM_TEMPLATES = {
     ],
     workflow: ['Qualification de la demande', 'Le technicien prépare diagnostic + solution', 'Le rédacteur produit la réponse, le chef support valide'],
   },
+  lancement: {
+    desc: 'Lancement produit : roadmap, annonce et communication, checklist de mise en ligne.',
+    orchestrator: { name: 'Chef de lancement', system: 'Tu pilotes un lancement produit. Tu consolides la roadmap des trois experts, arbitres les priorités, valides le message d\'annonce et coches la checklist finale. Rien ne part sans que la checklist soit complète.' },
+    agents: [
+      { name: 'Roadmap', role: 'planification', desc: 'Plan de lancement daté et priorisé', system: 'Tu produis la roadmap du lancement : phases (beta, annonce, GA), dates, dépendances, critères de passage. Format : tableau simple.', deliverable: 'roadmap' },
+      { name: 'Communication', role: 'com', desc: 'Annonce, posts, visuels à prévoir', system: 'Tu rédiges l\'annonce d\'identification (une phrase), le post de lancement (court) et la liste des canaux à activer avec l\'ordre de publication.', deliverable: 'kit de com' },
+      { name: 'Checklist', role: 'QA', desc: 'Liste de mise en ligne vérifiable', system: 'Tu produis la checklist de mise en ligne : technique (tests, rollback, monitoring), juridique (mentions, CGU si besoin), support (FAQ, qui répond). Chaque ligne vérifiable par oui/non.', deliverable: 'checklist' },
+    ],
+    workflow: ['Roadmap validée par le chef de lancement', 'Communication rédige à partir de la roadmap validée', 'Checklist produite et cochée — lancement autorisé seulement si tout est ✓'],
+  },
 };
 ipcMain.handle('team-from-template', (e, { key }) => {
   const tpl = TEAM_TEMPLATES[key];
@@ -1291,6 +1304,28 @@ ipcMain.handle('team-from-template', (e, { key }) => {
   list.push(rec);
   saveWorkshops('team', list);
   return { ok: true, item: rec };
+});
+// ⏪ Restaurer cette version : réapplique les avant-valeurs d'une entrée d'historique.
+// L'état courant est d'abord journalisé (l'opération elle-même est réversible par un
+// nouvel aller-retour) ; `at` identifie l'entrée (ISO unique par édition).
+ipcMain.handle('workshop-restore-version', (e, { kind, name, at }) => {
+  const wk = kind === 'agent' ? 'agent' : kind === 'skill' ? 'skill' : kind === 'team' ? 'team' : null;
+  if (!wk || typeof name !== 'string' || !name || typeof at !== 'string' || !at) return { ok: false, error: 'requête invalide' };
+  const list = loadWorkshops(wk);
+  const i = list.findIndex((x) => (x.team || x.name) === name);
+  if (i < 0) return { ok: false, error: 'introuvable' };
+  if (list[i].locked) return { ok: false, error: 'locked' }; // 🔒 ôter le cadenas d'abord
+  const entry = (list[i].history || []).find((h) => h.at === at);
+  if (!entry || !entry.before) return { ok: false, error: 'entrée introuvable' };
+  const rec = { ...list[i] };
+  const nowChanged = Object.keys(entry.before).filter((k) => JSON.stringify(rec[k]) !== JSON.stringify(entry.before[k]));
+  const nowBefore = {};
+  for (const k of nowChanged) nowBefore[k] = rec[k];
+  for (const k of nowChanged) rec[k] = entry.before[k];
+  rec.history = [{ at: new Date().toISOString(), action: 'restore', fields: nowChanged, before: nowBefore, restoredTo: at }, ...(list[i].history || [])].slice(0, 30);
+  list[i] = rec;
+  saveWorkshops(wk, list);
+  return { ok: true, item: rec, restoredFields: nowChanged };
 });
 ipcMain.handle('workshop-history', (e, { kind, name }) => {
   const wk = kind === 'agent' ? 'agent' : kind === 'skill' ? 'skill' : kind === 'team' ? 'team' : null;
@@ -1403,9 +1438,11 @@ ipcMain.handle('team-save', (e, { name, patch }) => {
     if (rec.team !== name && list.some((t, j) => j !== i && (t.team || t.name) === rec.team)) return { ok: false, error: 'name-exists' };
   }
   rec.name = rec.team;
-  // 🕘 Historique (même contrat que workshop-save)
+  // 🕘 Historique avec avant-valeurs (⏪) — même contrat que workshop-save
   const changed = Object.keys(patch).filter((k) => JSON.stringify(list[i][k]) !== JSON.stringify(patch[k]));
-  rec.history = [{ at: new Date().toISOString(), action: 'edit', fields: changed }, ...(list[i].history || [])].slice(0, 30);
+  const before = {};
+  for (const k of changed) before[k] = list[i][k];
+  rec.history = [{ at: new Date().toISOString(), action: 'edit', fields: changed, before }, ...(list[i].history || [])].slice(0, 30);
   list[i] = rec;
   saveWorkshops('team', list);
   return { ok: true, item: rec };
@@ -1617,14 +1654,8 @@ ipcMain.on('custom-delete', (e, name) => { if (typeof name === 'string' && name)
 // ── 💾 Sauvegarde portable : cadenas + corbeille + créations d'atelier dans un JSON daté ──
 // Objectif : ne rien perdre en changeant de Mac. Le fichier contient l'état complet
 // des ateliers (agents, skills, équipes, ✍️, corbeille) — les cadenas voyagent avec.
-ipcMain.handle('backup-export', async () => {
-  const r = await dialog.showSaveDialog({
-    title: LANG === 'en' ? 'Export MEGA PACK backup (locks, trash, workshops)' : 'Sauvegarde MEGA PACK (cadenas, corbeille, ateliers)',
-    defaultPath: `megapack-sauvegarde-${new Date().toISOString().slice(0, 10)}.json`,
-    filters: [{ name: 'JSON', extensions: ['json'] }],
-  });
-  if (r.canceled || !r.filePath) return false;
-  const payload = {
+function buildBackupPayload() {
+  return {
     format: 'megapack-backup',
     version: 1,
     exportedAt: new Date().toISOString(),
@@ -1633,8 +1664,51 @@ ipcMain.handle('backup-export', async () => {
     customs: PREFS.customs || [],
     trash: loadTrash(),
   };
-  try { fs.writeFileSync(r.filePath, JSON.stringify(payload, null, 2)); return true; } catch (e) { return false; }
+}
+ipcMain.handle('backup-export', async () => {
+  const r = await dialog.showSaveDialog({
+    title: LANG === 'en' ? 'Export MEGA PACK backup (locks, trash, workshops)' : 'Sauvegarde MEGA PACK (cadenas, corbeille, ateliers)',
+    defaultPath: `megapack-sauvegarde-${new Date().toISOString().slice(0, 10)}.json`,
+    filters: [{ name: 'JSON', extensions: ['json'] }],
+  });
+  if (r.canceled || !r.filePath) return false;
+  try { fs.writeFileSync(r.filePath, JSON.stringify(buildBackupPayload(), null, 2)); return true; } catch (e) { return false; }
 });
+// ── 💾 Auto-backup hebdomadaire silencieux ──
+// Un JSON complet (même format que la sauvegarde manuelle) est écrit dans
+// <MEGA PROMPT>/backups/ chaque semaine si le dernier a plus de 7 jours.
+// Rotation : les 4 plus récents sont gardés. Aucune fenêtre, aucun toast :
+// l'utilisateur peut l'ignorer sans rien savoir.
+const AUTO_BACKUP_KEEP = 4;
+const AUTO_BACKUP_DAYS = 7;
+function autoBackupDir() { return path.join(promptDir(), 'backups'); }
+function lastAutoBackupAt() { return PREFS.autoBackupAt || ''; }
+function writeAutoBackup() {
+  try {
+    const dir = autoBackupDir();
+    fs.mkdirSync(dir, { recursive: true });
+    const file = path.join(dir, `megapack-auto-${new Date().toISOString().slice(0, 10)}.json`);
+    fs.writeFileSync(file, JSON.stringify(buildBackupPayload(), null, 2));
+    // Rotation : garde les AUTO_BACKUP_KEEP fichiers auto- les plus récents
+    const autos = fs.readdirSync(dir).filter((f) => f.startsWith('megapack-auto-') && f.endsWith('.json')).sort().reverse();
+    for (const old of autos.slice(AUTO_BACKUP_KEEP)) { try { fs.unlinkSync(path.join(dir, old)); } catch (e) { /* best effort */ } }
+    PREFS.autoBackupAt = new Date().toISOString();
+    savePrefs();
+    return { ok: true, file };
+  } catch (err) { return { ok: false, error: String(err.message || err) };
+  }
+}
+function maybeAutoBackup() {
+  const last = lastAutoBackupAt();
+  if (last) {
+    const ageDays = (Date.now() - Date.parse(last)) / 86400000;
+    if (!(ageDays >= AUTO_BACKUP_DAYS)) return { ok: false, skipped: true };
+  }
+  return writeAutoBackup();
+}
+ipcMain.handle('backup-status', () => ({ last: lastAutoBackupAt(), dir: autoBackupDir(), keep: AUTO_BACKUP_KEEP }));
+ipcMain.handle('backup-auto-now', () => writeAutoBackup());
+
 // Restauration : remplace les ateliers par ceux du fichier, dédoublonne par suffixe -2…,
 // dé-verrouille à l'import (réengagement explicite), fusionne la corbeille.
 ipcMain.handle('backup-import', async () => {

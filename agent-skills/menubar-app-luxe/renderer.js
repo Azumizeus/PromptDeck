@@ -165,6 +165,15 @@ const T = LANG === 'fr' ? {
   tplSupport: '🎧 Support',
   tplSupportD: 'Qualification + diagnostic → réponse client prête',
   tplCreated: (n) => `📋 Équipe « ${n} » créée — modifie-la via ✏️`,
+  tplLaunch: '🚀 Lancement produit',
+  tplLaunchD: 'Roadmap → com → checklist de mise en ligne',
+  // ⏪ Restaurer cette version
+  restoreBtn: '⏪',
+  restoreT: 'Restaurer cette version',
+  restoreDone: (f) => `⏪ Version restaurée (${f} champ${f > 1 ? 's' : ''} reverti${f > 1 ? 's' : ''})`,
+  restoreErr: '⏪ Restauration impossible',
+  // 💾 Auto-backup hebdo
+  autoBkOn: (d) => `💾 Sauvegarde auto hebdomadaire active — dossier : ${d}`,
 } : {
   ph: 'Search a skill, an agent, a prompt…', all: 'All', skills: 'Skills',
   agents: 'Agents', perso: '✍️ Custom', favs: '★ Favorites', results: 'results',
@@ -311,6 +320,13 @@ const T = LANG === 'fr' ? {
   tplSupport: '🎧 Support',
   tplSupportD: 'Triage + diagnosis → ready-to-send answer',
   tplCreated: (n) => `📋 Team “${n}” created — edit it with ✏️`,
+  tplLaunch: '🚀 Product launch',
+  tplLaunchD: 'Roadmap → com → go-live checklist',
+  restoreBtn: '⏪',
+  restoreT: 'Restore this version',
+  restoreDone: (f) => `⏪ Version restored (${f} field${f > 1 ? 's' : ''} reverted)`,
+  restoreErr: '⏪ Restore failed',
+  autoBkOn: (d) => `💾 Weekly auto-backup active — folder: ${d}`,
 };
 
 // ---------- Catalogue + prefs ----------
@@ -499,6 +515,7 @@ APP_PARENT.insertAdjacentHTML('afterbegin', `
     <div id="tmbox">
       <h3>${T.trashT}<button id="tm-x" aria-label="${T.trashClose}">✕</button></h3>
       <p class="tmhint">${T.trashHint}</p>
+      <p id="tm-autobk" class="tmhint"></p>
       <div id="tm-list" role="list"></div>
       <div id="tmrow">
         <button id="tm-empty">${T.trashEmptyAll}</button>
@@ -998,6 +1015,12 @@ async function openTrash() {
   if (!window.mgp.trashList) return;
   $('tmodal').hidden = false;
   await renderTrash();
+  // 💾 état de l'auto-backup hebdo (affiché discrètement sous la liste)
+  try {
+    const st = window.mgp.backupStatus ? await window.mgp.backupStatus() : null;
+    const info = $('tm-autobk');
+    if (info && st && st.last) info.textContent = T.autoBkOn(st.dir);
+  } catch (e) { /* purement informatif */ }
 }
 function closeTrash() { $('tmodal').hidden = true; }
 async function renderTrash() {
@@ -1097,6 +1120,7 @@ const TEMPLATES = [
   { key: 'revue-code', label: () => T.tplCode, desc: () => T.tplCodeD, icon: '🔍' },
   { key: 'veille', label: () => T.tplVeille, desc: () => T.tplVeilleD, icon: '📰' },
   { key: 'support', label: () => T.tplSupport, desc: () => T.tplSupportD, icon: '🎧' },
+  { key: 'lancement', label: () => T.tplLaunch, desc: () => T.tplLaunchD, icon: '🚀' },
 ];
 function renderTemplates() {
   const host = $('w-tpl');
@@ -1129,8 +1153,21 @@ async function toggleHistory() {
   try { rows = (await window.mgp.workshopHistory(histFor.kind, histFor.name)) || []; } catch (e) { rows = []; }
   const fmt = (iso) => { try { return new Date(iso).toLocaleString(LANG === 'en' ? 'en-US' : 'fr-FR'); } catch (e) { return iso || ''; } };
   host.innerHTML = `<b>${T.histT}</b>` + (rows.length
-    ? rows.map((h) => `<div class="histrow">🕘 ${esc(T.histRow((h.fields || []).length, fmt(h.at)))}${(h.fields || []).length ? `<i>${esc(h.fields.join(', '))}</i>` : ''}</div>`).join('')
+    ? rows.map((h) => `<div class="histrow"><span class="histline">🕘 ${esc(T.histRow((h.fields || []).length, fmt(h.at)))}${(h.fields || []).length ? ` <i>${esc(h.fields.join(', '))}</i>` : ''}</span>${h.action !== 'restore' && (h.fields || []).length ? `<button class="histrest" data-at="${esc(h.at)}" title="${T.restoreT}" aria-label="${T.restoreT}">${T.restoreBtn}</button>` : ''}</div>`).join('')
     : `<div class="histrow">${T.histEmpty}</div>`);
+  host.querySelectorAll('button.histrest').forEach((b) => {
+    b.onclick = async () => {
+      if (!histFor || !window.mgp.workshopRestoreVersion) return;
+      const r = await window.mgp.workshopRestoreVersion(histFor.kind, histFor.name, b.dataset.at);
+      if (r && r.ok) {
+        showToast(T.restoreDone((r.restoredFields || []).length), 'ok');
+        host.hidden = true; $('we-hist').textContent = T.histShow;
+        closeWedit(); // le formulaire peut être périmé après revert : on repart du frais
+        await loadTeams();
+        if (W.items.length) refreshWorkshop();
+      } else showToast(r && r.error === 'locked' ? T.delLocked : T.restoreErr, 'err');
+    };
+  });
   host.hidden = false;
   $('we-hist').textContent = T.histHide;
 }

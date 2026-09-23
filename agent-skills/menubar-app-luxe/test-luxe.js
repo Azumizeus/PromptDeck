@@ -58,6 +58,7 @@ const trashStore = []; // 🗑 corbeille en mémoire
 let trashSeq = 0; // ids uniques (Date.now() seul peut collider en rafale)
 let lastBackup = null; // 💾 dernière sauvegarde (harnais)
 const backupExports = [];
+const autoBkStore = { last: '' }; // 💾 horodatage auto-backup (harnais)
 let defaultLLMStore = 'claude'; // le sélecteur du footer modifie la pref (comme l'IPC réel)
 const sandbox = {
   console,
@@ -113,8 +114,10 @@ sandbox.window.mgp = {
       if (keys.length !== 1 || keys[0] !== 'locked' || patch.locked !== false) return { ok: false, error: 'locked' };
     }
     const changed = Object.keys(patch).filter((k) => JSON.stringify(arr[i][k]) !== JSON.stringify(patch[k]));
+    const before = {};
+    for (const k of changed) before[k] = arr[i][k];
     arr[i] = { ...arr[i], ...patch };
-    arr[i].history = [{ at: new Date().toISOString(), action: 'edit', fields: changed }, ...(arr[i].history || [])].slice(0, 30);
+    arr[i].history = [{ at: new Date().toISOString(), action: 'edit', fields: changed, before }, ...(arr[i].history || [])].slice(0, 30);
     return { ok: true, item: arr[i] };
   },
   workshopCreate: async (kind, rec) => {
@@ -186,6 +189,7 @@ sandbox.window.mgp = {
       'revue-code': { desc: 'Revue de code', orchestrator: { name: 'Chef de revue', system: 'x'.repeat(50) }, agents: [{ name: 'Analyste code', role: 'analyse', desc: 'd', system: 's', deliverable: 'f' }, { name: 'Expert sécurité', role: 'sécurité', desc: 'd', system: 's', deliverable: 'f' }, { name: 'Expert performance', role: 'performance', desc: 'd', system: 's', deliverable: 'f' }], workflow: ['a', 'b', 'c'] },
       veille: { desc: 'Veille', orchestrator: { name: 'Chef de veille', system: 'y'.repeat(50) }, agents: [{ name: 'Veilleur tech', role: 'collecte', desc: 'd', system: 's', deliverable: 'f' }], workflow: ['a'] },
       support: { desc: 'Support', orchestrator: { name: 'Chef support', system: 'z'.repeat(50) }, agents: [{ name: 'Qualifieur', role: 'analyse', desc: 'd', system: 's', deliverable: 'f' }], workflow: ['a', 'b'] },
+      lancement: { desc: 'Lancement produit', orchestrator: { name: 'Chef de lancement', system: 'w'.repeat(50) }, agents: [{ name: 'Roadmap', role: 'planification', desc: 'd', system: 's', deliverable: 'f' }, { name: 'Communication', role: 'com', desc: 'd', system: 's', deliverable: 'f' }, { name: 'Checklist', role: 'QA', desc: 'd', system: 's', deliverable: 'f' }], workflow: ['roadmap validée', 'com rédigée', 'checklist cochée ✓'] },
     };
     const tpl = tpls[key];
     if (!tpl) return { ok: false, error: 'modèle inconnu' };
@@ -201,6 +205,23 @@ sandbox.window.mgp = {
     const w = arr.find((x) => (x.team || x.name) === name);
     return (w && Array.isArray(w.history)) ? w.history : [];
   },
+  workshopRestoreVersion: async (kind, name, at) => {
+    const arr = kind === 'team' ? teamStore : workshopStore[kind === 'agent' ? 'agent' : 'skill'];
+    const i = arr.findIndex((x) => (x.team || x.name) === name);
+    if (i < 0) return { ok: false, error: 'introuvable' };
+    if (arr[i].locked) return { ok: false, error: 'locked' };
+    const entry = (arr[i].history || []).find((h) => h.at === at);
+    if (!entry || !entry.before) return { ok: false, error: 'entrée introuvable' };
+    const nowChanged = Object.keys(entry.before).filter((k) => JSON.stringify(arr[i][k]) !== JSON.stringify(entry.before[k]));
+    const nowBefore = {};
+    for (const k of nowChanged) nowBefore[k] = arr[i][k];
+    for (const k of nowChanged) arr[i][k] = entry.before[k];
+    arr[i].history = [{ at: new Date().toISOString(), action: 'restore', fields: nowChanged, before: nowBefore, restoredTo: at }, ...(arr[i].history || [])].slice(0, 30);
+    return { ok: true, item: arr[i], restoredFields: nowChanged };
+  },
+  // 💾 Auto-backup hebdo (harnais : répertoire virtuel + horodatage en mémoire)
+  backupStatus: async () => ({ last: autoBkStore.last, dir: '/virtuel/MEGA PROMPT/backups', keep: 4 }),
+  backupAutoNow: async () => { autoBkStore.last = new Date().toISOString(); return { ok: true, file: '/virtuel/MEGA PROMPT/backups/megapack-auto-x.json' }; },
   // 🗑 Corbeille (harnais : store en mémoire, mêmes contrats que le main process)
   trashList: async () => [...trashStore].reverse(),
   // 💾 Sauvegarde portable (harnais : objet en mémoire au format réel)
@@ -679,6 +700,57 @@ const tSave = await sandbox.window.mgp.teamSave(t1.item.team, { desc: 'pirate' }
 check(tSave && tSave.ok === false && tSave.error === 'locked', 'équipe modèle verrouillée : team-save refuse');
 await MGP.toggleLock({ k: 'team', x: t1.item });
 check(MGP.lockOf('team', t1.item.team) === false, 'cadenas retiré de l\'équipe modèle');
+
+console.log('21) ⏪ Restaurer cette version depuis l\'historique :');
+// a) édition → historique avec avant-valeurs
+await MGP.editWorkshopItem('skill', 'Skill Test Senior');
+sandbox.document.getElementById('we-name').value = 'Skill Test Senior';
+sandbox.document.getElementById('we-desc').value = 'Version B pour test ⏪';
+await MGP.saveWedit();
+const skRec2 = workshopStore.skill.find((w) => w.name === 'Skill Test Senior');
+const firstEdit = skRec2.history.find((h) => h.action === 'edit' && h.before && h.before.desc !== undefined); // historique plus-récent-d'abord → le 1er est la dernière édition
+check(!!firstEdit && firstEdit.before.desc === 'Nouvelle desc historique', 'avant-valeur stockée dans l\'historique (desc de l\'édition précédente)');
+check(skRec2.desc === 'Version B pour test ⏪', 'édition appliquée (desc = B)');
+// b) restauration : retour à la desc d\'origine, journalisée comme « restore »
+const rv = await sandbox.window.mgp.workshopRestoreVersion('skill', 'Skill Test Senior', firstEdit.at);
+check(rv && rv.ok && rv.restoredFields.includes('desc'), 'restauration renvoie ok + champs reverti(s)');
+check(skRec2.desc === 'Nouvelle desc historique', 'desc revenue à la valeur d\'avant la dernière édition ⏪');
+check(skRec2.history[0].action === 'restore' && skRec2.history[0].restoredTo === firstEdit.at, 'l\'opération de restauration est journalisée (réversible)');
+// c) le panneau affiche le bouton ⏪ par entrée « edit » (pas sur les « restore »)
+await MGP.editWorkshopItem('skill', 'Skill Test Senior');
+await MGP.showHistory();
+const histHtml = MGP.histHtml();
+check(histHtml.includes('data-at='), 'bouton ⏪ présent sur les entrées d\'édition');
+MGP.closeWedit();
+// d) restauration refusée sur un item verrouillé
+await MGP.toggleLock({ k: 'skill', x: skRec2 });
+const rvLock = await sandbox.window.mgp.workshopRestoreVersion('skill', 'Skill Test Senior', firstEdit.at);
+check(rvLock && rvLock.ok === false && rvLock.error === 'locked', '⏪ refuse un item verrouillé');
+await MGP.toggleLock({ k: 'skill', x: skRec2 });
+
+console.log('22) 💾 Auto-backup hebdomadaire (rotation 4) :');
+const st1 = await sandbox.window.mgp.backupStatus();
+check(st1 && st1.keep === 4 && st1.dir.includes('backups'), 'statut expose rotation 4 + dossier backups/');
+check(!st1.last, 'aucun auto-backup au départ');
+const ab = await sandbox.window.mgp.backupAutoNow();
+check(ab && ab.ok, 'auto-backup écrit');
+const st2 = await sandbox.window.mgp.backupStatus();
+check(st2.last && !Number.isNaN(Date.parse(st2.last)), 'horodatage mis à jour après écriture');
+const ab2 = await sandbox.window.mgp.backupAutoNow();
+check(ab2 && ab2.ok, 'deuxième écriture acceptée (la fenêtre 7j est appliquée au démarrage, pas ici)');
+// la corbeille affiche le statut (ligne informative)
+await MGP.openTrash();
+check(MGP.trashVisible(), 'corbeille ouverte pour vérifier la ligne d\'état');
+MGP.closeTrash();
+
+console.log('23) 🚀 Modèle Lancement produit :');
+const tl = await MGP.teamFromTemplate('lancement');
+check(tl.ok, 'modèle lancement instancié');
+check(tl.item.agents.length === 3, '3 agents (roadmap, communication, checklist)');
+check(tl.item.workflow.length === 3 && tl.item.workflow[2].includes('checklist'), 'workflow : roadmap → com → checklist');
+check(tl.item.agents.map((a) => a.name).join(',').includes('Checklist'), 'l\'agent checklist est présent');
+const nAfter = teamStore.filter((t) => (t.team || '').startsWith('lancement')).length;
+check(nAfter === 1, `une seule équipe lancement (éditable, non verrouillée : ${!tl.item.locked})`);
 
 console.log('');
 if (fail) { console.log(`❌ ${fail} test(s) en échec`); process.exit(1); }

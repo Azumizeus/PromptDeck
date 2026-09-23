@@ -302,8 +302,12 @@ body{font:13.5px/1.45 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-se
 #we-history{display:flex;flex-direction:column;gap:4px;border:1px solid var(--line);
   border-radius:10px;padding:9px 10px;background:var(--card2);max-height:160px;overflow-y:auto}
 #we-history b{font-size:11px;color:var(--txt2)}
-.histrow{display:flex;flex-direction:column;font-size:11px;color:var(--txt2)}
+.histrow{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--txt2)}
+.histrow .histline{flex:1;min-width:0;display:flex;flex-direction:column}
 .histrow i{font-style:normal;font-size:10px;color:var(--mut)}
+button.histrest{border:1px solid var(--line);background:none;color:var(--txt2);cursor:pointer;
+  font-size:12px;padding:2px 7px;border-radius:7px;flex:none;transition:border-color .15s,color .15s}
+button.histrest:hover{border-color:var(--vio);color:var(--txt)}
 /* 🗑 Corbeille + 🔒 filtre */
 #trb,#lkf{border:1px solid var(--line);background:none;color:var(--txt2);cursor:pointer;
   font:inherit;font-size:11px;font-weight:600;padding:3px 9px;border-radius:99px;
