@@ -120,7 +120,38 @@ Au premier lancement, macOS affiche *« PromptDeck est une app téléchargée d'
 
 L'icône ⚡ apparaît dans la barre de menus. **⌥Espace** ouvre le panneau. C'est parti.
 
-### 4. Depuis les sources (facultatif)
+### 4. Lancement automatique à la session (recommandé)
+
+Pour que l'icône ⚡ soit là dès le démarrage du Mac :
+
+- **Dans l'app** : Réglages → cocher **Lancer au démarrage** (menu ⚡ → Réglages…), **ou**
+- **macOS** : ⚙️ Réglages Système → **Général** → **Ouverture** → ajouter **MEGA PACK**
+
+Vérifiable en une ligne :
+
+```bash
+osascript -e 'tell application "System Events" to get the name of every login item'
+```
+
+### 5. Installer depuis ce dépôt (build local)
+
+Le script construit `dist/MEGA PACK.app` (catalogue embarqué + signature ad-hoc) et
+`test-app.sh` le vérifie (22 vérifications : structure, catalogue 131+190, signature, lancement réel) :
+
+```bash
+git clone https://github.com/Azumizeus/PromptDeck.git
+cd PromptDeck/agent-skills/menubar-app-luxe
+npm install
+bash build-app.sh            # construit dist/MEGA PACK.app
+bash test-app.sh             # 22 vérifications (structure · catalogue · signature · lancement)
+open "dist/MEGA PACK.app"    # premier lancement
+
+# Installation finale dans /Applications :
+cp -R "dist/MEGA PACK.app" /Applications/
+xattr -cr "/Applications/MEGA PACK.app"   # retire la quarantaine (signature ad-hoc)
+```
+
+### 6. Depuis les sources (facultatif, mode dev)
 
 ```bash
 git clone https://github.com/Azumizeus/PromptDeck.git

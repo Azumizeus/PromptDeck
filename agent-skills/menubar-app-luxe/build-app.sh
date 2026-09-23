@@ -92,15 +92,25 @@ fi
 
 # 7. Signature ad-hoc — de l'intérieur vers l'extérieur (obligatoire quand on a modifié
 #    Info.plist). On ne touche PAS au binaire principal avec --deep : le deep re-écrit
-#    le stub et le corrompt. Chaque helper/framework est signé individuellement.
+#    le stub et le corrompt.
+#    NB : pas de `find | while` ici — avec pipefail, un find sans résultat fait échouer
+#    le pipeline et le for s'arrête après le premier tour. On passe par des glob.
 echo "• Signature ad-hoc…"
-find "$CONTENTS/Frameworks" -name '*.app' -maxdepth 3 -type d 2>/dev/null | while read -r h; do
-  codesign --force --sign - "$h" 2>/dev/null || true
+shopt -s nullglob
+for h in "$CONTENTS/Frameworks/"*.app; do
+  codesign --force --sign - "$h" 2>/dev/null || echo "  ⚠ helper non signé : $h"
 done
-for fw in "$CONTENTS/Frameworks"/*.framework; do
-  [ -e "$fw" ] || continue
-  codesign --force --sign - "$fw" 2>/dev/null || true
+for fw in "$CONTENTS/Frameworks/"*.framework; do
+  # les binaires nus (chrome_crashpad_handler…) DOIVENT être signés avant leur .framework
+  for b in "$fw/Versions/A/Helpers/"*; do
+    [ -f "$b" ] && [ -x "$b" ] && codesign --force --sign - "$b" 2>/dev/null
+  done
+  codesign --force --sign - "$fw" 2>/dev/null || echo "  ⚠ framework non signé : $fw"
 done
-codesign --force --sign - "$OUT" 2>/dev/null || true
+shopt -u nullglob
+codesign --force --sign - "$OUT" || { echo "❌ échec codesign racine" >&2; exit 1; }
+# vérification immédiate : la signature doit être valide, sinon échec du build
+codesign -vv "$OUT" > /dev/null 2>&1 || { echo "❌ signature invalide après build" >&2; exit 1; }
+echo "  ✓ signature valide"
 
 echo "✅ $OUT construit ($(du -sh "$OUT" | cut -f1))"

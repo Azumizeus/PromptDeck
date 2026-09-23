@@ -3,6 +3,21 @@
 Toutes les évolutions notables de **PromptDeck** (anciennement MEGA PACK) sont documentées ici.
 Format inspiré de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), versionnement [SemVer](https://semver.org/lang/fr/).
 
+## [2.8.1] - 2026-09-23
+
+### 📂 Clic droit .md (userscript) + test .app automatisé — Édition Luxe
+- **Clic droit → « 📂 Ouvrir le .md source »** : ouvre sur GitHub le SKILL.md ou la fiche agent
+  de l'expert choisi (userscript, comme dans l'app) ; **« 📄 Créer le .md »** télécharge la fiche
+  complète (type, catégorie, prompt d'activation)
+- **`test-app.sh`** : test automatisé du bundle packagé — **22 vérifications** en 4 volets :
+  structure (binaire, Info.plist, frameworks, rpath, icône), catalogue embarqué (131 skills +
+  190 agents dans `Contents/Resources/interface`), signature ad-hoc valide, **lancement réel**
+  (survie 15 s + 25 s, présence Dock, fermeture propre)
+- **`build-app.sh` durci** : signature de l'intérieur vers l'extérieur via glob (plus de
+  `find | while` qui sautait la signature avec `pipefail`), helpers signés avant leurs
+  frameworks, **échec explicite du build** si la signature finale est invalide
+- Version app alignée : **2.8.0** (bundle, package.json, README)
+
 ## [2.8.0] - 2026-09-22
 
 ### 🧠 Atelier IA dans Tampermonkey — clés API + « ✨ Générer » (userscript)

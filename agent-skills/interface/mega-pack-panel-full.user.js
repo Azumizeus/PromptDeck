@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         MEGA PACK Panel Luxe — Skills, Agents & Équipes pour tout LLM
 // @namespace    mega-pack
-// @version      2.8.0
+// @version      2.8.1
 // @description  Panneau flottant Édition Luxe dans une fenêtre macOS : 131 skills + 190 agents + 🕸 équipes + ✍️ prompts perso + ★ favoris, recherche instantanée, tooltip expert, clic droit multi-LLM, sélecteur de LLM par défaut, composeur ⌘-clic — injectable dans n'importe quelle conversation LLM (Claude, ChatGPT, Gemini, Perplexity, Mistral, OpenCode Web…)
 // @author       MEGA PACK
 // @match        *://*/*
@@ -3578,6 +3578,8 @@ window.MEGA_CATALOG = MEGA_CATALOG; // une const globale n'existe pas sur window
       '<span class="cs">' + T().sendTo + '</span>',
       tgts.map(function (t) { return '<button data-t="' + t + '">▸ ' + (LLM_LABEL[t] || t) + '</button>'; }).join(''),
       '<span class="cs">···</span>',
+      x.path ? '<button data-a="reveal">📂 ' + (LANG === 'fr' ? 'Ouvrir le .md source' : 'Open source .md') + '</button>' : '',
+      '<button data-a="md">📄 ' + (LANG === 'fr' ? 'Créer le .md (fiche + prompt)' : 'Create .md (sheet + prompt)') + '</button>',
       '<button data-a="copy">' + T().copyPrompt + '</button>',
       '<button data-a="fav">' + (isFav(x.name) ? T().favDel : T().favAdd) + '</button>',
       '<button data-t="clipboard">▸ ⧉ ' + T().clipboard + '</button>'
@@ -3592,6 +3594,23 @@ window.MEGA_CATALOG = MEGA_CATALOG; // une const globale n'existe pas sur window
         ev.stopPropagation();
         hideCtx();
         if (b.dataset.t) openLLM(b.dataset.t, promptOf(it));
+        else if (b.dataset.a === 'reveal') {
+          // 📂 Ouvre le .md source du catalogue dans un nouvel onglet (github raw localement impossible)
+          const url = 'https://github.com/Azumizeus/PromptDeck/blob/master/agent-skills/' + encodeURI(x.path).replace(/\/$/, '/SKILL.md').replace(/\.md$/, '.md').replace('skills/', 'skills/') + (x.path.endsWith('.md') ? '' : 'SKILL.md');
+          const finalUrl = x.path.endsWith('.md')
+            ? 'https://github.com/Azumizeus/PromptDeck/blob/master/agent-skills/' + encodeURI(x.path)
+            : 'https://github.com/Azumizeus/PromptDeck/tree/master/agent-skills/' + encodeURI(x.path);
+          window.open(finalUrl, '_blank');
+        }
+        else if (b.dataset.a === 'md') {
+          // 📄 Crée la fiche .md (téléchargement — un userscript n'écrit pas sur le disque)
+          const kindLabel = it.k === 'agent' ? 'agent' : 'skill';
+          const md = '# 🛠 ' + (x.name_fr || x.name) + '\n\n> ' + (x.desc_fr || x.desc || '') + '\n\n- **Type** : ' + kindLabel + '\n- **Catégorie** : ' + (x.category || '—') + '\n\n## Prompt d\'activation\n\n```\n' + promptOf(it) + '\n```\n';
+          const blob = new Blob([md], { type: 'text/markdown;charset=utf-8' });
+          const a = document.createElement('a');
+          a.href = URL.createObjectURL(blob); a.download = (x.name_fr || x.name) + '.md';
+          document.body.appendChild(a); a.click(); setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 400);
+        }
         else if (b.dataset.a === 'copy') { copy(promptOf(it)); flash(el, T().copied); }
         else if (b.dataset.a === 'fav') { toggleFav(x.name); render(); }
       };
