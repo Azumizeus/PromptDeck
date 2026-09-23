@@ -77,7 +77,7 @@ sandbox.window.mgp = {
   hide() {},
   openLLM: (t, p) => opened.push([t, String(p || '')]),
   openSettings() {},
-  getPrefs: () => ({ favorites: [], recents: [], customs: customsStore, defaultLLM: defaultLLMStore, sendTargets: ['chatgpt', 'claude', 'clipboard'], hasApi: { groq: true }, lang: 'fr', theme: 'dark' }),
+  getPrefs: () => ({ favorites: [], recents: [], customs: customsStore, defaultLLM: defaultLLMStore, sendTargets: ['chatgpt', 'claude', 'clipboard'], hasApi: { groq: true }, lang: 'fr', theme: 'dark', workshopLocks: { agent: [...workshopStore.agent.filter((w) => w.locked).map((w) => w.name)], skill: [...workshopStore.skill.filter((w) => w.locked).map((w) => w.name)], team: [...teamStore.filter((t) => t.locked).map((t) => t.team || t.name)] } }),
   toggleFav: (n) => { favsStore.has(n) ? favsStore.delete(n) : favsStore.add(n); },
   customSave: (item) => { const i = customsStore.findIndex((c) => c.name === item.name); if (i >= 0) customsStore[i] = item; else customsStore.push(item); },
   customDelete: (n) => { const i = customsStore.findIndex((c) => c.name === n); if (i >= 0) customsStore.splice(i, 1); },
@@ -88,8 +88,39 @@ sandbox.window.mgp = {
   workshopDelete: async (kind, name) => {
     const arr = workshopStore[kind === 'agent' ? 'agent' : 'skill'];
     const i = arr.findIndex((w) => w.name === name);
-    if (i >= 0) arr.splice(i, 1);
+    if (i < 0) return false;
+    if (arr[i].locked) return { ok: false, locked: true }; // 🔒 comme le main process réel
+    arr.splice(i, 1);
     return true;
+  },
+  workshopGet: async (kind, name) => workshopStore[kind === 'agent' ? 'agent' : 'skill'].find((w) => w.name === name) || null,
+  workshopSave: async (kind, name, patch) => {
+    const arr = workshopStore[kind === 'agent' ? 'agent' : 'skill'];
+    const i = arr.findIndex((w) => w.name === name);
+    if (i < 0) return { ok: false, error: 'introuvable' };
+    if (arr[i].locked) { // 🔒 seul le retrait du cadenas est accepté
+      const keys = Object.keys(patch || {});
+      if (keys.length !== 1 || keys[0] !== 'locked' || patch.locked !== false) return { ok: false, error: 'locked' };
+    }
+    arr[i] = { ...arr[i], ...patch };
+    return { ok: true, item: arr[i] };
+  },
+  workshopCreate: async (kind, rec) => {
+    const arr = workshopStore[kind === 'agent' ? 'agent' : 'skill'];
+    const copy = JSON.parse(JSON.stringify(rec));
+    copy.name = String(copy.name || '').trim();
+    if (arr.some((w) => w.name === copy.name)) copy.name = copy.name + '-2';
+    delete copy.locked;
+    if (kind === 'skill' && !copy.body) copy.body = copy.desc || 'Procédure à compléter.'; // comme le main process réel
+    arr.push(copy);
+    return { ok: true, item: copy };
+  },
+  workshopLock: async (kind, name, locked) => {
+    const arr = workshopStore[kind === 'agent' ? 'agent' : 'skill'];
+    const w = arr.find((x) => x.name === name);
+    if (!w) return { ok: false, error: 'introuvable' };
+    w.locked = !!locked;
+    return { ok: true, locked: w.locked };
   },
   workshopExport: async () => true,
   llmGenerate: async (p) => {
@@ -128,7 +159,7 @@ sandbox.window.mgp = {
     teamStore.push(rec);
     return { ok: true, item: rec, model: 'stub-model', latency: 1500 };
   },
-  teamDelete: async (name) => { const i = teamStore.findIndex((t) => (t.team || t.name) === name); if (i >= 0) teamStore.splice(i, 1); return true; },
+  teamDelete: async (name) => { const i = teamStore.findIndex((t) => (t.team || t.name) === name); if (i < 0) return false; if (teamStore[i].locked) return { ok: false, locked: true }; teamStore.splice(i, 1); return true; },
   teamExport: async () => true,
   teamMdCreate: async (name) => mdStore.push({ team: name }) && { ok: true, path: `/virtuel/MEGA PROMPT/equipes/${name}/ORCHESTRATEUR.md` },
   // ▶ Exécution d'équipe + rapport (harnais : réponse déterministe)
@@ -361,7 +392,8 @@ console.log('14) Catalogue ↔ fichiers .md — cohérence + révélation du dos
 // a) chaque item du CATALOGUE (skills/agents, hors créations Atelier qui n'ont pas de .md source) a un path existant
 const catItems = MGP.list().filter((r) => (r.k === 'skill' || r.k === 'agent') && r.x.path); // créations Atelier : sans path, hors périmètre
 const genItems = MGP.list().filter((r) => (r.k === 'skill' || r.k === 'agent') && !r.x.path);
-check(catItems.length === 321, 'catalogue : 321 experts avec path (' + catItems.length + ', créations Atelier hors périmètre : ' + genItems.length + ')');
+const catExpected = S.filter((x) => x.path).length + A.filter((x) => x.path).length; // calculé, pas figé : suit le catalogue
+check(catItems.length === catExpected, `catalogue : ${catExpected} experts avec path (${catItems.length}, créations Atelier hors périmètre : ${genItems.length})`);
 const fsReal = require('fs'), pathReal = require('path');
 const repoRoot = pathReal.resolve(__dirname, '..');
 const missingFiles = catItems.filter((r) => { try { fsReal.accessSync(pathReal.join(repoRoot, r.x.path)); return false; } catch (e) { return true; } });
@@ -385,6 +417,55 @@ if (idxCustom >= 0) {
   MGP.openCtxAt(idxCustom);
   check(!String(sandbox.document.getElementById('ctx')._html || '').includes('data-a="reveal"'), 'pas d\'entrée « .md source » pour les ✍️ (créations locales)');
 }
+
+console.log('12) ✏️ / 🔒 Gestion agents & skills (édition, cadenas, copie) :');
+// a) génération d'un agent + skill via le flux existant (store harnais)
+vm.runInContext('__mgp.openWorkshop()', ctx);
+MGP.setWkind('agent');
+await MGP.generate({ intent: 'agent pour tests gestion', kind: 'agent' });
+MGP.setWkind('skill');
+await MGP.generate({ intent: 'skill pour tests gestion', kind: 'skill' });
+const agRec = workshopStore.agent.find((w) => w.name === 'Agent Test Senior');
+const skRec = workshopStore.skill.find((w) => w.name === 'Skill Test Senior');
+check(!!agRec && !!skRec, 'agent + skill présents dans le store de l\'Atelier');
+// b) menu clic droit sur un agent/skill de l'Atelier : section Gestion avec Modifier + cadenas
+const idxWsAgent = MGP.workshopItems().findIndex((w) => w.k === 'agent');
+MGP.openCtxAt(idxWsAgent); // la liste principale contient les items Atelier via refreshWorkshop ? non — on force :
+const wsCtxHtml = String(sandbox.document.getElementById('ctx')._html || '');
+check(wsCtxHtml.includes('data-a="edit-ws"') || wsCtxHtml.includes('data-a="copy-ws"') || wsCtxHtml.includes('data-a="lock"'), 'section Gestion présente dans le menu clic droit (edit/copy/lock)');
+// c) édition : ouvre le modal avec les valeurs de l'enregistrement
+await MGP.editWorkshopItem('agent', 'Agent Test Senior');
+check(MGP.weditVisible(), 'modal d\'édition ouvert pour l\'agent de l\'Atelier');
+check(MGP.weditValues().orig === 'Agent Test Senior' && (MGP.weditValues().system || '').includes('agent senior de test'), 'modal pré-rempli (nom + prompt système)');
+// d) sauvegarde : le patch merge et le toast confirme
+sandbox.document.getElementById('we-desc').value = 'Description éditée par test';
+await MGP.saveWedit();
+check(!MGP.weditVisible(), 'modal fermé après enregistrement');
+const agAfter = workshopStore.agent.find((w) => w.name === 'Agent Test Senior');
+check(agAfter && agAfter.desc === 'Description éditée par test', 'description mise à jour dans le store (merge)');
+check(agAfter && agAfter.system && agAfter.system.includes('agent senior de test'), 'champs non édités conservés (system intact)');
+// e) cadenas ON : suppression refusée (le stub retourne { ok:false, locked:true })
+await MGP.toggleLock({ k: 'agent', x: agRec });
+check(MGP.lockOf('agent', 'Agent Test Senior'), 'cadenas posé (Set local mis à jour)');
+const delRes = await sandbox.window.mgp.workshopDelete('agent', 'Agent Test Senior');
+check(delRes && delRes.ok === false && delRes.locked, 'workshop-delete refuse un item verrouillé');
+check(workshopStore.agent.some((w) => w.name === 'Agent Test Senior'), 'l\'agent verrouillé existe toujours après tentative de suppression');
+// f) workshop-save refuse d\'éditer un verrouillé (seul le retrait du cadenas passe)
+const saveLocked = await sandbox.window.mgp.workshopSave('agent', 'Agent Test Senior', { desc: 'pirate' });
+check(saveLocked && saveLocked.ok === false && saveLocked.error === 'locked', 'workshop-save refuse l\'édition d\'un item verrouillé');
+// g) cadenas OFF : tout redevient possible
+await MGP.toggleLock({ k: 'agent', x: agRec });
+check(!MGP.lockOf('agent', 'Agent Test Senior'), 'cadenas retiré');
+const delRes2 = await sandbox.window.mgp.workshopDelete('agent', 'Agent Test Senior');
+check(delRes2 === true, 'suppression acceptée après retrait du cadenas');
+// h) copie modifiable depuis le catalogue (skill avec path → nouvelle entrée Atelier)
+const catSkill = MGP.list().find((r) => r.k === 'skill' && r.x.path);
+const beforeCount = workshopStore.skill.length;
+await MGP.copyToWorkshop(catSkill);
+check(workshopStore.skill.length === beforeCount + 1, 'copie créée dans l\'Atelier depuis le catalogue');
+const copyRec = workshopStore.skill[workshopStore.skill.length - 1];
+check(copyRec.name.includes('(copie)') && !copyRec.locked, 'copie suffixée « (copie) » et non verrouillée');
+check(copyRec.desc === catSkill.x.desc && copyRec.body && copyRec.body.includes(catSkill.x.desc), 'la copie conserve desc + amorce une procédure éditable');
 
 console.log('');
 if (fail) { console.log(`❌ ${fail} test(s) en échec`); process.exit(1); }

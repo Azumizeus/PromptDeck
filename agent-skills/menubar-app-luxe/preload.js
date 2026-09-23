@@ -41,6 +41,10 @@ contextBridge.exposeInMainWorld('mgp', {
   onEditCustom: (cb) => ipcRenderer.on('edit-custom', (e, c) => cb(c)),
   // ── Atelier agents/skills + moteur LLM (API clé) ──
   workshopList: (kind) => ipcRenderer.invoke('workshop-list', kind),
+  workshopGet: (kind, name) => ipcRenderer.invoke('workshop-get', { kind, name }),
+  workshopSave: (kind, name, patch) => ipcRenderer.invoke('workshop-save', { kind, name, patch }),
+  workshopCreate: (kind, rec) => ipcRenderer.invoke('workshop-create', { kind, rec }),
+  workshopLock: (kind, name, locked) => ipcRenderer.invoke('workshop-lock', { kind, name, locked }),
   workshopDelete: (kind, name) => ipcRenderer.invoke('workshop-delete', { kind, name }),
   workshopExport: (kind, name) => ipcRenderer.invoke('workshop-export', { kind, name }),
   llmGenerate: (payload) => ipcRenderer.invoke('llm-generate', payload),

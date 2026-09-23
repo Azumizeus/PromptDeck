@@ -42,6 +42,9 @@ function loadWorkshops(kind) {
 function saveWorkshops(kind, list) {
   try { fs.writeFileSync(workshopsPath(kind), JSON.stringify(list, null, 2)); } catch (e) { /* best effort */ }
 }
+// 🔒 Cadenas : un item verrouillé ne peut plus être supprimé ni écrasé.
+// Le verrou vit sur l'enregistrement (w.locked) — il survit aux mises à jour.
+function lockedNames(kind) { return new Set(loadWorkshops(kind).filter((w) => w && w.locked).map((w) => w.name)); }
 
 // ── Clés du shell : lance depuis le Finder, l'app ne voit pas le .zshrc →
 // on le charge une fois au boot (variables déjà présentes : on n'écrase pas).
@@ -350,11 +353,23 @@ ${(t.workflow || []).map((s, i) => `${i + 1}. ${s}`).join('\n')}
 }
 function syncPromptTree(dir) {
   const base = dir || promptDir();
-  let n = 0;
-  for (const s of MCAT.skills) { writeItemMd({ x: s, k: 'skill' }, base); n++; }
-  for (const a of MCAT.agents) { writeItemMd({ x: a, k: 'agent' }, base); n++; }
-  for (const c of (PREFS.customs || [])) { writeItemMd({ x: c, k: 'custom' }, base); n++; }
-  for (const t of loadWorkshops('team')) { try { writeTeamMd(t, base); n += 1 + (t.agents || []).length; } catch (e) { /* best effort */ } }
+  let n = 0, locked = 0;
+  const wlock = { agent: lockedNames('agent'), skill: lockedNames('skill'), custom: new Set() };
+  const write = (it) => {
+    // 🔒 Les .md d'items verrouillés ne sont jamais écrasés par la régénération.
+    const target = path.join(base, itemRelPath(it));
+    if (wlock[it.k].has(it.x.name) && fs.existsSync(target)) { locked++; return; }
+    writeItemMd(it, base); n++;
+  };
+  for (const s of MCAT.skills) write({ x: s, k: 'skill' });
+  for (const a of MCAT.agents) write({ x: a, k: 'agent' });
+  for (const c of (PREFS.customs || [])) write({ x: c, k: 'custom' });
+  for (const t of loadWorkshops('team')) {
+    try {
+      if (t.locked && fs.existsSync(path.join(base, 'equipes', mdSafe(t.team || t.name || 'equipe'), 'ORCHESTRATEUR.md'))) { locked++; continue; } // 🔒 équipe verrouillée intacte
+      writeTeamMd(t, base); n += 1 + (t.agents || []).length;
+    } catch (e) { /* best effort */ }
+  }
   const readme = path.join(base, 'LISEZMOI.md');
   try {
     fs.writeFileSync(readme, `# ⚡ MEGA PROMPT — bibliothèque de prompts\n\nGénérée par MEGA PACK Édition Luxe le ${new Date().toLocaleString('fr-FR')}.\n\n- **skills/** — ${MCAT.skills.length} procédures expertes, par catégorie\n- **agents/** — ${MCAT.agents.length} personas experts, par catégorie\n- **perso/** — tes prompts ✍️ (par tag)\n\nChaque fichier .md contient la fiche de l'item + le **prompt d'activation** prêt à coller dans n'importe quel LLM.\n`, 'utf8');
@@ -967,7 +982,7 @@ ipcMain.on('settings-changed', (e, { theme, lang, defaultLLM, sendTargets, autos
   if (win && !win.isDestroyed()) win.webContents.send('settings-changed', { theme, lang, defaultLLM: PREFS.defaultLLM });
 });
 ipcMain.on('get-prefs', (e) => {
-  e.returnValue = { defaultLLM: PREFS.defaultLLM, sendTargets: PREFS.sendTargets || [], shortcut: PREFS.shortcut, autostart: !!PREFS.autostart, favShortcuts: PREFS.favShortcuts !== false, favorites: PREFS.favorites, recents: PREFS.recents, customs: PREFS.customs, hasApi: Object.fromEntries(Object.keys(PROVIDERS).map((k) => [k, !!apiKeyFor(k)])), apiDefaultModel: PREFS.apiDefaultModel || '' };
+  e.returnValue = { defaultLLM: PREFS.defaultLLM, sendTargets: PREFS.sendTargets || [], shortcut: PREFS.shortcut, autostart: !!PREFS.autostart, favShortcuts: PREFS.favShortcuts !== false, favorites: PREFS.favorites, recents: PREFS.recents, customs: PREFS.customs, hasApi: Object.fromEntries(Object.keys(PROVIDERS).map((k) => [k, !!apiKeyFor(k)])), apiDefaultModel: PREFS.apiDefaultModel || '', workshopLocks: { agent: [...lockedNames('agent')], skill: [...lockedNames('skill')], team: [...lockedNames('team')] } };
 });
 // Sélecteur du LLM dans la barre du bas : changement instantané, persisté, propagé
 ipcMain.on('set-default-llm', (e, llm) => {
@@ -983,11 +998,13 @@ const slug = (s) => String(s || '').toLowerCase().normalize('NFD').replace(/[\u0
 ipcMain.handle('workshop-list', (e, kind) => loadWorkshops(kind === 'agent' ? 'agent' : 'skill'));
 ipcMain.handle('workshop-delete', (e, { kind, name }) => {
   if (typeof name !== 'string' || !name) return false;
-  const list = loadWorkshops(kind === 'agent' ? 'agent' : 'skill');
+  const wk = kind === 'agent' ? 'agent' : 'skill';
+  const list = loadWorkshops(wk);
   const i = list.findIndex((w) => w.name === name);
   if (i < 0) return false;
+  if (list[i].locked) return { ok: false, locked: true }; // 🔒 protégé contre la suppression
   list.splice(i, 1);
-  saveWorkshops(kind === 'agent' ? 'agent' : 'skill', list);
+  saveWorkshops(wk, list);
   return true;
 });
 ipcMain.handle('workshop-export', async (e, { kind, name }) => {
@@ -1003,6 +1020,70 @@ ipcMain.handle('workshop-export', async (e, { kind, name }) => {
     ? `# 👤 ${w.name}\n\n> ${w.desc || ''}\n\n- **Catégorie** : ${w.category || '—'}\n- **Compétences** : ${(w.skills || []).join(', ') || '—'}\n- **Outils** : ${(w.tools || []).join(', ') || '—'}\n\n## System prompt\n\n${w.system || ''}\n\n## Règles\n\n${(w.rules || []).map((x) => `- ${x}`).join('\n')}\n`
     : `# 🛠 ${w.name}\n\n> ${w.desc || ''}\n\n- **Catégorie** : ${w.category || '—'}\n- **Entrées** : ${(w.inputs || []).join(', ') || '—'}\n\n## Procédure (SKILL.md)\n\n${w.body || ''}\n\n## Vérifications\n\n${(w.checks || []).map((x) => `- ${x}`).join('\n')}\n`;
   try { fs.writeFileSync(r.filePath, md); return true; } catch (err) { return false; }
+});
+
+// ✏️ Atelier — lire, modifier et verrouiller une création (agent/skill)
+// Enregistrement MERGE : les champs fournis écrasent, les autres sont conservés
+// (origin, generatedAt, generatedWith, 🔒 locked, name_fr… ne sont jamais perdus).
+ipcMain.handle('workshop-get', (e, { kind, name }) => {
+  if (typeof name !== 'string' || !name) return null;
+  return loadWorkshops(kind === 'agent' ? 'agent' : 'skill').find((w) => w.name === name) || null;
+});
+ipcMain.handle('workshop-save', (e, { kind, name, patch }) => {
+  const wk = kind === 'agent' ? 'agent' : 'skill';
+  if (typeof name !== 'string' || !name || !patch || typeof patch !== 'object' || Array.isArray(patch)) return { ok: false, error: 'requête invalide' };
+  const list = loadWorkshops(wk);
+  const i = list.findIndex((w) => w.name === name);
+  if (i < 0) return { ok: false, error: 'introuvable' };
+  // 🔒 verrouillé : seul le retrait du cadenas (patch { locked: false }) est accepté —
+  // ni édition de contenu ni renommage. Le retrait passe par la confirmation de l'UI.
+  if (list[i].locked) {
+    const keys = Object.keys(patch);
+    if (keys.length !== 1 || keys[0] !== 'locked' || patch.locked !== false) return { ok: false, error: 'locked' };
+  }
+  const rec = { ...list[i], ...patch };
+  if (typeof rec.name === 'string') {
+    const nn = slug(rec.name);
+    if (nn !== name && list.some((w, j) => j !== i && w.name === nn)) return { ok: false, error: 'name-exists' };
+    rec.name = nn;
+  }
+  list[i] = rec;
+  saveWorkshops(wk, list);
+  return { ok: true, item: rec };
+});
+// 🛠 Copie d'un item existant (catalogue, Atelier ou équipe) dans l'Atelier :
+// dupliqué NON verrouillé, nom suffixé « (copie) » ; retourne l'enregistrement créé.
+ipcMain.handle('workshop-create', (e, { kind, rec }) => {
+  const wk = kind === 'agent' ? 'agent' : kind === 'skill' ? 'skill' : kind === 'team' ? 'team' : null;
+  if (!wk || !rec || typeof rec !== 'object' || Array.isArray(rec)) return { ok: false, error: 'requête invalide' };
+  const list = loadWorkshops(wk);
+  const copy = JSON.parse(JSON.stringify(rec));
+  copy.name = typeof copy.name === 'string' ? copy.name.trim().slice(0, 80) : '';
+  if (wk === 'team') { copy.team = copy.team || copy.name; if (!copy.team) return { ok: false, error: 'requête invalide' }; }
+  if (!copy.name) return { ok: false, error: 'requête invalide' };
+  const nn = slug(copy.name);
+  let final = nn, i = 2; // garantie d'unicité côté source de vérité
+  while (list.some((w) => w.name === final || (wk === 'team' && w.team === final))) final = `${nn}-${i++}`;
+  copy.name = final; if (wk === 'team') copy.team = final;
+  delete copy.locked; // une copie n'est jamais verrouillée
+  if (wk === 'agent' && !copy.system) return { ok: false, error: 'system vide' };
+  if (wk === 'skill' && !copy.body) {
+    // Copie d'un skill du catalogue : le prompt d'activation devient la procédure de départ (à éditer ensuite).
+    copy.body = [copy.desc, copy.tags && copy.tags.length ? `Tags : ${copy.tags.join(', ')}` : ''].filter(Boolean).join('\n\n') || 'Procédure à compléter.';
+  }
+  list.push(copy);
+  saveWorkshops(wk, list);
+  return { ok: true, item: copy };
+});
+ipcMain.handle('workshop-lock', (e, { kind, name, locked }) => {
+  const wk = kind === 'agent' ? 'agent' : 'skill';
+  if (typeof name !== 'string' || !name) return { ok: false, error: 'requête invalide' };
+  const list = loadWorkshops(wk);
+  const w = list.find((x) => x.name === name);
+  if (!w) return { ok: false, error: 'introuvable' };
+  w.locked = !!locked;
+  saveWorkshops(wk, list);
+  return { ok: true, locked: w.locked };
 });
 
 ipcMain.handle('llm-generate', async (e, payload) => {
@@ -1145,6 +1226,11 @@ ipcMain.handle('prompt-tree-overview', () => {
   try {
     const w = loadWorkshops(kind === 'agent' ? 'agent' : 'skill').find((x) => x.name === name);
     if (!w) return { ok: false, error: 'création introuvable' };
+    if (fs.existsSync(path.join(promptDir(), 'skills')) || fs.existsSync(path.join(promptDir(), 'agents'))) {
+      // 🔒 Le .md existant d'un item verrouillé n'est jamais écrasé (garde au sink)
+      const target = path.join(promptDir(), itemRelPath({ x: w, k: kind === 'agent' ? 'agent' : 'skill' }));
+      if (w.locked && fs.existsSync(target)) return { ok: true, path: target, locked: true, skipped: true };
+    }
     const abs = writeItemMd({ x: w, k: kind === 'agent' ? 'agent' : 'skill' });
     return { ok: true, path: abs };
   } catch (err) { return { ok: false, error: String(err.message || err) };
@@ -1221,6 +1307,7 @@ ipcMain.handle('team-delete', (e, name) => {
   const list = loadWorkshops('team');
   const i = list.findIndex((t) => (t.team || t.name) === name);
   if (i < 0) return false;
+  if (list[i].locked) return { ok: false, locked: true }; // 🔒 protégé contre la suppression
   list.splice(i, 1);
   saveWorkshops('team', list);
   return true;

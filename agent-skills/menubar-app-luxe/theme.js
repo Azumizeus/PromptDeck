@@ -289,6 +289,26 @@ body{font:13.5px/1.45 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-se
 #erow button:hover{border-color:var(--line2);color:var(--txt)}
 #erow .pri{background:var(--grad);border:none;color:#0b0c10}
 #erow .pri:hover{filter:brightness(1.08);color:#0b0c10}
+/* ✏️ / 🔒 Gestion : modal d'édition agent/skill + badge cadenas */
+#wedit{position:fixed;inset:0;background:rgba(5,6,10,.55);backdrop-filter:blur(6px);
+  display:flex;align-items:center;justify-content:center;z-index:60}
+#wedit[hidden]{display:none}
+#webox{width:min(460px,92%);max-height:86vh;overflow-y:auto;background:var(--card);border:1px solid var(--line2);
+  border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:10px;
+  box-shadow:0 24px 70px rgba(0,0,0,.5)}
+#webox h3{font-size:14px;font-weight:700}
+#webox label{display:flex;flex-direction:column;gap:4px;font-size:11px;color:var(--txt2);font-weight:600}
+#webox input,#webox textarea{background:var(--card2);border:1px solid var(--line);border-radius:8px;
+  color:var(--txt);font:inherit;padding:7px 9px;outline:none;resize:vertical}
+#webox input:focus,#webox textarea:focus{border-color:var(--vio)}
+#werow{display:flex;gap:8px;align-items:center}
+#werow button{border:1px solid var(--line);background:none;color:var(--txt2);cursor:pointer;
+  font:inherit;font-size:12px;font-weight:600;padding:7px 14px;border-radius:8px;
+  transition:border-color .15s,color .15s}
+#werow button:hover{border-color:var(--line2);color:var(--txt)}
+#werow .pri{background:var(--grad);border:none;color:#0b0c10}
+#werow .pri:hover{filter:brightness(1.08);color:#0b0c10}
+.lk{font-size:11px;filter:saturate(.9);margin-left:2px}
 
 @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
 @media (prefers-contrast: more){
