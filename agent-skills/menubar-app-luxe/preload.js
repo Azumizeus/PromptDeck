@@ -77,6 +77,7 @@ contextBridge.exposeInMainWorld('mgp', {
   setDefaultLLM: (llm) => ipcRenderer.send('set-default-llm', llm),
   // ── 🕸 Équipes multi-agents (super-orchestrateur + agents + workflow) ──
   modelsList: (provider) => ipcRenderer.invoke('models-list', provider),
+  providersTest: (opts) => ipcRenderer.invoke('providers-test', opts || {}),
   teamList: () => ipcRenderer.invoke('team-list'),
   teamGenerate: (payload) => ipcRenderer.invoke('team-generate', payload),
   teamRun: (payload) => ipcRenderer.invoke('team-run', payload),

@@ -52,6 +52,10 @@ const T = LANG === 'fr' ? {
   atelierDone: (m, l) => `✓ Généré en ${(l / 1000).toFixed(1)} s · ${m || 'LLM'}`,
   atelierErr: 'Échec',
   atelierNeedApi: "Ajoute une clé API dans Réglages → Intelligence (ou variable d'environnement).",
+  atelierAutoOk: (lbl) => `🧪 Fournisseur testé : ${lbl} (clé valide) — sélectionné automatiquement.`,
+  atelierAutoNone: '🧪 Aucune clé API valide trouvée — ajoute ou renouvelle une clé dans Réglages → Intelligence.',
+  atelierTest: '🧪 Tester les clés',
+  atelierTesting: '🧪 Test en cours…',
   atelierDel: 'Supprimer', atelierExp: 'Exporter .md',
   agentOf: 'Système', skillOf: 'Procédure',
   needIntent: "Décris d'abord ce que la création doit faire.",
@@ -215,6 +219,10 @@ const T = LANG === 'fr' ? {
   atelierDone: (m, l) => `✓ Generated in ${(l / 1000).toFixed(1)} s · ${m || 'LLM'}`,
   atelierErr: 'Failed',
   atelierNeedApi: 'Add an API key in Settings → Intelligence (or an environment variable).',
+  atelierAutoOk: (lbl) => `🧪 Provider tested: ${lbl} (valid key) — selected automatically.`,
+  atelierAutoNone: '🧪 No valid API key found — add or renew a key in Settings → Intelligence.',
+  atelierTest: '🧪 Test keys',
+  atelierTesting: '🧪 Testing…',
   atelierDel: 'Delete', atelierExp: 'Export .md',
   agentOf: 'System', skillOf: 'Procedure',
   needIntent: 'Describe first what your creation should do.',
@@ -470,6 +478,8 @@ APP_PARENT.insertAdjacentHTML('afterbegin', `
       <div class="wk">
         <span class="wl">${T.wProvider}</span>
         <select id="w-prov" aria-label="${T.wProvider}"></select>
+        <button id="w-test" type="button" title="${LANG === 'fr' ? 'Tester les clés API et choisir un fournisseur valide' : 'Test API keys and pick a working provider'}"
+          style="border:1px solid var(--line);background:none;color:var(--txt2);cursor:pointer;font:600 10.5px/1 inherit;padding:4px 9px;border-radius:99px;white-space:nowrap">${T.atelierTest}</button>
         <span class="wl">${T.wModel}</span>
         <input id="w-model" type="text" placeholder="auto" aria-label="${T.wModel}" maxlength="120" list="w-model-list" style="flex:1">
         <datalist id="w-model-list"></datalist>
@@ -1342,7 +1352,35 @@ function fillProviders() {
   if (savedP && list.includes(savedP)) sel.value = savedP;
   $('w-model').value = savedM || '';
   refreshModelList(sel.value);
-  sel.onchange = () => refreshModelList(sel.value); // re-charge la liste /models à chaque changement
+  sel.onchange = () => { PROV_CHOSEN = true; refreshModelList(sel.value); }; // re-charge la liste /models à chaque changement
+  const tbtn = $('w-test');
+  if (tbtn) tbtn.onclick = () => autoPickProvider(true); // re-test forcé (ignore le cache)
+}
+// 🧪 Test automatique des clés : sonde les fournisseurs (côté main, cache 10 min) et
+// sélectionne le premier dont la clé répond. Ne bascule JAMAIS si l'utilisateur a
+// déjà choisi explicitement un fournisseur dans cette session.
+let PROV_CHOSEN = false; // l'utilisateur a touché au menu fournisseur dans cette session
+async function autoPickProvider(force) {
+  const btn = $('w-test');
+  if (!btn || !window.mgp.providersTest) return;
+  const prev = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = T.atelierTesting;
+  try {
+    const r = await window.mgp.providersTest({ force: !!force });
+    const sel = $('w-prov');
+    if (!sel) return;
+    if (r && r.ok) {
+      sel.value = r.provider;
+      if (r.model) $('w-model').value = r.model;
+      refreshModelList(r.provider);
+      showToast(T.atelierAutoOk(r.label || r.provider), 'ok');
+    } else {
+      showToast(T.atelierAutoNone, 'err');
+    }
+  } catch (e) { /* sonde indisponible : on garde la sélection courante */ }
+  btn.disabled = false;
+  btn.textContent = prev;
 }
 function wgenPayload(intent) {
   return { intent, lang: LANG, provider: $('w-prov') ? $('w-prov').value : undefined, model: ($('w-model').value || '').trim() || undefined };
@@ -1451,6 +1489,7 @@ function openWorkshop() {
   renderRunlist();
   renderTemplates();
   wintent.focus();
+  if (!PROV_CHOSEN) autoPickProvider(false); // sonde silencieuse (cache 10 min côté main)
 }
 
 // ── ▶ Mode exécution d'équipe : mission réelle via l'API (orchestrateur → agents → rapport) ──
@@ -1700,6 +1739,12 @@ window.__mgp = {
   lockOf: (k, n) => lockOf(k, n),
   toggleLock: (it) => toggleLock(it),
   copyToWorkshop: (it) => copyToWorkshop(it),
+  // 🧪 sonde fournisseurs (tests)
+  autoPickProvider: (force) => autoPickProvider(force),
+  provChosen: () => PROV_CHOSEN,
+  setProvChosen: (v) => { PROV_CHOSEN = !!v; },
+  wprovValue: () => ($('w-prov') ? $('w-prov').value : ''),
+  wmodelValue: () => ($('w-model') ? $('w-model').value : ''),
   ctxHtmlStr: () => String(document.getElementById('ctx')._html || ''),
   // 💾 sauvegarde + 🕘 historique + 📋 modèles
   doBackupExport: () => doBackupExport(),

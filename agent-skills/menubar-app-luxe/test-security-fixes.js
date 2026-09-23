@@ -67,7 +67,10 @@ const { mdSafe, containedJoin } = require('./lib/md-writer');
   // apiEncrypted.
   const apiKeyForBody = src.slice(src.indexOf('function apiKeyFor'), src.indexOf('function apiKeyFor') + 1600);
   check(apiKeyForBody.includes('PREFS.apiEncrypted[provider]'), 'F-1: apiKeyFor exige le flag apiEncrypted');
-  check(/return OPENCODE_KEYS\[provider\] \|\| '';/.test(apiKeyForBody), 'F-1: apiKeyFor ne retombe plus sur PREFS.apiKeys en clair');
+  // Le repli final ne touche que OPENCODE_KEYS (boucle d'alias freellm/freellmapi incluse),
+  // jamais les prefs en clair — invariant F-1 conservé.
+  check(!/PREFS\.apiKeys\[provider\] \|\|/.test(apiKeyForBody) && /return '';\s*\n\}/.test(apiKeyForBody), 'F-1: apiKeyFor ne retombe plus sur PREFS.apiKeys en clair');
+  check(/OPENCODE_KEYS\[name\] \|\|/.test(apiKeyForBody) || /OPENCODE_KEYS\[name\]\) return OPENCODE_KEYS\[name\]/.test(apiKeyForBody), 'F-1: le repli OPENCODE_KEYS (alias inclus) est conservé');
 
   // 3. Migration one-shot au chargement des prefs.
   check(src.includes('function migratePlaintextApiKeys'), 'F-1: migration one-shot présente');

@@ -129,7 +129,12 @@ function apiKeyFor(provider) {
       return safeStorage.decryptString(Buffer.from(PREFS.apiKeys[provider]));
     }
   } catch (e) { /* clé chiffrée illisible : ne JAMAIS retomber sur la pref en clair */ }
-  return OPENCODE_KEYS[provider] || '';
+  // Alias : la config OpenCode peut stocker la clé sous un autre nom (ex. freellmapi → freellm)
+  const aliases = { freellm: ['freellm', 'freellmapi'] };
+  for (const name of aliases[provider] || [provider]) {
+    if (OPENCODE_KEYS[name]) return OPENCODE_KEYS[name];
+  }
+  return '';
 }
 // Migration one-shot : prefs en clair → chiffré si l'OS le permet, sinon supprimées.
 // Retourne la liste des fournisseurs dont la clé a été migrée.
@@ -156,7 +161,60 @@ function migratePlaintextApiKeys() {
   return migrated;
 }
 
-// Liste dynamique des modèles d'un fournisseur (GET /v1/models, comme OpenCode)
+// ── 🧪 Test automatique des clés API : sonde chaque fournisseur et choisit un qui marche ──
+// Un GET /models échoue en 401 avec une clé morte — c'est exactement le signal recherché,
+// sans dépenser de quota de génération. Résultat gardé 10 min (cache) pour éviter de
+// sonder à chaque ouverture de l'Atelier.
+const PROBE_TIMEOUT_MS = 8000;
+const PROBE_CACHE_MS = 10 * 60 * 1000;
+const probeCache = new Map(); // provider → { ok, status, at }
+function probeCacheGet(provider) {
+  const hit = probeCache.get(provider);
+  if (hit && Date.now() - hit.at < PROBE_CACHE_MS) return hit;
+  if (hit) probeCache.delete(provider);
+  return null;
+}
+async function probeProvider(provider) {
+  const cached = probeCacheGet(provider);
+  if (cached) return cached;
+  const prov = PROVIDERS[provider];
+  let rec = { ok: false, status: 0, at: Date.now() };
+  if (prov && prov.base) {
+    try {
+      const key = apiKeyFor(provider);
+      const headers = {};
+      if (key) headers.authorization = 'Bearer ' + key;
+      const ctl = new AbortController();
+      const timer = setTimeout(() => ctl.abort(), PROBE_TIMEOUT_MS);
+      try {
+        const res = await fetch(prov.base.replace(/\/chat\/completions$/, '') + '/models', { headers, signal: ctl.signal });
+        rec = { ok: res.ok, status: res.status, at: Date.now() };
+      } finally { clearTimeout(timer); }
+    } catch (e) { rec = { ok: false, status: 0, at: Date.now() }; }
+  }
+  probeCache.set(provider, rec);
+  return rec;
+}
+// Le rend final : premier fournisseur dont la clé répond OK. Ordre de priorité :
+// les routeurs locaux d'abord (pas de quota), puis les clés cloud par ordre du catalogue.
+const PROBE_PRIORITY = ['omniroute', 'freellm', 'ollama', 'groq', 'gemini', 'mistral', 'cerebras', 'cohere', 'openai', 'anthropic', 'openrouter'];
+ipcMain.handle('providers-test', async (e, { force } = {}) => {
+  if (force) probeCache.clear();
+  const order = PROBE_PRIORITY.filter((p) => PROVIDERS[p] && apiKeyFor(p));
+  const checked = [];
+  for (const p of order) {
+    const rec = await probeProvider(p);
+    checked.push({ provider: p, ok: rec.ok, status: rec.status });
+    if (rec.ok) {
+      const prov = PROVIDERS[p];
+      const fallbackModel = (PROVIDERS[p].models || '').split(',')[0].trim();
+      const model = (PREFS.apiModels && PREFS.apiModels[p]) || fallbackModel || '';
+      return { ok: true, provider: p, model, label: prov.label || p, checked };
+    }
+  }
+  return { ok: false, checked };
+});
+// Une clé réenregistrée (ou retirée) invalide le résultat du test correspondant.
 ipcMain.handle('models-list', async (e, provider) => {
   const prov = PROVIDERS[provider];
   if (!prov || !prov.base) return { ok: false, error: 'fournisseur inconnu' };
@@ -1542,6 +1600,7 @@ ipcMain.handle('llm-test', async (e, p) => {
 // (fail-closed, audit run-1 F-1 : plus de fallback silencieux en clair sur disque).
 ipcMain.handle('api-set', (e, { provider, key, model } = {}) => {
   if (!PROVIDERS[provider]) return { ok: false, reason: 'unknown-provider' };
+  probeCache.delete(provider); // la sonde re-testera la nouvelle clé (ou son absence)
   let refusal = null;
   PREFS.apiKeys = PREFS.apiKeys || {};
   if (key) {

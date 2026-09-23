@@ -58,6 +58,9 @@ const trashStore = []; // 🗑 corbeille en mémoire
 let trashSeq = 0; // ids uniques (Date.now() seul peut collider en rafale)
 let lastBackup = null; // 💾 dernière sauvegarde (harnais)
 const backupExports = [];
+// 🧪 sonde fournisseurs (harnais : résultat contrôlé par les tests)
+const probeCalls = [];
+let probeResult = { ok: false, checked: [] };
 const autoBkStore = { last: '' }; // 💾 horodatage auto-backup (harnais)
 let defaultLLMStore = 'claude'; // le sélecteur du footer modifie la pref (comme l'IPC réel)
 const sandbox = {
@@ -147,6 +150,7 @@ sandbox.window.mgp = {
     return { ok: true, kind: p.kind, item: rec, model: 'stub-model', latency: 1234 };
   },
   llmTest: async () => ({ ok: true, model: 'stub-model', latency: 42, sample: 'OK' }),
+  providersTest: async (opts) => { probeCalls.push({ force: !!(opts && opts.force) }); return probeResult; },
   apiSet: async () => true,
   // Dossier MEGA PROMPT (harnais : fichiers virtuels)
   promptDirGet: async () => '/virtuel/MEGA PROMPT',
@@ -751,6 +755,33 @@ check(tl.item.workflow.length === 3 && tl.item.workflow[2].includes('checklist')
 check(tl.item.agents.map((a) => a.name).join(',').includes('Checklist'), 'l\'agent checklist est présent');
 const nAfter = teamStore.filter((t) => (t.team || '').startsWith('lancement')).length;
 check(nAfter === 1, `une seule équipe lancement (éditable, non verrouillée : ${!tl.item.locked})`);
+
+console.log('');
+console.log('24) 🧪 Test automatique des clés API :');
+// a) aucun fournisseur valide → aucun basculement, message d'erreur clair
+probeCalls.length = 0;
+probeResult = { ok: false, checked: [{ provider: 'groq', ok: false, status: 401 }] };
+MGP.setProvChosen(false);
+await MGP.autoPickProvider(false);
+check(probeCalls.length === 1 && probeCalls[0].force === false, 'sonde appelée (cache)');
+check(!MGP.provChosen(), 'aucun choix imposé en échec');
+check(String(byId('toast')._txt).includes('Aucune clé'), `toast d\'erreur affiché ("${String(byId('toast')._txt).slice(0, 48)}…")`);
+// b) un fournisseur valide → bascule + modèle conseillé
+probeResult = { ok: true, provider: 'gemini', model: 'gemini-flash-latest', label: 'Google Gemini', checked: [{ provider: 'groq', ok: false, status: 401 }, { provider: 'gemini', ok: true, status: 200 }] };
+await MGP.autoPickProvider(false);
+check(MGP.wprovValue() === 'gemini', 'bascule sur le premier fournisseur valide (gemini)');
+check(MGP.wmodelValue() === 'gemini-flash-latest', 'modèle conseillé rempli');
+check(String(byId('toast')._txt).includes('Gemini'), `toast de succès affiché ("${String(byId('toast')._txt).slice(0, 48)}…")`);
+// c) choix utilisateur respecté : PROV_CHOSEN → plus de bascule auto à l'ouverture
+MGP.setProvChosen(true);
+probeCalls.length = 0;
+await MGP.openWorkshop();
+check(probeCalls.length === 0, 'choix explicite respecté : pas de sonde à l\'ouverture');
+MGP.setProvChosen(false);
+// d) bouton 🧪 : re-test forcé (ignore le cache)
+probeCalls.length = 0;
+await MGP.autoPickProvider(true);
+check(probeCalls.length === 1 && probeCalls[0].force === true, 're-test forcé passe force=true');
 
 console.log('');
 if (fail) { console.log(`❌ ${fail} test(s) en échec`); process.exit(1); }
