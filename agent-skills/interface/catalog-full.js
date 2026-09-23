@@ -1,9 +1,9 @@
-// Catalogue complet MEGA PACK v0.7.2 — généré par build-interface.py
+// Catalogue complet MEGA PACK v0.7.3 — généré par build-interface.py
 // Skills: 132 | Agents: 190
 const MEGA_CATALOG = {
  "meta": {
   "generated": "2026-09-23",
-  "version": "0.7.2",
+  "version": "0.7.3",
   "skills": 132,
   "agents": 190
  },

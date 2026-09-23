@@ -91,7 +91,7 @@ def cat_agent(path):
 
 
 out = {
-    "meta": {"generated": "2026-09-23", "version": "0.7.2",
+    "meta": {"generated": "2026-09-23", "version": "0.7.3",
              "skills": len(skills), "agents": len(agents)},
     "skills": [{"name": s["name"], "desc": s["desc"],
                 "category": cat_skill(s["path"]), "path": s["path"]} for s in skills],

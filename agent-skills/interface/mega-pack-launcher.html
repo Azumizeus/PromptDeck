@@ -80,7 +80,7 @@ footer a{color:var(--acc);text-decoration:none}
 </head>
 <body>
 <header>
-  <h1>⚡ MEGA PACK <span class="badge" id="v">v0.7.0</span><span class="cnt" id="count"></span>
+  <h1>⚡ MEGA PACK <span class="badge" id="v">v0.7.3</span><span class="cnt" id="count"></span>
     <span class="toptools">
       <span class="dd" id="llm-dd"><button class="selectbtn" id="llm-btn">🌐 <span data-i18n="llmBtn">Ouvrir dans LLM</span> ▾</button><div class="dropdown" id="llm-menu">
         <div class="it" data-llm="claude">🟠 Claude (claude.ai)</div>
@@ -120,12 +120,12 @@ footer a{color:var(--acc);text-decoration:none}
 </footer>
 <div class="toast" id="toast"></div>
 <script>
-// Catalogue complet MEGA PACK v0.7.2 — généré par build-interface.py
+// Catalogue complet MEGA PACK v0.7.3 — généré par build-interface.py
 // Skills: 132 | Agents: 190
 const MEGA_CATALOG = {
  "meta": {
   "generated": "2026-09-23",
-  "version": "0.7.2",
+  "version": "0.7.3",
   "skills": 132,
   "agents": 190
  },
@@ -3126,6 +3126,7 @@ function persist(){try{localStorage.setItem(THEME_KEY,THEME);localStorage.setIte
 applyTheme();
 
 document.getElementById('count').textContent=S.length+' skills · '+A.length+' agents';
+document.getElementById('v').textContent='v'+(window.MEGA_CATALOG&&window.MEGA_CATALOG.meta?window.MEGA_CATALOG.meta.version:'?');
 let mode='all', sel=new Set(), cat='__all', q='', sort='cat';
 const catsS=[...new Set(S.map(x=>x.category))].sort();
 const catsA=[...new Set(A.map(x=>x.category))].sort();

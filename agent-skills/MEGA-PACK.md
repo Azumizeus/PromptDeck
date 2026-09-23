@@ -1,7 +1,7 @@
 # MEGA PACK — Skills & Agents pour Claude Desktop et OpenCode
 
-> **Version :** 1.2.0 (23 septembre 2026)
-> **Base :** addyosmani/agent-skills v0.6.9 → v0.7.0 (méga pack) → v0.7.1 (+ Cloudflare security-audit) → **v0.7.2 (synchronisation amont 0.6.10)** + intégration Seeker Team + Skill Game Dev
+> **Version :** 1.3.0 (23 septembre 2026)
+> **Base :** addyosmani/agent-skills v0.6.9 → v0.7.0 (méga pack) → v0.7.1 (+ Cloudflare security-audit) → v0.7.2 (synchronisation amont 0.6.10) → **v0.7.3 (correctifs d'audit de sécurité)** + intégration Seeker Team + Skill Game Dev
 > **Total :** 132 skills · 190 agents · 10 slash commands
 
 ## Ce qui a été intégré au dossier maître `agent-skills/`
@@ -19,6 +19,25 @@ client-side, supply-chain, cloud/déploiement, RPC/messaging, IA & LLM, memory-s
 desktop/mobile/IPC, épuisement de ressources, isolation multi-tenant…). Mode « guidance »
 par défaut ; les 6 phases complètes ne s'exécutent que sur demande explicite d'audit ou de
 test d'intrusion. Tests des validateurs : 34 + 31 ✔.
+
+### 0-ter. Correctifs d'audit de sécurité (v0.7.3 — 23 sept. 2026)
+
+L'audit `security-audit` (run-1 quick + run-2 standard, rapports dans `audits/security-audit/`)
+a débouché sur 3 correctifs confirmés appliqués au code :
+
+- **Serveur launcher** : bind `127.0.0.1` (plus d'exposition LAN) — `interface/MEGA-PACK-serveur.command`
+- **Écritures markdown** : nouveau `menubar-app-luxe/lib/md-writer.js` — `mdSafe` neutralise les
+  segments `..` et `containedJoin` garantit la containment au sink (imports de config JSON)
+- **Clés API** : stockage **fail-closed** (refus si chiffrement OS indisponible, jamais de clair
+  sur disque) + migration one-shot des clés en clair existantes vers le keychain
+
+Et 2 durcissements (ex-needs_validation) : **sandbox réseau** pour l'executor d'evals
+comportementaux (`sandbox-exec` loopback-only sur macOS, refus ailleurs sauf `--allow-network`
+explicite) et **provenance `llm-generated`** sur les items d'atelier créés par IA (notice
+bilingue sur les exports .md et prompts copiés).
+
+Tests : `test-security-fixes.js` 24/24 · `run-evals-net-test.js` 14/14 · evals déterministes
+161 checks PASSED · app Luxe 2.9.0 re-signée, `test-app.sh` 22/22.
 
 ### 0-bis. Synchronisation amont 0.6.9 → 0.6.10 (v0.7.2 — 23 sept. 2026)
 

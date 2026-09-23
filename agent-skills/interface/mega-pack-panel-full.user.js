@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         MEGA PACK Panel Luxe — Skills, Agents & Équipes pour tout LLM
 // @namespace    mega-pack
-// @version      2.8.1
+// @version      2.8.2
 // @description  Panneau flottant Édition Luxe dans une fenêtre macOS : 131 skills + 190 agents + 🕸 équipes + ✍️ prompts perso + ★ favoris, recherche instantanée, tooltip expert, clic droit multi-LLM, sélecteur de LLM par défaut, composeur ⌘-clic — injectable dans n'importe quelle conversation LLM (Claude, ChatGPT, Gemini, Perplexity, Mistral, OpenCode Web…)
 // @author       MEGA PACK
 // @match        *://*/*
@@ -22,12 +22,12 @@
 // ==/UserScript==
 
 // ── Catalogue complet embarqué (généré par build-userscript.py) ───────────
-// Catalogue complet MEGA PACK v0.7.2 — généré par build-interface.py
+// Catalogue complet MEGA PACK v0.7.3 — généré par build-interface.py
 // Skills: 132 | Agents: 190
 const MEGA_CATALOG = {
  "meta": {
   "generated": "2026-09-23",
-  "version": "0.7.2",
+  "version": "0.7.3",
   "skills": 132,
   "agents": 190
  },
