@@ -1,0 +1,21 @@
+{
+  "run_id": "agent-skills-standard-run-2",
+  "repo": "agent-skills",
+  "target": "/Users/mickaeldunoyer/Desktop/Skill Install/agent-skills",
+  "source_ref": "7036ea9b8c0f0d1a2b3c4d5e6f7a8b9c0d1e2f3a (commit 'Fix confirmed audit findings and harden needs-validation items', worktree propre)",
+  "profile": "standard",
+  "scope_paths": ["repo-wide"],
+  "budget": null,
+  "execution_policy": "sandboxed-source-and-local-only",
+  "companion_files": ["ATTACK-CLASSES.md", "HUNTING.md", "VALIDATION-AND-REPORTING.md", "RECONNAISSANCE.md"],
+  "prior_runs": [
+    {
+      "path": "/Users/mickaeldunoyer/security-audit-skill/agent-skills/run-1",
+      "profile": "quick",
+      "source_ref": "e0cda34c64b34e45218d3aeb5fb2be790f0d76f9",
+      "archived_copy": "/Users/mickaeldunoyer/Desktop/Skill Install/agent-skills/audits/security-audit/run-1"
+    }
+  ],
+  "notes": "Prior run ledger and findings carried forward per SKILL.md (reconnaissance rules 1-6). Deferred units menubar-app-v1 and menubar-app-v2 from run-1 are current work in this standard run. Remediation commit 7036ea9 (fixes F-1/F-2/F-3, mitigations NV-1/NV-2) must be revalidated with fresh evidence; carried findings may not be closed without it.",
+  "run_status": "complete"
+}

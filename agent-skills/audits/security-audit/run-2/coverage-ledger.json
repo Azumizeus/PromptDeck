@@ -1,0 +1,610 @@
+[
+  {
+    "coverage_id": "repo-file::ai-and-llm::luxe-llm-workshop::llm-output-handling",
+    "canonical_refs": {
+      "surface": "repo-file",
+      "boundary": "ai-and-llm",
+      "subsystem": "luxe-llm-workshop",
+      "attack_class": "llm-output-handling"
+    },
+    "surface": "repo-file",
+    "boundary": "ai-and-llm",
+    "subsystem": "luxe-llm-workshop",
+    "attack_class": "llm-output-handling",
+    "starting_paths": ["menubar-app-luxe/main.js", "menubar-app-luxe/renderer.js"],
+    "ordinary_attack_class_block": "AI-AND-LLM.md#prompt-and-content-injection",
+    "selected_companion_blocks": [],
+    "excluded_blocks": [],
+    "prior_status": "prior_needs_validation",
+    "attempts": [],
+    "wave": 1,
+    "status": "covered",
+    "agent_id": "parent-inline-standard",
+    "reviewed_paths": ["menubar-app-luxe/main.js", "menubar-app-luxe/renderer.js"],
+    "local_checks": [
+      {
+        "agent_id": "parent-inline-standard",
+        "reviewed_paths": ["menubar-app-luxe/main.js", "menubar-app-luxe/renderer.js"],
+        "invariant": "LLM-generated workshop content is durably identified as machine-generated wherever it is persisted, exported, or replayed into prompts",
+        "method": "source",
+        "result": "NV-2 remediation verified at 7036ea9: llm-generate (main.js:1037) and team-generate (main.js:1275) persist origin=llm-generated plus generatedWith model info; mdForItem/teamMd prepend a bilingual AI-content notice to exported .md files; renderer promptOf (renderer.js:193-200) prepends the notice to copied prompts. Static checks in test-security-fixes.js 24/24. Residual scope disclosed in NEEDS-VALIDATION: imported or pre-origin items carry no notice.",
+        "artifact": null
+      }
+    ],
+    "result_fingerprints": [],
+    "unresolved": []
+  },
+  {
+    "coverage_id": "repo-file::client-side::interface-userscript-keys::credential-handling",
+    "canonical_refs": {
+      "surface": "repo-file",
+      "boundary": "client-side",
+      "subsystem": "interface-userscript-keys",
+      "attack_class": "credential-handling"
+    },
+    "surface": "repo-file",
+    "boundary": "client-side",
+    "subsystem": "interface-userscript-keys",
+    "attack_class": "credential-handling",
+    "starting_paths": ["interface/mega-pack-panel.user.js", "interface/mega-pack-panel-full.user.js", "interface/mega-pack-launcher.html"],
+    "ordinary_attack_class_block": "CLIENT-SIDE.md#credential-and-secret-handling",
+    "selected_companion_blocks": ["CLIENT-SIDE.md#dom-injection"],
+    "excluded_blocks": [],
+    "prior_status": "prior_covered_same_source",
+    "attempts": [],
+    "wave": 1,
+    "status": "covered",
+    "agent_id": "parent-inline-standard",
+    "reviewed_paths": ["interface/mega-pack-panel.user.js", "interface/mega-pack-panel-full.user.js", "interface/catalog-full.js"],
+    "local_checks": [
+      {
+        "agent_id": "parent-inline-standard",
+        "reviewed_paths": ["interface/mega-pack-panel.user.js", "interface/mega-pack-panel-full.user.js", "interface/catalog-full.js"],
+        "invariant": "Userscript keys never leave provider endpoints; catalog interpolation stays within same-principal repo constants",
+        "method": "source",
+        "result": "Catalog regenerated (v0.7.2) with only catalog-constant content; the run-1 rejected record (GM storage fallback, same principal) still matches current source. No finding.",
+        "artifact": null
+      }
+    ],
+    "result_fingerprints": [],
+    "unresolved": []
+  },
+  {
+    "coverage_id": "repo-file::client-side::luxe-electron-webprefs::renderer-hardening",
+    "canonical_refs": {
+      "surface": "repo-file",
+      "boundary": "client-side",
+      "subsystem": "luxe-electron-webprefs",
+      "attack_class": "renderer-hardening"
+    },
+    "surface": "repo-file",
+    "boundary": "client-side",
+    "subsystem": "luxe-electron-webprefs",
+    "attack_class": "renderer-hardening",
+    "starting_paths": ["menubar-app-luxe/main.js", "menubar-app-luxe/renderer.js", "menubar-app-luxe/settings.js"],
+    "ordinary_attack_class_block": "CLIENT-SIDE.md#dom-injection",
+    "selected_companion_blocks": [
+      "CLIENT-SIDE.md#messaging-trust",
+      "DESKTOP-MOBILE-AND-LOCAL-IPC.md#local-ipc-and-exported-component-attack-classes-subagent_type-general"
+    ],
+    "excluded_blocks": [],
+    "prior_status": "prior_covered_same_source",
+    "attempts": [],
+    "wave": 1,
+    "status": "covered",
+    "agent_id": "parent-inline-standard",
+    "reviewed_paths": ["menubar-app-luxe/main.js", "menubar-app-luxe/renderer.js", "menubar-app-luxe/settings.js"],
+    "local_checks": [
+      {
+        "agent_id": "parent-inline-standard",
+        "reviewed_paths": ["menubar-app-luxe/main.js", "menubar-app-luxe/renderer.js", "menubar-app-luxe/settings.js"],
+        "invariant": "Remediated trust-boundary code renders no lower-trust string into an executable context",
+        "method": "source",
+        "result": "Diff 425b266..7036ea9 re-reviewed: lib/md-writer.js exports pure path/string functions; the provenance notice feeds the copied prompt (LLM input), not a DOM sink; settings refusal uses the status text API; no new innerHTML, eval, or shell interpolation. No boundary violation.",
+        "artifact": null
+      }
+    ],
+    "result_fingerprints": [],
+    "unresolved": []
+  },
+  {
+    "coverage_id": "repo-file::client-side::menubar-luxe-prefs::credential-handling",
+    "canonical_refs": {
+      "surface": "repo-file",
+      "boundary": "client-side",
+      "subsystem": "menubar-luxe-prefs",
+      "attack_class": "credential-handling"
+    },
+    "surface": "repo-file",
+    "boundary": "client-side",
+    "subsystem": "menubar-luxe-prefs",
+    "attack_class": "credential-handling",
+    "starting_paths": ["menubar-app-luxe/main.js", "menubar-app-luxe/settings.js"],
+    "ordinary_attack_class_block": "CLIENT-SIDE.md#credential-and-secret-handling",
+    "selected_companion_blocks": [
+      "DESKTOP-MOBILE-AND-LOCAL-IPC.md#privileged-helper-and-local-file-attack-classes-subagent_type-general"
+    ],
+    "excluded_blocks": [],
+    "prior_status": "prior_confirmed_changed_source",
+    "attempts": [],
+    "wave": 1,
+    "status": "covered",
+    "agent_id": "parent-inline-standard",
+    "reviewed_paths": ["menubar-app-luxe/main.js", "menubar-app-luxe/settings.js"],
+    "local_checks": [
+      {
+        "agent_id": "parent-inline-standard",
+        "reviewed_paths": ["menubar-app-luxe/main.js", "menubar-app-luxe/settings.js"],
+        "invariant": "API keys persist only under OS-level encryption; no plaintext path to disk or back through the loader",
+        "method": "source",
+        "result": "F-1 remediation verified at 7036ea9: api-set refuses storage (no-os-encryption) when safeStorage is unavailable or throws; apiKeyFor reads only apiEncrypted-flagged entries and no longer falls back to PREFS.apiKeys; loadPrefs runs migratePlaintextApiKeys (re-encrypt or delete); settings.js surfaces the refusal. Verified by test-security-fixes.js 24/24 at this ref. The run-1 finding menubar-app-luxe/main.js@api-key-plaintext-fallback-in-prefs-json is remediated (was medium under demonstrated conditions).",
+        "artifact": null
+      }
+    ],
+    "result_fingerprints": [],
+    "unresolved": []
+  },
+  {
+    "coverage_id": "repo-file::desktop-mobile-and-local-ipc::menubar-app-v1::command-execution-and-process",
+    "canonical_refs": {
+      "surface": "repo-file",
+      "boundary": "desktop-mobile-and-local-ipc",
+      "subsystem": "menubar-app-v1",
+      "attack_class": "command-execution-and-process"
+    },
+    "surface": "repo-file",
+    "boundary": "desktop-mobile-and-local-ipc",
+    "subsystem": "menubar-app-v1",
+    "attack_class": "command-execution-and-process",
+    "starting_paths": ["menubar-app/main.js", "menubar-app/preload.js"],
+    "ordinary_attack_class_block": "DESKTOP-MOBILE-AND-LOCAL-IPC.md#local-ipc-and-exported-component-attack-classes-subagent_type-general",
+    "selected_companion_blocks": [
+      "DESKTOP-MOBILE-AND-LOCAL-IPC.md#webview-and-native-bridge-attack-classes-subagent_type-general"
+    ],
+    "excluded_blocks": [],
+    "prior_status": "prior_deferred",
+    "attempts": [],
+    "wave": 1,
+    "status": "covered",
+    "agent_id": "parent-inline-standard",
+    "reviewed_paths": ["menubar-app/main.js", "menubar-app/preload.js"],
+    "local_checks": [
+      {
+        "agent_id": "parent-inline-standard",
+        "reviewed_paths": ["menubar-app/main.js", "menubar-app/preload.js"],
+        "invariant": "No repo-content or renderer-controlled string reaches process argv beyond a fixed allowlist; IPC handlers validate types; no plaintext credential storage",
+        "method": "source",
+        "result": "685-line app fully traced: execFile('osascript') argv is fixed except resolveOpenCode() which only returns fixed install paths or null (fallback 'opencode'); openLLM targets map through a hardcoded urls table with encodeURIComponent; clipboard write of user prompt is same-principal; IPC handlers validate types before use; prefs JSON holds no API keys; contextIsolation true + nodeIntegration false on all windows; the captureShots menu HTML interpolates menu labels without escaping but renders in an offscreen display-only window (same principal, no persistence); v1 has no API-key persistence at all (env/OpenCode config only). No trust-boundary violation.",
+        "artifact": null
+      }
+    ],
+    "result_fingerprints": [],
+    "unresolved": []
+  },
+  {
+    "coverage_id": "repo-file::desktop-mobile-and-local-ipc::menubar-app-v2::command-execution-and-process",
+    "canonical_refs": {
+      "surface": "repo-file",
+      "boundary": "desktop-mobile-and-local-ipc",
+      "subsystem": "menubar-app-v2",
+      "attack_class": "command-execution-and-process"
+    },
+    "surface": "repo-file",
+    "boundary": "desktop-mobile-and-local-ipc",
+    "subsystem": "menubar-app-v2",
+    "attack_class": "command-execution-and-process",
+    "starting_paths": ["menubar-app-v2/main.js", "menubar-app-v2/preload.js"],
+    "ordinary_attack_class_block": "DESKTOP-MOBILE-AND-LOCAL-IPC.md#local-ipc-and-exported-component-attack-classes-subagent_type-general",
+    "selected_companion_blocks": [
+      "DESKTOP-MOBILE-AND-LOCAL-IPC.md#webview-and-native-bridge-attack-classes-subagent_type-general"
+    ],
+    "excluded_blocks": [],
+    "prior_status": "prior_deferred",
+    "attempts": [],
+    "wave": 1,
+    "status": "covered",
+    "agent_id": "parent-inline-standard",
+    "reviewed_paths": ["menubar-app-v2/main.js", "menubar-app-v2/preload.js"],
+    "local_checks": [
+      {
+        "agent_id": "parent-inline-standard",
+        "reviewed_paths": ["menubar-app-v2/main.js", "menubar-app-v2/preload.js"],
+        "invariant": "Same invariant set as v1 with the v2 delta reviewed (isolated userData dir)",
+        "method": "source",
+        "result": "691-line app is the v1 codebase plus an isolated userData dir (MGP_USERDATA_DIR or megapack-menubar-v2, absolute or parent-relative), vibrancy, and visual deltas; the osascript/resolveOpenCode/openLLM/IPC analysis transfers. The userData override accepts an absolute path from the environment but only redirects the app's own prefs — operator-controlled, same principal. No trust-boundary violation.",
+        "artifact": null
+      }
+    ],
+    "result_fingerprints": [],
+    "unresolved": []
+  },
+  {
+    "coverage_id": "repo-file::desktop-mobile-and-local-ipc::menubar-luxe-ipc-shell::ipc-handler-input",
+    "canonical_refs": {
+      "surface": "repo-file",
+      "boundary": "desktop-mobile-and-local-ipc",
+      "subsystem": "menubar-luxe-ipc-shell",
+      "attack_class": "ipc-handler-input"
+    },
+    "surface": "repo-file",
+    "boundary": "desktop-mobile-and-local-ipc",
+    "subsystem": "menubar-luxe-ipc-shell",
+    "attack_class": "ipc-handler-input",
+    "starting_paths": ["menubar-app-luxe/main.js", "menubar-app-luxe/lib/md-writer.js"],
+    "ordinary_attack_class_block": "DESKTOP-MOBILE-AND-LOCAL-IPC.md#local-ipc-and-exported-component-attack-classes-subagent_type-general",
+    "selected_companion_blocks": [],
+    "excluded_blocks": [],
+    "prior_status": "prior_confirmed_changed_source",
+    "attempts": [],
+    "wave": 1,
+    "status": "covered",
+    "agent_id": "parent-inline-standard",
+    "reviewed_paths": ["menubar-app-luxe/main.js", "menubar-app-luxe/lib/md-writer.js"],
+    "local_checks": [
+      {
+        "agent_id": "parent-inline-standard",
+        "reviewed_paths": ["menubar-app-luxe/main.js", "menubar-app-luxe/lib/md-writer.js"],
+        "invariant": "Write sinks behind IPC reject path segments that resolve outside the target base directory",
+        "method": "source",
+        "result": "F-2 remediation verified at 7036ea9: writeItemMd (main.js:276-279) and writeTeamMd (main.js:324-325) route through containedJoin (lib/md-writer.js:28-52), which rejects absolute and '..' segments before resolving; mdSafe neutralizes dotdot names. End-to-end unit checks cover the import-config chain (test-security-fixes.js 24/24). The run-1 finding menubar-app-luxe/main.js@mdsafe-preserves-dotdot-write-scope-escape is remediated (was low, escape capped at same-principal promptDir).",
+        "artifact": null
+      }
+    ],
+    "result_fingerprints": [],
+    "unresolved": []
+  },
+  {
+    "coverage_id": "repo-file::desktop-mobile-and-local-ipc::menubar-luxe-mdopen::ipc-handler-input",
+    "canonical_refs": {
+      "surface": "repo-file",
+      "boundary": "desktop-mobile-and-local-ipc",
+      "subsystem": "menubar-luxe-mdopen",
+      "attack_class": "ipc-handler-input"
+    },
+    "surface": "repo-file",
+    "boundary": "desktop-mobile-and-local-ipc",
+    "subsystem": "menubar-luxe-mdopen",
+    "attack_class": "ipc-handler-input",
+    "starting_paths": ["menubar-app-luxe/main.js"],
+    "ordinary_attack_class_block": "DESKTOP-MOBILE-AND-LOCAL-IPC.md#local-ipc-and-exported-component-attack-classes-subagent_type-general",
+    "selected_companion_blocks": [],
+    "excluded_blocks": [],
+    "prior_status": "prior_covered_same_source",
+    "attempts": [],
+    "wave": 1,
+    "status": "covered",
+    "agent_id": "parent-inline-standard",
+    "reviewed_paths": ["menubar-app-luxe/main.js"],
+    "local_checks": [
+      {
+        "agent_id": "parent-inline-standard",
+        "reviewed_paths": ["menubar-app-luxe/main.js"],
+        "invariant": "Workspace markdown open handler keeps paths inside the configured workspace root",
+        "method": "source",
+        "result": "The prompt-md-open '..' guard rejected as a finding in run-1 (guard effective, same principal) is unchanged at 7036ea9; no new handler or path shape introduced. No finding.",
+        "artifact": null
+      }
+    ],
+    "result_fingerprints": [],
+    "unresolved": []
+  },
+  {
+    "coverage_id": "repo-file::resource-exhaustion-and-availability::evals-executor::executor-sandboxing",
+    "canonical_refs": {
+      "surface": "repo-file",
+      "boundary": "resource-exhaustion-and-availability",
+      "subsystem": "evals-executor",
+      "attack_class": "executor-sandboxing"
+    },
+    "surface": "repo-file",
+    "boundary": "resource-exhaustion-and-availability",
+    "subsystem": "evals-executor",
+    "attack_class": "executor-sandboxing",
+    "starting_paths": ["scripts/run-evals.js"],
+    "ordinary_attack_class_block": "RESOURCE-EXHAUSTION-AND-AVAILABILITY.md#unbounded-resource-consumption",
+    "selected_companion_blocks": [
+      "SUPPLY-CHAIN-AND-RELEASE.md#ci-and-automation-attack-classes-subagent_type-general"
+    ],
+    "excluded_blocks": [],
+    "prior_status": "prior_needs_validation",
+    "attempts": [],
+    "wave": 1,
+    "status": "covered",
+    "agent_id": "parent-inline-standard",
+    "reviewed_paths": ["scripts/run-evals.js", "scripts/run-evals-net-test.js"],
+    "local_checks": [
+      {
+        "agent_id": "parent-inline-standard",
+        "reviewed_paths": ["scripts/run-evals.js", "scripts/run-evals-net-test.js"],
+        "invariant": "Untrusted-fixture-grade executors cannot open non-loopback network sockets; bypass requires an explicit user-level opt-out",
+        "method": "local",
+        "result": "NV-1 remediation re-executed at 7036ea9: NET_SB_PROFILE (run-evals.js:61-67) denies network-outbound except localhost TCP and local unix sockets; runBehavioral wraps executor and grader via sandbox-exec and exits non-zero where no sandbox support exists without explicit --allow-network. Unit checks 14/14 and the live probe (loopback 200, external blocked exit 7) hold at this ref. Remaining unrestricted path is the explicit operator flag; residual platform gap disclosed in NEEDS-VALIDATION.",
+        "artifact": "agents/parent-inline-standard/artifacts/run-evals-net-test-14of14.txt"
+      }
+    ],
+    "result_fingerprints": [],
+    "unresolved": []
+  },
+  {
+    "coverage_id": "repo-file::supply-chain-and-release::build-scripts-py::untrusted-input-to-exec",
+    "canonical_refs": {
+      "surface": "repo-file",
+      "boundary": "supply-chain-and-release",
+      "subsystem": "build-scripts-py",
+      "attack_class": "untrusted-input-to-exec"
+    },
+    "surface": "repo-file",
+    "boundary": "supply-chain-and-release",
+    "subsystem": "build-scripts-py",
+    "attack_class": "untrusted-input-to-exec",
+    "starting_paths": ["build-interface.py", "interface/MEGA-PACK-serveur.command"],
+    "ordinary_attack_class_block": "SUPPLY-CHAIN-AND-RELEASE.md#ci-and-automation-attack-classes-subagent_type-general",
+    "selected_companion_blocks": [
+      "WEB-PROTOCOL-AND-AUTH.md#localhost-and-loopback-service-exposure"
+    ],
+    "excluded_blocks": [],
+    "prior_status": "prior_covered_same_source",
+    "attempts": [],
+    "wave": 1,
+    "status": "covered",
+    "agent_id": "parent-inline-standard",
+    "reviewed_paths": ["build-interface.py", "interface/MEGA-PACK-serveur.command"],
+    "local_checks": [
+      {
+        "agent_id": "parent-inline-standard",
+        "reviewed_paths": ["build-interface.py", "interface/MEGA-PACK-serveur.command"],
+        "invariant": "Build scripts transform repo data only; the launcher server must not expose unauthenticated content beyond loopback",
+        "method": "source",
+        "result": "F-3 fix in source at 7036ea9: interface/MEGA-PACK-serveur.command line 11 is `python3 -m http.server 8788 --bind 127.0.0.1`; build-interface.py unchanged, operates on repo constants (see local-http-server unit for the live probe). No finding.",
+        "artifact": null
+      }
+    ],
+    "result_fingerprints": [],
+    "unresolved": []
+  },
+  {
+    "coverage_id": "repo-file::supply-chain-and-release::ci-workflow::untrusted-input-to-exec",
+    "canonical_refs": {
+      "surface": "repo-file",
+      "boundary": "supply-chain-and-release",
+      "subsystem": "ci-workflow",
+      "attack_class": "untrusted-input-to-exec"
+    },
+    "surface": "repo-file",
+    "boundary": "supply-chain-and-release",
+    "subsystem": "ci-workflow",
+    "attack_class": "untrusted-input-to-exec",
+    "starting_paths": [".github/workflows/ci.yml"],
+    "ordinary_attack_class_block": "SUPPLY-CHAIN-AND-RELEASE.md#ci-and-automation-attack-classes-subagent_type-general",
+    "selected_companion_blocks": [],
+    "excluded_blocks": [],
+    "prior_status": "prior_covered_same_source",
+    "attempts": [],
+    "wave": 1,
+    "status": "covered",
+    "agent_id": "parent-inline-standard",
+    "reviewed_paths": [".github/workflows/ci.yml", "scripts/lib/skill-lint.js"],
+    "local_checks": [
+      {
+        "agent_id": "parent-inline-standard",
+        "reviewed_paths": [".github/workflows/ci.yml", "scripts/lib/skill-lint.js"],
+        "invariant": "CI executes only reviewed repo code with no checkout-content interpolation into shells and no secrets exposure",
+        "method": "source",
+        "result": "Re-confirmed at 7036ea9 after the upstream sync: workflow invokes the deterministic eval gate (min-rank1 95) and validators; no pull_request_target checkout misuse, no content-derived interpolation into run: blocks, no unbounded artifact writes. No finding.",
+        "artifact": null
+      }
+    ],
+    "result_fingerprints": [],
+    "unresolved": []
+  },
+  {
+    "coverage_id": "repo-file::supply-chain-and-release::hooks-shell::untrusted-input-to-exec",
+    "canonical_refs": {
+      "surface": "repo-file",
+      "boundary": "supply-chain-and-release",
+      "subsystem": "hooks-shell",
+      "attack_class": "untrusted-input-to-exec"
+    },
+    "surface": "repo-file",
+    "boundary": "supply-chain-and-release",
+    "subsystem": "hooks-shell",
+    "attack_class": "untrusted-input-to-exec",
+    "starting_paths": ["hooks/session-start.sh", "hooks/simplify-ignore.sh", "hooks/sdd-cache-list.sh", "hooks/sdd-cache-read.sh", "hooks/sdd-cache-write.sh"],
+    "ordinary_attack_class_block": "SUPPLY-CHAIN-AND-RELEASE.md#ci-and-automation-attack-classes-subagent_type-general",
+    "selected_companion_blocks": [],
+    "excluded_blocks": [],
+    "prior_status": "prior_covered_same_source",
+    "attempts": [],
+    "wave": 1,
+    "status": "covered",
+    "agent_id": "parent-inline-standard",
+    "reviewed_paths": ["hooks/session-start.sh", "hooks/simplify-ignore.sh", "hooks/sdd-cache-list.sh", "hooks/sdd-cache-read.sh", "hooks/sdd-cache-write.sh"],
+    "local_checks": [
+      {
+        "agent_id": "parent-inline-standard",
+        "reviewed_paths": ["hooks/session-start.sh", "hooks/simplify-ignore.sh", "hooks/sdd-cache-list.sh", "hooks/sdd-cache-read.sh", "hooks/sdd-cache-write.sh"],
+        "invariant": "Hooks execute only fixed commands over session-controlled paths with quoting intact; no eval of content",
+        "method": "source",
+        "result": "Hooks unchanged since the run-1 pass except the simplify-ignore fix reviewed at commit 3fa698a; hooks.json remains removed from registration (opt-in only, documented in the 0.6.10 sync). Session Start no longer auto-executes repo hooks. No finding.",
+        "artifact": null
+      }
+    ],
+    "result_fingerprints": [],
+    "unresolved": []
+  },
+  {
+    "coverage_id": "repo-file::supply-chain-and-release::lifecycle-skills-md::prompt-injection-content",
+    "canonical_refs": {
+      "surface": "repo-file",
+      "boundary": "supply-chain-and-release",
+      "subsystem": "lifecycle-skills-md",
+      "attack_class": "prompt-injection-content"
+    },
+    "surface": "repo-file",
+    "boundary": "supply-chain-and-release",
+    "subsystem": "lifecycle-skills-md",
+    "attack_class": "prompt-injection-content",
+    "starting_paths": ["skills", "AGENTS.md"],
+    "ordinary_attack_class_block": "SUPPLY-CHAIN-AND-RELEASE.md#dependency-and-build-input-attack-classes-subagent_type-general",
+    "selected_companion_blocks": ["AI-AND-LLM.md#prompt-and-content-injection"],
+    "excluded_blocks": [],
+    "prior_status": "prior_covered_same_source",
+    "attempts": [],
+    "wave": 1,
+    "status": "covered",
+    "agent_id": "parent-inline-standard",
+    "reviewed_paths": ["skills/security-audit/SKILL.md", "AGENTS.md"],
+    "local_checks": [
+      {
+        "agent_id": "parent-inline-standard",
+        "reviewed_paths": ["skills/security-audit/SKILL.md", "AGENTS.md"],
+        "invariant": "Repo markdown is reviewable same-principal content; untrusted external content must be documented as such, not assumed safe",
+        "method": "source",
+        "result": "The security-audit skill (new since run-1) reinforces the content boundary: page text is untrusted, target code executes only under an OS sandbox, out-of-source facts require needs_validation. AGENTS.md maps audit intents to it. No finding.",
+        "artifact": null
+      }
+    ],
+    "result_fingerprints": [],
+    "unresolved": []
+  },
+  {
+    "coverage_id": "repo-file::supply-chain-and-release::node-scripts-ci::untrusted-input-to-exec",
+    "canonical_refs": {
+      "surface": "repo-file",
+      "boundary": "supply-chain-and-release",
+      "subsystem": "node-scripts-ci",
+      "attack_class": "untrusted-input-to-exec"
+    },
+    "surface": "repo-file",
+    "boundary": "supply-chain-and-release",
+    "subsystem": "node-scripts-ci",
+    "attack_class": "untrusted-input-to-exec",
+    "starting_paths": ["scripts/lib/skill-lint.js", "scripts/run-evals.js", "scripts/validate-skills.js", "scripts/validate-reference-links.js", "scripts/validate-commands.js", "scripts/validate-versions.js"],
+    "ordinary_attack_class_block": "SUPPLY-CHAIN-AND-RELEASE.md#ci-and-automation-attack-classes-subagent_type-general",
+    "selected_companion_blocks": [],
+    "excluded_blocks": [],
+    "prior_status": "prior_covered_same_source",
+    "attempts": [],
+    "wave": 1,
+    "status": "covered",
+    "agent_id": "parent-inline-standard",
+    "reviewed_paths": ["scripts/run-evals.js", "scripts/validate-skills.js"],
+    "local_checks": [
+      {
+        "agent_id": "parent-inline-standard",
+        "reviewed_paths": ["scripts/run-evals.js", "scripts/validate-skills.js"],
+        "invariant": "No repo-content string reaches shell interpolation or arbitrary process argv; sandbox profile text is a source constant",
+        "method": "source",
+        "result": "run-evals.js at 7036ea9: execFileSync argv is array-form; dynamic argv entries are the sandbox wrapper constants and repo paths validated by VALID_SKILL_NAME; the grader prompt travels via stdin. NET_SB_PROFILE is a source constant. No finding.",
+        "artifact": null
+      }
+    ],
+    "result_fingerprints": [],
+    "unresolved": []
+  },
+  {
+    "coverage_id": "repo-file::supply-chain-and-release::pack-agents-md::prompt-injection-content",
+    "canonical_refs": {
+      "surface": "repo-file",
+      "boundary": "supply-chain-and-release",
+      "subsystem": "pack-agents-md",
+      "attack_class": "prompt-injection-content"
+    },
+    "surface": "repo-file",
+    "boundary": "supply-chain-and-release",
+    "subsystem": "pack-agents-md",
+    "attack_class": "prompt-injection-content",
+    "starting_paths": ["agents"],
+    "ordinary_attack_class_block": "SUPPLY-CHAIN-AND-RELEASE.md#dependency-and-build-input-attack-classes-subagent_type-general",
+    "selected_companion_blocks": ["AI-AND-LLM.md#prompt-and-content-injection"],
+    "excluded_blocks": [],
+    "prior_status": "prior_covered_same_source",
+    "attempts": [],
+    "wave": 1,
+    "status": "covered",
+    "agent_id": "parent-inline-standard",
+    "reviewed_paths": ["agents"],
+    "local_checks": [
+      {
+        "agent_id": "parent-inline-standard",
+        "reviewed_paths": ["agents"],
+        "invariant": "Packaged agent prompts remain same-principal reviewed content with no silent external-content execution path",
+        "method": "source",
+        "result": "agents/ unchanged since the run-1 pass; the new provenance pattern in the Luxe app demonstrates the intended disclosure posture for generated content. No finding.",
+        "artifact": null
+      }
+    ],
+    "result_fingerprints": [],
+    "unresolved": []
+  },
+  {
+    "coverage_id": "repo-file::web-protocol-and-auth::local-http-server::localhost-exposure",
+    "canonical_refs": {
+      "surface": "repo-file",
+      "boundary": "web-protocol-and-auth",
+      "subsystem": "local-http-server",
+      "attack_class": "localhost-exposure"
+    },
+    "surface": "repo-file",
+    "boundary": "web-protocol-and-auth",
+    "subsystem": "local-http-server",
+    "attack_class": "localhost-exposure",
+    "starting_paths": ["interface/MEGA-PACK-serveur.command", "interface/mega-pack-launcher.html"],
+    "ordinary_attack_class_block": "WEB-PROTOCOL-AND-AUTH.md#localhost-and-loopback-service-exposure",
+    "selected_companion_blocks": ["CLIENT-SIDE.md#dom-injection"],
+    "excluded_blocks": [],
+    "prior_status": "prior_confirmed_changed_source",
+    "attempts": [],
+    "wave": 1,
+    "status": "covered",
+    "agent_id": "parent-inline-standard",
+    "reviewed_paths": ["interface/MEGA-PACK-serveur.command"],
+    "local_checks": [
+      {
+        "agent_id": "parent-inline-standard",
+        "reviewed_paths": ["interface/MEGA-PACK-serveur.command"],
+        "invariant": "Unauthenticated local content server listens on loopback only",
+        "method": "local",
+        "result": "F-3 remediation re-executed at 7036ea9: live probe binds 127.0.0.1 only and serves 200 on loopback (lsof + curl, artifact bind-127001-probe-run2.txt). The run-1 finding interface/MEGA-PACK-serveur.command@http-server-binds-all-interfaces is remediated (was low).",
+        "artifact": "agents/parent-inline-standard/artifacts/bind-127001-probe-run2.txt"
+      }
+    ],
+    "result_fingerprints": [],
+    "unresolved": []
+  },
+  {
+    "coverage_id": "repo-file::web-protocol-and-auth::menubar-luxe-remote-endpoints::localhost-exposure",
+    "canonical_refs": {
+      "surface": "repo-file",
+      "boundary": "web-protocol-and-auth",
+      "subsystem": "menubar-luxe-remote-endpoints",
+      "attack_class": "localhost-exposure"
+    },
+    "surface": "repo-file",
+    "boundary": "web-protocol-and-auth",
+    "subsystem": "menubar-luxe-remote-endpoints",
+    "attack_class": "localhost-exposure",
+    "starting_paths": ["menubar-app-luxe/main.js"],
+    "ordinary_attack_class_block": "WEB-PROTOCOL-AND-AUTH.md#localhost-and-loopback-service-exposure",
+    "selected_companion_blocks": [],
+    "excluded_blocks": [],
+    "prior_status": "prior_covered_same_source",
+    "attempts": [],
+    "wave": 1,
+    "status": "covered",
+    "agent_id": "parent-inline-standard",
+    "reviewed_paths": ["menubar-app-luxe/main.js"],
+    "local_checks": [
+      {
+        "agent_id": "parent-inline-standard",
+        "reviewed_paths": ["menubar-app-luxe/main.js"],
+        "invariant": "No listener or loopback service is opened by the app itself; outbound traffic goes only to configured provider endpoints",
+        "method": "source",
+        "result": "Still no listen()/server creation in the app at 7036ea9; outbound calls only to hardcoded provider endpoints. No finding.",
+        "artifact": null
+      }
+    ],
+    "result_fingerprints": [],
+    "unresolved": []
+  }
+]
