@@ -1,0 +1,503 @@
+[
+  {
+    "verdict": "confirmed",
+    "fingerprint": "interface/MEGA-PACK-serveur.command@http-server-binds-all-interfaces",
+    "title": "Local documentation server binds 0.0.0.0 instead of loopback",
+    "description": "interface/MEGA-PACK-serveur.command launches `python3 -m http.server 8788 -d \"$DIR\"` without a --bind argument, so Python's http.server listens on all interfaces. Any host on the same LAN can browse the served interface/ directory (launcher, catalog, userscript) and hold the port open. The served content is the public catalog, so confidentiality impact is minimal, but the intended audience is the local user's browser (\"http://localhost:8788\" is what the script prints), which is an explicit trust boundary the binding violates. A sandboxed loopback probe confirmed the wildcard binding (`TCP *:18788 (LISTEN)` for an equivalent server).",
+    "root_cause": "The script relies on python3 -m http.server defaults (binds 0.0.0.0) instead of pinning the listener to the loopback interface the workflow actually documents.",
+    "intended_behavior": "The one-click local server must only accept connections from the local machine; LAN peers must not be able to connect.",
+    "trace": [
+      {
+        "kind": "entrypoint",
+        "file": "interface/MEGA-PACK-serveur.command",
+        "line": 8,
+        "scope": "if lsof -nP -iTCP:8788 ... else branch",
+        "description": "Double-click entry point starts the local HTTP server for the launcher."
+      },
+      {
+        "kind": "propagation",
+        "file": "interface/MEGA-PACK-serveur.command",
+        "line": 9,
+        "scope": "python3 -m http.server 8788 -d \"$DIR\" >/dev/null 2>&1 &",
+        "description": "http.server is started with no --bind option; python binds to 0.0.0.0 by default."
+      },
+      {
+        "kind": "sink",
+        "file": "interface/MEGA-PACK-serveur.command",
+        "line": 9,
+        "scope": "listening socket",
+        "description": "Server accepts connections from any LAN host and serves the whole interface/ directory."
+      }
+    ],
+    "evidence": [
+      {
+        "file": "interface/MEGA-PACK-serveur.command",
+        "line": 9,
+        "description": "`python3 -m http.server 8788 -d \"$DIR\"` contains no --bind 127.0.0.1 argument."
+      },
+      {
+        "file": "interface/MEGA-PACK-serveur.command",
+        "line": 13,
+        "description": "The script itself announces http://localhost:8788, showing the loopback audience is the intended trust boundary."
+      },
+      {
+        "file": "run-1 scratch probe (sandboxed loopback test)",
+        "line": 1,
+        "description": "Equivalent server started with default bind reported `TCP *:18788 (LISTEN)` via lsof, demonstrating the wildcard binding on this platform."
+      }
+    ],
+    "conditions": [
+      {
+        "kind": "network_routing",
+        "description": "The user runs the .command on a machine attached to a shared network (home/office Wi-Fi); any peer can then reach port 8788."
+      }
+    ],
+    "execution": {
+      "attacker_perspective": "A device on the same LAN connects to http://<victim-ip>:8788/ while the victim has the launcher server running, and browses every file under interface/.",
+      "payloads": [
+        "GET http://<victim-ip>:8788/catalog-full.js",
+        "GET http://<victim-ip>:8788/mega-pack-panel-full.user.js"
+      ],
+      "instructions": [
+        "On a second LAN machine (or the same machine via its non-loopback IP), run: curl -s http://<victim-ip>:8788/mega-pack-launcher.html | head -5",
+        "Observe the launcher HTML returned instead of connection refused.",
+        "Stop after confirming readability; do not enumerate further or attempt writes (http.server is read-only)."
+      ],
+      "observed_result": "Loopback probe of the binding shows the server listening on all interfaces; remote readability of public catalog files is the maximum effect (read-only handler)."
+    },
+    "remediation": {
+      "strategy": "Pin the server to loopback and keep the same UX.",
+      "code_changes": [
+        {
+          "file_name": "interface/MEGA-PACK-serveur.command",
+          "fixed_code": "python3 -m http.server 8788 --bind 127.0.0.1 -d \"$DIR\" >/dev/null 2>&1 &"
+        }
+      ]
+    },
+    "severity": {
+      "likelihood": {
+        "score": "high",
+        "reason": "The script is documented as a recommended one-click step (INSTALL.txt étape 3) and laptops routinely join shared networks."
+      },
+      "impact": {
+        "score": "low",
+        "reason": "Served files are the public catalog and docs; read-only handler; no credentials in interface/."
+      },
+      "overall_severity": "low"
+    },
+    "confidence": {
+      "score": "high",
+      "reason": "Missing --bind is directly visible in source and the wildcard binding was reproduced locally under the skill's sandbox rules."
+    }
+  },
+  {
+    "verdict": "rejected",
+    "fingerprint": "interface/mega-pack-panel.user.js@gm-key-fallback-to-site-localstorage",
+    "title": "Userscript Atelier keys fall back to site-scoped localStorage",
+    "claimed_root_cause": "When GM_* storage is unavailable the userscript stores the Atelier API key in the host site's localStorage under 'mgp.gm.ai.key'.",
+    "trace": [
+      {
+        "kind": "entrypoint",
+        "file": "interface/mega-pack-panel.user.js",
+        "line": 34,
+        "scope": "gm.set fallback: store.set('gm.' + k, v)",
+        "description": "Key write when GM_setValue is not a function."
+      },
+      {
+        "kind": "sink",
+        "file": "interface/mega-pack-panel.user.js",
+        "line": 30,
+        "scope": "localStorage.setItem('mgp.' + k, …)",
+        "description": "Key persisted in the host site's localStorage."
+      }
+    ],
+    "evidence": [
+      {
+        "file": "interface/mega-pack-panel.user.js",
+        "line": 33,
+        "description": "Comment documents GM_* as primary and localStorage as explicit fallback."
+      },
+      {
+        "file": "interface/mega-pack-panel.user.js",
+        "line": 7,
+        "description": "@match *://*/* — but storage is origin-scoped, so each site only reaches its own copy."
+      }
+    ],
+    "reason": "No trust boundary is crossed beyond the user's own decision: a user who installs a credential-holding userscript on a site and stores a key there exposes it to that site's origin — which is the same principal that would receive the key anyway when the user sends a prompt from that site. GM_* primary storage already avoids sharing keys across sites. Recorded as a hardening note (prefer refusing storage over site-localStorage fallback), not a vulnerability.",
+    "description": "Userscript Atelier keys fall back to site-scoped localStorage — candidate raised during hunting and refuted during validation (see reason)."
+  },
+  {
+    "verdict": "confirmed",
+    "fingerprint": "menubar-app-luxe/main.js@api-key-plaintext-fallback-in-prefs-json",
+    "title": "API keys stored in plaintext JSON when OS keychain encryption is unavailable",
+    "description": "menubar-app-luxe/main.js stores LLM provider API keys via Electron safeStorage and, when safeStorage.isEncryptionAvailable() is false (or it throws), falls back to writing the raw key into mgp-prefs.json (JSON.stringify(PREFS) with default file mode 0644). The preferences file therefore leaves the keychain boundary on disk in cleartext. A local probe confirmed no keys are currently stored, so there is no live exposure; the finding is the persistence mechanism. Any process running as the user (or any disk/backup exfiltration) reads the file without the OS-level protection safeStorage exists to provide.",
+    "root_cause": "The key-setting handler treats safeStorage unavailability as a silent fallback to plaintext persistence instead of refusing to store or requiring an explicit degraded-mode warning.",
+    "intended_behavior": "Credentials must either be stored through the OS-protected store or not persisted at all; a degraded mode must be explicit (refuse + inform), never silent.",
+    "trace": [
+      {
+        "kind": "entrypoint",
+        "file": "menubar-app-luxe/main.js",
+        "line": 1276,
+        "scope": "ipcMain.handle('api-set')",
+        "description": "User submits an API key for a provider from the settings UI."
+      },
+      {
+        "kind": "propagation",
+        "file": "menubar-app-luxe/main.js",
+        "line": 1284,
+        "scope": "else if (key) { PREFS.apiKeys[provider] = key; }",
+        "description": "Fallback branch stores the raw key when safeStorage is unavailable; a catch block repeats the same fallback."
+      },
+      {
+        "kind": "sink",
+        "file": "menubar-app-luxe/main.js",
+        "line": 330,
+        "scope": "fs.writeFileSync(prefsPath(), JSON.stringify(PREFS))",
+        "description": "PREFS (including plaintext keys) is serialised to mgp-prefs.json with default permissions."
+      }
+    ],
+    "evidence": [
+      {
+        "file": "menubar-app-luxe/main.js",
+        "line": 1280,
+        "description": "Primary branch encrypts with safeStorage.encryptString."
+      },
+      {
+        "file": "menubar-app-luxe/main.js",
+        "line": 1284,
+        "description": "Fallback branch assigns the raw key with no warning to the user."
+      },
+      {
+        "file": "menubar-app-luxe/main.js",
+        "line": 1289,
+        "description": "The catch block repeats the plaintext fallback even when encryption was attempted."
+      },
+      {
+        "file": "menubar-app-luxe/main.js",
+        "line": 1,
+        "description": "Local probe of the sink file (mode 0644, apiKeys currently empty) — path: ~/Library/Application Support/megapack-menubar-luxe/mgp-prefs.json. File exists with mode 0644; currently apiKeys is empty, confirming the sink but no live secret."
+      }
+    ],
+    "conditions": [
+      {
+        "kind": "environmental_dependency",
+        "description": "Keychain encryption unavailable at key-set time (Linux without libsecret, headless sessions, or transient Keychain errors), which is exactly when the fallback branch runs."
+      }
+    ],
+    "execution": {
+      "attacker_perspective": "Any malware or co-resident process running as the user (or an attacker with a disk image / cloud backup of the home directory) reads mgp-prefs.json and extracts provider API keys in cleartext.",
+      "payloads": [
+        "cat \"$HOME/Library/Application Support/megapack-menubar-luxe/mgp-prefs.json\" | jq .apiKeys"
+      ],
+      "instructions": [
+        "Set a key while safeStorage is unavailable (e.g. run the app on Linux without a secret service).",
+        "Read the prefs file and observe the key in cleartext under .apiKeys[provider]."
+      ],
+      "observed_result": "On this machine the sink file exists (0644) with an empty apiKeys map; the plaintext branch is directly readable in source, so exposure is conditional on the degraded environment."
+    },
+    "remediation": {
+      "strategy": "Make degraded persistence explicit and fail closed.",
+      "code_changes": [
+        {
+          "file_name": "menubar-app-luxe/main.js",
+          "fixed_code": "ipcMain.handle('api-set', (e, { provider, key, model } = {}) => {\n  if (!PROVIDERS[provider]) return false;\n  PREFS.apiKeys = PREFS.apiKeys || {};\n  const { safeStorage } = require('electron');\n  const encrypted = safeStorage.isEncryptionAvailable();\n  if (key && !encrypted) {\n    return { ok: false, error: LANG === 'en'\n      ? 'OS secure storage unavailable — the key was NOT saved (plaintext storage disabled).'\n      : \"Stockage sécurisé indisponible — la clé n'a PAS été enregistrée (stockage en clair désactivé).\" };\n  }\n  if (key) {\n    PREFS.apiKeys[provider] = safeStorage.encryptString(key).toString('base64');\n    PREFS.apiEncrypted = PREFS.apiEncrypted || {};\n    PREFS.apiEncrypted[provider] = true;\n  } else {\n    delete PREFS.apiKeys[provider];\n    if (PREFS.apiEncrypted) delete PREFS.apiEncrypted[provider];\n  }\n  // …model handling unchanged…\n});"
+        }
+      ]
+    },
+    "severity": {
+      "likelihood": {
+        "score": "medium",
+        "reason": "Triggers only when safeStorage is unavailable or throws, which is environment-dependent but a supported configuration (Linux/headless)."
+      },
+      "impact": {
+        "score": "medium",
+        "reason": "Cleartext provider credentials outlive the process, survive backups, and are readable by everything running as the user; scoped by single-user mode."
+      },
+      "overall_severity": "medium"
+    },
+    "confidence": {
+      "score": "high",
+      "reason": "Fallback is explicit in source; the sink file and its mode were verified locally; live plaintext storage was not present to observe, which the record states."
+    }
+  },
+  {
+    "verdict": "needs_validation",
+    "fingerprint": "menubar-app-luxe/main.js@llm-generated-workshop-items-flow-into-later-prompts",
+    "title": "LLM-generated workshop items persist and re-enter later team-run prompts",
+    "description": "llm-generate stores an LLM-authored item (name/desc/system/body) into workshops files, and team-run later injects those stored system prompts and agent descriptions into new LLM calls. All renderer sinks are escaped (verified: esc() applied in cardHTML/tipHtml/ctxTreeHtml), and no shell or filesystem sink is reachable from item fields, so this is not a code-execution path. The residual risk is stored prompt-injection: a malicious or jailbroken generation (or an imported config crafted similarly) persists instructions that steer later missions or report generation. Whether that is in-model is a trust-model decision the app owner must make; source alone cannot show an established boundary failure.",
+    "claimed_root_cause": "Generated workshop items are treated as trusted configuration forever, without a provenance marker or a user-visible review step before their system prompts are reused in team-run orchestration.",
+    "trace": [
+      {
+        "kind": "entrypoint",
+        "file": "menubar-app-luxe/main.js",
+        "line": 1080,
+        "scope": "llm-generate: const rec = { name: String(j.name ...), system: String(j.system ...), body: ... }",
+        "description": "LLM JSON response fields are length-capped and persisted to my-agents.json / my-skills.json."
+      },
+      {
+        "kind": "propagation",
+        "file": "menubar-app-luxe/main.js",
+        "line": 1179,
+        "scope": "team-run: a.system || 'Tu es l'agent…' passed as the system message",
+        "description": "Stored item fields become system prompts for later agent calls."
+      },
+      {
+        "kind": "sink",
+        "file": "menubar-app-luxe/main.js",
+        "line": 1194,
+        "scope": "team-run report consolidation prompt",
+        "description": "Agent outputs (itself LLM text) are concatenated into the final orchestrator prompt."
+      }
+    ],
+    "evidence": [
+      {
+        "file": "menubar-app-luxe/main.js",
+        "line": 1080,
+        "description": "rec fields come from extractJson(text) of the provider response with length caps only."
+      },
+      {
+        "file": "menubar-app-luxe/main.js",
+        "line": 1179,
+        "description": "Stored a.system is used verbatim as a system prompt for later calls."
+      },
+      {
+        "file": "menubar-app-luxe/renderer.js",
+        "line": 188,
+        "description": "esc() covers DOM sinks (verified across cardHTML/tipHtml/ctxTreeHtml), ruling out XSS from the same data."
+      }
+    ],
+    "blockers": [
+      "No established boundary failure in source: the 'boundary' is the LLM trust model, and whether provider responses are trusted configuration is an owner policy question.",
+      "Whether imported configs can seed workshop items with arbitrary system prompts depends on whether the owner considers config files trusted (they are user-selected, shareable artifacts)."
+    ],
+    "validation_plan": {
+      "local": "Seed a workshop item whose system field instructs exfiltration-style behavior (echo the mission into its answer), then run a team mission and observe whether the injected instruction steers the sub-agent report.",
+      "deployment": "Decide and document the trust model: mark generated/imported items as untrusted (provenance flag + confirmation before their system prompt is reused), or accept and document the residual risk."
+    }
+  },
+  {
+    "verdict": "confirmed",
+    "fingerprint": "menubar-app-luxe/main.js@mdsafe-preserves-dotdot-write-scope-escape",
+    "title": "mdSafe sanitiser preserves '..' segments, letting imported customs write outside perso/",
+    "description": "menubar-app-luxe/main.js builds .md export paths with itemRelPath(), which wraps user-controlled name/tag/category in mdSafe(). mdSafe replaces path separators and reserved characters but leaves a bare '..' segment intact. For k === 'custom' the path becomes path.join('perso', tag, name + '.md'); with tag='..' and name='..' this normalises to the promptDir root, escaping the intended perso/ subfolder. The customs array is attacker-influenced through import-config, which copies data.customs from an imported JSON file with no schema validation (main.js ~line 334). A local reproduction confirmed the escape: path.join('perso','..','...md') resolves to the base root and overwriteFile wrote there. Impact is bounded by path.join normalisation (only one '..' per segment, '..' cannot chain across segments beyond the root) and the write lands inside the user's own promptDir, so this is a scope-escape within the same principal, not arbitrary write. The same mdSafe gap means a future refactor could widen it to a real traversal.",
+    "root_cause": "mdSafe() was written to strip separator characters but was never required to reject '..' or enforce that path.resolve(base, rel) stays under base; itemRelPath() relies on it as a security boundary without that guarantee.",
+    "intended_behavior": "Exported .md files must always land inside the chosen subfolder of promptDir, regardless of the name/tag/category strings, including for objects loaded from an imported configuration file.",
+    "trace": [
+      {
+        "kind": "entrypoint",
+        "file": "menubar-app-luxe/main.js",
+        "line": 1338,
+        "scope": "ipcMain.handle('import-config')",
+        "description": "Imported config JSON is parsed and data.customs is copied into PREFS.customs without validating tag/name."
+      },
+      {
+        "kind": "propagation",
+        "file": "menubar-app-luxe/main.js",
+        "line": 317,
+        "scope": "syncPromptTree(): for (const c of (PREFS.customs || [])) writeItemMd({ x: c, k: 'custom' }, base)",
+        "description": "Every custom item, including imported ones, flows into the .md writer."
+      },
+      {
+        "kind": "sink",
+        "file": "menubar-app-luxe/main.js",
+        "line": 243,
+        "scope": "writeItemMd(): fs.writeFileSync(path.join(dir || promptDir(), itemRelPath(it)))",
+        "description": "Path built from unsanitised-against-'..' segments is used for the file write."
+      }
+    ],
+    "evidence": [
+      {
+        "file": "menubar-app-luxe/main.js",
+        "line": 220,
+        "description": "mdSafe replaces / \\ : * ? \" < > | but not dots, so mdSafe('..') === '..'."
+      },
+      {
+        "file": "menubar-app-luxe/main.js",
+        "line": 234,
+        "description": "itemRelPath k==='custom' branch: path.join('perso', tag, `${mdSafe(x.name)}.md`)."
+      },
+      {
+        "file": "menubar-app-luxe/main.js",
+        "line": 1344,
+        "description": "import-config assigns data.customs directly (Array.isArray check only)."
+      },
+      {
+        "file": "menubar-app-luxe/main.js",
+        "line": 1,
+        "description": "Reproduction harness: itemRelPath({k:'custom', x:{name:'..', tag:'..'}}) === '...md' and fs.writeFileSync(path.resolve(BASE, '...md')) created the file at the base root, outside perso/."
+      }
+    ],
+    "conditions": [
+      {
+        "kind": "user_interaction",
+        "description": "The user imports a shared MEGA PACK configuration JSON whose customs array contains crafted tag/name values (the file is the trust boundary; it is a shareable artifact)."
+      },
+      {
+        "kind": "data_state",
+        "description": "The user then runs the 'Générer tous les .md' sync (or any prompt-md-create) which iterates PREFS.customs."
+      }
+    ],
+    "execution": {
+      "attacker_perspective": "An attacker shares a crafted config JSON (socially engineered as a 'preset pack'); on import and .md sync, files the victim expects under perso/<tag>/ are written to the promptDir root (e.g. overwriting LISEZMOI.md), and with crafted '..'-only names the write target escapes the intended folder.",
+      "payloads": [
+        "{\"favorites\":[],\"customs\":[{\"name\":\"..\",\"tag\":\"..\",\"desc\":\"x\"}]}"
+      ],
+      "instructions": [
+        "In the app: Réglages → Importer une configuration (select the crafted JSON).",
+        "Then trigger the .md sync (Réglages → 🔄 Générer tous les .md).",
+        "Inspect the promptDir: the file '...md' appears at the root instead of perso/../ being sanitised, and the root LISEZMOI.md can be overwritten by a matching name."
+      ],
+      "observed_result": "Sandboxed reproduction of itemRelPath/writeItemMd confirmed the resolved path escapes perso/ and lands at the promptDir root; chaining beyond the root is blocked by path.join normalisation (no multi-level climb)."
+    },
+    "remediation": {
+      "strategy": "Enforce the containment invariant at the sink instead of trusting per-segment sanitisation.",
+      "code_changes": [
+        {
+          "file_name": "menubar-app-luxe/main.js",
+          "fixed_code": "function writeItemMd(it, dir) {\n  const base = path.resolve(dir || promptDir());\n  const abs = path.resolve(base, itemRelPath(it));\n  if (abs !== base && !abs.startsWith(base + path.sep)) {\n    throw new Error('write escaped promptDir: ' + itemRelPath(it));\n  }\n  fs.mkdirSync(path.dirname(abs), { recursive: true });\n  fs.writeFileSync(abs, mdForItem(it), 'utf8');\n  return abs;\n}"
+        },
+        {
+          "file_name": "menubar-app-luxe/main.js",
+          "fixed_code": "// mdSafe: reject dot-only segments outright\nconst mdSafe = (s) => {\n  const out = String(s || '').replace(/[/\\\\:*?\"<>|]/g, '-').replace(/\\s+/g, ' ').trim().slice(0, 80);\n  return (out && out !== '.' && out !== '..') ? out : 'sans-nom';\n};"
+        }
+      ]
+    },
+    "severity": {
+      "likelihood": {
+        "score": "medium",
+        "reason": "Requires importing a malicious config file and running the sync; config sharing is an advertised flow but social engineering is needed."
+      },
+      "impact": {
+        "score": "low",
+        "reason": "Write is confined to the user's own promptDir root (same principal); worst case overwrites the user's own launcher-generated files."
+      },
+      "overall_severity": "low"
+    },
+    "confidence": {
+      "score": "high",
+      "reason": "Sanitiser gap demonstrated by direct code execution of the exact functions under the skill's sandbox rules."
+    }
+  },
+  {
+    "verdict": "rejected",
+    "fingerprint": "menubar-app-luxe/main.js@prompt-md-open-dotdot-check",
+    "title": "prompt-md-open / prompt-dir-open '..' handling",
+    "claimed_root_cause": "Handlers block literal '..' substrings and prompt-md-open additionally bounds with startsWith(promptDir()).",
+    "trace": [
+      {
+        "kind": "entrypoint",
+        "file": "menubar-app-luxe/main.js",
+        "line": 1063,
+        "scope": "prompt-md-open handler",
+        "description": "sub.includes('..') rejection then resolved-path containment check."
+      },
+      {
+        "kind": "sink",
+        "file": "menubar-app-luxe/main.js",
+        "line": 1067,
+        "scope": "shell.openPath(target)",
+        "description": "Opens only files under promptDir()."
+      }
+    ],
+    "evidence": [
+      {
+        "file": "menubar-app-luxe/main.js",
+        "line": 1065,
+        "description": "target.startsWith(promptDir()) guard present for the md branch."
+      },
+      {
+        "file": "menubar-app-luxe/renderer.js",
+        "line": 455,
+        "description": "Tree rows originate from main-process treeOverview(), not renderer-controlled strings; esc() applied in HTML."
+      }
+    ],
+    "reason": "The claimed traversal via data-open values is not reachable: rel values come from the main process's own directory listing of promptDir, the '..' substring is rejected, and the md branch is containment-checked. Opening a user-visible file inside the user's own promptDir is same-principal behavior. The dir branch opens a directory without the startsWith check, but it can only surface Finder views of paths the main process itself listed — not a boundary violation worth a finding; noted for consistency (apply the same guard to dir).",
+    "description": "prompt-md-open / prompt-dir-open '..' handling — candidate raised during hunting and refuted during validation (see reason)."
+  },
+  {
+    "verdict": "needs_validation",
+    "fingerprint": "scripts/run-evals.js@behavioral-executor-without-network-sandbox",
+    "title": "Behavioral evals execute `claude -p` with Bash/WebFetch/WebSearch and no network sandbox",
+    "description": "scripts/run-evals.js materialises eval workspaces and runs headless `claude -p --permission-mode acceptEdits --allowedTools Read,Glob,Grep,Edit,Write,Bash,WebFetch,WebSearch` with the skill text appended to the system prompt. The workspace is a throwaway directory, but nothing constrains the executor's network access or enforces the empty-allowlisted-environment model the pack's own audit guidance requires. All fixtures reviewed in this run are inert, so no violation is demonstrated today; the exposure is that any future fixture, prompt, or graded-transcript content becomes tool-armed agent input in CI.",
+    "claimed_root_cause": "The executor grants WebFetch/WebSearch/Bash to agent-controlled input (prompt + fixtures) inside CI without an OS-level sandbox profile or allowlist of destinations.",
+    "trace": [
+      {
+        "kind": "entrypoint",
+        "file": "scripts/run-evals.js",
+        "line": 534,
+        "scope": "execFileSync('claude', ['-p', ..., '--permission-mode', 'acceptEdits', '--allowedTools', EXECUTOR_TOOLS, ...])",
+        "description": "Headless executor launches with write-and-network tools for each behavioral eval."
+      },
+      {
+        "kind": "propagation",
+        "file": "scripts/run-evals.js",
+        "line": 520,
+        "scope": "materializeWorkspace(ev)",
+        "description": "Fixture files from evals/fixtures/<skill>/ are copied into the workspace the agent can act on."
+      },
+      {
+        "kind": "sink",
+        "file": "scripts/run-evals.js",
+        "line": 534,
+        "scope": "cwd: workspace",
+        "description": "Bash runs inside the workspace; WebFetch/WebSearch egress has no allowlist or capture."
+      }
+    ],
+    "evidence": [
+      {
+        "file": "scripts/run-evals.js",
+        "line": 49,
+        "description": "EXECUTOR_TOOLS includes Bash, WebFetch, WebSearch — network-capable tools."
+      },
+      {
+        "file": ".github/workflows/test-plugin-install.yml",
+        "line": 35,
+        "description": "Behavioral evals are a documented CI step (token-spend gate), so the executor context is a shared CI runner, not a personal machine."
+      },
+      {
+        "file": "evals/fixtures/ (reviewed during Phase 1/2)",
+        "line": 1,
+        "description": "All checked-in fixtures reviewed this run are benign (static files, no fetch/exec instructions)."
+      }
+    ],
+    "blockers": [
+      "No decisive fact from source alone: whether CI runners apply their own egress policy or org-level network controls is outside the repository and was not probed (live CI environment out of scope).",
+      "Whether the maintainer accepts agent-controlled egress during behavioral evals is a policy fact only the owner can confirm."
+    ],
+    "validation_plan": {
+      "local": "Run one behavioral eval with egress monitoring (e.g. a local DNS/HTTP sink and proxy env vars) to observe what destinations the executor contacts by default.",
+      "deployment": "Confirm on the CI runner whether network egress during the behavioral step is restricted by org policy, or add a sandbox (e.g. seatbelt/firejail profile or a no-egress job) around the claude -p invocation."
+    }
+  },
+  {
+    "verdict": "rejected",
+    "fingerprint": "skills/lifecycle-md@prompt-instruction-content",
+    "title": "Skill and agent markdown as agent instructions",
+    "claimed_root_cause": "SKILL.md/agent files contain imperative instructions that coding agents will follow; a malicious contributor could encode harmful instructions.",
+    "trace": [
+      {
+        "kind": "entrypoint",
+        "file": "skills/ (pack content)",
+        "line": 1,
+        "description": "Pack purpose is to load these files as agent instructions.",
+        "scope": "repository source"
+      },
+      {
+        "kind": "sink",
+        "file": "AGENTS.md",
+        "line": 1,
+        "description": "Repo instructs agents to follow skill workflows strictly.",
+        "scope": "repository source"
+      }
+    ],
+    "evidence": [
+      {
+        "file": "CONTRIBUTING.md",
+        "line": 1,
+        "description": "Changes arrive through reviewed PRs with pre-flight checks; the repo's own review process is the intended control."
+      }
+    ],
+    "reason": "Instructions-to-agents is the declared purpose of the pack, and the content is in-repo, versioned, and review-gated; there is no external/untrusted source reaching these files in this repository. The reviewer-controlled supply chain is a governance property, not a code vulnerability. Covered by the supply-chain unit rather than a finding.",
+    "description": "Skill and agent markdown as agent instructions — candidate raised during hunting and refuted during validation (see reason)."
+  }
+]

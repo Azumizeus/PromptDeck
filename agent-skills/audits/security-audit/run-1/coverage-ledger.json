@@ -1,0 +1,656 @@
+[
+  {
+    "coverage_id": "repo-file::client-side::interface-userscript-keys::credential-handling",
+    "canonical_refs": {
+      "surface": "repo-file",
+      "boundary": "client-side",
+      "subsystem": "interface-userscript-keys",
+      "attack_class": "credential-handling"
+    },
+    "surface": "repo-file",
+    "boundary": "client-side",
+    "subsystem": "interface-userscript-keys",
+    "attack_class": "credential-handling",
+    "starting_paths": [
+      "interface/mega-pack-panel.user.js",
+      "interface/mega-pack-panel-full.user.js",
+      "interface/mega-pack-launcher.html"
+    ],
+    "ordinary_attack_class_block": null,
+    "selected_companion_blocks": [
+      "CLIENT-SIDE.md#dom-injection",
+      "CLIENT-SIDE.md#messaging-trust"
+    ],
+    "excluded_blocks": [],
+    "prior_status": "none",
+    "attempts": [],
+    "wave": 1,
+    "status": "covered",
+    "agent_id": "hunter-interface",
+    "reviewed_paths": [
+      "interface/catalog-full.js",
+      "interface/mega-pack-launcher.html",
+      "interface/mega-pack-panel.user.js"
+    ],
+    "local_checks": [
+      {
+        "agent_id": "hunter-interface",
+        "reviewed_paths": [
+          "interface/catalog-full.js",
+          "interface/mega-pack-launcher.html",
+          "interface/mega-pack-panel.user.js"
+        ],
+        "invariant": "Catalog text rendered into LLM inputs, not DOM sinks; API keys never leave GM storage or go to non-provider endpoints",
+        "method": "source",
+        "result": "AI calls go only to hardcoded AI_PROVIDERS URLs with GM_xmlhttpRequest; activation inserts desc into LLM input box (no innerHTML sink). Launcher cardHTML interpolates catalog fields unescaped into innerHTML but catalog is repo-constant (same principal); no custom-item path exists in the launcher.",
+        "artifact": null
+      }
+    ],
+    "result_fingerprints": [],
+    "unresolved": []
+  },
+  {
+    "coverage_id": "repo-file::client-side::luxe-electron-webprefs::renderer-hardening",
+    "canonical_refs": {
+      "surface": "repo-file",
+      "boundary": "client-side",
+      "subsystem": "luxe-electron-webprefs",
+      "attack_class": "renderer-hardening"
+    },
+    "surface": "repo-file",
+    "boundary": "client-side",
+    "subsystem": "luxe-electron-webprefs",
+    "attack_class": "renderer-hardening",
+    "starting_paths": [
+      "menubar-app-luxe/main.js",
+      "menubar-app-luxe/renderer.js",
+      "menubar-app-luxe/index.html",
+      "menubar-app-luxe/standalone-inline.html"
+    ],
+    "ordinary_attack_class_block": null,
+    "selected_companion_blocks": [
+      "CLIENT-SIDE.md#dom-injection"
+    ],
+    "excluded_blocks": [],
+    "prior_status": "none",
+    "attempts": [],
+    "wave": 1,
+    "status": "covered",
+    "agent_id": "hunter-webprefs",
+    "reviewed_paths": [
+      "menubar-app-luxe/main.js",
+      "menubar-app-luxe/preload.js",
+      "menubar-app-luxe/renderer.js"
+    ],
+    "local_checks": [
+      {
+        "agent_id": "hunter-webprefs",
+        "reviewed_paths": [
+          "menubar-app-luxe/main.js",
+          "menubar-app-luxe/preload.js",
+          "menubar-app-luxe/renderer.js"
+        ],
+        "invariant": "Renderer windows use contextIsolation with nodeIntegration off; remote content is never loaded; llm/team-run network calls happen in the main process with fixed provider URLs",
+        "method": "source",
+        "result": "All BrowserWindows: contextIsolation:true, nodeIntegration:false (sandbox:false kept for preload require of electron — noted). loadFile/loadURL data: only; llmChat posts to hardcoded provider bases. openLLM only opens fixed URL table or user-configured endpoint (custom provider URL is user-set, same principal).",
+        "artifact": null
+      }
+    ],
+    "result_fingerprints": [],
+    "unresolved": []
+  },
+  {
+    "coverage_id": "repo-file::client-side::menubar-luxe-prefs::credential-handling",
+    "canonical_refs": {
+      "surface": "repo-file",
+      "boundary": "client-side",
+      "subsystem": "menubar-luxe-prefs",
+      "attack_class": "credential-handling"
+    },
+    "surface": "repo-file",
+    "boundary": "client-side",
+    "subsystem": "menubar-luxe-prefs",
+    "attack_class": "credential-handling",
+    "starting_paths": [
+      "menubar-app-luxe/main.js",
+      "menubar-app-luxe/preload.js",
+      "menubar-app-luxe/settings.js"
+    ],
+    "ordinary_attack_class_block": null,
+    "selected_companion_blocks": [
+      "CLIENT-SIDE.md#credential-handling"
+    ],
+    "excluded_blocks": [],
+    "prior_status": "none",
+    "attempts": [],
+    "wave": 1,
+    "status": "candidate",
+    "agent_id": "hunter-prefs",
+    "reviewed_paths": [
+      "menubar-app-luxe/main.js"
+    ],
+    "local_checks": [
+      {
+        "agent_id": "hunter-prefs",
+        "reviewed_paths": [
+          "menubar-app-luxe/main.js"
+        ],
+        "invariant": "API keys persist only through the OS-protected store",
+        "method": "source",
+        "result": "api-set handler encrypts with safeStorage but falls back to plaintext assignment (lines 1283, 1288) persisted to mgp-prefs.json 0644 (line 330). Local probe: file exists, apiKeys currently empty — mechanism confirmed, no live secret.",
+        "artifact": null
+      }
+    ],
+    "result_fingerprints": [
+      "menubar-app-luxe/main.js@api-key-plaintext-fallback-in-prefs-json"
+    ],
+    "unresolved": []
+  },
+  {
+    "coverage_id": "repo-file::desktop-mobile-and-local-ipc::menubar-luxe-ipc-shell::ipc-handler-input",
+    "canonical_refs": {
+      "surface": "repo-file",
+      "boundary": "desktop-mobile-and-local-ipc",
+      "subsystem": "menubar-luxe-ipc-shell",
+      "attack_class": "ipc-handler-input"
+    },
+    "surface": "repo-file",
+    "boundary": "desktop-mobile-and-local-ipc",
+    "subsystem": "menubar-luxe-ipc-shell",
+    "attack_class": "ipc-handler-input",
+    "starting_paths": [
+      "menubar-app-luxe/main.js"
+    ],
+    "ordinary_attack_class_block": null,
+    "selected_companion_blocks": [
+      "DESKTOP-MOBILE-AND-LOCAL-IPC.md#local-ipc"
+    ],
+    "excluded_blocks": [],
+    "prior_status": "none",
+    "attempts": [],
+    "wave": 1,
+    "status": "candidate",
+    "agent_id": "hunter-ipc",
+    "reviewed_paths": [
+      "menubar-app-luxe/main.js",
+      "menubar-app-luxe/preload.js"
+    ],
+    "local_checks": [
+      {
+        "agent_id": "hunter-ipc",
+        "reviewed_paths": [
+          "menubar-app-luxe/main.js",
+          "menubar-app-luxe/preload.js"
+        ],
+        "invariant": "Every renderer-reachable IPC handler validates paths and keeps file writes/opens under promptDir or repo root",
+        "method": "source",
+        "result": "prompt-md-open: '..' rejected + startsWith(promptDir). prompt-dir-open: '..' rejected (no containment but directory-open of user tree only). source-reveal: absolute paths allowed but startsWith(repo-root) enforced. writeItemMd: mdSafe leaves '..' as a segment — imported customs (import-config, no schema) can escape perso/ to promptDir root via path.join normalisation; sandboxed reproduction of the exact functions confirmed one-level escape, no further climb possible.",
+        "artifact": null
+      }
+    ],
+    "result_fingerprints": [
+      "menubar-app-luxe/main.js@mdsafe-preserves-dotdot-write-scope-escape"
+    ],
+    "unresolved": []
+  },
+  {
+    "coverage_id": "repo-file::desktop-mobile-and-local-ipc::menubar-luxe-mdopen::ipc-handler-input",
+    "canonical_refs": {
+      "surface": "repo-file",
+      "boundary": "desktop-mobile-and-local-ipc",
+      "subsystem": "menubar-luxe-mdopen",
+      "attack_class": "ipc-handler-input"
+    },
+    "surface": "repo-file",
+    "boundary": "desktop-mobile-and-local-ipc",
+    "subsystem": "menubar-luxe-mdopen",
+    "attack_class": "ipc-handler-input",
+    "starting_paths": [
+      "menubar-app-luxe/main.js"
+    ],
+    "ordinary_attack_class_block": null,
+    "selected_companion_blocks": [
+      "DESKTOP-MOBILE-AND-LOCAL-IPC.md#local-ipc"
+    ],
+    "excluded_blocks": [],
+    "prior_status": "none",
+    "attempts": [],
+    "wave": 1,
+    "status": "covered",
+    "agent_id": "hunter-ipc",
+    "reviewed_paths": [
+      "menubar-app-luxe/main.js"
+    ],
+    "local_checks": [
+      {
+        "agent_id": "hunter-ipc",
+        "reviewed_paths": [
+          "menubar-app-luxe/main.js"
+        ],
+        "invariant": "prompt-md-open containment guard holds for renderer-supplied rel paths",
+        "method": "source",
+        "result": "'..' substring rejected and resolved path bounded by startsWith(promptDir()); tree rows originate from the main process listing, not renderer strings.",
+        "artifact": null
+      }
+    ],
+    "result_fingerprints": [],
+    "unresolved": []
+  },
+  {
+    "coverage_id": "repo-file::resource-exhaustion-and-availability::evals-executor::executor-sandboxing",
+    "canonical_refs": {
+      "surface": "repo-file",
+      "boundary": "resource-exhaustion-and-availability",
+      "subsystem": "evals-executor",
+      "attack_class": "executor-sandboxing"
+    },
+    "surface": "repo-file",
+    "boundary": "resource-exhaustion-and-availability",
+    "subsystem": "evals-executor",
+    "attack_class": "executor-sandboxing",
+    "starting_paths": [
+      "scripts/run-evals.js",
+      "evals/fixtures",
+      "evals/cases"
+    ],
+    "ordinary_attack_class_block": null,
+    "selected_companion_blocks": [
+      "RESOURCE-EXHAUSTION-AND-AVAILABILITY.md#agent-execution-budgets"
+    ],
+    "excluded_blocks": [],
+    "prior_status": "none",
+    "attempts": [],
+    "wave": 1,
+    "status": "candidate",
+    "agent_id": "hunter-evals",
+    "reviewed_paths": [
+      ".github/workflows/test-plugin-install.yml",
+      "evals/cases",
+      "evals/fixtures",
+      "scripts/run-evals.js"
+    ],
+    "local_checks": [
+      {
+        "agent_id": "hunter-evals",
+        "reviewed_paths": [
+          ".github/workflows/test-plugin-install.yml",
+          "evals/cases",
+          "evals/fixtures",
+          "scripts/run-evals.js"
+        ],
+        "invariant": "Behavioral executors run with bounded tools and no untrusted fixture content reaches command construction",
+        "method": "source",
+        "result": "execFileSync with fixed argv (no shell), fixtures copied into throwaway workspace; all 29 case files + fixtures reviewed are inert. BUT executor tools include WebFetch/WebSearch/Bash with no network sandbox — policy fact outside repo.",
+        "artifact": null
+      }
+    ],
+    "result_fingerprints": [
+      "scripts/run-evals.js@behavioral-executor-without-network-sandbox"
+    ],
+    "unresolved": []
+  },
+  {
+    "coverage_id": "repo-file::supply-chain-and-release::build-scripts-py::untrusted-input-to-exec",
+    "canonical_refs": {
+      "surface": "repo-file",
+      "boundary": "supply-chain-and-release",
+      "subsystem": "build-scripts-py",
+      "attack_class": "untrusted-input-to-exec"
+    },
+    "surface": "repo-file",
+    "boundary": "supply-chain-and-release",
+    "subsystem": "build-scripts-py",
+    "attack_class": "untrusted-input-to-exec",
+    "starting_paths": [
+      "build-interface.py",
+      "build-userscript.py",
+      "build-i18n-template.py"
+    ],
+    "ordinary_attack_class_block": null,
+    "selected_companion_blocks": [
+      "SUPPLY-CHAIN-AND-RELEASE.md#dependency-and-build-execution"
+    ],
+    "excluded_blocks": [],
+    "prior_status": "none",
+    "attempts": [],
+    "wave": 1,
+    "status": "covered",
+    "agent_id": "hunter-build-py",
+    "reviewed_paths": [
+      "build-i18n-template.py",
+      "build-interface.py",
+      "build-userscript.py"
+    ],
+    "local_checks": [
+      {
+        "agent_id": "hunter-build-py",
+        "reviewed_paths": [
+          "build-i18n-template.py",
+          "build-interface.py",
+          "build-userscript.py"
+        ],
+        "invariant": "Build scripts never execute repo-derived strings; they only read/write local files",
+        "method": "source",
+        "result": "build-interface.py/build-userscript.py parse local markdown and write interface/ JSON+HTML; no eval, no subprocess, no network. build-i18n-template.py is a template generator, same profile.",
+        "artifact": null
+      }
+    ],
+    "result_fingerprints": [],
+    "unresolved": []
+  },
+  {
+    "coverage_id": "repo-file::supply-chain-and-release::hooks-shell::untrusted-input-to-exec",
+    "canonical_refs": {
+      "surface": "repo-file",
+      "boundary": "supply-chain-and-release",
+      "subsystem": "hooks-shell",
+      "attack_class": "untrusted-input-to-exec"
+    },
+    "surface": "repo-file",
+    "boundary": "supply-chain-and-release",
+    "subsystem": "hooks-shell",
+    "attack_class": "untrusted-input-to-exec",
+    "starting_paths": [
+      "hooks/session-start.sh",
+      "hooks/simplify-ignore.sh",
+      "hooks/sdd-cache-pre.sh",
+      "hooks/sdd-cache-post.sh"
+    ],
+    "ordinary_attack_class_block": null,
+    "selected_companion_blocks": [
+      "SUPPLY-CHAIN-AND-RELEASE.md#hook-input-handling"
+    ],
+    "excluded_blocks": [],
+    "prior_status": "none",
+    "attempts": [],
+    "wave": 1,
+    "status": "covered",
+    "agent_id": "hunter-hooks",
+    "reviewed_paths": [
+      "hooks/hooks.json",
+      "hooks/sdd-cache-post.sh",
+      "hooks/sdd-cache-pre.sh",
+      "hooks/session-start.sh",
+      "hooks/simplify-ignore.sh"
+    ],
+    "local_checks": [
+      {
+        "agent_id": "hunter-hooks",
+        "reviewed_paths": [
+          "hooks/sdd-cache-post.sh",
+          "hooks/sdd-cache-pre.sh",
+          "hooks/session-start.sh",
+          "hooks/simplify-ignore.sh"
+        ],
+        "invariant": "Hook scripts treat Claude Code stdin JSON as data only, escape through jq, and never eval it",
+        "method": "source",
+        "result": "session-start.sh emits jq-constructed hookSpecificOutput only; simplify-ignore.sh expands placeholders from its own cache and keeps a .recovered fallback; no eval of input. sdd-cache-*.sh treat tool_input.url as data for curl/jq only; URL is the agent's own WebFetch argument (same principal).",
+        "artifact": null
+      },
+      {
+        "agent_id": "hunter-hooks",
+        "reviewed_paths": [
+          "hooks/hooks.json"
+        ],
+        "invariant": "SessionStart registration matches 0.6.10 policy (not plugin-registered)",
+        "method": "source",
+        "result": "hooks/hooks.json removed in commit 3fa698a; no hook is registered by the plugin; scripts remain opt-in for hosts without native routing.",
+        "artifact": null
+      }
+    ],
+    "result_fingerprints": [],
+    "unresolved": []
+  },
+  {
+    "coverage_id": "repo-file::supply-chain-and-release::lifecycle-skills-md::prompt-injection-content",
+    "canonical_refs": {
+      "surface": "repo-file",
+      "boundary": "supply-chain-and-release",
+      "subsystem": "lifecycle-skills-md",
+      "attack_class": "prompt-injection-content"
+    },
+    "surface": "repo-file",
+    "boundary": "supply-chain-and-release",
+    "subsystem": "lifecycle-skills-md",
+    "attack_class": "prompt-injection-content",
+    "starting_paths": [
+      "skills"
+    ],
+    "ordinary_attack_class_block": null,
+    "selected_companion_blocks": [
+      "AI-AND-LLM.md#prompt-injection"
+    ],
+    "excluded_blocks": [],
+    "prior_status": "none",
+    "attempts": [],
+    "wave": 1,
+    "status": "candidate",
+    "agent_id": "hunter-skillcontent",
+    "reviewed_paths": [
+      "skills"
+    ],
+    "local_checks": [
+      {
+        "agent_id": "hunter-skillcontent",
+        "reviewed_paths": [
+          "skills"
+        ],
+        "invariant": "No skill markdown instructs agents to fetch remote content, run network commands, or exfiltrate; executable skill scripts are inert",
+        "method": "source",
+        "result": "Grep sweep for eval(, child_process, os.system, curl/wget/fetch across skills/: hits are documented examples (polish eval fixtures create local repos; last30days-surf scripts call documented public APIs with env tokens, run locally by the user). security-audit validators are pure schema checkers. No exfiltration or obfuscated content.",
+        "artifact": null
+      }
+    ],
+    "result_fingerprints": [
+      "skills/lifecycle-md@prompt-instruction-content"
+    ],
+    "unresolved": []
+  },
+  {
+    "coverage_id": "repo-file::supply-chain-and-release::menubar-app-v1-v2::untrusted-input-to-exec",
+    "canonical_refs": {
+      "surface": "repo-file",
+      "boundary": "supply-chain-and-release",
+      "subsystem": "menubar-app-v1-v2",
+      "attack_class": "untrusted-input-to-exec"
+    },
+    "surface": "repo-file",
+    "boundary": "supply-chain-and-release",
+    "subsystem": "menubar-app-v1-v2",
+    "attack_class": "untrusted-input-to-exec",
+    "starting_paths": [
+      "menubar-app",
+      "menubar-app-v2"
+    ],
+    "ordinary_attack_class_block": "Legacy app copies (menubar-app/, menubar-app-v2/) are superseded by menubar-app-luxe (v2.8.0 is the shipped app); deep hunting of deprecated code is deferred as low-value duplication of the luxe findings.",
+    "selected_companion_blocks": [],
+    "excluded_blocks": [],
+    "prior_status": "none",
+    "attempts": [],
+    "wave": 1,
+    "status": "deferred",
+    "agent_id": null,
+    "reviewed_paths": [],
+    "local_checks": [],
+    "result_fingerprints": [],
+    "unresolved": [
+      "Quick profile: legacy menubar-app and menubar-app-v2 share most code with the audited luxe app; their catalog copy and main.js should receive the same credential/IPC checks in a standard or deep run."
+    ]
+  },
+  {
+    "coverage_id": "repo-file::supply-chain-and-release::node-scripts-ci::untrusted-input-to-exec",
+    "canonical_refs": {
+      "surface": "repo-file",
+      "boundary": "supply-chain-and-release",
+      "subsystem": "node-scripts-ci",
+      "attack_class": "untrusted-input-to-exec"
+    },
+    "surface": "repo-file",
+    "boundary": "supply-chain-and-release",
+    "subsystem": "node-scripts-ci",
+    "attack_class": "untrusted-input-to-exec",
+    "starting_paths": [
+      "scripts"
+    ],
+    "ordinary_attack_class_block": null,
+    "selected_companion_blocks": [
+      "SUPPLY-CHAIN-AND-RELEASE.md#ci-release-integrity"
+    ],
+    "excluded_blocks": [],
+    "prior_status": "none",
+    "attempts": [],
+    "wave": 1,
+    "status": "covered",
+    "agent_id": "hunter-nodeci",
+    "reviewed_paths": [
+      "scripts/lib/skill-lint.js",
+      "scripts/run-evals.js",
+      "scripts/validate-artifact-paths.js",
+      "scripts/validate-commands.js",
+      "scripts/validate-reference-links.js",
+      "scripts/validate-skills.js",
+      "scripts/validate-versions.js"
+    ],
+    "local_checks": [
+      {
+        "agent_id": "hunter-nodeci",
+        "reviewed_paths": [
+          "scripts/lib/skill-lint.js",
+          "scripts/run-evals.js",
+          "scripts/validate-artifact-paths.js",
+          "scripts/validate-commands.js",
+          "scripts/validate-reference-links.js",
+          "scripts/validate-skills.js",
+          "scripts/validate-versions.js"
+        ],
+        "invariant": "CI validators never interpolate repo content into commands",
+        "method": "source",
+        "result": "Only child_process use is execFileSync('git', ['describe',...]) with fixed args; all other validators are fs+regex. CI workflow (test-plugin-install.yml) runs validators directly; validate-versions pins manifests to git tag — currently failing locally because local manifests are 0.7.x while last tag is v1.1.0 (release process, not a vulnerability).",
+        "artifact": null
+      }
+    ],
+    "result_fingerprints": [],
+    "unresolved": []
+  },
+  {
+    "coverage_id": "repo-file::supply-chain-and-release::pack-agents-md::prompt-injection-content",
+    "canonical_refs": {
+      "surface": "repo-file",
+      "boundary": "supply-chain-and-release",
+      "subsystem": "pack-agents-md",
+      "attack_class": "prompt-injection-content"
+    },
+    "surface": "repo-file",
+    "boundary": "supply-chain-and-release",
+    "subsystem": "pack-agents-md",
+    "attack_class": "prompt-injection-content",
+    "starting_paths": [
+      "agents"
+    ],
+    "ordinary_attack_class_block": null,
+    "selected_companion_blocks": [
+      "AI-AND-LLM.md#prompt-injection"
+    ],
+    "excluded_blocks": [],
+    "prior_status": "none",
+    "attempts": [],
+    "wave": 1,
+    "status": "covered",
+    "agent_id": "hunter-agentscontent",
+    "reviewed_paths": [
+      "agents"
+    ],
+    "local_checks": [
+      {
+        "agent_id": "hunter-agentscontent",
+        "reviewed_paths": [
+          "agents"
+        ],
+        "invariant": "190 agent persona files contain no executable payloads or exfiltration instructions; they are prompt personas only",
+        "method": "source",
+        "result": "Persona files are declarative role prompts (no code blocks with network/exec instructions beyond professional guidance); sampling across categories plus grep for fetch/curl/exec found only narrative mentions in security personas.",
+        "artifact": null
+      }
+    ],
+    "result_fingerprints": [],
+    "unresolved": []
+  },
+  {
+    "coverage_id": "repo-file::web-protocol-and-auth::local-http-server::localhost-exposure",
+    "canonical_refs": {
+      "surface": "repo-file",
+      "boundary": "web-protocol-and-auth",
+      "subsystem": "local-http-server",
+      "attack_class": "localhost-exposure"
+    },
+    "surface": "repo-file",
+    "boundary": "web-protocol-and-auth",
+    "subsystem": "local-http-server",
+    "attack_class": "localhost-exposure",
+    "starting_paths": [
+      "interface/MEGA-PACK-serveur.command"
+    ],
+    "ordinary_attack_class_block": null,
+    "selected_companion_blocks": [
+      "WEB-PROTOCOL-AND-AUTH.md#http-request-framing"
+    ],
+    "excluded_blocks": [],
+    "prior_status": "none",
+    "attempts": [],
+    "wave": 1,
+    "status": "candidate",
+    "agent_id": "hunter-httpserver",
+    "reviewed_paths": [
+      "interface/MEGA-PACK-serveur.command"
+    ],
+    "local_checks": [
+      {
+        "agent_id": "hunter-httpserver",
+        "reviewed_paths": [
+          "interface/MEGA-PACK-serveur.command"
+        ],
+        "invariant": "The documented local-only server accepts connections only from localhost",
+        "method": "local",
+        "result": "Sandboxed probe of an equivalent python http.server default bind shows `TCP *:18788 (LISTEN)` — wildcard binding confirmed on this platform; script has no --bind flag (line 9).",
+        "artifact": "agents/hunter-httpserver/artifacts/lsof-probe.txt"
+      }
+    ],
+    "result_fingerprints": [
+      "interface/MEGA-PACK-serveur.command@http-server-binds-all-interfaces"
+    ],
+    "unresolved": []
+  },
+  {
+    "coverage_id": "repo-file::web-protocol-and-auth::menubar-luxe-remote-endpoints::localhost-exposure",
+    "canonical_refs": {
+      "surface": "repo-file",
+      "boundary": "web-protocol-and-auth",
+      "subsystem": "menubar-luxe-remote-endpoints",
+      "attack_class": "localhost-exposure"
+    },
+    "surface": "repo-file",
+    "boundary": "web-protocol-and-auth",
+    "subsystem": "menubar-luxe-remote-endpoints",
+    "attack_class": "localhost-exposure",
+    "starting_paths": [
+      "menubar-app-luxe/main.js",
+      "interface/MEGA-PACK-serveur.command"
+    ],
+    "ordinary_attack_class_block": "Remote-endpoint enumeration beyond provider API bases is excluded: openLLM targets are fixed URL tables plus documented user-configured providers; probing live provider endpoints is out of scope by the skill's live-service rule.",
+    "selected_companion_blocks": [
+      "WEB-PROTOCOL-AND-AUTH.md#authentication-protocols"
+    ],
+    "excluded_blocks": [],
+    "prior_status": "none",
+    "attempts": [],
+    "wave": 1,
+    "status": "not_applicable",
+    "agent_id": null,
+    "reviewed_paths": [],
+    "local_checks": [],
+    "result_fingerprints": [],
+    "unresolved": [
+      "Live provider endpoints and the freebuff:// / opencode:// custom schemes cannot be probed under the source-only sandbox policy; the openLLM URL table was reviewed statically and is fixed."
+    ]
+  }
+]

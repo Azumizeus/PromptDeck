@@ -1,0 +1,22 @@
+{
+  "run_id": "agent-skills-run-1",
+  "repo": "agent-skills",
+  "target": "/Users/mickaeldunoyer/Desktop/Skill Install/agent-skills",
+  "source_ref": "e0cda34c64b34e45218d3aeb5fb2be790f0d76f9 (2026-09-23T06:04:50+02:00, clean worktree; untracked dirs excluded from review)",
+  "profile": "quick",
+  "scope_paths": ["."],
+  "budget": null,
+  "execution_policy": "sandboxed-source-and-local-only",
+  "companions": ["SUPPLY-CHAIN-AND-RELEASE.md", "CLOUD-AND-DEPLOYMENT.md", "AI-AND-LLM.md", "CLIENT-SIDE.md", "RESOURCE-EXHAUSTION-AND-AVAILABILITY.md"],
+  "prior_runs": [],
+  "shared_file_owners": {
+    "run-metadata.json": "parent",
+    "architecture.md": "parent",
+    "coverage-ledger.json": "parent",
+    "findings.json": "parent",
+    "REPORT.md": "parent",
+    "FINDINGS-DETAIL.md": "parent",
+    "NEEDS-VALIDATION.md": "parent"
+  },
+  "run_status": "in_progress"
+}
