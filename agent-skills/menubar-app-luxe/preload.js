@@ -35,6 +35,9 @@ contextBridge.exposeInMainWorld('mgp', {
   toggleFav: (name) => ipcRenderer.send('toggle-fav', name),
   exportConfig: () => ipcRenderer.invoke('export-config'),
   importConfig: () => ipcRenderer.invoke('import-config'),
+  // ── 💾 Sauvegarde portable (cadenas + corbeille + ateliers) ──
+  backupExport: () => ipcRenderer.invoke('backup-export'),
+  backupImport: () => ipcRenderer.invoke('backup-import'),
   customSave: (item) => ipcRenderer.send('custom-save', item),
   customDelete: (name) => ipcRenderer.send('custom-delete', name),
   exportCustoms: () => ipcRenderer.invoke('export-customs'),
@@ -45,6 +48,7 @@ contextBridge.exposeInMainWorld('mgp', {
   workshopSave: (kind, name, patch) => ipcRenderer.invoke('workshop-save', { kind, name, patch }),
   workshopCreate: (kind, rec) => ipcRenderer.invoke('workshop-create', { kind, rec }),
   workshopLock: (kind, name, locked) => ipcRenderer.invoke('workshop-lock', { kind, name, locked }),
+  workshopHistory: (kind, name) => ipcRenderer.invoke('workshop-history', { kind, name }),
   workshopDelete: (kind, name) => ipcRenderer.invoke('workshop-delete', { kind, name }),
   workshopExport: (kind, name) => ipcRenderer.invoke('workshop-export', { kind, name }),
   llmGenerate: (payload) => ipcRenderer.invoke('llm-generate', payload),
@@ -76,6 +80,7 @@ contextBridge.exposeInMainWorld('mgp', {
   reportSave: (p) => ipcRenderer.invoke('report-save', p),
   teamDelete: (name) => ipcRenderer.invoke('team-delete', name),
   teamSave: (name, patch) => ipcRenderer.invoke('team-save', { name, patch }),
+  teamFromTemplate: (key) => ipcRenderer.invoke('team-from-template', { key }),
   teamExport: (name) => ipcRenderer.invoke('team-export', name),
   teamMdCreate: (name) => ipcRenderer.invoke('team-md-create', name),
 });

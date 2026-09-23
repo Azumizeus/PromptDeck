@@ -140,6 +140,31 @@ const T = LANG === 'fr' ? {
   etSavedT: (n) => `✏️ Équipe « ${n} » modifiée`,
   // 🔒 Filtre
   lockFilterT: 'Afficher uniquement les éléments verrouillés',
+  // 💾 Sauvegarde portable
+  backupT: '💾 Sauvegarde (cadenas + corbeille + ateliers)',
+  backupSave: '💾 Sauvegarder',
+  backupLoad: '📥 Restaurer une sauvegarde',
+  backupSaved: '💾 Sauvegarde enregistrée',
+  backupRestored: (n, t) => `📥 Restauration : ${n} élément(s), ${t} entrée(s) de corbeille`,
+  backupErr: '💾 Sauvegarde impossible',
+  backupBad: '💾 Fichier de sauvegarde invalide',
+  // 🕘 Historique
+  histT: '🕘 Historique des modifications',
+  histEmpty: 'Aucune modification enregistrée — l\'historique démarre à ta première édition.',
+  histRow: (n, d) => `${n} champ${n > 1 ? 's' : ''} modifié${n > 1 ? 's' : ''} · ${d}`,
+  histShow: '🕘 Historique',
+  histHide: 'Masquer l\'historique',
+  // 📋 Modèles d'équipes
+  tplBtn: '📋 Modèles',
+  tplT: '📋 Modèles d\'équipes prêts à l\'emploi',
+  tplHint: 'Créés comme équipes ordinaires : éditables, supprimables, cadenassables.',
+  tplCode: '🔍 Revue de code',
+  tplCodeD: 'Analyste + sécurité + performance → rapport priorisé',
+  tplVeille: '📰 Veille',
+  tplVeilleD: 'Collecte + synthèse → briefing actionnable',
+  tplSupport: '🎧 Support',
+  tplSupportD: 'Qualification + diagnostic → réponse client prête',
+  tplCreated: (n) => `📋 Équipe « ${n} » créée — modifie-la via ✏️`,
 } : {
   ph: 'Search a skill, an agent, a prompt…', all: 'All', skills: 'Skills',
   agents: 'Agents', perso: '✍️ Custom', favs: '★ Favorites', results: 'results',
@@ -264,6 +289,28 @@ const T = LANG === 'fr' ? {
   etAgentBad: 'Invalid agent line (format: name | role | description | prompt)',
   etSavedT: (n) => `✏️ Team “${n}” updated`,
   lockFilterT: 'Show locked items only',
+  backupT: '💾 Backup (locks + trash + workshops)',
+  backupSave: '💾 Save backup',
+  backupLoad: '📥 Restore a backup',
+  backupSaved: '💾 Backup saved',
+  backupRestored: (n, t) => `📥 Restored: ${n} item(s), ${t} trash entry(ies)`,
+  backupErr: '💾 Backup failed',
+  backupBad: '💾 Invalid backup file',
+  histT: '🕘 Change history',
+  histEmpty: 'No changes recorded yet — history starts with your first edit.',
+  histRow: (n, d) => `${n} field${n > 1 ? 's' : ''} changed · ${d}`,
+  histShow: '🕘 History',
+  histHide: 'Hide history',
+  tplBtn: '📋 Templates',
+  tplT: '📋 Ready-to-use team templates',
+  tplHint: 'Created as ordinary teams: editable, deletable, lockable.',
+  tplCode: '🔍 Code review',
+  tplCodeD: 'Analyst + security + performance → prioritized report',
+  tplVeille: '📰 Watch',
+  tplVeilleD: 'Collect + synthesize → actionable briefing',
+  tplSupport: '🎧 Support',
+  tplSupportD: 'Triage + diagnosis → ready-to-send answer',
+  tplCreated: (n) => `📋 Team “${n}” created — edit it with ✏️`,
 };
 
 // ---------- Catalogue + prefs ----------
@@ -418,6 +465,7 @@ APP_PARENT.insertAdjacentHTML('afterbegin', `
         <button id="w-x">${LANG === 'fr' ? 'Fermer' : 'Close'}</button>
       </div>
       <div class="wlist-h"><b>${T.atelierList}</b><span id="w-count" class="wmut"></span></div>
+      <div id="w-tpl" role="group" aria-label="${T.tplT}"></div>
       <div id="w-list" role="list"></div>
       <div class="wlist-h"><b>${T.wRunList}</b></div>
       <div id="w-runlist" role="list"></div>
@@ -455,6 +503,8 @@ APP_PARENT.insertAdjacentHTML('afterbegin', `
       <div id="tmrow">
         <button id="tm-empty">${T.trashEmptyAll}</button>
         <span style="flex:1"></span>
+        <button id="tm-backup" title="${T.backupT}">${T.backupSave}</button>
+        <button id="tm-restore-bk" title="${T.backupT}">${T.backupLoad}</button>
         <button id="tm-close">${T.trashClose}</button>
       </div>
     </div>
@@ -498,9 +548,11 @@ APP_PARENT.insertAdjacentHTML('afterbegin', `
       </div>
       <div id="werow">
         <button id="we-save" class="pri">${T.efSave}</button>
+        <button id="we-hist" hidden>${T.histShow}</button>
         <span style="flex:1"></span>
         <button id="we-x">${T.efCancel}</button>
       </div>
+      <div id="we-history" hidden></div>
     </div>
   </div>
 </main>`);
@@ -860,6 +912,9 @@ function openWedit(kind, rec) {
   $('we-kind').value = kind === 'agent' ? 'agent' : 'skill';
   $('we-orig').value = rec.name || '';
   $('we-title').textContent = kind === 'agent' ? T.editAgentT : T.editSkillT;
+  histFor = { kind, name: rec.name || '' }; // 🕘 l'historique suit l'item édité
+  $('we-history').hidden = true; $('we-hist').textContent = T.histShow;
+  $('we-hist').hidden = false;
   $('we-name').value = rec.name || '';
   $('we-desc').value = rec.desc || '';
   const sk = $('we-skillsec');
@@ -981,6 +1036,8 @@ async function renderTrash() {
 $('tm-x').onclick = closeTrash;
 $('tm-close').onclick = closeTrash;
 $('tm-empty').onclick = async () => { await window.mgp.trashEmpty(); showToast(T.trashEmptied, 'ok'); await renderTrash(); };
+$('tm-backup').onclick = doBackupExport;
+$('tm-restore-bk').onclick = doBackupImport;
 
 // ────────────────────────────────────────────────────────────────────────
 //  ✏️ Édition des équipes — orchestrateur, agents, workflow dans #wedit
@@ -993,6 +1050,9 @@ async function editTeam(name) {
   $('we-kind').value = 'team';
   $('we-orig').value = t.team || t.name;
   $('we-title').textContent = T.editTeamT;
+  histFor = { kind: 'team', name: t.team || t.name }; // 🕘 idem pour les équipes
+  $('we-history').hidden = true; $('we-hist').textContent = T.histShow;
+  $('we-hist').hidden = false;
   $('we-name').value = t.team || t.name;
   $('we-t-desc').value = t.desc || '';
   $('we-t-orchname').value = (t.orchestrator && t.orchestrator.name) || '';
@@ -1030,6 +1090,74 @@ async function saveTeamEdit() {
 // Ligne agent sans « | » : role/desc/system vides, mais un nom est exigé (message dédié sinon).
 function teamAgentLineOk(line) { return line.trim().length > 0; }
 
+// ────────────────────────────────────────────────────────────────────────
+//  📋 Modèles d'équipes — revue de code, veille, support (instanciés éditables)
+// ────────────────────────────────────────────────────────────────────────
+const TEMPLATES = [
+  { key: 'revue-code', label: () => T.tplCode, desc: () => T.tplCodeD, icon: '🔍' },
+  { key: 'veille', label: () => T.tplVeille, desc: () => T.tplVeilleD, icon: '📰' },
+  { key: 'support', label: () => T.tplSupport, desc: () => T.tplSupportD, icon: '🎧' },
+];
+function renderTemplates() {
+  const host = $('w-tpl');
+  if (!host || !window.mgp.teamFromTemplate) return;
+  host.innerHTML = `<span class="tplhead">${T.tplT}</span><span class="tplhint">${T.tplHint}</span>`
+    + TEMPLATES.map((t) => `<button class="tplcard" data-k="${t.key}" title="${esc(t.desc())}">
+        <b>${t.icon} ${esc(t.label())}</b><i>${esc(t.desc())}</i>
+      </button>`).join('');
+  host.querySelectorAll('.tplcard').forEach((b) => {
+    b.onclick = async () => {
+      const r = await window.mgp.teamFromTemplate(b.dataset.k);
+      if (r && r.ok) {
+        showToast(T.tplCreated(r.item.team || r.item.name), 'ok');
+        await loadTeams();
+        if (W.items.length) refreshWorkshop();
+      } else showToast(T.trashErr, 'err');
+    };
+  });
+}
+
+// ────────────────────────────────────────────────────────────────────────
+//  🕘 Historique des modifications (journal embarqué dans l'enregistrement)
+// ────────────────────────────────────────────────────────────────────────
+let histFor = null; // { kind, name } de l'item affiché dans #wedit
+async function toggleHistory() {
+  const host = $('we-history');
+  if (!host.hidden) { host.hidden = true; $('we-hist').textContent = T.histShow; return; }
+  if (!histFor || !window.mgp.workshopHistory) return;
+  let rows = [];
+  try { rows = (await window.mgp.workshopHistory(histFor.kind, histFor.name)) || []; } catch (e) { rows = []; }
+  const fmt = (iso) => { try { return new Date(iso).toLocaleString(LANG === 'en' ? 'en-US' : 'fr-FR'); } catch (e) { return iso || ''; } };
+  host.innerHTML = `<b>${T.histT}</b>` + (rows.length
+    ? rows.map((h) => `<div class="histrow">🕘 ${esc(T.histRow((h.fields || []).length, fmt(h.at)))}${(h.fields || []).length ? `<i>${esc(h.fields.join(', '))}</i>` : ''}</div>`).join('')
+    : `<div class="histrow">${T.histEmpty}</div>`);
+  host.hidden = false;
+  $('we-hist').textContent = T.histHide;
+}
+
+// ────────────────────────────────────────────────────────────────────────
+//  💾 Sauvegarde portable (cadenas + corbeille + ateliers → JSON daté)
+// ────────────────────────────────────────────────────────────────────────
+let backupExportsCount = 0; // 🧪 instrumentation de test (nombre d'exports effectués)
+async function doBackupExport() {
+  if (!window.mgp.backupExport) return;
+  const ok = await window.mgp.backupExport();
+  if (ok) backupExportsCount++;
+  showToast(ok ? T.backupSaved : T.backupErr, ok ? 'ok' : 'err');
+}
+async function doBackupImport() {
+  if (!window.mgp.backupImport) return;
+  const r = await window.mgp.backupImport();
+  if (r && r.ok) {
+    showToast(T.backupRestored(r.restored || 0, r.trashAdded || 0), 'ok');
+    await refreshWorkshop();
+    await loadTeams();
+    if ($('tmodal').hidden === false) await renderTrash();
+  } else if (r && r.error && r.error !== 'annulé') {
+    showToast(r.error === 'format inconnu' ? T.backupBad : T.backupErr, 'err');
+  }
+}
+
 // ---------- Modal ✍️ ----------
 let editing = null;
 function openModal(c) {
@@ -1064,6 +1192,7 @@ $('e-txt').addEventListener('keydown', (e) => { if ((e.metaKey || e.ctrlKey) && 
 // ── Modal d'édition agent/skill (#wedit) ──
 $('we-save').onclick = () => saveWedit();
 $('we-x').onclick = closeWedit;
+$('we-hist').onclick = toggleHistory; // 🕘 journal des modifications
 $('we-system').addEventListener('keydown', (e) => { if ((e.metaKey || ctrl(e)) && e.key === 'Enter') saveWedit(); });
 $('we-body').addEventListener('keydown', (e) => { if ((e.metaKey || ctrl(e)) && e.key === 'Enter') saveWedit(); });
 function ctrl(e) { return e.ctrlKey; }
@@ -1283,6 +1412,7 @@ function openWorkshop() {
   fillProviders();
   refreshWorkshop();
   renderRunlist();
+  renderTemplates();
   wintent.focus();
 }
 
@@ -1534,6 +1664,18 @@ window.__mgp = {
   toggleLock: (it) => toggleLock(it),
   copyToWorkshop: (it) => copyToWorkshop(it),
   ctxHtmlStr: () => String(document.getElementById('ctx')._html || ''),
+  // 💾 sauvegarde + 🕘 historique + 📋 modèles
+  doBackupExport: () => doBackupExport(),
+  doBackupImport: () => doBackupImport(),
+  backupCount: () => backupExportsCount,
+  renderTemplates: () => renderTemplates(),
+  tplHtml: () => String(document.getElementById('w-tpl')._html || ''),
+  teamFromTemplate: (key) => window.mgp.teamFromTemplate(key),
+  loadTeamsBridge: () => loadTeams(),
+  showHistory: () => toggleHistory(),
+  histHtml: () => String(document.getElementById('we-history')._html || ''),
+  histVisible: () => !$('we-history').hidden,
+  toggleHistory: () => toggleHistory(),
   // 🗑 Corbeille + ✏️ équipe + 🔒 filtre
   openTrash: () => openTrash(),
   trashVisible: () => !$('tmodal').hidden,

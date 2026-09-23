@@ -289,6 +289,21 @@ body{font:13.5px/1.45 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-se
 #erow button:hover{border-color:var(--line2);color:var(--txt)}
 #erow .pri{background:var(--grad);border:none;color:#0b0c10}
 #erow .pri:hover{filter:brightness(1.08);color:#0b0c10}
+/* 📋 Modèles d'équipes + 🕘 Historique */
+#w-tpl{display:flex;flex-direction:column;gap:4px;margin-top:2px}
+.tplhead{font-size:11px;font-weight:700;color:var(--txt2)}
+.tplhint{font-size:10px;color:var(--mut)}
+.tplcard{display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:left;
+  border:1px solid var(--line);border-radius:10px;background:var(--card2);cursor:pointer;
+  padding:8px 10px;font:inherit;transition:border-color .15s}
+.tplcard:hover{border-color:var(--vio)}
+.tplcard b{font-size:12px;color:var(--txt)}
+.tplcard i{font-style:normal;font-size:10.5px;color:var(--mut)}
+#we-history{display:flex;flex-direction:column;gap:4px;border:1px solid var(--line);
+  border-radius:10px;padding:9px 10px;background:var(--card2);max-height:160px;overflow-y:auto}
+#we-history b{font-size:11px;color:var(--txt2)}
+.histrow{display:flex;flex-direction:column;font-size:11px;color:var(--txt2)}
+.histrow i{font-style:normal;font-size:10px;color:var(--mut)}
 /* 🗑 Corbeille + 🔒 filtre */
 #trb,#lkf{border:1px solid var(--line);background:none;color:var(--txt2);cursor:pointer;
   font:inherit;font-size:11px;font-weight:600;padding:3px 9px;border-radius:99px;

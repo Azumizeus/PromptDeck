@@ -14,7 +14,7 @@ console.log(`Catalogue : ${S.length} skills · ${A.length} agents`);
 // ── harnais DOM minimal ──
 function makeEl(tag) {
   const cls = new Set();
-  return {
+  const el = {
     tagName: String(tag).toUpperCase(), dataset: {}, children: [], _handlers: {}, _html: '', _txt: '',
     style: {},
     setAttribute() {}, getAttribute() { return null; }, removeAttribute() {},
@@ -32,12 +32,17 @@ function makeEl(tag) {
     addEventListener(ev, fn) { (this._handlers[ev] ||= []).push(fn); },
     getContext() { return null; },
     scrollIntoView() {}, focus() {}, blur() {}, closest() { return null; },
-    querySelector() { return null; }, querySelectorAll() { return []; },
+    querySelector() { return null; },
+    querySelectorAll(sel) {
+      // harnais : les boutons générés par innerHTML sont simulés via _onclicks (voir el._onclicks)
+      return (el._onclicks && el._onclicks[sel]) || [];
+    },
     clientWidth: 560, clientHeight: 480,
     // API géométrie (tooltip flottant + menu contextuel)
     getBoundingClientRect() { return { left: 0, top: 0, right: 560, bottom: 480, width: 560, height: 480 }; },
     matches() { return false; },
   };
+  return el;
 }
 const ids = {};
 const byId = (id) => (ids[id] ||= makeEl('div'));
@@ -51,6 +56,8 @@ const workshopStore = { agent: [], skill: [] };
 const teamStore = [];
 const trashStore = []; // 🗑 corbeille en mémoire
 let trashSeq = 0; // ids uniques (Date.now() seul peut collider en rafale)
+let lastBackup = null; // 💾 dernière sauvegarde (harnais)
+const backupExports = [];
 let defaultLLMStore = 'claude'; // le sélecteur du footer modifie la pref (comme l'IPC réel)
 const sandbox = {
   console,
@@ -105,7 +112,9 @@ sandbox.window.mgp = {
       const keys = Object.keys(patch || {});
       if (keys.length !== 1 || keys[0] !== 'locked' || patch.locked !== false) return { ok: false, error: 'locked' };
     }
+    const changed = Object.keys(patch).filter((k) => JSON.stringify(arr[i][k]) !== JSON.stringify(patch[k]));
     arr[i] = { ...arr[i], ...patch };
+    arr[i].history = [{ at: new Date().toISOString(), action: 'edit', fields: changed }, ...(arr[i].history || [])].slice(0, 30);
     return { ok: true, item: arr[i] };
   },
   workshopCreate: async (kind, rec) => {
@@ -167,11 +176,52 @@ sandbox.window.mgp = {
     const i = teamStore.findIndex((t) => (t.team || t.name) === name);
     if (i < 0) return { ok: false, error: 'introuvable' };
     if (teamStore[i].locked) return { ok: false, error: 'locked' };
+    const changed = Object.keys(patch).filter((k) => JSON.stringify(teamStore[i][k]) !== JSON.stringify(patch[k]));
     teamStore[i] = { ...teamStore[i], ...patch, name: patch.team || name };
+    teamStore[i].history = [{ at: new Date().toISOString(), action: 'edit', fields: changed }, ...(teamStore[i].history || [])].slice(0, 30);
     return { ok: true, item: teamStore[i] };
+  },
+  teamFromTemplate: async (key) => {
+    const tpls = {
+      'revue-code': { desc: 'Revue de code', orchestrator: { name: 'Chef de revue', system: 'x'.repeat(50) }, agents: [{ name: 'Analyste code', role: 'analyse', desc: 'd', system: 's', deliverable: 'f' }, { name: 'Expert sécurité', role: 'sécurité', desc: 'd', system: 's', deliverable: 'f' }, { name: 'Expert performance', role: 'performance', desc: 'd', system: 's', deliverable: 'f' }], workflow: ['a', 'b', 'c'] },
+      veille: { desc: 'Veille', orchestrator: { name: 'Chef de veille', system: 'y'.repeat(50) }, agents: [{ name: 'Veilleur tech', role: 'collecte', desc: 'd', system: 's', deliverable: 'f' }], workflow: ['a'] },
+      support: { desc: 'Support', orchestrator: { name: 'Chef support', system: 'z'.repeat(50) }, agents: [{ name: 'Qualifieur', role: 'analyse', desc: 'd', system: 's', deliverable: 'f' }], workflow: ['a', 'b'] },
+    };
+    const tpl = tpls[key];
+    if (!tpl) return { ok: false, error: 'modèle inconnu' };
+    const base = key;
+    let nm = base, i = 2;
+    while (teamStore.some((t) => (t.team || t.name) === nm)) nm = `${base}-${i++}`;
+    const rec = { name: nm, team: nm, ...JSON.parse(JSON.stringify(tpl)), fromTemplate: key };
+    teamStore.push(rec);
+    return { ok: true, item: rec };
+  },
+  workshopHistory: async (kind, name) => {
+    const arr = kind === 'team' ? teamStore : workshopStore[kind === 'agent' ? 'agent' : 'skill'];
+    const w = arr.find((x) => (x.team || x.name) === name);
+    return (w && Array.isArray(w.history)) ? w.history : [];
   },
   // 🗑 Corbeille (harnais : store en mémoire, mêmes contrats que le main process)
   trashList: async () => [...trashStore].reverse(),
+  // 💾 Sauvegarde portable (harnais : objet en mémoire au format réel)
+  backupExport: async () => { lastBackup = { format: 'megapack-backup', version: 1, exportedAt: new Date().toISOString(), workshops: { agent: [...workshopStore.agent], skill: [...workshopStore.skill], team: [...teamStore] }, customs: [...customsStore], trash: [...trashStore] }; backupExports.push(lastBackup); return true; },
+  backupImport: async () => {
+    if (!lastBackup) return { ok: false, error: 'format inconnu' };
+    let restored = 0, trashAdded = 0;
+    for (const wk of ['agent', 'skill', 'team']) {
+      for (const rec0 of (lastBackup.workshops[wk] || [])) {
+        const arr = wk === 'team' ? teamStore : workshopStore[wk];
+        const names = new Set(arr.map((w) => w.team || w.name));
+        const rec = { ...rec0, locked: false };
+        let nm = rec.team || rec.name;
+        if (names.has(nm)) { const base = nm.replace(/-\d+$/, ''); let n = 2; while (names.has(`${base}-${n}`)) n++; nm = `${base}-${n}`; }
+        rec.name = nm; if (wk === 'team') rec.team = nm;
+        arr.push(rec); restored++;
+      }
+    }
+    for (const t of (lastBackup.trash || [])) if (!trashStore.some((x) => x.id === t.id)) { trashStore.push(t); trashAdded++; }
+    return { ok: true, restored, trashAdded };
+  },
   trashRestore: async (id) => {
     const i = trashStore.findIndex((t) => t.id === id);
     if (i < 0) return { ok: false, error: 'introuvable' };
@@ -563,6 +613,72 @@ vm.runInContext('__mgp.select("all")', ctx);
 MGP.toggleLockFilter();
 check(!MGP.lockFilterOn(), 'filtre désactivé : toute la liste revient');
 check(MGP.list().length === MGP.counts().all, 'aucune perte d\'items après désactivation');
+
+console.log('18) 💾 Sauvegarde portable (cadenas + corbeille + ateliers) :');
+// a) export : le format embarque tout
+await MGP.doBackupExport();
+check(MGP.backupCount() === 1, 'sauvegarde créée');
+check(lastBackup.format === 'megapack-backup' && lastBackup.workshops && lastBackup.trash, 'format megapack-backup avec workshops + trash');
+const teamCountBk = lastBackup.workshops.team.length;
+check(teamCountBk >= 1, `les équipes sont incluses (${teamCountBk})`);
+// b) import dans un monde vide : tout revient, dé-verrouillé, sans doublon
+const bkAgents = lastBackup.workshops.agent.length, bkSkills = lastBackup.workshops.skill.length, bkTeams = lastBackup.workshops.team.length;
+workshopStore.agent = []; workshopStore.skill = []; teamStore.length = 0;
+await MGP.doBackupImport();
+check(workshopStore.agent.length === bkAgents && workshopStore.skill.length === bkSkills && teamStore.length === bkTeams, `restauration complète (${bkAgents} agents, ${bkSkills} skills, ${bkTeams} équipes)`);
+check(workshopStore.agent.every((w) => !w.locked) && teamStore.every((t) => !t.locked), 'tout est dé-verrouillé après restauration (réengagement explicite)');
+// c) re-import : dédoublonnage par suffixe, jamais d\'écrasement
+const before2 = workshopStore.agent.length + workshopStore.skill.length + teamStore.length;
+await MGP.doBackupImport();
+const after2 = workshopStore.agent.length + workshopStore.skill.length + teamStore.length;
+check(after2 === before2 * 2, `re-import dédoublonné par suffixe (${before2} → ${after2})`);
+
+console.log('19) 🕘 Historique des modifications :');
+// a) une édition enregistre les champs modifiés avec horodatage
+await MGP.editWorkshopItem('skill', 'Skill Test Senior');
+sandbox.document.getElementById('we-name').value = 'Skill Test Senior';
+sandbox.document.getElementById('we-desc').value = 'Nouvelle desc historique';
+await MGP.saveWedit();
+const skHist = (workshopStore.skill.find((w) => w.name === 'Skill Test Senior') || {}).history;
+check(Array.isArray(skHist) && skHist.length >= 1, 'historique créé à la première édition');
+check(skHist[0].action === 'edit' && Array.isArray(skHist[0].fields) && skHist[0].fields.includes('desc'), `champs modifiés tracés (${skHist[0].fields.join(', ')})`);
+check(typeof skHist[0].at === 'string' && !Number.isNaN(Date.parse(skHist[0].at)), 'horodatage ISO valide');
+// b) panneau : s\'ouvre, liste les entrées, se referme
+await MGP.editWorkshopItem('skill', 'Skill Test Senior');
+await MGP.showHistory();
+check(MGP.histVisible(), 'panneau historique visible');
+check(MGP.histHtml().includes('desc'), 'l\'historique liste les champs modifiés');
+await MGP.showHistory();
+check(!MGP.histVisible(), 'panneau historique masqué au second clic');
+MGP.closeWedit();
+// c) une édition d\'équipe journalise aussi
+await MGP.editTeam('Équipe Test');
+sandbox.document.getElementById('we-t-wf').value = 'Étape H1\nÉtape H2';
+await MGP.saveTeamEdit();
+const tmHist = (teamStore.find((t) => (t.team || t.name) === 'Équipe Test') || {}).history;
+check(Array.isArray(tmHist) && tmHist.length >= 1 && tmHist[0].fields.includes('workflow'), 'historique d\'équipe tracé (workflow)');
+
+console.log('20) 📋 Modèles d\'équipes prêts à l\'emploi :');
+vm.runInContext('__mgp.openWorkshop()', ctx);
+await MGP.reloadTeams();
+const tplHtml = MGP.tplHtml();
+check(tplHtml.includes('data-k="revue-code"') && tplHtml.includes('data-k="veille"') && tplHtml.includes('data-k="support"'), '3 modèles affichés dans l\'Atelier');
+const nTeamsBefore = teamStore.length;
+const t1 = await MGP.teamFromTemplate('revue-code');
+check(t1.ok && t1.item.agents.length === 3 && t1.item.workflow.length === 3, 'modèle revue de code instancié (3 agents, 3 étapes)');
+check(t1.item.fromTemplate === 'revue-code' && !t1.item.locked, 'instanciation éditable et non verrouillée');
+const t2 = await MGP.teamFromTemplate('revue-code');
+check(t2.item.team !== t1.item.team, `collision de nom suffixée (${t1.item.team} → ${t2.item.team})`);
+const t3 = await MGP.teamFromTemplate('veille');
+const t4 = await MGP.teamFromTemplate('support');
+check(t3.ok && t4.ok, 'modèles veille + support instanciés');
+check(teamStore.length === nTeamsBefore + 4, '4 équipes créées depuis les modèles');
+// une équipe modèle est éditable comme les autres (workshop-lock + team-save)
+await MGP.toggleLock({ k: 'team', x: t1.item });
+const tSave = await sandbox.window.mgp.teamSave(t1.item.team, { desc: 'pirate' });
+check(tSave && tSave.ok === false && tSave.error === 'locked', 'équipe modèle verrouillée : team-save refuse');
+await MGP.toggleLock({ k: 'team', x: t1.item });
+check(MGP.lockOf('team', t1.item.team) === false, 'cadenas retiré de l\'équipe modèle');
 
 console.log('');
 if (fail) { console.log(`❌ ${fail} test(s) en échec`); process.exit(1); }

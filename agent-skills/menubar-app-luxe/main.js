@@ -1066,6 +1066,10 @@ ipcMain.handle('workshop-save', (e, { kind, name, patch }) => {
     if (nn !== name && list.some((w, j) => j !== i && w.name === nn)) return { ok: false, error: 'name-exists' };
     rec.name = nn;
   }
+  // 🕘 Historique : champs réellement modifiés + horodatage (gardé sur l'enregistrement,
+  // voyage avec lui — export de sauvegarde inclus). 30 entrées max par item.
+  const changed = Object.keys(patch).filter((k) => JSON.stringify(list[i][k]) !== JSON.stringify(patch[k]));
+  rec.history = [{ at: new Date().toISOString(), action: 'edit', fields: changed }, ...(list[i].history || [])].slice(0, 30);
   list[i] = rec;
   saveWorkshops(wk, list);
   return { ok: true, item: rec };
@@ -1095,10 +1099,10 @@ ipcMain.handle('workshop-create', (e, { kind, rec }) => {
   return { ok: true, item: copy };
 });
 ipcMain.handle('workshop-lock', (e, { kind, name, locked }) => {
-  const wk = kind === 'agent' ? 'agent' : 'skill';
-  if (typeof name !== 'string' || !name) return { ok: false, error: 'requête invalide' };
+  const wk = kind === 'agent' ? 'agent' : kind === 'skill' ? 'skill' : kind === 'team' ? 'team' : null;
+  if (!wk || typeof name !== 'string' || !name) return { ok: false, error: 'requête invalide' };
   const list = loadWorkshops(wk);
-  const w = list.find((x) => x.name === name);
+  const w = list.find((x) => (x.team || x.name) === name);
   if (!w) return { ok: false, error: 'introuvable' };
   w.locked = !!locked;
   saveWorkshops(wk, list);
@@ -1241,7 +1245,60 @@ function treeOverview() {
 ipcMain.handle('prompt-tree-overview', () => {
   try { return { ok: true, tree: treeOverview() }; }
   catch (err) { return { ok: false, error: String(err.message || err) }; }
-});ipcMain.handle('workshop-md-create', (e, { kind, name }) => {
+});// 📋 Modèles d'équipes prêts à l'emploi : instanciés comme créations d'Atelier (éditables,
+// non verrouillés, suffixe -2/-3 en cas de collision de nom).
+const TEAM_TEMPLATES = {
+  'revue-code': {
+    desc: 'Revue de code multi-experts : analyse, sécurité, performance, rapport priorisé.',
+    orchestrator: { name: 'Chef de revue', system: 'Tu coordonnes une revue de code. Tu distribues les diffs aux experts, collectes leurs findings, arbitres les priorités (bloquant / important / mineur) et rends un rapport final structuré avec actions concrètes.' },
+    agents: [
+      { name: 'Analyste code', role: 'analyse', desc: 'Lisibilité, structure, bugs potentiels', system: 'Tu analyses le code proposé : bugs, cas limites, lisibilité, nommage. Cite les lignes concernées.', deliverable: 'liste de findings code' },
+      { name: 'Expert sécurité', role: 'sécurité', desc: 'Failles et entrées non fiables', system: 'Tu cherches les vulnérabilités du diff : injections, frontières de confiance, secrets. Un finding = preuve + impact + fix minimal.', deliverable: 'findings sécurité' },
+      { name: 'Expert performance', role: 'performance', desc: 'Coûts et complexité', system: 'Tu repères les coûts cachés : complexité, allocations, N+1, I/O bloquant. Chiffré quand possible.', deliverable: 'findings perf' },
+    ],
+    workflow: ['Chaque expert analyse le diff et rend ses findings', 'Le chef de revue dédoublonne et priorise (bloquant/important/mineur)', 'Rapport final : findings, actions concrètes, fichiers concernés'],
+  },
+  veille: {
+    desc: 'Veille d\'équipe : collecte, synthèse comparative, briefing actionnable.',
+    orchestrator: { name: 'Chef de veille', system: 'Tu pilotes une veille thématique. Tu répartis les sources entre veilleurs, compares leurs synthèses, élimines les doublons et produis un briefing final : faits, tendances, ce qu\'il faut faire cette semaine.' },
+    agents: [
+      { name: 'Veilleur tech', role: 'collecte', desc: 'Nouveautés techniques du domaine', system: 'Tu collectes les nouveautés techniques notables de la période : versions, annonces, dépôts. Chaque item : quoi, pourquoi ça compte, source.', deliverable: 'liste factuelle' },
+      { name: 'Synthétiseur', role: 'synthèse', desc: 'Tendances et comparaisons', system: 'Tu regroupes les items collectés en tendances, compares les options et signales ce qui est du bruit.', deliverable: 'tendances' },
+      { name: 'Rédacteur briefing', role: 'rédaction', desc: 'Briefing court et actionnable', system: 'Tu rédiges un briefing de 10 lignes max : 3 faits clés, 1 tendance, 1 action concrète pour l\'équipe.', deliverable: 'briefing' },
+    ],
+    workflow: ['Les veilleurs collectent leurs items', 'Le synthétiseur regroupe et compare', 'Le rédacteur produit le briefing final'],
+  },
+  support: {
+    desc: 'Support client : qualification, solution, réponse prête à envoyer.',
+    orchestrator: { name: 'Chef support', system: 'Tu coordonnes le traitement d\'une demande support. Tu fais qualifier par un expert, tu fais préparer la réponse technique, puis tu valides la réponse finale : correcte, honnête, adaptée au client.' },
+    agents: [
+      { name: 'Qualifieur', role: 'analyse', desc: 'Catégorise et priorise la demande', system: 'Tu qualifies la demande : catégorie, sévérité, informations manquantes, environnement probable. Sortie : fiche de qualification.', deliverable: 'qualification' },
+      { name: 'Technicien', role: 'solution', desc: 'Diagnostic et solution pas-à-pas', system: 'Tu proposes un diagnostic et une solution pas-à-pas, avec la ou les causes possibles. Si une information manque, liste les questions à poser.', deliverable: 'solution détaillée' },
+      { name: 'Rédacteur réponse', role: 'rédaction', desc: 'Réponse client prête à envoyer', system: 'Tu rédiges la réponse client : claire, empathique, sans jargon inutile, avec les étapes et le délai. Pas de promesse invérifiable.', deliverable: 'réponse finale' },
+    ],
+    workflow: ['Qualification de la demande', 'Le technicien prépare diagnostic + solution', 'Le rédacteur produit la réponse, le chef support valide'],
+  },
+};
+ipcMain.handle('team-from-template', (e, { key }) => {
+  const tpl = TEAM_TEMPLATES[key];
+  if (!tpl) return { ok: false, error: 'modèle inconnu' };
+  const list = loadWorkshops('team');
+  const label = key === 'revue-code' ? 'Revue de code' : key === 'veille' ? 'Veille' : 'Support';
+  const base = slug(label);
+  let nm = base, i = 2;
+  while (list.some((t) => (t.team || t.name) === nm)) nm = `${base}-${i++}`;
+  const rec = { name: nm, team: nm, desc: tpl.desc, orchestrator: JSON.parse(JSON.stringify(tpl.orchestrator)), agents: JSON.parse(JSON.stringify(tpl.agents)), workflow: [...tpl.workflow], createdAt: new Date().toISOString(), fromTemplate: key };
+  list.push(rec);
+  saveWorkshops('team', list);
+  return { ok: true, item: rec };
+});
+ipcMain.handle('workshop-history', (e, { kind, name }) => {
+  const wk = kind === 'agent' ? 'agent' : kind === 'skill' ? 'skill' : kind === 'team' ? 'team' : null;
+  if (!wk || typeof name !== 'string' || !name) return [];
+  const w = loadWorkshops(wk).find((x) => (x.team || x.name) === name);
+  return (w && Array.isArray(w.history)) ? w.history : [];
+});
+ipcMain.handle('workshop-md-create', (e, { kind, name }) => {
   try {
     const w = loadWorkshops(kind === 'agent' ? 'agent' : 'skill').find((x) => x.name === name);
     if (!w) return { ok: false, error: 'création introuvable' };
@@ -1346,6 +1403,9 @@ ipcMain.handle('team-save', (e, { name, patch }) => {
     if (rec.team !== name && list.some((t, j) => j !== i && (t.team || t.name) === rec.team)) return { ok: false, error: 'name-exists' };
   }
   rec.name = rec.team;
+  // 🕘 Historique (même contrat que workshop-save)
+  const changed = Object.keys(patch).filter((k) => JSON.stringify(list[i][k]) !== JSON.stringify(patch[k]));
+  rec.history = [{ at: new Date().toISOString(), action: 'edit', fields: changed }, ...(list[i].history || [])].slice(0, 30);
   list[i] = rec;
   saveWorkshops('team', list);
   return { ok: true, item: rec };
@@ -1554,6 +1614,76 @@ function deleteCustom(name) {
 }
 ipcMain.on('custom-delete', (e, name) => { if (typeof name === 'string' && name) deleteCustom(name); });
 // Export / import de la configuration (favoris, récents, préférences) en JSON
+// ── 💾 Sauvegarde portable : cadenas + corbeille + créations d'atelier dans un JSON daté ──
+// Objectif : ne rien perdre en changeant de Mac. Le fichier contient l'état complet
+// des ateliers (agents, skills, équipes, ✍️, corbeille) — les cadenas voyagent avec.
+ipcMain.handle('backup-export', async () => {
+  const r = await dialog.showSaveDialog({
+    title: LANG === 'en' ? 'Export MEGA PACK backup (locks, trash, workshops)' : 'Sauvegarde MEGA PACK (cadenas, corbeille, ateliers)',
+    defaultPath: `megapack-sauvegarde-${new Date().toISOString().slice(0, 10)}.json`,
+    filters: [{ name: 'JSON', extensions: ['json'] }],
+  });
+  if (r.canceled || !r.filePath) return false;
+  const payload = {
+    format: 'megapack-backup',
+    version: 1,
+    exportedAt: new Date().toISOString(),
+    appVersion: app.getVersion ? app.getVersion() : '',
+    workshops: { agent: loadWorkshops('agent'), skill: loadWorkshops('skill'), team: loadWorkshops('team') },
+    customs: PREFS.customs || [],
+    trash: loadTrash(),
+  };
+  try { fs.writeFileSync(r.filePath, JSON.stringify(payload, null, 2)); return true; } catch (e) { return false; }
+});
+// Restauration : remplace les ateliers par ceux du fichier, dédoublonne par suffixe -2…,
+// dé-verrouille à l'import (réengagement explicite), fusionne la corbeille.
+ipcMain.handle('backup-import', async () => {
+  const r = await dialog.showOpenDialog({
+    title: LANG === 'en' ? 'Import a MEGA PACK backup' : 'Importer une sauvegarde MEGA PACK',
+    filters: [{ name: 'JSON', extensions: ['json'] }],
+    properties: ['openFile'],
+  });
+  if (r.canceled || !r.filePaths || !r.filePaths[0]) return { ok: false, error: 'annulé' };
+  try {
+    const data = JSON.parse(fs.readFileSync(r.filePaths[0], 'utf8'));
+    if (!data || data.format !== 'megapack-backup' || !data.workshops) return { ok: false, error: 'format inconnu' };
+    let restored = 0;
+    for (const wk of ['agent', 'skill', 'team']) {
+      const incoming = Array.isArray(data.workshops[wk]) ? data.workshops[wk] : [];
+      const cur = loadWorkshops(wk);
+      const names = new Set(cur.map((w) => (w.team || w.name)));
+      for (const rec0 of incoming) {
+        const rec = { ...rec0 };
+        if (rec.locked) rec.locked = false; // jamais un piège au retour d'une sauvegarde
+        let nm = wk === 'team' ? (rec.team || rec.name) : rec.name;
+        if (!nm) continue;
+        if (names.has(nm)) { const base = nm.replace(/-\d+$/, ''); let n = 2; while (names.has(`${base}-${n}`)) n++; nm = `${base}-${n}`; }
+        rec.name = nm;
+        if (wk === 'team') rec.team = nm;
+        names.add(nm);
+        cur.push(rec);
+        restored++;
+      }
+      saveWorkshops(wk, cur);
+    }
+    // ✍️ : dédoublonnage par nom, les entrées importées complètent les existantes
+    for (const c of (Array.isArray(data.customs) ? data.customs : [])) {
+      if (c && c.name && !PREFS.customs.some((x) => x.name === c.name)) { PREFS.customs.push(c); restored++; }
+    }
+    savePrefs();
+    // Corbeille : fusion par id (les entrées locales ont priorité)
+    const tl = loadTrash();
+    const ids = new Set(tl.map((t) => t.id));
+    let trashAdded = 0;
+    for (const t of (Array.isArray(data.trash) ? data.trash : [])) {
+      if (t && t.id && !ids.has(t.id)) { tl.push(t); ids.add(t.id); trashAdded++; }
+    }
+    saveTrash(tl);
+    return { ok: true, restored, trashAdded };
+  } catch (err) { return { ok: false, error: String(err.message || err) };
+  }
+});
+
 ipcMain.handle('export-config', async () => {
   const r = await dialog.showSaveDialog({
     title: 'Exporter la configuration MEGA PACK',
