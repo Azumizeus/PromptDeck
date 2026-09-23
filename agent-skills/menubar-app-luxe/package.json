@@ -1,7 +1,7 @@
 {
   "name": "megapack-menubar-luxe",
   "productName": "MEGA PACK",
-  "version": "2.9.1",
+  "version": "2.9.2",
   "description": "MEGA PACK Luxe — skills & agents : tooltip expert, clic droit multi-LLM, équipes exécutables, atelier de création IA",
   "main": "main.js",
   "scripts": {

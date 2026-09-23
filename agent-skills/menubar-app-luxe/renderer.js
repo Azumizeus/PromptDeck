@@ -116,6 +116,30 @@ const T = LANG === 'fr' ? {
   delLocked: '🔒 Suppression impossible — cet élément est verrouillé (clic droit → retirer le cadenas).',
   copiedToWs: (k) => `🛠 Copie créée dans l\'Atelier (${k}) — clic droit → Modifier pour l\'ajuster.`,
   copiedToWsErr: 'Échec de la copie vers l\'Atelier',
+  // 🗑 Corbeille
+  trashT: '🗑 Corbeille',
+  trashBtn: '🗑',
+  trashEmptyMsg: 'Corbeille vide — rien à restaurer.',
+  trashHint: 'Les éléments supprimés restent restaurables ici (60 maximum, les plus anciens sont retirés).',
+  trashRestore: '♻️ Restaurer',
+  trashDelete: '✕ Supprimer définitivement',
+  trashEmptyAll: 'Vider la corbeille',
+  trashClose: 'Fermer',
+  trashRestored: (n, k) => `♻️ ${n} restauré (${k})`,
+  trashDeleted: '✕ Supprimé définitivement',
+  trashEmptied: '🗑 Corbeille vidée',
+  trashErr: '🗑 Action corbeille impossible',
+  trashKind: (k) => k === 'agent' ? 'agent' : k === 'skill' ? 'skill' : k === 'team' ? 'équipe' : 'prompt ✍️',
+  // ✏️ Édition équipe
+  editTeamT: '✏️ Modifier l\'équipe',
+  etOrch: 'Orchestrateur — nom',
+  etOrchSys: 'Orchestrateur — prompt système',
+  etAgents: 'Agents (un par ligne : nom | rôle | description | prompt système)',
+  etWf: 'Workflow (une étape par ligne)',
+  etAgentBad: 'Ligne agent invalide (format : nom | rôle | description | prompt)',
+  etSavedT: (n) => `✏️ Équipe « ${n} » modifiée`,
+  // 🔒 Filtre
+  lockFilterT: 'Afficher uniquement les éléments verrouillés',
 } : {
   ph: 'Search a skill, an agent, a prompt…', all: 'All', skills: 'Skills',
   agents: 'Agents', perso: '✍️ Custom', favs: '★ Favorites', results: 'results',
@@ -219,6 +243,27 @@ const T = LANG === 'fr' ? {
   delLocked: '🔒 Deletion blocked — this item is locked (right-click → remove the lock).',
   copiedToWs: (k) => `🛠 Copy created in the Workshop (${k}) — right-click → Edit to adjust it.`,
   copiedToWsErr: 'Copy to Workshop failed',
+  trashT: '🗑 Trash',
+  trashBtn: '🗑',
+  trashEmptyMsg: 'Trash is empty — nothing to restore.',
+  trashHint: 'Deleted items stay restorable here (60 max, oldest are dropped).',
+  trashRestore: '♻️ Restore',
+  trashDelete: '✕ Delete permanently',
+  trashEmptyAll: 'Empty trash',
+  trashClose: 'Close',
+  trashRestored: (n, k) => `♻️ ${n} restored (${k})`,
+  trashDeleted: '✕ Permanently deleted',
+  trashEmptied: '🗑 Trash emptied',
+  trashErr: '🗑 Trash action failed',
+  trashKind: (k) => k === 'agent' ? 'agent' : k === 'skill' ? 'skill' : k === 'team' ? 'team' : 'custom prompt',
+  editTeamT: '✏️ Edit team',
+  etOrch: 'Orchestrator — name',
+  etOrchSys: 'Orchestrator — system prompt',
+  etAgents: 'Agents (one per line: name | role | description | system prompt)',
+  etWf: 'Workflow (one step per line)',
+  etAgentBad: 'Invalid agent line (format: name | role | description | prompt)',
+  etSavedT: (n) => `✏️ Team “${n}” updated`,
+  lockFilterT: 'Show locked items only',
 };
 
 // ---------- Catalogue + prefs ----------
@@ -285,6 +330,7 @@ let query = '';
 let results = [];              // [{ x, k }]
 let sel = new Set();           // noms sélectionnés (⌘-clic)
 let idx = 0;
+let lockOnly = false;          // 🔒 filtre « verrouillés seulement » (cumulable avec onglets + recherche)
 
 const $ = (id) => document.getElementById(id);
 
@@ -327,7 +373,9 @@ APP_PARENT.insertAdjacentHTML('afterbegin', `
       <button id="llmbtn" title="${T.llmSelT}" aria-haspopup="menu" aria-expanded="false">⌨ ${esc(T.llm)} <b>${esc(tgtLabel(DEFAULT_LLM))}</b> ▾</button>
       <span id="llmmenu" role="menu" hidden></span>
     </span>
+    <button id="lkf" title="${T.lockFilterT}" aria-pressed="false">🔒</button>
     <button id="atb" title="${T.atelierT}" aria-haspopup="dialog">🛠 ${T.atelier}</button>
+    <button id="trb" title="${T.trashT}" aria-haspopup="dialog">${T.trashBtn}</button>
     <span id="cnt" role="status" aria-live="polite"></span>
   </footer>
   <div id="tip" role="tooltip" hidden></div>
@@ -399,6 +447,18 @@ APP_PARENT.insertAdjacentHTML('afterbegin', `
       </div>
     </div>
   </div>
+  <div id="tmodal" role="dialog" aria-modal="true" aria-label="${T.trashT}" hidden>
+    <div id="tmbox">
+      <h3>${T.trashT}<button id="tm-x" aria-label="${T.trashClose}">✕</button></h3>
+      <p class="tmhint">${T.trashHint}</p>
+      <div id="tm-list" role="list"></div>
+      <div id="tmrow">
+        <button id="tm-empty">${T.trashEmptyAll}</button>
+        <span style="flex:1"></span>
+        <button id="tm-close">${T.trashClose}</button>
+      </div>
+    </div>
+  </div>
   <div id="modal" role="dialog" aria-modal="true" aria-label="${T.newp}" hidden>
     <div id="mbox">
       <h3>✍️ ${LANG === 'fr' ? 'Nouveau prompt' : 'New prompt'}</h3>
@@ -416,6 +476,13 @@ APP_PARENT.insertAdjacentHTML('afterbegin', `
     <div id="webox">
       <h3 id="we-title"></h3>
       <input type="hidden" id="we-kind" value="agent"><input type="hidden" id="we-orig" value="">
+      <div id="we-teamsec" hidden>
+        ${weRow(T.efDesc, '<textarea id="we-t-desc" rows="2" maxlength="400"></textarea>')}
+        ${weRow(T.etOrch, '<input id="we-t-orchname" type="text" maxlength="80">')}
+        ${weRow(T.etOrchSys, '<textarea id="we-t-orchsys" rows="7" maxlength="8000"></textarea>')}
+        ${weRow(T.etAgents, '<textarea id="we-t-agents" rows="5" maxlength="8000" placeholder="Analyste | analyse | Analyse le besoin | Tu analyses…"></textarea>')}
+        ${weRow(T.etWf, '<textarea id="we-t-wf" rows="4" maxlength="4000"></textarea>')}
+      </div>
       ${weRow(T.efName, '<input id="we-name" type="text" maxlength="80">')}
       ${weRow(T.efDesc, '<textarea id="we-desc" rows="2" maxlength="400"></textarea>')}
       <div id="we-skillsec">
@@ -514,7 +581,7 @@ function ctxHtml(it) {
       it.x.path ? `<button role="menuitem" data-a="copy-ws">${T.copyToWorkshop}</button>`
                 : `<button role="menuitem" data-a="edit-ws">${T.editItem}</button>`
     ) : it.k === 'custom' ? `<button role="menuitem" data-a="edit-custom">${T.editItem}</button>`
-    : it.k === 'team' ? `<button role="menuitem" data-a="copy-ws">${T.copyToWorkshop}</button>`
+    : it.k === 'team' ? `<button role="menuitem" data-a="edit-team">${T.editItem}</button><button role="menuitem" data-a="copy-ws">${T.copyToWorkshop}</button>`
     : ''}
     ${(((it.k === 'agent' || it.k === 'skill') && !it.x.path) || it.k === 'team') ? (
       (() => { const lk = it.k === 'team' ? lockOf('team', x.team || x.name) : lockOf(it.k, x.name);
@@ -556,6 +623,7 @@ function openCtx(el, it, cx, cy) {
       else if (b.dataset.a === 'fav') toggleFav(it.x.name);
       // ── Gestion : édition + cadenas (agents/skills de l'Atelier, équipes, ✍️) ──
       else if (b.dataset.a === 'edit-ws') editWorkshopItem(it.k, it.x.name);
+      else if (b.dataset.a === 'edit-team') editTeam(it.x._t.team || it.x.name);
       else if (b.dataset.a === 'edit-custom') { const c = CUSTOMS.find((cc) => cc.name === it.x.name); if (c) openModal(c); }
       else if (b.dataset.a === 'copy-ws') copyToWorkshop(it);
       else if (b.dataset.a === 'lock') toggleLock(it);
@@ -654,8 +722,12 @@ const byFilter = (it) => {
   if (filter === 'favs') return isFav(it.x.name);
   return true;
 };
+// 🔒 Filtre cumulatif : ne garde que les items verrouillés (agents/skills/équipes de l'Atelier)
+const byLock = (it) => !lockOnly || (it.k === 'team'
+  ? lockOf('team', (it.x._t && (it.x._t.team || it.x._t.name)) || it.x.name)
+  : lockOf(it.k, it.x.name));
 function compute() {
-  results = ALL.filter(byFilter).filter(match);
+  results = ALL.filter(byFilter).filter(byLock).filter(match);
   if (query) {
     const toks = qTokens();
     const score = (it) => {
@@ -790,13 +862,13 @@ function openWedit(kind, rec) {
   $('we-title').textContent = kind === 'agent' ? T.editAgentT : T.editSkillT;
   $('we-name').value = rec.name || '';
   $('we-desc').value = rec.desc || '';
-  const sp = $('we-skills'), st = $('we-tools'), sr = $('we-rules');
-  const sk = $('we-skillsec'), sy = $('we-system');
+  const sk = $('we-skillsec');
   sk.hidden = kind !== 'agent';
   $('we-procsec').hidden = kind !== 'skill';
+  $('we-teamsec').hidden = true; // l'édition équipe passe par editTeam
   if (kind === 'agent') {
-    sp.value = weList(rec.skills); st.value = weList(rec.tools); sr.value = weLines(rec.rules);
-    sy.value = rec.system || '';
+    $('we-skills').value = weList(rec.skills); $('we-tools').value = weList(rec.tools); $('we-rules').value = weLines(rec.rules);
+    $('we-system').value = rec.system || '';
   } else {
     $('we-inputs').value = weList(rec.inputs); $('we-checks').value = weLines(rec.checks);
     $('we-body').value = rec.body || '';
@@ -806,6 +878,7 @@ function openWedit(kind, rec) {
 }
 function closeWedit() { $('wedit').hidden = true; }
 async function saveWedit() {
+  if ($('we-kind').value === 'team') return saveTeamEdit(); // ✏️ équipe : champs dédiés
   const kind = $('we-kind').value === 'agent' ? 'agent' : 'skill';
   const orig = $('we-orig').value;
   const patch = { name: String($('we-name').value || '').trim(), desc: String($('we-desc').value || '').trim() };
@@ -863,6 +936,100 @@ async function copyToWorkshop(it) {
 }
 const slugLike = (s) => String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
 
+// ────────────────────────────────────────────────────────────────────────
+//  🗑 Corbeille — les éléments supprimés restent restaurables (même sans cadenas)
+// ────────────────────────────────────────────────────────────────────────
+async function openTrash() {
+  if (!window.mgp.trashList) return;
+  $('tmodal').hidden = false;
+  await renderTrash();
+}
+function closeTrash() { $('tmodal').hidden = true; }
+async function renderTrash() {
+  const host = $('tm-list');
+  let items = [];
+  try { items = (await window.mgp.trashList()) || []; } catch (e) { items = []; }
+  $('tm-empty').disabled = !items.length;
+  host.innerHTML = items.length
+    ? items.map((t) => `<div class="tmit" role="listitem">
+        <span class="tmico">${t.kind === 'agent' ? '👤' : t.kind === 'team' ? '🕸' : t.kind === 'custom' ? '✍️' : '🛠'}</span>
+        <span class="tmmid"><b>${esc(t.name)}</b><i>${esc(T.trashKind(t.kind))} · ${esc((t.deletedAt || '').slice(0, 16).replace('T', ' '))}</i></span>
+        <span class="wact2">
+          <button data-a="restore" data-id="${esc(t.id)}" title="${T.trashRestore}">♻️</button>
+          <button data-a="purge" data-id="${esc(t.id)}" title="${T.trashDelete}">✕</button>
+        </span>
+      </div>`).join('')
+    : `<div class="wempty">${T.trashEmptyMsg}</div>`;
+  host.querySelectorAll('button[data-id]').forEach((b) => {
+    b.onclick = async () => {
+      if (b.dataset.a === 'restore') {
+        const r = await window.mgp.trashRestore(b.dataset.id);
+        if (r && r.ok) {
+          showToast(T.trashRestored(r.name, T.trashKind(r.kind)), 'ok');
+          await refreshWorkshop();
+          if (r.kind === 'custom') { CUSTOMS = (window.mgp.getPrefs().customs || []).slice(); ALL.length = 0; ALL.push(...S.map((x) => ({ x, k: 'skill' })), ...A.map((x) => ({ x, k: 'agent' })), ...CUSTOMS.map((x) => ({ x, k: 'custom' }))); render(); }
+          if (r.kind === 'team') await loadTeams();
+        } else showToast(T.trashErr, 'err');
+      } else {
+        await window.mgp.trashDelete(b.dataset.id);
+        showToast(T.trashDeleted, 'ok');
+      }
+      await renderTrash();
+    };
+  });
+}
+$('tm-x').onclick = closeTrash;
+$('tm-close').onclick = closeTrash;
+$('tm-empty').onclick = async () => { await window.mgp.trashEmpty(); showToast(T.trashEmptied, 'ok'); await renderTrash(); };
+
+// ────────────────────────────────────────────────────────────────────────
+//  ✏️ Édition des équipes — orchestrateur, agents, workflow dans #wedit
+// ────────────────────────────────────────────────────────────────────────
+async function editTeam(name) {
+  if (!window.mgp.teamSave) return;
+  const t = TEAMS.find((x) => (x.team || x.name) === name) || (window.mgp.teamList ? (await window.mgp.teamList() || []).find((x) => (x.team || x.name) === name) : null);
+  if (!t) { showToast(T.edErr('introuvable'), 'err'); return; }
+  if (t.locked) { showToast(T.delLocked, 'err'); return; } // 🔒 ôter le cadenas d'abord
+  $('we-kind').value = 'team';
+  $('we-orig').value = t.team || t.name;
+  $('we-title').textContent = T.editTeamT;
+  $('we-name').value = t.team || t.name;
+  $('we-t-desc').value = t.desc || '';
+  $('we-t-orchname').value = (t.orchestrator && t.orchestrator.name) || '';
+  $('we-t-orchsys').value = (t.orchestrator && t.orchestrator.system) || '';
+  $('we-t-agents').value = (t.agents || []).map((a) => [a.name, a.role || '', a.desc || '', a.system || ''].join(' | ')).join('\n');
+  $('we-t-wf').value = (t.workflow || []).join('\n');
+  $('wedit').hidden = false;
+  $('we-name').focus();
+}
+async function saveTeamEdit() {
+  const orig = $('we-orig').value;
+  const patch = {
+    team: String($('we-name').value || '').trim(),
+    desc: String($('we-t-desc').value || '').trim(),
+    orchestrator: {
+      name: String($('we-t-orchname').value || '').trim(),
+      system: String($('we-t-orchsys').value || '').trim(),
+    },
+    agents: String($('we-t-agents').value || '').split('\n').map((l) => l.trim()).filter(Boolean).map((l) => {
+      const p = l.split('|').map((s) => s.trim());
+      if (!p[0]) return null;
+      return { name: p[0], role: p[1] || '', desc: p[2] || '', system: p[3] || '' };
+    }).filter(Boolean),
+    workflow: String($('we-t-wf').value || '').split('\n').map((l) => l.trim()).filter(Boolean),
+  };
+  if (!patch.team) { showToast(T.edErr('nom vide'), 'err'); return; }
+  const r = await window.mgp.teamSave(orig, patch);
+  if (r && r.ok) {
+    closeWedit();
+    showToast(T.etSavedT(patch.team), 'ok');
+    await loadTeams();
+    if (W.items.length) refreshWorkshop();
+  } else showToast(T.edErr(r && r.error === 'name-exists' ? T.edExists : ((r && r.error) || '?')), 'err');
+}
+// Ligne agent sans « | » : role/desc/system vides, mais un nom est exigé (message dédié sinon).
+function teamAgentLineOk(line) { return line.trim().length > 0; }
+
 // ---------- Modal ✍️ ----------
 let editing = null;
 function openModal(c) {
@@ -911,6 +1078,17 @@ $('tabs').querySelectorAll('[data-f]').forEach((b) => {
   };
 });
 q.addEventListener('input', () => { query = q.value.trim().toLowerCase(); idx = 0; render(); });
+// 🔒 Filtre « verrouillés seulement » : cumulable avec l'onglet actif et la recherche
+$('lkf').onclick = () => {
+  lockOnly = !lockOnly;
+  $('lkf').setAttribute('aria-pressed', String(lockOnly));
+  $('lkf').style.borderColor = lockOnly ? 'var(--vio)' : '';
+  $('lkf').style.color = lockOnly ? 'var(--txt)' : '';
+  idx = 0;
+  render();
+};
+// 🗑 Corbeille (bouton du footer)
+$('trb').onclick = () => { openTrash(); };
 $('langb').onclick = () => { window.mgp.onSettingsChange && window.mgp.onSettingsChange({ lang: LANG === 'fr' ? 'en' : 'fr' }); location.reload(); };
 composeBtn.onclick = () => openSelection(DEFAULT_LLM || 'claude');
 
@@ -919,6 +1097,10 @@ document.addEventListener('keydown', (e) => {
   if (!$('tour').hidden) return; // 🎓 la visite guidée capte le clavier (pas d'action du panneau en arrière-plan)
   if (!$('modal').hidden) {
     if (e.key === 'Escape') { closeModal(); return; }
+    return;
+  }
+  if (!$('tmodal').hidden) {
+    if (e.key === 'Escape') { closeTrash(); return; }
     return;
   }
   if (!$('wedit').hidden) {
@@ -1049,7 +1231,7 @@ function renderWorkshop() {
         <span class="wico">${itEmoji(it.k)}</span>
         <span class="wmid"><b>${esc(lname(it.x))}${lk ? ` <span class="lk" title="${T.lockBadgeT}">${T.lockBadge}</span>` : ''}</b><i>${esc((it.k === 'team' ? (it.x.desc || '') : (ldesc(it.x) || '')).slice(0, 80))}</i><u>${esc(det)}</u></span>
         <span class="wact2">
-          ${it.k !== 'team' ? `<button data-a="edit" title="${T.editItem}" aria-label="${T.editItem}">✏️</button>` : ''}
+          <button data-a="edit" title="${T.editItem}" aria-label="${T.editItem}">✏️</button>
           ${it.k !== 'team' ? `<button data-a="lock" title="${lk ? T.unlockItem : T.lockItem}" aria-label="${lk ? T.unlockItem : T.lockItem}">${lk ? '🔓' : '🔒'}</button>` : ''}
           <button data-a="export" title="${T.atelierExp}" aria-label="${T.atelierExp}">⬇</button>
           <button data-a="del" title="${T.atelierDel}" aria-label="${T.atelierDel}">🗑</button>
@@ -1060,7 +1242,7 @@ function renderWorkshop() {
   wlist.querySelectorAll('.wit button').forEach((b) => {
     b.onclick = async () => {
       const it = W.items[+b.closest('.wit').dataset.i];
-      if (b.dataset.a === 'edit') { editWorkshopItem(it.k, it.x.name); return; }
+      if (b.dataset.a === 'edit') { it.k === 'team' ? editTeam(it.x._t.team || it.x.name) : editWorkshopItem(it.k, it.x.name); return; }
       if (b.dataset.a === 'lock') { toggleLock({ k: it.k, x: it.x._t || it.x }); return; }
       if (b.dataset.a === 'del') {
         if (it.k === 'team') {
@@ -1352,6 +1534,17 @@ window.__mgp = {
   toggleLock: (it) => toggleLock(it),
   copyToWorkshop: (it) => copyToWorkshop(it),
   ctxHtmlStr: () => String(document.getElementById('ctx')._html || ''),
+  // 🗑 Corbeille + ✏️ équipe + 🔒 filtre
+  openTrash: () => openTrash(),
+  trashVisible: () => !$('tmodal').hidden,
+  renderTrash: () => renderTrash(),
+  trashHtml: () => String(document.getElementById('tm-list')._html || ''),
+  closeTrash: () => closeTrash(),
+  editTeam: (n) => editTeam(n),
+  editTeamVisible: () => !$('wedit').hidden && $('we-kind').value === 'team',
+  saveTeamEdit: () => saveTeamEdit(),
+  toggleLockFilter: () => $('lkf').onclick(),
+  lockFilterOn: () => lockOnly,
   counts: () => ({ all: ALL.length, skills: S.length, agents: A.length, customs: CUSTOMS.length, favs: FAVS.size, teams: TEAMS.length }),
   tabs: () => TABS.slice(),
 };

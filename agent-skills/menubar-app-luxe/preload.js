@@ -61,6 +61,11 @@ contextBridge.exposeInMainWorld('mgp', {
   promptTreeOverview: () => ipcRenderer.invoke('prompt-tree-overview'),
   promptMdOpen: (sub) => ipcRenderer.invoke('prompt-md-open', sub),
   workshopMdCreate: (kind, name) => ipcRenderer.invoke('workshop-md-create', { kind, name }),
+  // ── 🗑 Corbeille (suppression restaurable) ──
+  trashList: () => ipcRenderer.invoke('trash-list'),
+  trashRestore: (id) => ipcRenderer.invoke('trash-restore', id),
+  trashDelete: (id) => ipcRenderer.invoke('trash-delete', id),
+  trashEmpty: () => ipcRenderer.invoke('trash-empty'),
   // ── LLM par défaut : sélecteur rapide dans la barre du bas du panneau ──
   setDefaultLLM: (llm) => ipcRenderer.send('set-default-llm', llm),
   // ── 🕸 Équipes multi-agents (super-orchestrateur + agents + workflow) ──
@@ -70,6 +75,7 @@ contextBridge.exposeInMainWorld('mgp', {
   teamRun: (payload) => ipcRenderer.invoke('team-run', payload),
   reportSave: (p) => ipcRenderer.invoke('report-save', p),
   teamDelete: (name) => ipcRenderer.invoke('team-delete', name),
+  teamSave: (name, patch) => ipcRenderer.invoke('team-save', { name, patch }),
   teamExport: (name) => ipcRenderer.invoke('team-export', name),
   teamMdCreate: (name) => ipcRenderer.invoke('team-md-create', name),
 });

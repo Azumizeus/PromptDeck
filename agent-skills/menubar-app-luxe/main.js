@@ -42,6 +42,24 @@ function loadWorkshops(kind) {
 function saveWorkshops(kind, list) {
   try { fs.writeFileSync(workshopsPath(kind), JSON.stringify(list, null, 2)); } catch (e) { /* best effort */ }
 }
+// 🗑 Corbeille : les items supprimés (agents, skills, équipes, ✍️) y sont mis en quarantaine
+// (même sans cadenas) et y restent restaurables. Persistance : my-trash.json.
+function trashPath() { return path.join(app.getPath('userData'), 'my-trash.json'); }
+function loadTrash() {
+  try { const a = JSON.parse(fs.readFileSync(trashPath(), 'utf8')); return Array.isArray(a) ? a.slice(0, 60) : []; }
+  catch (e) { return []; }
+}
+function saveTrash(list) {
+  try { fs.writeFileSync(trashPath(), JSON.stringify(list.slice(-60), null, 2)); } catch (e) { /* best effort */ }
+}
+function trashPush(entry) {
+  const list = loadTrash();
+  // id unique même en rafale : compteur + aléa en plus de Date.now()
+  list.push({ ...entry, deletedAt: new Date().toISOString(),
+    id: `${entry.id}:${Date.now()}:${Math.random().toString(36).slice(2, 8)}` });
+  saveTrash(list); // garde-fou : 60 entrées max, les plus anciennes disparaissent
+}
+function trashFind(id) { return loadTrash().find((t) => t.id === id); }
 // 🔒 Cadenas : un item verrouillé ne peut plus être supprimé ni écrasé.
 // Le verrou vit sur l'enregistrement (w.locked) — il survit aux mises à jour.
 function lockedNames(kind) { return new Set(loadWorkshops(kind).filter((w) => w && w.locked).map((w) => w.name)); }
@@ -1003,8 +1021,9 @@ ipcMain.handle('workshop-delete', (e, { kind, name }) => {
   const i = list.findIndex((w) => w.name === name);
   if (i < 0) return false;
   if (list[i].locked) return { ok: false, locked: true }; // 🔒 protégé contre la suppression
-  list.splice(i, 1);
+  const [rec] = list.splice(i, 1);
   saveWorkshops(wk, list);
+  trashPush({ id: `${wk}:${name}:${Date.now()}`, kind: wk, name, rec }); // 🗑 restaurable
   return true;
 });
 ipcMain.handle('workshop-export', async (e, { kind, name }) => {
@@ -1308,9 +1327,28 @@ ipcMain.handle('team-delete', (e, name) => {
   const i = list.findIndex((t) => (t.team || t.name) === name);
   if (i < 0) return false;
   if (list[i].locked) return { ok: false, locked: true }; // 🔒 protégé contre la suppression
-  list.splice(i, 1);
+  const [rec] = list.splice(i, 1);
   saveWorkshops('team', list);
+  trashPush({ id: `team:${name}:${Date.now()}`, kind: 'team', name, rec }); // 🗑 restaurable
   return true;
+});
+// ✏️ Édition d'une équipe : nom, description, orchestrateur, agents, workflow.
+// Merge : workflow/agents/orchestrateur fournis remplacent, le reste (origin, 🔒…) est conservé.
+ipcMain.handle('team-save', (e, { name, patch }) => {
+  if (typeof name !== 'string' || !name || !patch || typeof patch !== 'object' || Array.isArray(patch)) return { ok: false, error: 'requête invalide' };
+  const list = loadWorkshops('team');
+  const i = list.findIndex((t) => (t.team || t.name) === name);
+  if (i < 0) return { ok: false, error: 'introuvable' };
+  if (list[i].locked) return { ok: false, error: 'locked' }; // 🔒 ôter le cadenas d'abord
+  const rec = { ...list[i], ...patch };
+  if (typeof rec.team === 'string') {
+    rec.team = rec.team.trim().slice(0, 80) || name;
+    if (rec.team !== name && list.some((t, j) => j !== i && (t.team || t.name) === rec.team)) return { ok: false, error: 'name-exists' };
+  }
+  rec.name = rec.team;
+  list[i] = rec;
+  saveWorkshops('team', list);
+  return { ok: true, item: rec };
 });
 ipcMain.handle('team-export', async (e, name) => {
   const t = loadWorkshops('team').find((x) => (x.team || x.name) === name);
@@ -1436,6 +1474,53 @@ ipcMain.handle('api-set', (e, { provider, key, model } = {}) => {
   savePrefs();
   return refusal ? { ok: false, reason: refusal } : { ok: true };
 });
+// ── 🗑 Corbeille : lister / restaurer / supprimer définitivement / vider ──
+ipcMain.handle('trash-list', () => loadTrash().slice().reverse()); // plus récents d'abord
+ipcMain.handle('trash-restore', (e, id) => {
+  if (typeof id !== 'string' || !id) return { ok: false, error: 'requête invalide' };
+  const list = loadTrash();
+  const i = list.findIndex((t) => t.id === id);
+  if (i < 0) return { ok: false, error: 'introuvable' };
+  const entry = list[i];
+  const wk = entry.kind === 'agent' ? 'agent' : entry.kind === 'skill' ? 'skill' : entry.kind === 'team' ? 'team' : entry.kind === 'custom' ? 'custom' : null;
+  if (!wk || !entry.rec) return { ok: false, error: 'type inconnu' };
+  if (wk === 'custom') {
+    // ✍️ : pas de doublon de nom — l'entrée existante est écrasée (comportement d'avant suppression)
+    const cs = (PREFS.customs || []).filter((c) => c.name !== entry.name);
+    cs.push(entry.rec);
+    PREFS.customs = cs;
+    savePrefs();
+  } else {
+    const wl = loadWorkshops(wk);
+    const rec = { ...entry.rec };
+    if (rec.locked) rec.locked = false; // restauration = réengagement explicite, jamais un piège
+    let nm = entry.name;
+    if (wl.some((w) => (w.team || w.name) === nm)) { // collision : suffixe -2, -3…
+      const base = nm.replace(/-\d+$/, '');
+      let n = 2;
+      while (wl.some((w) => (w.team || w.name) === `${base}-${n}`)) n++;
+      nm = `${base}-${n}`;
+    }
+    rec.name = nm;
+    if (wk === 'team') rec.team = nm;
+    wl.push(rec);
+    saveWorkshops(wk, wl);
+  }
+  list.splice(i, 1);
+  saveTrash(list);
+  return { ok: true, kind: wk, name: nm };
+});
+ipcMain.handle('trash-delete', (e, id) => {
+  if (typeof id !== 'string' || !id) return false;
+  const list = loadTrash();
+  const i = list.findIndex((t) => t.id === id);
+  if (i < 0) return false;
+  list.splice(i, 1);
+  saveTrash(list);
+  return true;
+});
+ipcMain.handle('trash-empty', () => { saveTrash([]); return true; });
+
 // ✍️ Prompts personnalisés : création/édition et suppression (persistés dans PREFS)
 ipcMain.on('custom-save', (e, item) => {
   if (!item || typeof item.name !== 'string' || typeof item.desc !== 'string') return;
@@ -1460,7 +1545,10 @@ ipcMain.handle('export-customs', async () => {
   try { fs.writeFileSync(r.filePath, parts.join('\n---\n\n')); return true; } catch (e) { return false; }
 });
 function deleteCustom(name) {
-  PREFS.customs = (PREFS.customs || []).filter((c) => c.name !== name);
+  const cs = (PREFS.customs || []).filter((c) => c.name !== name);
+  const victim = (PREFS.customs || []).find((c) => c.name === name); // 🗑 en corbeille avant effacement
+  if (victim) trashPush({ id: `custom:${name}:${Date.now()}`, kind: 'custom', name, rec: victim });
+  PREFS.customs = cs;
   PREFS.favorites = (PREFS.favorites || []).filter((n) => n !== name);
   savePrefs();
 }

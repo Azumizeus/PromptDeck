@@ -49,6 +49,8 @@ const favsStore = new Set();
 const customsStore = [];
 const workshopStore = { agent: [], skill: [] };
 const teamStore = [];
+const trashStore = []; // 🗑 corbeille en mémoire
+let trashSeq = 0; // ids uniques (Date.now() seul peut collider en rafale)
 let defaultLLMStore = 'claude'; // le sélecteur du footer modifie la pref (comme l'IPC réel)
 const sandbox = {
   console,
@@ -90,7 +92,8 @@ sandbox.window.mgp = {
     const i = arr.findIndex((w) => w.name === name);
     if (i < 0) return false;
     if (arr[i].locked) return { ok: false, locked: true }; // 🔒 comme le main process réel
-    arr.splice(i, 1);
+    const [removed] = arr.splice(i, 1);
+    trashStore.push({ id: `${kind}:${name}:${Date.now()}-${++trashSeq}` , kind, name, rec: removed }); // 🗑 comme le main process réel
     return true;
   },
   workshopGet: async (kind, name) => workshopStore[kind === 'agent' ? 'agent' : 'skill'].find((w) => w.name === name) || null,
@@ -116,8 +119,8 @@ sandbox.window.mgp = {
     return { ok: true, item: copy };
   },
   workshopLock: async (kind, name, locked) => {
-    const arr = workshopStore[kind === 'agent' ? 'agent' : 'skill'];
-    const w = arr.find((x) => x.name === name);
+    const arr = kind === 'team' ? teamStore : workshopStore[kind === 'agent' ? 'agent' : 'skill'];
+    const w = arr.find((x) => (x.team || x.name) === name);
     if (!w) return { ok: false, error: 'introuvable' };
     w.locked = !!locked;
     return { ok: true, locked: w.locked };
@@ -159,7 +162,28 @@ sandbox.window.mgp = {
     teamStore.push(rec);
     return { ok: true, item: rec, model: 'stub-model', latency: 1500 };
   },
-  teamDelete: async (name) => { const i = teamStore.findIndex((t) => (t.team || t.name) === name); if (i < 0) return false; if (teamStore[i].locked) return { ok: false, locked: true }; teamStore.splice(i, 1); return true; },
+  teamDelete: async (name) => { const i = teamStore.findIndex((t) => (t.team || t.name) === name); if (i < 0) return false; if (teamStore[i].locked) return { ok: false, locked: true }; const [r] = teamStore.splice(i, 1); trashStore.push({ id: `team:${name}:${Date.now()}`, kind: 'team', name, rec: r }); return true; },
+  teamSave: async (name, patch) => {
+    const i = teamStore.findIndex((t) => (t.team || t.name) === name);
+    if (i < 0) return { ok: false, error: 'introuvable' };
+    if (teamStore[i].locked) return { ok: false, error: 'locked' };
+    teamStore[i] = { ...teamStore[i], ...patch, name: patch.team || name };
+    return { ok: true, item: teamStore[i] };
+  },
+  // 🗑 Corbeille (harnais : store en mémoire, mêmes contrats que le main process)
+  trashList: async () => [...trashStore].reverse(),
+  trashRestore: async (id) => {
+    const i = trashStore.findIndex((t) => t.id === id);
+    if (i < 0) return { ok: false, error: 'introuvable' };
+    const e = trashStore[i];
+    if (e.kind === 'custom') { customsStore.push(e.rec); }
+    else if (e.kind === 'team') { const rec = { ...e.rec, locked: false }; rec.team = e.name; rec.name = e.name; teamStore.push(rec); }
+    else { const arr = workshopStore[e.kind]; const rec = { ...e.rec, locked: false }; rec.name = arr.some((w) => w.name === e.name) ? e.name + '-2' : e.name; arr.push(rec); }
+    trashStore.splice(i, 1);
+    return { ok: true, kind: e.kind, name: e.name };
+  },
+  trashDelete: async (id) => { const i = trashStore.findIndex((t) => t.id === id); if (i >= 0) trashStore.splice(i, 1); return true; },
+  trashEmpty: async () => { trashStore.length = 0; return true; },
   teamExport: async () => true,
   teamMdCreate: async (name) => mdStore.push({ team: name }) && { ok: true, path: `/virtuel/MEGA PROMPT/equipes/${name}/ORCHESTRATEUR.md` },
   // ▶ Exécution d'équipe + rapport (harnais : réponse déterministe)
@@ -466,6 +490,79 @@ check(workshopStore.skill.length === beforeCount + 1, 'copie créée dans l\'Ate
 const copyRec = workshopStore.skill[workshopStore.skill.length - 1];
 check(copyRec.name.includes('(copie)') && !copyRec.locked, 'copie suffixée « (copie) » et non verrouillée');
 check(copyRec.desc === catSkill.x.desc && copyRec.body && copyRec.body.includes(catSkill.x.desc), 'la copie conserve desc + amorce une procédure éditable');
+
+console.log('15) 🗑 Corbeille — suppression restaurable (même sans cadenas) :');
+// a) suppression d'un agent → va en corbeille, plus dans l'Atelier
+const victimName = 'Agent Test Senior';
+await sandbox.window.mgp.workshopDelete('agent', victimName);
+check(trashStore.some((t) => t.kind === 'agent' && t.name === victimName), 'agent supprimé présent dans la corbeille');
+// b) la corbeille s'ouvre et liste la victime
+await MGP.openTrash();
+check(MGP.trashVisible(), 'modal corbeille ouvert');
+await MGP.renderTrash();
+check(MGP.trashHtml().includes(victimName), 'la corbeille liste l\'agent supprimé');
+// c) restauration : l'agent revient dans l'Atelier et quitte la corbeille
+const trashId = trashStore.find((t) => t.kind === 'agent' && t.name === victimName).id;
+const rr = await sandbox.window.mgp.trashRestore(trashId);
+check(rr && rr.ok && rr.name === victimName, 'restauration renvoie ok + nom');
+check(workshopStore.agent.some((w) => w.name === victimName), 'agent restauré de retour dans l\'Atelier');
+check(!trashStore.some((t) => t.id === trashId), 'entrée corbeille consommée après restauration');
+// d) suppression définitive : ne revient pas (l'agent restauré est re-supprimé puis purgé)
+await sandbox.window.mgp.workshopDelete('agent', victimName);
+const agentTrashEntries = trashStore.filter((t) => t.kind === 'agent' && t.name === victimName);
+const id2 = agentTrashEntries.length ? agentTrashEntries[agentTrashEntries.length - 1].id : null;
+if (id2) await sandbox.window.mgp.trashDelete(id2);
+check(!trashStore.some((t) => t.id === id2), 'suppression définitive vide l\'entrée');
+check(!workshopStore.agent.some((w) => w.name === victimName), 'et l\'agent n\'existe plus nulle part');
+// e) vider la corbeille
+await sandbox.window.mgp.trashEmpty();
+check(trashStore.length === 0, 'vider la corbeille : store vide');
+MGP.closeTrash();
+check(!MGP.trashVisible(), 'corbeille fermée');
+
+console.log('16) ✏️ Édition d\'équipe (orchestrateur + agents + workflow) :');
+const teamBefore = teamStore.find((t) => (t.team || t.name) === 'Équipe Test');
+check(!!teamBefore, 'équipe de test présente');
+await MGP.editTeam('Équipe Test');
+check(MGP.editTeamVisible(), 'modal d\'édition équipe ouvert (kind=team)');
+check(MGP.weditValues().orig === 'Équipe Test', 'pré-rempli avec le nom de l\'équipe');
+// nouvelle workflow + agent via le format « nom | rôle | desc | prompt »
+sandbox.document.getElementById('we-name').value = 'Équipe Test';
+sandbox.document.getElementById('we-t-wf').value = 'Étape 1 modifiée\nÉtape 2 modifiée';
+sandbox.document.getElementById('we-t-agents').value = 'Analyste | analyse | Analyse le besoin | Tu analyses.\nVérificateur | QA | Vérifie le livrable | Tu vérifies tout.';
+await MGP.saveTeamEdit();
+check(!MGP.weditVisible(), 'modal fermé après enregistrement');
+const teamAfter = teamStore.find((t) => (t.team || t.name) === 'Équipe Test');
+check(teamAfter.workflow.length === 2 && teamAfter.workflow[0] === 'Étape 1 modifiée', 'workflow mis à jour');
+check(teamAfter.agents.length === 2 && teamAfter.agents[1].name === 'Vérificateur' && teamAfter.agents[1].system === 'Tu vérifies tout.', 'agents parsés (nom | rôle | desc | prompt) et remplacés');
+check(teamAfter.orchestrator && (teamAfter.orchestrator.system || '').includes('supervises'), 'orchestrateur conservé (merge des champs non fournis)');
+// ✏️ sur une équipe verrouillée : refus (toast) — le modal reste à l'état où il était
+await MGP.toggleLock({ k: 'team', x: teamAfter });
+MGP.closeWedit(); // s'assure d'un état fermé avant l'essai
+await MGP.editTeam('Équipe Test');
+await new Promise((r) => setTimeout(r, 0)); // laisse le toggleLock async de l'étape précédente se terminer
+await new Promise((r2) => setTimeout(r2, 0));
+check(!MGP.editTeamVisible(), 'édition refusée sur une équipe verrouillée (ôter le cadenas d\'abord)');
+await MGP.toggleLock({ k: 'team', x: teamAfter });
+
+console.log('17) 🔒 Filtre « verrouillés seulement » :');
+// état initial : on verrouille la copie du skill puis on la ré-ajoute à ALL
+// (loadTeams() reconstruit ALL depuis S/A/TEAMS et retire les créations Atelier ajoutées à la main)
+await MGP.toggleLock({ k: 'skill', x: copyRec });
+if (!S.some((x) => x.name === copyRec.name)) S.push(copyRec); // ré-attache la copie au pool des skills
+await MGP.reloadTeams(); // reconstruit ALL depuis S/A/TEAMS/CUSTOMS (la copie redevient listable)
+MGP.toggleLockFilter();
+check(MGP.lockFilterOn(), 'filtre activé');
+const lockedList = MGP.list();
+check(lockedList.length >= 1 && lockedList.every((r) => r.k === 'team' ? MGP.lockOf('team', (r.x._t && (r.x._t.team || r.x._t.name)) || r.x.name) : MGP.lockOf(r.k, r.x.name)), `liste filtrée : ${lockedList.length} item(s), tous verrouillés`);
+// cumul avec un onglet : onglet skills + filtre → uniquement des skills verrouillés
+vm.runInContext('__mgp.select("skills")', ctx);
+const lockedSkills = MGP.list();
+check(lockedSkills.every((r) => r.k === 'skill' && MGP.lockOf('skill', r.x.name)), `cumul onglet+filtre : ${lockedSkills.length} skill(s) verrouillé(s) seulement`);
+vm.runInContext('__mgp.select("all")', ctx);
+MGP.toggleLockFilter();
+check(!MGP.lockFilterOn(), 'filtre désactivé : toute la liste revient');
+check(MGP.list().length === MGP.counts().all, 'aucune perte d\'items après désactivation');
 
 console.log('');
 if (fail) { console.log(`❌ ${fail} test(s) en échec`); process.exit(1); }

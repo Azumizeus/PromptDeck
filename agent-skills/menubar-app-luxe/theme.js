@@ -289,6 +289,34 @@ body{font:13.5px/1.45 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-se
 #erow button:hover{border-color:var(--line2);color:var(--txt)}
 #erow .pri{background:var(--grad);border:none;color:#0b0c10}
 #erow .pri:hover{filter:brightness(1.08);color:#0b0c10}
+/* 🗑 Corbeille + 🔒 filtre */
+#trb,#lkf{border:1px solid var(--line);background:none;color:var(--txt2);cursor:pointer;
+  font:inherit;font-size:11px;font-weight:600;padding:3px 9px;border-radius:99px;
+  transition:border-color .15s,color .15s}
+#trb:hover,#lkf:hover{border-color:var(--vio);color:var(--txt)}
+#lkf[aria-pressed="true"]{border-color:var(--vio);color:var(--txt);background:var(--card)}
+#tmodal{position:fixed;inset:0;background:rgba(5,6,10,.55);backdrop-filter:blur(6px);
+  display:flex;align-items:center;justify-content:center;z-index:60}
+#tmodal[hidden]{display:none}
+#tmbox{width:min(460px,92%);max-height:80vh;display:flex;flex-direction:column;gap:10px;
+  background:var(--card);border:1px solid var(--line2);border-radius:14px;padding:16px;
+  box-shadow:0 24px 70px rgba(0,0,0,.5)}
+#tmbox h3{font-size:14px;font-weight:700;display:flex;align-items:center}
+#tm-x{margin-left:auto;border:none;background:none;color:var(--mut);cursor:pointer;font-size:13px}
+#tm-x:hover{color:var(--txt)}
+.tmhint{margin:0;font-size:10.5px;color:var(--mut)}
+#tm-list{overflow-y:auto;display:flex;flex-direction:column;gap:4px;min-height:60px}
+.tmit{display:flex;align-items:center;gap:9px;padding:7px 9px;border:1px solid var(--line);
+  border-radius:10px;background:var(--card2)}
+.tmico{font-size:15px;flex:none}
+.tmmid{flex:1;min-width:0;display:flex;flex-direction:column}
+.tmmid b{font-size:12.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tmmid i{font-style:normal;font-size:10px;color:var(--mut)}
+#tmrow{display:flex;gap:8px;align-items:center}
+#tmrow button{border:1px solid var(--line);background:none;color:var(--txt2);cursor:pointer;
+  font:inherit;font-size:12px;font-weight:600;padding:7px 14px;border-radius:8px}
+#tmrow button:hover{border-color:var(--line2);color:var(--txt)}
+#tmrow button:disabled{opacity:.4;cursor:default}
 /* ✏️ / 🔒 Gestion : modal d'édition agent/skill + badge cadenas */
 #wedit{position:fixed;inset:0;background:rgba(5,6,10,.55);backdrop-filter:blur(6px);
   display:flex;align-items:center;justify-content:center;z-index:60}
