@@ -18,6 +18,7 @@ Ce projet utilise les skills installés dans `.opencode/skills/` (ou un chemin c
 - Refactoring / simplification → `code-simplification`
 - Conception d'API ou d'interface → `api-and-interface-design`
 - Travail UI → `frontend-ui-engineering`
+- Audit de sécurité / pentest / recherche de vulnérabilités → `security-audit` (mode guidé par défaut ; workflow 6 phases sur demande explicite)
 
 ## Modèle d'exécution
 
@@ -54,6 +55,7 @@ The agent should automatically map user intent to skills:
 - Refactoring / simplification → `code-simplification`
 - API or interface design → `api-and-interface-design`
 - UI work → `frontend-ui-engineering`
+- Security audit / pen-test / vulnerability research → `security-audit` (guidance mode by default; full 6-phase workflow only on explicit audit requests)
 
 ### Lifecycle Mapping (Implicit Commands)
 
@@ -64,8 +66,8 @@ Instead, the agent must internally follow this lifecycle:
 - DEFINE → `spec-driven-development`
 - PLAN → `planning-and-task-breakdown`
 - BUILD → `incremental-implementation` + `test-driven-development`
-- VERIFY → `debugging-and-error-recovery`
-- REVIEW → `code-review-and-quality`
+- VERIFY → `debugging-and-error-recovery` (or `security-audit` for vulnerability verification)
+- REVIEW → `code-review-and-quality` (+ `security-audit` guidance mode for security-sensitive changes)
 - SHIP → `shipping-and-launch`
 
 ### Execution Model

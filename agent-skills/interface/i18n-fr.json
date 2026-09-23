@@ -1282,5 +1282,9 @@
   "zz-code-recon": {
     "name": "zz-code-recon (audit sécurité)",
     "desc": "Construction de contexte architectural profond pour audits de sécurité : revues de sécurité, compréhension de codebases, cartographie des frontières de confiance et préparation à l'analyse de vulnérabilités. Inspiré de la méthodologie Trail of Bits."
+  },
+  "security-audit": {
+    "name": "Audit de sécurité (Cloudflare)",
+    "desc": "Audit de sécurité multi-phases issu de Cloudflare (skill à l'origine de leur harnais interne de découverte de vulnérabilités). 6 phases orchestrées par agents isolés : 1) Reconnaissance → architecture.md + coverage-ledger.json ; 2) Chasse guidée par couverture avec critiques de couverture ; 3) Validation adversariale — le vérificateur n'est jamais le découvreur ; 4) Sortie structurée findings.json (verdicts confirmed / needs_validation / rejected, validés par report-schema.json) ; 5) Vérification indépendante des enregistrements ; 6) Rapport neutre REPORT.md + FINDINGS-DETAIL.md + NEEDS-VALIDATION.md. 15 guides de classes d'attaques : web/protocole/auth, cache, client-side (DOM, prototype pollution), supply-chain & release, cloud/IaC/serverless, RPC & messaging, épuisement de ressources, isolation multi-tenant, desktop/mobile/IPC, memory-safety/binaire, IA & LLM (prompt injection). Mode « guidance » par défaut pour les questions ciblées ; workflow complet sur demande explicite d'audit ou de pentest. Exécutions multiples additives : chaque run cible les trous de couverture restants. Validateurs Node zero-dependency inclus (65 tests)."
   }
 }

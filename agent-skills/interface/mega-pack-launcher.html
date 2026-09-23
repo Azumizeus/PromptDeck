@@ -120,13 +120,13 @@ footer a{color:var(--acc);text-decoration:none}
 </footer>
 <div class="toast" id="toast"></div>
 <script>
-// Catalogue complet MEGA PACK v0.7.0 — généré par build-interface.py
-// Skills: 131 | Agents: 190
+// Catalogue complet MEGA PACK v0.7.2 — généré par build-interface.py
+// Skills: 132 | Agents: 190
 const MEGA_CATALOG = {
  "meta": {
-  "generated": "2026-09-20",
-  "version": "0.7.0",
-  "skills": 131,
+  "generated": "2026-09-23",
+  "version": "0.7.2",
+  "skills": 132,
   "agents": 190
  },
  "skills": [
@@ -475,6 +475,14 @@ const MEGA_CATALOG = {
    "desc_fr": "Durcit le code contre les vulnérabilités : audit des entrées utilisateur, authentification, stockage, intégrations externes et flux de connexion (OWASP Top Ten)."
   },
   {
+   "name": "security-audit",
+   "desc": "Security guidance and vulnerability review for codebases, APIs, services, CLI tools, libraries, and daemons. Use for security questions, focused reviews, vulnerability research, security audits, or pen tests. Run the complete workflow only for explicit codebase audit or pen-test requests, full/compr",
+   "category": "security-audit",
+   "path": "skills/security-audit/",
+   "name_fr": "Audit de sécurité (Cloudflare)",
+   "desc_fr": "Audit de sécurité multi-phases issu de Cloudflare (skill à l'origine de leur harnais interne de découverte de vulnérabilités). 6 phases orchestrées par agents isolés : 1) Reconnaissance → architecture.md + coverage-ledger.json ; 2) Chasse guidée par couverture avec critiques de couverture ; 3) Validation adversariale — le vérificateur n'est jamais le découvreur ; 4) Sortie structurée findings.json (verdicts confirmed / needs_validation / rejected, validés par report-schema.json) ; 5) Vérification indépendante des enregistrements ; 6) Rapport neutre REPORT.md + FINDINGS-DETAIL.md + NEEDS-VALIDATION.md. 15 guides de classes d'attaques : web/protocole/auth, cache, client-side (DOM, prototype pollution), supply-chain & release, cloud/IaC/serverless, RPC & messaging, épuisement de ressources, isolation multi-tenant, desktop/mobile/IPC, memory-safety/binaire, IA & LLM (prompt injection). Mode « guidance » par défaut pour les questions ciblées ; workflow complet sur demande explicite d'audit ou de pentest. Exécutions multiples additives : chaque run cible les trous de couverture restants. Validateurs Node zero-dependency inclus (65 tests)."
+  },
+  {
    "name": "shipping-and-launch",
    "desc": "Prepares production launches. Use when preparing to deploy to production, or when asking what needs to be in place before shipping. Use when you need a pre-launch checklist, when setting up monitoring, when planning a staged rollout, or when you need a rollback strategy.",
    "category": "shipping-and-launch",
@@ -772,7 +780,7 @@ const MEGA_CATALOG = {
   },
   {
    "name": "solana-game",
-   "desc": "Solana game development with Unity, React Native, and web. Extends solana-dev-skill with gaming-specific patterns including Solana.Unity-SDK, Mobile Wallet Adapter, PlaySolana/PSG1, wallet integration, NFT systems, transaction building, and game architecture. For program development (Anchor, Pinocch",
+   "desc": "Use when building a game on Solana — Unity, React Native, or web titles where gameplay loops, player progression, or in-game economies must integrate with the blockchain. Gaming-specific patterns this skill covers that core Solana development does not: Solana.Unity-SDK for Unity, Mobile Wallet Adapt",
    "category": "solana-game-skill",
    "path": "skills/solana-game-skill/",
    "name_fr": "Jeux Solana",

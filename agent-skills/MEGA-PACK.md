@@ -1,10 +1,51 @@
 # MEGA PACK — Skills & Agents pour Claude Desktop et OpenCode
 
-> **Version :** 1.0.0 (19 septembre 2026)
-> **Base :** addyosmani/agent-skills v0.6.9 → v0.7.0 (méga pack) + intégration Seeker Team + Skill Game Dev
-> **Total :** 131 skills · 190 agents · 9 slash commands
+> **Version :** 1.2.0 (23 septembre 2026)
+> **Base :** addyosmani/agent-skills v0.6.9 → v0.7.0 (méga pack) → v0.7.1 (+ Cloudflare security-audit) → **v0.7.2 (synchronisation amont 0.6.10)** + intégration Seeker Team + Skill Game Dev
+> **Total :** 132 skills · 190 agents · 10 slash commands
 
 ## Ce qui a été intégré au dossier maître `agent-skills/`
+
+### 0. Skill sécurité Cloudflare → `skills/security-audit/` (1 skill, v0.7.1 — 23 sept. 2026)
+
+Source : [cloudflare/security-audit-skill](https://github.com/cloudflare/security-audit-skill) (MIT).
+Skill d'audit de sécurité multi-phases qui orchestre des agents isolés : reconnaissance
+(`architecture.md`, `coverage-ledger.json`), chasse guidée par couverture, validation
+adversariale (le vérificateur n'est jamais le découvreur), sortie structurée `findings.json`
+(validée par `report-schema.json` + validateurs Node zero-dependency), vérification
+indépendante des enregistrements et rapport neutre (`REPORT.md`, `FINDINGS-DETAIL.md`,
+`NEEDS-VALIDATION.md`). 15 guides de classes d'attaques inclus (web/protocole/auth,
+client-side, supply-chain, cloud/déploiement, RPC/messaging, IA & LLM, memory-safety/binaire,
+desktop/mobile/IPC, épuisement de ressources, isolation multi-tenant…). Mode « guidance »
+par défaut ; les 6 phases complètes ne s'exécutent que sur demande explicite d'audit ou de
+test d'intrusion. Tests des validateurs : 34 + 31 ✔.
+
+### 0-bis. Synchronisation amont 0.6.9 → 0.6.10 (v0.7.2 — 23 sept. 2026)
+
+Les 25 skills lifecycle du maître sont alignés sur la release amont [Agent Skills
+0.6.10](https://github.com/addyosmani/agent-skills/releases/tag/0.6.10) :
+
+- **13 SKILL.md patchés** (context-engineering, spec/planning, incremental, TDD, debugging,
+  docs/ADRs, doubt/source/constraint-driven, git-workflow, observability, shipping,
+  using-agent-skills) — complétude des gardes-fous « plan incomplet » et contexte.
+- **security-and-hardening** : description 0.6.10 (vocabulaire de routage « auditing an input
+  handler », « OWASP Top Ten ») appliquée sur le corps méga-pack (patterns OWASP inline
+  + `references/security-checklist.md`), qui est conservé.
+- **hooks/** : `hooks.json` supprimé — le plugin Claude Code n'enregistre plus le hook
+  SessionStart (fin du double-routage, ~3,5k tokens/session économisés) ; `session-start.sh`
+  reste disponible en opt-in pour les hôtes sans routage natif, avec envelope
+  `hookSpecificOutput` standard et fallback `jq is required`. Les ajouts méga-pack
+  (`SDD-CACHE.md`, `sdd-cache-pre.sh`, `sdd-cache-post.sh`) sont conservés.
+- **`simplify-ignore.sh`** : plus de perte de travail au Stop — expansion du contenu courant
+  au lieu de la restauration aveugle du backup, fallback `.recovered`.
+- **scripts** (skill-lint, run-evals, validate-reference-links + leurs tests) et
+  **CI** (`--min-rank1 95`, test skill-lint, test hook payload) alignés 0.6.10.
+- **docs** : codex-setup (progressive disclosure, plus de préchargement du meta-skill),
+  gemini-cli-setup (10 commands), CONTRIBUTING (règle « Write the Procedure, Not the
+  Workaround »).
+- **Non intégré volontairement** : les sections Project Structure / tableaux portables du
+  README amont (le README méga-pack décrit 132 skills + 190 agents) et la suppression du
+  dossier `evals/` amont (le maître garde ses evals et scripts opérationnels).
 
 ### 1. Skills de protocoles Solana → `skills/solana-protocols/` (46 skills)
 
@@ -53,7 +94,9 @@ renommé `seeker-strike-mobile` (nom de skill valide : minuscules et tirets uniq
 - `solana-development/solana-compression` : `solana-compression` → `zk-compression-light`
   (collision avec `lightprotocol-skills/solana-compression`).
 
-Vérification finale : 0 collision de `name:` sur les 131 skills installés.
+Vérification finale : 0 collision de `name:` sur les 132 skills installés
+(`name: CI` apparaît 2× dans des fichiers de référence internes — uv-reference et
+python-dev — mais aucun SKILL.md racine n'est en collision).
 
 ### Non intégré (déjà présent ou redondant)
 
@@ -64,7 +107,7 @@ Vérification finale : 0 collision de `name:` sur les 131 skills installés.
 
 ## 🖱️ Interface d'activation (boutons) — `interface/`
 
-Catalogue interactif des 131 skills + 190 agents, activables par bouton dans **tout LLM** :
+Catalogue interactif des 132 skills + 190 agents, activables par bouton dans **tout LLM** :
 
 - **`interface/mega-pack-launcher.html`** — launcheur autonome (double-clic) : recherche,
   filtres 36 catégories, bouton ⚡ Activer (copie le prompt d'activation), composeur
@@ -80,7 +123,7 @@ Catalogue interactif des 131 skills + 190 agents, activables par bouton dans **t
 
 ## 🧭 App menu-bar macOS — `menubar-app/`
 
-Application Electron résidente dans la barre de menus : recherche globale des 131 skills +
+Application Electron résidente dans la barre de menus : recherche globale des 132 skills +
 190 agents, activation en 1 clic, ouverture directe dans Claude/ChatGPT.
 
 ```bash
@@ -96,7 +139,7 @@ Raccourcis : **⌘Espace** panneau · **↑↓/⏎** copier · **⌘⏎** Claude
 ### Option A — global (tous les projets), recommandé
 
 ```bash
-# Skills (81)
+# Skills (132)
 mkdir -p ~/.claude/skills
 cp -R "/Users/mickaeldunoyer/Desktop/Skill Install/agent-skills/skills/"* ~/.claude/skills/
 
@@ -115,7 +158,7 @@ cp -R "/Users/mickaeldunoyer/Desktop/Skill Install/agent-skills/agents/"* ~/.cla
 ## Installation OpenCode
 
 ```bash
-# Skills (81) — global
+# Skills (132) — global
 mkdir -p ~/.config/opencode/skills
 cp -R "/Users/mickaeldunoyer/Desktop/Skill Install/agent-skills/skills/"* ~/.config/opencode/skills/
 
@@ -129,9 +172,9 @@ OpenCode découvre aussi les chemins `~/.claude/skills/` et `~/.agents/skills/`.
 
 | Ensemble | Attendu |
 |----------|---------|
-| SKILL.md dans `skills/` | 131 |
+| SKILL.md dans `skills/` | 132 |
 | Agents `.md` dans `agents/` | 190 |
-| Slash commands (`.claude/commands/` + `commands/`) | 9 + 9 |
+| Slash commands (`.claude/commands/` + `commands/`) | 10 + 10 |
 | Fichiers `interface/` | 4 (launcher, userscript, bookmarklet, catalogue) |
 | App menu-bar `menubar-app/` | main.js + preload + renderer + réglages + icônes tray |
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Test automatisé du MEGA PACK.app packagé — 4 volets :
 #   1) structure du bundle (binaire intact, Info.plist, frameworks, app/, icônes)
-#   2) catalogue embarqué (131 skills + 190 agents dans Contents/Resources/interface)
+#   2) catalogue embarqué (132 skills + 190 agents dans Contents/Resources/interface)
 #   3) signature ad-hoc valide
 #   4) lancement réel stable via launchd (open) — l'app doit survivre 15 s
 # Usage : bash test-app.sh [chemin-vers-app]   (défaut : dist/MEGA PACK.app)
@@ -47,11 +47,11 @@ const fs = require('fs');
 try {
   const code = fs.readFileSync('$CAT', 'utf8');
   const c = new Function(code + ';return MEGA_CATALOG;')();
-  if (c.skills.length === 131 && c.agents.length === 190) console.log('ok');
+  if (c.skills.length === 132 && c.agents.length === 190) console.log('ok');
   else console.log('bad:' + c.skills.length + '/' + c.agents.length);
 } catch (e) { console.log('err'); }
 " 2>/dev/null)
-check "catalogue complet : 131 skills + 190 agents" test "$CATCHECK" = "ok"
+check "catalogue complet : 132 skills + 190 agents" test "$CATCHECK" = "ok"
 check "les paths du catalogue sont relatifs (résolubles depuis le dépôt)" test "$(node -e "
 const fs=require('fs');
 const code=fs.readFileSync('$CAT','utf8');

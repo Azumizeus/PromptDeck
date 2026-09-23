@@ -270,6 +270,7 @@ The commands above are entry points. The pack includes 25 skills total — 24 li
 | [code-review-and-quality](skills/code-review-and-quality/SKILL.md) | Five-axis review, change sizing (~100 lines), severity labels (Nit/Optional/FYI), review speed norms, splitting strategies | Before merging any change |
 | [code-simplification](skills/code-simplification/SKILL.md) | Chesterton's Fence, Rule of 500, reduce complexity while preserving exact behavior | Code works but is harder to read or maintain than it should be |
 | [security-and-hardening](skills/security-and-hardening/SKILL.md) | OWASP Top 10 prevention, auth patterns, secrets management, dependency auditing, three-tier boundary system | Handling user input, auth, data storage, or external integrations |
+| [security-audit](skills/security-audit/SKILL.md) | Multi-phase security audit from Cloudflare: reconnaissance, coverage-led vulnerability hunting, adversarial candidate validation, machine-readable findings.json, independent record verification, six-phase workflow with 15 attack-class hunting guides (web, client-side, supply chain, cloud, RPC, AI/LLM, memory safety, desktop/mobile…) | Explicit audit or pen-test requests, full security reviews, focused vulnerability research |
 | [performance-optimization](skills/performance-optimization/SKILL.md) | Measure-first approach - Core Web Vitals targets, profiling workflows, bundle analysis, anti-pattern detection | Performance requirements exist or you suspect regressions |
 
 ### Ship - Deploy with confidence
@@ -428,11 +429,11 @@ The portable core stays in shared directories. Host-specific paths are native di
 
 | Layer / consumer | Repository paths | Purpose |
 |---|---|---|
-| Shared workflow core | `skills/` (131 skills : 25 lifecycle + 46 solana-protocols + 7 game-design + 3 packs blockchain/jupiter/lightprotocol) | Portable `SKILL.md` workflows used by every integration |
+| Shared workflow core | `skills/` (132 skills : 25 lifecycle + 46 solana-protocols + 7 game-design + 3 packs blockchain/jupiter/lightprotocol + Cloudflare security-audit) | Portable `SKILL.md` workflows used by every integration |
 | Shared review material | `agents/` (190 personas), `references/` (7 checklists) | Specialist reviewers and pack-level checklists carried by whole-repo installs |
-| Claude Code adapter | `.claude/commands/` (9 commands), `.claude-plugin/`, `hooks/` | Slash-command wrappers, marketplace metadata, and lifecycle hooks |
-| Gemini CLI adapter | `.gemini/commands/` (9 commands) | Gemini-native TOML command wrappers |
-| Antigravity CLI adapter | `commands/` (9 commands), `plugin.json` | Legacy TOML wrappers and the root plugin manifest; see the [known wrapper limitation](docs/antigravity-setup.md#lifecycle-workflows-and-command-compatibility) |
+| Claude Code adapter | `.claude/commands/` (10 commands), `.claude-plugin/`, `hooks/` | Slash-command wrappers, marketplace metadata, and lifecycle hooks |
+| Gemini CLI adapter | `.gemini/commands/` (10 commands) | Gemini-native TOML command wrappers |
+| Antigravity CLI adapter | `commands/` (10 commands), `plugin.json` | Legacy TOML wrappers and the root plugin manifest; see the [known wrapper limitation](docs/antigravity-setup.md#lifecycle-workflows-and-command-compatibility) |
 | Codex adapter | `.codex-plugin/`, `.agents/plugins/` | Codex plugin metadata and marketplace registration; Codex consumes `skills/` directly |
 | GitHub Copilot CLI adapter | `plugin.json` | Root plugin metadata; Copilot CLI discovers `skills/` by convention and does not register the lifecycle wrappers |
 | Contributor tooling | `scripts/` (13 scripts), `evals/` (25 case files), `.github/workflows/` | Validation, routing evals, and CI |

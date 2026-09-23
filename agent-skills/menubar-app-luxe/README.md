@@ -3,7 +3,7 @@
 Une liste sobre, noire, instantanée. **Compréhensible en 3 secondes** : on cherche,
 on lit, on tire le prompt. Rien d'autre.
 
-- **321 experts** : 131 skills 🛠 · 190 agents 👤 · ✍️ tes prompts · ★ tes favoris
+- **321 experts** : 132 skills 🛠 · 190 agents 👤 · ✍️ tes prompts · ★ tes favoris
 - **Recherche instantanée** dès la première lettre, filtres en un clic
 - **Tout au clavier** : ↑↓ naviguer · ⏎ copier · ⌘⏎ ouvrir (LLM par défaut) ·
   ⇧⏎ ChatGPT · ⌥⏎ composer la sélection · ⌘1-9 favoris · ⌘, réglages
