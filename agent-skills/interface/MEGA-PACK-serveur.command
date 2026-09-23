@@ -6,7 +6,9 @@ DIR="$(cd "$(dirname "$0")" && pwd)"
 if lsof -nP -iTCP:8788 -sTCP:LISTEN >/dev/null 2>&1; then
   echo "Serveur déjà lancé sur le port 8788 ✓"
 else
-  python3 -m http.server 8788 -d "$DIR" >/dev/null 2>&1 &
+  # Bind loopback uniquement : le launcher sert du contenu local sans
+  # authentification — jamais exposé au LAN (audit run-1, finding F-3).
+  python3 -m http.server 8788 --bind 127.0.0.1 -d "$DIR" >/dev/null 2>&1 &
   echo "Serveur lancé : http://localhost:8788 ✓"
 fi
 

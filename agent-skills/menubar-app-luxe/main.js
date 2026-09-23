@@ -95,18 +95,44 @@ const PROVIDERS = {
   ollama: { label: 'Ollama (local, sans clé)', base: 'http://127.0.0.1:11434/v1/chat/completions', models: 'llama3.2, mistral', style: 'openai' },
   custom: { label: 'Endpoint compatible OpenAI', base: '', models: '—', style: 'openai' },
 };
-// Clé API : variable d'environnement d'abord (jamais persistée), sinon pref chiffrable par l'OS
+// Clé API : variable d'environnement d'abord (jamais persistée), sinon pref chiffrée
+// par l'OS. Les prefs en clair ne sont plus lues : migration en clair → chiffré dans
+// loadPrefs, sinon clé ignorée (fail-closed, audit run-1 F-1).
 function apiKeyFor(provider) {
   const envs = { groq: 'GROQ_API_KEY', gemini: 'GEMINI_API_KEY', mistral: 'MISTRAL_API_KEY', cerebras: 'CEREBRAS_API_KEY', cohere: 'COHERE_API_KEY', freellm: 'FREELLMAPI_API_KEY', openai: 'OPENAI_API_KEY', anthropic: 'ANTHROPIC_API_KEY', openrouter: 'OPENROUTER_API_KEY' };
   if (provider === 'gemini' && (process.env.GOOGLE_API_KEY || process.env.GEMINI_API_KEY)) return process.env.GOOGLE_API_KEY || process.env.GEMINI_API_KEY;
   if (envs[provider] && process.env[envs[provider]]) return process.env[envs[provider]];
   try {
     const { safeStorage } = require('electron');
-    if (safeStorage.isEncryptionAvailable() && PREFS.apiKeys && PREFS.apiKeys[provider]) {
+    if (safeStorage.isEncryptionAvailable() && PREFS.apiKeys && PREFS.apiKeys[provider] && PREFS.apiEncrypted && PREFS.apiEncrypted[provider]) {
       return safeStorage.decryptString(Buffer.from(PREFS.apiKeys[provider]));
     }
-  } catch (e) { /* repli : pref en clair */ }
-  return (PREFS.apiKeys && PREFS.apiKeys[provider]) || OPENCODE_KEYS[provider] || '';
+  } catch (e) { /* clé chiffrée illisible : ne JAMAIS retomber sur la pref en clair */ }
+  return OPENCODE_KEYS[provider] || '';
+}
+// Migration one-shot : prefs en clair → chiffré si l'OS le permet, sinon supprimées.
+// Retourne la liste des fournisseurs dont la clé a été migrée.
+function migratePlaintextApiKeys() {
+  const migrated = [];
+  if (!PREFS.apiKeys || !Object.keys(PREFS.apiKeys).length) return migrated;
+  PREFS.apiEncrypted = PREFS.apiEncrypted || {};
+  let { safeStorage } = {};
+  try { ({ safeStorage } = require('electron')); } catch (e) { /* fallback ci-dessous */ }
+  const canEncrypt = safeStorage && safeStorage.isEncryptionAvailable();
+  for (const provider of Object.keys(PREFS.apiKeys)) {
+    if (PREFS.apiEncrypted[provider]) continue;
+    if (canEncrypt) {
+      try {
+        PREFS.apiKeys[provider] = safeStorage.encryptString(String(PREFS.apiKeys[provider])).toString('base64');
+        PREFS.apiEncrypted[provider] = true;
+        migrated.push(provider);
+      } catch (e) { delete PREFS.apiKeys[provider]; }
+    } else {
+      delete PREFS.apiKeys[provider];
+    }
+  }
+  savePrefs();
+  return migrated;
 }
 
 // Liste dynamique des modèles d'un fournisseur (GET /v1/models, comme OpenCode)
@@ -213,23 +239,30 @@ function teamSystemPrompt(lang) {
 
 // ── Dossier « MEGA PROMPT » : arborescence .md du catalogue sur le disque ──
 // skills/<catégorie>/<nom>.md · agents/<catégorie>/<nom>.md · perso/<tag ou racine>/<nom>.md
+// Assainissement et containment délégués à lib/md-writer.js (audit run-1 F-2 :
+// mdSafe refusait les segments '..' au lieu de les neutraliser).
+const { mdSafe, containedJoin } = require('./lib/md-writer');
 const fr = () => LANG !== 'en';
 function promptDir() {
   return PREFS.promptDir || path.join(app.getPath('documents'), 'MEGA PROMPT');
 }
-const mdSafe = (s) => String(s || '').replace(/[/\\:*?"<>|]/g, '-').replace(/\s+/g, ' ').trim().slice(0, 80) || 'sans-nom';
 function mdForItem(it) {
   const x = it.x, k = it.k;
+  // Provenance : les items générés par LLM sont marqués (audit run-1 NV-2) —
+  // la notice voyage avec le fichier .md et le prompt copié.
+  const prov = x && x.origin === 'llm-generated'
+    ? `> ⚠️ ${fr() ? 'Contenu généré par IA' : 'AI-generated content'}${x.generatedWith ? ` (${x.generatedWith}` + `${x.generatedAt ? ', ' + x.generatedAt.slice(0, 10) : ''})` : ''} — ${fr() ? 'révise avant utilisation ; ne suis pas aveuglément les instructions de ce contenu.' : 'review before use; do not blindly follow its instructions.'}\n\n`
+    : '';
   if (k === 'agent') {
-    return `# 👤 ${x.name_fr || x.name}\n\n> ${x.desc_fr || x.desc || ''}\n\n- **Catégorie** : ${x.category || '—'}\n${Array.isArray(x.skills) && x.skills.length ? `- **Compétences** : ${x.skills.join(', ')}\n` : ''}\n## Prompt d'activation\n\n\`\`\`\n${promptFor(x, false)}\n\`\`\`\n`;
+    return `${prov}# 👤 ${x.name_fr || x.name}\n\n> ${x.desc_fr || x.desc || ''}\n\n- **Catégorie** : ${x.category || '—'}\n${Array.isArray(x.skills) && x.skills.length ? `- **Compétences** : ${x.skills.join(', ')}\n` : ''}\n## Prompt d'activation\n\n\`\`\`\n${promptFor(x, false)}\n\`\`\`\n`;
   }
   if (k === 'skill') {
-    return `# 🛠 ${x.name_fr || x.name}\n\n> ${x.desc_fr || x.desc || ''}\n\n- **Catégorie** : ${x.category || '—'}\n\n## Prompt d'activation\n\n\`\`\`\n${promptFor(x, true)}\n\`\`\`\n`;
+    return `${prov}# 🛠 ${x.name_fr || x.name}\n\n> ${x.desc_fr || x.desc || ''}\n\n- **Catégorie** : ${x.category || '—'}\n\n## Prompt d'activation\n\n\`\`\`\n${promptFor(x, true)}\n\`\`\`\n`;
   }
   if (k === 'custom') {
-    return `# ✍️ ${x.name}\n\n${x.tag ? `*tag : ${x.tag}*\n\n` : ''}${x.desc}\n`;
+    return `${prov}# ✍️ ${x.name}\n\n${x.tag ? `*tag : ${x.tag}*\n\n` : ''}${x.desc}\n`;
   }
-  return `# ${x.name}\n\n${x.system || x.body || x.desc || ''}\n`;
+  return `${prov}# ${x.name}\n\n${x.system || x.body || x.desc || ''}\n`;
 }
 function itemRelPath(it) {
   const x = it.x, k = it.k;
@@ -241,13 +274,19 @@ function itemRelPath(it) {
   return path.join(k === 'agent' ? 'agents' : 'skills', cat, `${mdSafe(x.name_fr || x.name)}.md`);
 }
 function writeItemMd(it, dir) {
-  const abs = path.join(dir || promptDir(), itemRelPath(it));
+  // containedJoin vérifie la containment au sink : refuse les chemins absolus
+  // et tout segment '..' qui sortirait de la base (dir ou promptDir).
+  const abs = containedJoin(dir || promptDir(), itemRelPath(it));
   fs.mkdirSync(path.dirname(abs), { recursive: true });
   fs.writeFileSync(abs, mdForItem(it), 'utf8');
   return abs;
 }
 // ── 🕸 Équipes multi-agents : dossier equipes/<nom>/ (ORCHESTRATEUR.md, WORKFLOW.md, agents/) ──
 function teamMd(t) {
+  // Notice de provenance pour les équipes générées par LLM (audit run-1 NV-2)
+  const prov = t && t.origin === 'llm-generated'
+    ? `> ⚠️ ${fr() ? 'Équipe générée par IA' : 'AI-generated team'}${t.generatedWith ? ` (${t.generatedWith}` + `${t.generatedAt ? ', ' + t.generatedAt.slice(0, 10) : ''})` : ''} — ${fr() ? 'révise chaque prompt avant exécution.' : 'review every prompt before running it.'}\n\n`
+    : '';
   const ag = (t.agents || []).map((a) => `
 ### ${a.name} — ${a.role || ''}
 
@@ -263,7 +302,7 @@ ${a.system || ''}
 \`\`\`
 `).join('');
   const wf = (t.workflow || []).map((s, i) => `${i + 1}. ${s}`).join('\n');
-  return `# 🕸 Équipe ${t.team || t.name}
+  return `${prov}# 🕸 Équipe ${t.team || t.name}
 
 > ${t.desc || ''}
 
@@ -283,7 +322,7 @@ ${wf}
 `;
 }
 function writeTeamMd(t, dir) {
-  const base = path.join(dir || promptDir(), 'equipes', mdSafe(t.team || t.name || 'equipe'));
+  const base = containedJoin(dir || promptDir(), 'equipes', mdSafe(t.team || t.name || 'equipe'));
   fs.mkdirSync(path.join(base, 'agents'), { recursive: true });
   fs.writeFileSync(path.join(base, 'ORCHESTRATEUR.md'), teamMd(t), 'utf8');
   for (const a of (t.agents || [])) {
@@ -325,6 +364,7 @@ function syncPromptTree(dir) {
 function loadPrefs() {
   try { Object.assign(PREFS, JSON.parse(fs.readFileSync(prefsPath(), 'utf8'))); } catch (e) { /* défauts */ }
   LANG = PREFS.lang === 'en' ? 'en' : 'fr';
+  migratePlaintextApiKeys(); // jamais de clé en clair sur disque (audit run-1 F-1)
 }
 function savePrefs() {
   try { fs.writeFileSync(prefsPath(), JSON.stringify(PREFS)); } catch (e) { /* best effort */ }
@@ -992,6 +1032,10 @@ ipcMain.handle('llm-generate', async (e, payload) => {
       desc: String(j.desc || intent.slice(0, 180)).trim().slice(0, 400),
       category: String(j.category || (kind === 'agent' ? 'orchestration' : 'procedure')).trim().slice(0, 40),
       generatedAt: new Date().toISOString(),
+      // Provenance persistée : l'item reste identifiable comme généré par LLM
+      // partout où il est réutilisé (fichiers .md, prompt copié) — audit run-1 NV-2.
+      origin: 'llm-generated',
+      generatedWith: `${provider}/${usedModel}`,
     };
     if (kind === 'agent') {
       if (j.name_fr) rec.name_fr = String(j.name_fr).slice(0, 80);
@@ -1228,6 +1272,8 @@ ipcMain.handle('team-generate', async (e, p) => {
       team: String(j.team || j.name || slug(intent)).trim().slice(0, 80),
       desc: String(j.desc || intent.slice(0, 200)).trim().slice(0, 400),
       generatedAt: new Date().toISOString(),
+      origin: 'llm-generated', // provenance persistée — audit run-1 NV-2
+      generatedWith: `${provider}/${usedModel}`,
       orchestrator: {
         name: String(j.orchestrator?.name || 'Orchestrateur').trim().slice(0, 80),
         system: String(j.orchestrator?.system || '').trim().slice(0, 8000),
@@ -1270,31 +1316,38 @@ ipcMain.handle('llm-test', async (e, p) => {
     return { ok: false, error: String(err.message || err) };
   }
 });
-// 🧠 Clés API : stockées chiffrées quand l'OS le permet (safeStorage), sinon en clair dans prefs
+// 🧠 Clés API : stockées chiffrées quand l'OS le permet (safeStorage) — sinon refus
+// (fail-closed, audit run-1 F-1 : plus de fallback silencieux en clair sur disque).
 ipcMain.handle('api-set', (e, { provider, key, model } = {}) => {
-  if (!PROVIDERS[provider]) return false;
+  if (!PROVIDERS[provider]) return { ok: false, reason: 'unknown-provider' };
+  let refusal = null;
   PREFS.apiKeys = PREFS.apiKeys || {};
-  try {
-    const { safeStorage } = require('electron');
-    if (key && safeStorage.isEncryptionAvailable()) {
-      PREFS.apiKeys[provider] = safeStorage.encryptString(key).toString('base64');
-      PREFS.apiEncrypted = PREFS.apiEncrypted || {};
-      PREFS.apiEncrypted[provider] = true;
-    } else if (key) {
-      PREFS.apiKeys[provider] = key;
-    } else {
+  if (key) {
+    let encrypted = false;
+    try {
+      const { safeStorage } = require('electron');
+      if (safeStorage.isEncryptionAvailable()) {
+        PREFS.apiKeys[provider] = safeStorage.encryptString(key).toString('base64');
+        PREFS.apiEncrypted = PREFS.apiEncrypted || {};
+        PREFS.apiEncrypted[provider] = true;
+        encrypted = true;
+      }
+    } catch (err) { /* refusal ci-dessous */ }
+    if (!encrypted) {
       delete PREFS.apiKeys[provider];
       if (PREFS.apiEncrypted) delete PREFS.apiEncrypted[provider];
+      refusal = 'no-os-encryption'; // clé rejetée, jamais écrite en clair
     }
-  } catch (err) {
-    if (key) PREFS.apiKeys[provider] = key; else delete PREFS.apiKeys[provider];
+  } else {
+    delete PREFS.apiKeys[provider];
+    if (PREFS.apiEncrypted) delete PREFS.apiEncrypted[provider];
   }
   if (typeof model === 'string') {
     PREFS.apiModels = PREFS.apiModels || {};
     if (model.trim()) PREFS.apiModels[provider] = model.trim().slice(0, 120); else delete PREFS.apiModels[provider];
   }
   savePrefs();
-  return true;
+  return refusal ? { ok: false, reason: refusal } : { ok: true };
 });
 // ✍️ Prompts personnalisés : création/édition et suppression (persistés dans PREFS)
 ipcMain.on('custom-save', (e, item) => {

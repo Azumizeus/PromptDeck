@@ -35,6 +35,11 @@ for f in main.js preload.js renderer.js index.html settings.html settings.js \
          iconTemplate.png iconTemplate@2x.png package.json; do
   [ -f "$f" ] && cp "$f" "$APP_DIR/"
 done
+# lib/ (modules requis par main.js : md-writer pour le containment des .md)
+if [ -d lib ]; then
+  mkdir -p "$APP_DIR/lib"
+  for f in lib/*.js; do [ -f "$f" ] && cp "$f" "$APP_DIR/lib/"; done
+fi
 # node_modules de production uniquement (auto-launch)
 mkdir -p "$APP_DIR/node_modules"
 for dep in auto-launch; do

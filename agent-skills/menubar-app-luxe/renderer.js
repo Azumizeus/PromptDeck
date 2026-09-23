@@ -188,12 +188,18 @@ try { window.mgp.onSettings((p) => { if (p && p.defaultLLM) { DEFAULT_LLM = p.de
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const lname = (x) => LANG === 'en' ? (x.name_en || x.name) : (x.name_fr || x.name);
 const ldesc = (x) => LANG === 'en' ? (x.desc_en || x.desc) : (x.desc_fr || x.desc);
+// Provenance : les items générés par LLM portent une notice de confiance quand
+// leur prompt est copié (audit run-1 NV-2) — même principal, contenu non vérifié.
+const provenanceNotice = (x) => x && x.origin === 'llm-generated'
+  ? `[Contenu généré par IA — révise-le avant de l'exécuter tel quel]\n\n`
+  : '';
 function promptOf(x, k) {
   const n = lname(x), d = (ldesc(x) || '').trim();
-  if (k === 'custom') return `${n}\n\n${d}`;
-  if (k === 'team') return teamPromptOf(x);
-  if (k === 'agent') return `Agis désormais comme l'agent "${n}". ${d}\nUtilise cette expertise pour répondre à ma demande ci-dessous.\n\n`;
-  return `Utilise le skill "${n}" (${CAT.meta?.name || 'MEGA PACK'}). ${d}\nApplique-le à ma demande ci-dessous.\n\n`;
+  const prov = provenanceNotice(x);
+  if (k === 'custom') return `${prov}${n}\n\n${d}`;
+  if (k === 'team') return provenanceNotice(x._t || x) + teamPromptOf(x);
+  if (k === 'agent') return `${prov}Agis désormais comme l'agent "${n}". ${d}\nUtilise cette expertise pour répondre à ma demande ci-dessous.\n\n`;
+  return `${prov}Utilise le skill "${n}" (${CAT.meta?.name || 'MEGA PACK'}). ${d}\nApplique-le à ma demande ci-dessous.\n\n`;
 }
 // 🕸 Équipe multi-agents : le prompt copié EST le protocole complet (orchestrateur + agents + workflow)
 function teamPromptOf(x) {

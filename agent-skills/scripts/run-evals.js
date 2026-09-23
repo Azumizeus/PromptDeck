@@ -22,6 +22,9 @@
  *     workspace. Execution evals materialize files[] fixtures and grade the
  *     full stream-json trace; dialogue evals need no fixture and grade the
  *     conversational turns. --dry-run prints the plan without executing.
+ *     The executor and grader run inside an OS network sandbox (loopback-only
+ *     outbound via sandbox-exec on macOS); on platforms without sandbox
+ *     support the run is refused unless --allow-network is passed explicitly.
  *
  * Zero dependencies. Exit code 1 on any error-level failure.
  */
@@ -47,6 +50,37 @@ const GRADER_TIMEOUT_MS = 5 * 60 * 1000;
 // can perform the skill instead of narrating it. Tier 3 is opt-in and spends
 // tokens; review this list if your fixtures invoke anything unusual.
 const EXECUTOR_TOOLS = 'Read,Glob,Grep,Edit,Write,Bash,WebFetch,WebSearch';
+
+// ---------- tier 3 network sandbox ----------
+// The Tier-3 executor runs `claude -p` with Bash/WebFetch/WebSearch: without
+// a network policy it could reach arbitrary hosts (run-1 needs_validation
+// finding). Wrap it in an OS sandbox that denies all outbound traffic except
+// loopback TCP (local client/server checks) and local unix sockets. On
+// platforms with no sandbox support the run is refused unless the user
+// passes --allow-network explicitly (never acceptable in CI).
+const NET_SB_PROFILE = [
+  '(version 1)',
+  '(allow default)',
+  '(deny network-outbound)',
+  '(allow network-outbound (remote tcp "localhost:*"))',
+  '(allow network-outbound (remote unix-socket))',
+].join('\n');
+
+function networkWrapped(cmd, args, { platform = process.platform, sandboxExecPath = '/usr/bin/sandbox-exec', allowNetwork = false, tmpDir = os.tmpdir() } = {}) {
+  if (allowNetwork) return { cmd, args, sandboxed: false };
+  if (platform === 'darwin' && fs.existsSync(sandboxExecPath)) {
+    const profilePath = path.join(tmpDir, `agent-skills-net-${process.pid}.sb`);
+    fs.writeFileSync(profilePath, `${NET_SB_PROFILE}\n`, { mode: 0o600 });
+    return { cmd: sandboxExecPath, args: ['-f', profilePath, cmd, ...args], sandboxed: true, profilePath };
+  }
+  return null;
+}
+
+function cleanupNetworkWrapper(wrapped) {
+  if (wrapped && wrapped.profilePath) {
+    try { fs.rmSync(wrapped.profilePath, { force: true }); } catch { /* best-effort */ }
+  }
+}
 
 // Required minimums per case file (evals/README.md).
 const MIN_POSITIVE = 3;
@@ -478,7 +512,7 @@ function parseGrading(raw, expectations) {
 // resolve to files outside the project tree for both reads and writes.
 const VALID_SKILL_NAME = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 
-function runBehavioral(skillName, dryRun) {
+function runBehavioral(skillName, dryRun, allowNetwork = false) {
   if (!skillName || !VALID_SKILL_NAME.test(skillName)) {
     console.error(`Invalid skill name: "${skillName}" — must be kebab-case (e.g. "my-skill")`);
     process.exit(1);
@@ -516,7 +550,25 @@ function runBehavioral(skillName, dryRun) {
         ? 'dialogue transcript; no fixture required'
         : `execution trace in workspace + ${fixtures} fixture(s)`;
       console.log(`[dry-run] eval ${ev.id}: ${artifact}; claude -p --verbose --output-format stream-json --permission-mode acceptEdits --allowedTools ${EXECUTOR_TOOLS} --append-system-prompt <${skillName}/SKILL.md> < prompt-on-stdin`);
+      console.log(`[dry-run] network: ${allowNetwork ? 'unrestricted (--allow-network)' : 'sandbox-exec — loopback-only outbound'}`);
       continue;
+    }
+    // Refuse early (before creating the throwaway workspace) when the
+    // platform cannot enforce the network policy.
+    const execArgs = ['-p', '--verbose', '--output-format', 'stream-json',
+      '--permission-mode', 'acceptEdits',
+      '--allowedTools', EXECUTOR_TOOLS,
+      '--append-system-prompt', `Follow this skill exactly:\n\n${fs.readFileSync(skillFile, 'utf8')}`];
+    const wrappedExec = networkWrapped('claude', execArgs, { allowNetwork });
+    let wrappedGrade = null; // assigné après l'executor ; cleanup TDZ-safe
+    if (!wrappedExec) {
+      console.error([
+        'Tier-3 behavioral evals run an agent with Bash/WebFetch — an OS network sandbox is required.',
+        '  macOS: /usr/bin/sandbox-exec is used automatically (loopback-only outbound).',
+        `  This platform (${process.platform}) has no network sandbox support here;`,
+        '  re-run with --allow-network to accept unrestricted executor network access (never in CI).',
+      ].join('\n'));
+      process.exit(1);
     }
     const workspace = kind === 'dialogue'
       ? fs.mkdtempSync(path.join(os.tmpdir(), 'agent-skills-dialogue-eval-'))
@@ -528,13 +580,12 @@ function runBehavioral(skillName, dryRun) {
     // edit files and run commands in the throwaway workspace; without it,
     // headless denials would force the exact narrate-instead-of-perform
     // failure mode that trace grading exists to catch.
+    // Executor + grader inherit the loopback-only network policy (see
+    // networkWrapped above). The grader needs no network at all.
     try {
     const trace = execFileSync(
-      'claude',
-      ['-p', '--verbose', '--output-format', 'stream-json',
-        '--permission-mode', 'acceptEdits',
-        '--allowedTools', EXECUTOR_TOOLS,
-        '--append-system-prompt', `Follow this skill exactly:\n\n${fs.readFileSync(skillFile, 'utf8')}`],
+      wrappedExec.cmd,
+      wrappedExec.args,
       { input: ev.prompt, encoding: 'utf8', maxBuffer: 64 * 1024 * 1024, cwd: workspace, timeout: EXECUTOR_TIMEOUT_MS },
     );
     const gradingInstructions = kind === 'dialogue'
@@ -555,7 +606,8 @@ function runBehavioral(skillName, dryRun) {
     ].join('\n\n');
     // The trace can be megabytes; pass the grader prompt via stdin, never
     // argv, or it would blow past the OS argument-size limit (E2BIG).
-    const raw = execFileSync('claude', ['-p'], { input: graderPrompt, encoding: 'utf8', maxBuffer: 16 * 1024 * 1024, timeout: GRADER_TIMEOUT_MS });
+    wrappedGrade = networkWrapped('claude', ['-p'], { allowNetwork });
+    const raw = execFileSync(wrappedGrade.cmd, wrappedGrade.args, { input: graderPrompt, encoding: 'utf8', maxBuffer: 16 * 1024 * 1024, timeout: GRADER_TIMEOUT_MS });
     const grading = parseGrading(raw, ev.expectations);
     const base = path.join(RESULTS_DIR, `${skillName}.eval-${ev.id}`);
     if (!grading) {
@@ -569,8 +621,10 @@ function runBehavioral(skillName, dryRun) {
     if (grading.summary.passed < grading.summary.total) failures++;
     } finally {
       // Clean up throwaway workspace to prevent leaking fixture data
-      // into world-readable temp directories.
+      // into world-readable temp directories, and the sandbox profile.
       try { fs.rmSync(workspace, { recursive: true, force: true }); } catch { /* best-effort */ }
+      cleanupNetworkWrapper(wrappedExec);
+      cleanupNetworkWrapper(wrappedGrade);
     }
   }
   process.exit(failures ? 1 : 0);
@@ -595,7 +649,7 @@ function main(args = process.argv.slice(2)) {
       console.error('--min-rank1 applies only to deterministic evals');
       process.exit(1);
     }
-    runBehavioral(args[bIdx + 1], args.includes('--dry-run'));
+    runBehavioral(args[bIdx + 1], args.includes('--dry-run'), args.includes('--allow-network'));
   } else {
     runDeterministic(minRank1);
   }
@@ -603,4 +657,4 @@ function main(args = process.argv.slice(2)) {
 
 if (require.main === module) main();
 
-module.exports = { materializeWorkspace, parseGrading };
+module.exports = { materializeWorkspace, parseGrading, networkWrapped, cleanupNetworkWrapper, NET_SB_PROFILE };
