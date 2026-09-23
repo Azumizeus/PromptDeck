@@ -1,0 +1,42 @@
+{
+  "skill_name": "solana-anchor-claude-skill",
+  "trigger": {
+    "positive": [
+      {
+        "prompt": "Configure Anchor.toml and write the TypeScript test suite for my Anchor workspace",
+        "top_k": 3
+      },
+      {
+        "prompt": "Add an account constraint to my Anchor instruction to prevent substitution attacks",
+        "top_k": 3
+      },
+      {
+        "prompt": "Refactor my Anchor program files so the code is minimal and reusable without duplication",
+        "top_k": 3
+      }
+    ],
+    "negative": [
+      {
+        "prompt": "Integrate a Jupiter swap route in my frontend",
+        "owner": "solana-dev"
+      },
+      {
+        "prompt": "Design the token economy of a play-and-own web game",
+        "owner": "solana-game"
+      }
+    ]
+  },
+  "evals": [
+    {
+      "id": 1,
+      "kind": "dialogue",
+      "prompt": "My Anchor instruction lets two escrow accounts be swapped mid-flight. Add the right constraint.",
+      "expected_output": "An Anchor account-constraints fix (has_one / seeds / bump) with a regression test, minimal and reusable",
+      "expectations": [
+        "The constraint targets the exact account substitution risk named",
+        "A TypeScript test proves the attack is now rejected",
+        "No unrelated refactor is bundled into the fix"
+      ]
+    }
+  ]
+}

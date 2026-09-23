@@ -1,0 +1,38 @@
+{
+  "skill_name": "solana-game",
+  "trigger": {
+    "positive": [
+      {
+        "prompt": "Build a Solana game with Unity where items and progression are on-chain",
+        "top_k": 3
+      },
+      {
+        "prompt": "Design the play-and-own economy of my web game with NFT rewards on Solana",
+        "top_k": 3
+      },
+      {
+        "prompt": "Integrate the Mobile Wallet Adapter into my React Native Solana game",
+        "top_k": 3
+      }
+    ],
+    "negative": [    {"prompt": "Add a deploy stage to the pipeline with a manual approval gate", "owner": "ci-cd-and-automation"},
+      {
+        "prompt": "Write an Anchor program for a Solana escrow",
+        "owner": "solana-anchor-claude-skill"
+      }
+    ]
+  },
+  "evals": [
+    {
+      "id": 1,
+      "kind": "dialogue",
+      "prompt": "My players must own their in-game items as NFTs on Solana. Sketch the architecture.",
+      "expected_output": "A game architecture with the NFT mint/update flow, wallet sessions, and transaction patterns appropriate to mobile and web",
+      "expectations": [
+        "The NFT ownership flow uses the right Metaplex/SDK building blocks",
+        "Session keys or wallet adapter choice is justified for a game loop",
+        "Program work is delegated appropriately instead of reinventing Anchor patterns"
+      ]
+    }
+  ]
+}

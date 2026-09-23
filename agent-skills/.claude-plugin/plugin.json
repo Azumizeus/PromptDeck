@@ -1,7 +1,7 @@
 {
   "name": "agent-skills",
-  "version": "0.7.0",
-  "description": "MEGA PACK: engineering lifecycle skills + 46 Solana protocol skills + 7 game-design skills + 190 agent personas.",
+  "version": "0.7.2",
+  "description": "MEGA PACK: engineering lifecycle skills + 46 Solana protocol skills + 7 game-design skills + 190 agent personas + Cloudflare security-audit skill.",
   "author": {
     "name": "Addy Osmani"
   },

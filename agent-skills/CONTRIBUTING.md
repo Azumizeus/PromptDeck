@@ -82,7 +82,7 @@ We don't accept translations of the documentation (README, `docs/`) or of skills
 
 ## Testing Hooks
 
-The session-start hook (`hooks/session-start.sh`) injects the `using-agent-skills` meta-skill into every new Claude Code session. A regression test at `hooks/session-start-test.sh` validates the hook's JSON payload — both when `jq` is available and when it isn't.
+The session-start script (`hooks/session-start.sh`) injects the `using-agent-skills` meta-skill when wired into a host's `SessionStart` hook. The Claude Code plugin does not register it — Claude Code routes skills natively, and always-on injection would create two routers for the same task (see [docs/getting-started.md](docs/getting-started.md)); the script remains for hosts without native skill routing. A regression test at `hooks/session-start-test.sh` validates the script's JSON payload — both when `jq` is available and when it isn't.
 
 Run it before opening any PR that touches:
 
@@ -97,7 +97,7 @@ Expected output: `session-start JSON payload OK`. The script exits non-zero on a
 
 ### Reproducing the no-jq fallback
 
-The hook gracefully degrades to an `INFO`-priority payload when `jq` isn't on `PATH`. To exercise that branch locally, strip `jq`'s directory from `PATH` for the test invocation:
+The hook still emits the same `hookSpecificOutput` envelope when `jq` isn't on `PATH`, with `additionalContext` explaining that `jq` is required. To exercise that branch locally, strip `jq`'s directory from `PATH` for the test invocation:
 
 ```bash
 JQ_DIR=$(dirname "$(command -v jq)")
@@ -107,7 +107,7 @@ PATH=$(echo "$PATH" | tr ':' '\n' | grep -v "^${JQ_DIR}$" | tr '\n' ':' | sed 's
 
 This works cleanly when `jq` lives in its own directory (e.g. `/opt/homebrew/bin` from Homebrew, `/usr/local/bin` from a manual install). If your `jq` shares a system bin with other tools the test depends on (such as `mktemp` in `/usr/bin`), the simpler approach is to install `jq` via a separate package manager so it has its own bin directory, then re-run.
 
-The hook's `command -v jq` check fails under the stripped `PATH`, the `INFO`-priority fallback runs, and the test asserts the `jq is required` guidance message instead of the normal payload.
+The hook's `command -v jq` check fails under the stripped `PATH`, the jq-missing fallback runs, and the test asserts the `jq is required` guidance in `additionalContext` instead of the meta-skill body.
 
 ## Reporting Issues
 

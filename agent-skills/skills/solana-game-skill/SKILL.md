@@ -1,6 +1,6 @@
 ---
 name: solana-game
-description: Solana game development with Unity, React Native, and web. Extends solana-dev-skill with gaming-specific patterns including Solana.Unity-SDK, Mobile Wallet Adapter, PlaySolana/PSG1, wallet integration, NFT systems, transaction building, and game architecture. For program development (Anchor, Pinocchio), delegates to core solana-dev skill.
+description: Use when building a game on Solana — Unity, React Native, or web titles where gameplay loops, player progression, or in-game economies must integrate with the blockchain. Gaming-specific patterns this skill covers that core Solana development does not: Solana.Unity-SDK for Unity, Mobile Wallet Adapter session keys, PlaySolana/PSG1, in-game NFT item systems, token-gated content, on-chain leaderboards and progression, and transaction flows tuned for game feel (batching, latency, failover). Use the core solana-dev skill instead for wallets, RPC, Anchor/Pinocchio programs, and dapp plumbing with no gameplay surface.
 user-invocable: true
 ---
 

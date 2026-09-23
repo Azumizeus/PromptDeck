@@ -1,0 +1,57 @@
+{
+  "skill_name": "security-audit",
+  "trigger": {
+    "positive": [
+      {
+        "prompt": "security audit this codebase",
+        "top_k": 3
+      },
+      {
+        "prompt": "find security vulnerabilities in ./src",
+        "top_k": 3
+      },
+      {
+        "prompt": "do a security review of the authentication flow and output findings",
+        "top_k": 3
+      },
+      {
+        "prompt": "pen-test the login flow of this app and report confirmed vulnerabilities",
+        "top_k": 3
+      }
+    ],
+    "negative": [
+      {
+        "prompt": "Harden the input validation of the signup form while implementing it",
+        "owner": "security-and-hardening"
+      },
+      {
+        "prompt": "Review this pull request for code quality",
+        "owner": "code-review-and-quality"
+      }
+    ]
+  },
+  "evals": [
+    {
+      "id": 1,
+      "kind": "dialogue",
+      "prompt": "Is this CORS configuration exploitable? Quick question, no report needed.",
+      "expected_output": "Guidance-mode analysis of the trust boundary with a bounded answer and no audit artifacts written",
+      "expectations": [
+        "No full six-phase audit is run and no output directory is created",
+        "The answer distinguishes an established boundary failure from a hardening note",
+        "Facts that cannot be established from source are marked needs_validation"
+      ]
+    },
+    {
+      "id": 2,
+      "kind": "dialogue",
+      "prompt": "Audit the auth flow of this repo and report confirmed vulnerabilities with evidence.",
+      "expected_output": "Reconnaissance, coverage-led hunting, adversarially validated findings, and a report where confirmed findings carry source evidence and severity",
+      "expectations": [
+        "Each confirmed finding cites concrete source evidence and an affected principal or security outcome",
+        "The agent that validates a finding is not the agent that found it",
+        "Unproven candidates stay needs_validation with the exact unresolved fact and no severity"
+      ]
+    }
+  ]
+}

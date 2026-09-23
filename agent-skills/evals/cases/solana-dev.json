@@ -1,0 +1,42 @@
+{
+  "skill_name": "solana-dev",
+  "trigger": {
+    "positive": [
+      {
+        "prompt": "Build a Solana dapp end to end: wallet connection, program, tests, deploy to devnet",
+        "top_k": 3
+      },
+      {
+        "prompt": "Which Solana client library should I use from TypeScript and how do I connect to devnet?",
+        "top_k": 3
+      },
+      {
+        "prompt": "Explain Solana concepts my team keeps asking about: rent, accounts, PDAs and CPIs",
+        "top_k": 3
+      }
+    ],
+    "negative": [
+      {
+        "prompt": "Configure Anchor.toml and write the TypeScript test suite for my Anchor workspace",
+        "owner": "solana-anchor-claude-skill"
+      },
+      {
+        "prompt": "Handle the in-game wallet session of my Solana game client",
+        "owner": "solana-game"
+      }
+    ]
+  },
+  "evals": [
+    {
+      "id": 1,
+      "kind": "dialogue",
+      "prompt": "Set up my first Solana dapp: connect a Phantom wallet, call a program on devnet, and show the balance.",
+      "expected_output": "A working wallet connection, a devnet program call, and a balance read with the recommended client stack",
+      "expectations": [
+        "The recommended TypeScript client stack is current and justified",
+        "The devnet flow includes airdrop/funding and error handling",
+        "Security checklist items (no private keys in client code) are respected"
+      ]
+    }
+  ]
+}
