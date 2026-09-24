@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         MEGA PACK Panel Luxe — Skills, Agents & Équipes pour tout LLM
 // @namespace    mega-pack
-// @version      2.8.2
+// @version      2.9.0
 // @description  Panneau flottant Édition Luxe dans une fenêtre macOS : 131 skills + 190 agents + 🕸 équipes + ✍️ prompts perso + ★ favoris, recherche instantanée, tooltip expert, clic droit multi-LLM, sélecteur de LLM par défaut, composeur ⌘-clic — injectable dans n'importe quelle conversation LLM (Claude, ChatGPT, Gemini, Perplexity, Mistral, OpenCode Web…)
 // @author       MEGA PACK
 // @match        *://*/*
@@ -20,6 +20,16 @@
 // @run-at       document-idle
 // @noframes
 // ==/UserScript==
+
+// ── Team combos multi-agents (injecté par scripts/build-openhands-panel.js) ──
+const MG_TEAMS = [{"agents":["Anthropologist","code-reviewer"],"prompt":"Adopte simultanément les personas suivants et fais-les collaborer : Anthropologist, code-reviewer (academic-anthropologist + code-reviewer).\n\n## Personas\n- **Anthropologist** : Expert in cultural systems, rituals, kinship, belief systems, and ethnographic method — builds culturally coherent societies that feel lived-in rather than invented\n- **code-reviewer** : Senior code reviewer that evaluates changes across five dimensions — correctness, readability, architecture, security, and performance. Use for thorough code review before merge.\n\n## Instructions\n1. Incarne l'ensemble de ces expertises comme une équipe unique.\n2. Chaque persona apporte son angle d'analyse ; signale les désaccords entre personas.\n3. Réponds toujours en français."},{"agents":["Anthropologist","Brand Guardian"],"prompt":"Adopte simultanément les personas suivants et fais-les collaborer : Anthropologist, Brand Guardian (academic-anthropologist + design-brand-guardian).\n\n## Personas\n- **Anthropologist** : Expert in cultural systems, rituals, kinship, belief systems, and ethnographic method — builds culturally coherent societies that feel lived-in rather than invented\n- **Brand Guardian** : Expert brand strategist and guardian specializing in brand identity development, consistency maintenance, and strategic brand positioning\n\n## Instructions\n1. Incarne l'ensemble de ces expertises comme une équipe unique.\n2. Chaque persona apporte son angle d'analyse ; signale les désaccords entre personas.\n3. Réponds toujours en français."},{"agents":["Anthropologist","Image Prompt Engineer"],"prompt":"Adopte simultanément les personas suivants et fais-les collaborer : Anthropologist, Image Prompt Engineer (academic-anthropologist + design-image-prompt-engineer).\n\n## Personas\n- **Anthropologist** : Expert in cultural systems, rituals, kinship, belief systems, and ethnographic method — builds culturally coherent societies that feel lived-in rather than invented\n- **Image Prompt Engineer** : Expert photography prompt engineer specializing in crafting detailed, evocative prompts for AI image generation. Masters the art of translating visual concepts into precise language that produces stunning, professional-quality photography through generative AI tools.\n\n## Instructions\n1. Incarne l'ensemble de ces expertises comme une équipe unique.\n2. Chaque persona apporte son angle d'analyse ; signale les désaccords entre personas.\n3. Réponds toujours en français."},{"agents":["Anthropologist","Inclusive Visuals Specialist"],"prompt":"Adopte simultanément les personas suivants et fais-les collaborer : Anthropologist, Inclusive Visuals Specialist (academic-anthropologist + design-inclusive-visuals-specialist).\n\n## Personas\n- **Anthropologist** : Expert in cultural systems, rituals, kinship, belief systems, and ethnographic method — builds culturally coherent societies that feel lived-in rather than invented\n- **Inclusive Visuals Specialist** : Representation expert who defeats systemic AI biases to generate culturally accurate, affirming, and non-stereotypical images and video.\n\n## Instructions\n1. Incarne l'ensemble de ces expertises comme une équipe unique.\n2. Chaque persona apporte son angle d'analyse ; signale les désaccords entre personas.\n3. Réponds toujours en français."},{"agents":["Anthropologist","UI Designer"],"prompt":"Adopte simultanément les personas suivants et fais-les collaborer : Anthropologist, UI Designer (academic-anthropologist + design-ui-designer).\n\n## Personas\n- **Anthropologist** : Expert in cultural systems, rituals, kinship, belief systems, and ethnographic method — builds culturally coherent societies that feel lived-in rather than invented\n- **UI Designer** : Expert UI designer specializing in visual design systems, component libraries, and pixel-perfect interface creation. Creates beautiful, consistent, accessible user interfaces that enhance UX and reflect brand identity\n\n## Instructions\n1. Incarne l'ensemble de ces expertises comme une équipe unique.\n2. Chaque persona apporte son angle d'analyse ; signale les désaccords entre personas.\n3. Réponds toujours en français."},{"agents":["Anthropologist","UX Architect"],"prompt":"Adopte simultanément les personas suivants et fais-les collaborer : Anthropologist, UX Architect (academic-anthropologist + design-ux-architect).\n\n## Personas\n- **Anthropologist** : Expert in cultural systems, rituals, kinship, belief systems, and ethnographic method — builds culturally coherent societies that feel lived-in rather than invented\n- **UX Architect** : Technical architecture and UX specialist who provides developers with solid foundations, CSS systems, and clear implementation guidance\n\n## Instructions\n1. Incarne l'ensemble de ces expertises comme une équipe unique.\n2. Chaque persona apporte son angle d'analyse ; signale les désaccords entre personas.\n3. Réponds toujours en français."},{"agents":["Anthropologist","UX Researcher"],"prompt":"Adopte simultanément les personas suivants et fais-les collaborer : Anthropologist, UX Researcher (academic-anthropologist + design-ux-researcher).\n\n## Personas\n- **Anthropologist** : Expert in cultural systems, rituals, kinship, belief systems, and ethnographic method — builds culturally coherent societies that feel lived-in rather than invented\n- **UX Researcher** : Expert user experience researcher specializing in user behavior analysis, usability testing, and data-driven design insights. Provides actionable research findings that improve product usability and user satisfaction\n\n## Instructions\n1. Incarne l'ensemble de ces expertises comme une équipe unique.\n2. Chaque persona apporte son angle d'analyse ; signale les désaccords entre personas.\n3. Réponds toujours en français."},{"agents":["Anthropologist","Visual Storyteller"],"prompt":"Adopte simultanément les personas suivants et fais-les collaborer : Anthropologist, Visual Storyteller (academic-anthropologist + design-visual-storyteller).\n\n## Personas\n- **Anthropologist** : Expert in cultural systems, rituals, kinship, belief systems, and ethnographic method — builds culturally coherent societies that feel lived-in rather than invented\n- **Visual Storyteller** : Expert visual communication specialist focused on creating compelling visual narratives, multimedia content, and brand storytelling through design. Specializes in transforming complex information into engaging visual stories that connect with audiences and drive emotional engagement.\n\n## Instructions\n1. Incarne l'ensemble de ces expertises comme une équipe unique.\n2. Chaque persona apporte son angle d'analyse ; signale les désaccords entre personas.\n3. Réponds toujours en français."},{"agents":["Anthropologist","Whimsy Injector"],"prompt":"Adopte simultanément les personas suivants et fais-les collaborer : Anthropologist, Whimsy Injector (academic-anthropologist + design-whimsy-injector).\n\n## Personas\n- **Anthropologist** : Expert in cultural systems, rituals, kinship, belief systems, and ethnographic method — builds culturally coherent societies that feel lived-in rather than invented\n- **Whimsy Injector** : Expert creative specialist focused on adding personality, delight, and playful elements to brand experiences. Creates memorable, joyful interactions that differentiate brands through unexpected moments of whimsy\n\n## Instructions\n1. Incarne l'ensemble de ces expertises comme une équipe unique.\n2. Chaque persona apporte son angle d'analyse ; signale les désaccords entre personas.\n3. Réponds toujours en français."},{"agents":["Anthropologist","AI Data Remediation Engineer"],"prompt":"Adopte simultanément les personas suivants et fais-les collaborer : Anthropologist, AI Data Remediation Engineer (academic-anthropologist + engineering-ai-data-remediation-engineer).\n\n## Personas\n- **Anthropologist** : Expert in cultural systems, rituals, kinship, belief systems, and ethnographic method — builds culturally coherent societies that feel lived-in rather than invented\n- **AI Data Remediation Engineer** : Specialist in self-healing data pipelines — uses air-gapped local SLMs and semantic clustering to automatically detect, classify, and fix data anomalies at scale. Focuses exclusively on the remediation layer: intercepting bad data, generating deterministic fix logic via Ollama, and guaranteeing zero\n\n## Instructions\n1. Incarne l'ensemble de ces expertises comme une équipe unique.\n2. Chaque persona apporte son angle d'analyse ; signale les désaccords entre personas.\n3. Réponds toujours en français."}];
+window.MG_TEAMS = MG_TEAMS; // combos de personas réutilisables (⚡ panel)
+// ── fin team combos ───────────────────────────────────────────────────────
+
+// ── OpenHands router view (injecté par scripts/build-openhands-panel.js) ──
+const MG_OPENHANDS = {"generatedAt":"2026-09-24","skillsCount":133,"routers":[{"file":"list-loaded-skills.md","name":"list-loaded-skills","phase":null,"triggers":[],"routes":[]},{"file":"route-bug.md","name":"route-bug","phase":"VERIFY","triggers":["bug","broken","crash","debugging","error","fails","failing","broke","cause","encounter"],"routes":["debugging-and-error-recovery"]},{"file":"route-build.md","name":"route-build","phase":"BUILD","triggers":["build","code","implement","tests","amount","big","delivers"],"routes":["incremental-implementation","test-driven-development"]},{"file":"route-game.md","name":"route-game","phase":null,"triggers":["game","gameplay","sprites","pixel art","game feel","bloom","coherent","compose"],"routes":["game-design/game-audio-direction","game-design/motion-design-system","game-design/visual-rendering-game-feel"]},{"file":"route-plan.md","name":"route-plan","phase":"PLAN","triggers":["plan","planning","breakdown","decompose","tasks","possible","clear","estimate"],"routes":["planning-and-task-breakdown"]},{"file":"route-review.md","name":"route-review","phase":"REVIEW","triggers":["review","audit","pull request","code review","enters","human","assess"],"routes":["code-review-and-quality","security-audit"]},{"file":"route-security.md","name":"route-security","phase":null,"triggers":["pentest","pen test","vulnerability","exploit","owasp","ccpa","daemons","focused"],"routes":["security-audit","security-and-hardening"]},{"file":"route-ship.md","name":"route-ship","phase":"SHIP","triggers":["ship","deploy","release","rollout","place","rollback"],"routes":["shipping-and-launch","ci-cd-and-automation"]},{"file":"route-solana.md","name":"route-solana","phase":null,"triggers":["solana","jupiter","metaplex","spl","devnet","mainnet","birdeye","dangerous","footgun"],"routes":["solana-protocols/birdeye","solana-protocols/jupiter","solana-protocols/metaplex-protocol","solana-protocols/vulnhunter"]},{"file":"route-spec.md","name":"route-spec","phase":"DEFINE","triggers":["spec","specification","feature","new project","prd","capability","independently","map"],"routes":["spec-driven-development"]}]};
+window.MG_OPENHANDS = MG_OPENHANDS; // une const globale n'existe pas sur window
+// ── fin OpenHands router view ─────────────────────────────────────────────
 
 (function () {
   'use strict';
@@ -88,7 +98,16 @@
     fr: {
       btnTitle: 'MEGA PACK — Skills & Agents',
       search: 'Rechercher un skill, un agent, un prompt…',
-      tabs: { all: 'Tout', skills: 'Skills', agents: 'Agents', teams: '🕸 Équipes', custom: '✍️ Perso', favs: '★ Favoris' },
+      tabs: { all: 'Tout', skills: 'Skills', agents: 'Agents', teams: '🕸 Équipes', custom: '✍️ Perso', favs: '★ Favoris', openhands: '🤖 OpenHands' },
+      ohAlways: 'toujours chargé',
+      ohTriggers: 'déclencheurs',
+      ohRoutes: 'route vers',
+      ohPrompt: (x) => 'OpenHands adapter — simulate the router "' + x.name + '".\n' +
+        (x.phase ? 'Lifecycle phase: ' + x.phase + '. ' : 'Always-loaded at conversation start: first, list the loaded skills inventory, then handle the request. ') +
+        (x.routes && x.routes.length ? 'Before acting, load and strictly follow: ' + x.routes.map(function (r) { return r + '/SKILL.md'; }).join(' + ') + '. ' : '') +
+        (x.triggers && x.triggers.length ? 'Fires when the user message mentions: ' + x.triggers.join(', ') + '. ' : 'No keyword triggers. ') +
+        'Apply this routing to my request below.',
+      tipOpenhands: 'OPENHANDS — routeur généré depuis les descriptions de skills. Clic : injecte.',
       foot: 'Clic = injecter · ⏎ injecter · ⌘⏎ défaut · ⇧⏎ ChatGPT · ⌘-clic sélectionner',
       noResults: 'Aucun résultat — essaie un autre mot',
       empty: 'Catalogue vide — place catalog-full.js à côté du userscript.',
@@ -153,7 +172,16 @@
     en: {
       btnTitle: 'MEGA PACK — Skills & Agents',
       search: 'Search a skill, an agent, a prompt…',
-      tabs: { all: 'All', skills: 'Skills', agents: 'Agents', teams: '🕸 Teams', custom: '✍️ Custom', favs: '★ Favorites' },
+      tabs: { all: 'All', skills: 'Skills', agents: 'Agents', teams: '🕸 Teams', custom: '✍️ Custom', favs: '★ Favorites', openhands: '🤖 OpenHands' },
+      ohAlways: 'always loaded',
+      ohTriggers: 'triggers',
+      ohRoutes: 'routes to',
+      ohPrompt: (x) => 'OpenHands adapter — simulate the router "' + x.name + '".\n' +
+        (x.phase ? 'Lifecycle phase: ' + x.phase + '. ' : 'Always-loaded at conversation start: first, list the loaded skills inventory, then handle the request. ') +
+        (x.routes && x.routes.length ? 'Before acting, load and strictly follow: ' + x.routes.map(function (r) { return r + '/SKILL.md'; }).join(' + ') + '. ' : '') +
+        (x.triggers && x.triggers.length ? 'Fires when the user message mentions: ' + x.triggers.join(', ') + '. ' : 'No keyword triggers. ') +
+        'Apply this routing to my request below.',
+      tipOpenhands: 'OPENHANDS — router generated from skill descriptions. Click: inject.',
       foot: 'Click = inject · ⏎ inject · ⌘⏎ default · ⇧⏎ ChatGPT · ⌘-click select',
       noResults: 'No results',
       empty: 'Empty catalog — place catalog-full.js next to the userscript.',
@@ -239,6 +267,23 @@
 
   // ── Données dérivées (aligné Édition Luxe) ────────────────────────────────
   function cat() { return window.MEGA_CATALOG || { skills: [], agents: [] }; }
+  // ── Vue OpenHands : items depuis le snapshot embarqué MG_OPENHANDS ────────
+  function ohItems() {
+    if (!window.MG_OPENHANDS || !Array.isArray(window.MG_OPENHANDS.routers)) return [];
+    return window.MG_OPENHANDS.routers.map(function (r) {
+      return {
+        x: {
+          name: r.name,
+          desc: (r.phase ? '[' + r.phase + '] ' : (r.triggers.length ? '[🤖 OpenHands] ' : '[' + T().ohAlways + '] ')) +
+            (r.routes.length ? T().ohRoutes + ' ' + r.routes.join(', ') + ' — ' : '') +
+            (r.triggers.length ? T().ohTriggers + ' (' + r.triggers.length + ') : ' + r.triggers.join(', ') : ''),
+          category: r.phase ? 'phase-' + r.phase.toLowerCase() : 'openhands',
+          _oh: r,
+        },
+        k: 'openhands',
+      };
+    });
+  }
   function customs() { return store.get('customs', []); }
   function favs() { return store.get('favs', []); }
   function teams() { return store.get('teams', []); }
@@ -248,18 +293,37 @@
     if (i >= 0) f.splice(i, 1); else f.push(n);
     store.set('favs', f); return i < 0;
   }
+  // ── Équipes multi-agents générées (MG_TEAMS, injecté par build-openhands-panel.js) ──
+  function ohTeamItems() {
+    if (!window.MG_TEAMS || !Array.isArray(window.MG_TEAMS)) return [];
+    return window.MG_TEAMS.map(function (c) {
+      return {
+        x: {
+          name: '👥 ' + c.agents.join(' + '),
+          desc: '[Équipe générée] ' + c.agents.length + ' agents — ' + c.prompt.slice(0, 120) + '…',
+          category: 'equipe-multi',
+          _tc: c,
+        },
+        k: 'oh-team',
+      };
+    });
+  }
   function ALL() {
     const C = cat();
     return [].concat(
       C.skills.map(function (x) { return { x: x, k: 'skill' }; }),
       C.agents.map(function (x) { return { x: x, k: 'agent' }; }),
       teams().map(function (t) { return { x: { name: t.team || t.name, desc: t.desc, _t: t }, k: 'team' }; }),
-      customs().map(function (x) { return { x: x, k: 'custom' }; })
+      customs().map(function (x) { return { x: x, k: 'custom' }; }),
+      ohItems(),
+      ohTeamItems()
     );
   }
   function lname(x) { return (LANG === 'fr' && x.name_fr) ? x.name_fr : x.name; }
   function ldesc(x) { return (LANG === 'fr' && x.desc_fr) ? x.desc_fr : (x.desc || ''); }
   function promptOf(it) {
+    if (it.k === 'oh-team') return it.x._tc.prompt;
+    if (it.k === 'openhands') return T().ohPrompt(it.x._oh);
     if (it.k === 'custom') return T().pCustom(it.x);
     if (it.k === 'team') return T().pTeam(it.x);
     if (it.k === 'agent') return T().pAgent(it.x);
@@ -579,7 +643,7 @@
   let tipTimer = null, tipFor = null;
   function tipHtml(it) {
     const x = it.x, k = it.k;
-    const kind = k === 'agent' ? T().tipAgent : k === 'custom' ? T().tipCustom : k === 'team' ? T().tipTeam : T().tipSkill;
+    const kind = k === 'agent' ? T().tipAgent : k === 'custom' ? T().tipCustom : k === 'team' ? T().tipTeam : k === 'oh-team' ? T().tipTeam : k === 'openhands' ? T().tipOpenhands : T().tipSkill;
     const kl = k === 'agent' ? 'AGENT' : k === 'custom' ? 'PERSO' : k === 'team' ? 'ÉQUIPE' : 'SKILL';
     const cat = x.category ? '<span class="tc">' + T().tipCat + ' : ' + String(x.category).replace(/-/g, ' ') + '</span>' : '';
     const teamLine = (k === 'team' && x._t)
@@ -638,8 +702,8 @@
         }
         else if (b.dataset.a === 'md') {
           // 📄 Crée la fiche .md (téléchargement — un userscript n'écrit pas sur le disque)
-          const kindLabel = it.k === 'agent' ? 'agent' : 'skill';
-          const md = '# 🛠 ' + (x.name_fr || x.name) + '\n\n> ' + (x.desc_fr || x.desc || '') + '\n\n- **Type** : ' + kindLabel + '\n- **Catégorie** : ' + (x.category || '—') + '\n\n## Prompt d\'activation\n\n```\n' + promptOf(it) + '\n```\n';
+          const kindLabel = it.k === 'agent' ? 'agent' : it.k === 'openhands' ? 'microagent OpenHands' : it.k === 'team' ? 'équipe' : it.k === 'custom' ? 'prompt perso' : 'skill';
+          const md = '# ' + (it.k === 'openhands' ? '🤖' : '🛠') + ' ' + (x.name_fr || x.name) + '\n\n> ' + (x.desc_fr || x.desc || '') + '\n\n- **Type** : ' + kindLabel + '\n- **Catégorie** : ' + (x.category || '—') + '\n\n## Prompt d\'activation\n\n```\n' + promptOf(it) + '\n```\n';
           const blob = new Blob([md], { type: 'text/markdown;charset=utf-8' });
           const a = document.createElement('a');
           a.href = URL.createObjectURL(blob); a.download = (x.name_fr || x.name) + '.md';
@@ -696,6 +760,7 @@
     else if (tab === 'agents') pool = pool.filter(function (it) { return it.k === 'agent'; });
     else if (tab === 'teams') pool = pool.filter(function (it) { return it.k === 'team'; });
     else if (tab === 'custom') pool = pool.filter(function (it) { return it.k === 'custom'; });
+    else if (tab === 'openhands') pool = pool.filter(function (it) { return it.k === 'openhands' || it.k === 'oh-team'; });
     else if (tab === 'favs') pool = pool.filter(function (it) { return isFav(it.x.name); });
     results = pool.filter(function (it) {
       const hay = (it.x.name + ' ' + lname(it.x) + ' ' + (it.x.category || '') + ' ' + ldesc(it.x)).toLowerCase();
@@ -712,7 +777,7 @@
 
   function renderTabs() {
     const tb = panel.querySelector('#mgp-tabs');
-    const tabs = ['all', 'skills', 'agents', 'teams', 'custom', 'favs'];
+    const tabs = ['all', 'skills', 'agents', 'teams', 'custom', 'favs', 'openhands'];
     tb.innerHTML = tabs.map(function (t) {
       return '<button class="mgp-tab' + (tab === t ? ' on' : '') + '" data-t="' + t + '">' + T().tabs[t] + '</button>';
     }).join('');
@@ -743,7 +808,7 @@
     } else {
       list.innerHTML = results.map(function (it, i) {
         const fav = isFav(it.x.name);
-        const ico = it.k === 'agent' ? '👤' : it.k === 'custom' ? '✍️' : it.k === 'team' ? '🕸' : '🛠';
+        const ico = it.k === 'agent' ? '👤' : it.k === 'custom' ? '✍️' : it.k === 'team' ? '🕸' : it.k === 'openhands' ? '🤖' : '🛠';
         return '<div class="mgp-item k-' + it.k + (i === idx ? ' on' : '') + (sel.indexOf(it.x.name) !== -1 ? ' selc' : '') + '" data-i="' + i + '" data-n="' + it.x.name.replace(/"/g, '&quot;') + '">' +
           '<span class="ico">' + ico + '</span>' +
           '<span class="mid"><b>' + lname(it.x) + '</b><span class="d">' + ldesc(it.x).slice(0, 90) + '</span></span>' +

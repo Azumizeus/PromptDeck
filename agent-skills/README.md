@@ -160,6 +160,34 @@ See [docs/opencode-setup.md](docs/opencode-setup.md).
 </details>
 
 <details>
+<summary><b>OpenHands</b></summary>
+
+OpenHands supports the Agent Skills spec natively. Clone the repo and copy the skills you need into OpenHands' discovery paths:
+
+```bash
+git clone https://github.com/addyosmani/agent-skills.git
+mkdir -p .agents/skills
+cp -r agent-skills/skills/<skill-name> .agents/skills/
+```
+
+The repo also ships custom OpenHands actions:
+
+- **Startup skill inventory** — an always-loaded microagent at `.openhands/microagents/list-loaded-skills.md` (no `triggers` field = loaded in full on every conversation start) that lists the loaded skills at the start of every conversation.
+- **Generated routers** — nine keyword-triggered microagents derived from the skills' own descriptions by `scripts/generate-openhands-routers.js` and drift-checked in CI: six lifecycle routers (`route-spec`, `route-plan`, `route-build`, `route-bug`, `route-review`, `route-ship`) covering every AGENTS.md phase, plus three specialty routers (`route-solana`, `route-game`, `route-security`) for the nested packs. CI auto-regenerates and auto-commits them when a skill description changes. The loader simulator also verifies description-based routing through the eval tier's TF-IDF engine.
+- **Live views** — an OpenHands tab in `interface/mega-pack-launcher.html` (inventory + all routers with their triggers) and a full standalone dashboard at `interface/openhands-dashboard.html` (routing simulator, journal, tasks, reminders, notes), both built from a repo snapshot by `scripts/build-openhands-dashboard.js`.
+
+Copy them into your project with the skills:
+
+```bash
+mkdir -p .openhands/microagents
+cp agent-skills/.openhands/microagents/*.md .openhands/microagents/
+```
+
+See [docs/openhands-setup.md](docs/openhands-setup.md).
+
+</details>
+
+<details>
 <summary><b>GitHub Copilot</b></summary>
 
 Use agent definitions from `agents/` as Copilot personas and skill content in `.github/copilot-instructions.md`. See [docs/copilot-setup.md](docs/copilot-setup.md).
@@ -293,7 +321,7 @@ The commands above are entry points. The pack includes 25 skills total — 24 li
 | Skill | What It Does | Use When |
 |-------|-------------|----------|
 | [jupiter](skills/solana-protocols/jupiter/SKILL.md) | Jupiter APIs : Ultra Swap, Lend, Perps, Trigger, Recurring, Price, Portfolio, Send | Intégrer swaps / DeFi Jupiter |
-| [metaplex](skills/solana-protocols/metaplex/SKILL.md) | Metaplex : NFT, Token Metadata, Core, Candy Machine | NFT / tokens Solana |
+| [metaplex-protocol](skills/solana-protocols/metaplex-protocol/SKILL.md) | Metaplex : NFT, Token Metadata, Core, Candy Machine | NFT / tokens Solana |
 | [helius](skills/solana-protocols/helius/SKILL.md) | Helius RPC, APIs enhanced, webhooks, DAS API | RPC et indexation Solana |
 | [quicknode](skills/solana-protocols/quicknode/SKILL.md) | QuickNode RPC, add-ons, streams | Infrastructure RPC alternative |
 | [pyth](skills/solana-protocols/pyth/SKILL.md) | Pyth oracles : price feeds, Hermes API | Prix on-chain / off-chain |
@@ -435,6 +463,7 @@ The portable core stays in shared directories. Host-specific paths are native di
 | Gemini CLI adapter | `.gemini/commands/` (10 commands) | Gemini-native TOML command wrappers |
 | Antigravity CLI adapter | `commands/` (10 commands), `plugin.json` | Legacy TOML wrappers and the root plugin manifest; see the [known wrapper limitation](docs/antigravity-setup.md#lifecycle-workflows-and-command-compatibility) |
 | Codex adapter | `.codex-plugin/`, `.agents/plugins/` | Codex plugin metadata and marketplace registration; Codex consumes `skills/` directly |
+| OpenHands adapter | `.openhands/microagents/` (startup inventory + 9 generated routers), `scripts/generate-openhands-routers.js`, `scripts/openhands-loader-sim.js`, `scripts/build-openhands-dashboard.js`, `interface/openhands-dashboard.html` | Always-loaded startup inventory, description-driven keyword routing (six lifecycle routers + three specialty routers for nested packs, regenerated from skill descriptions with CI auto-commit), a two-layer conversation-start simulator, and browser views; see [docs/openhands-setup.md](docs/openhands-setup.md) |
 | GitHub Copilot CLI adapter | `plugin.json` | Root plugin metadata; Copilot CLI discovers `skills/` by convention and does not register the lifecycle wrappers |
 | Contributor tooling | `scripts/` (13 scripts), `evals/` (25 case files), `.github/workflows/` | Validation, routing evals, and CI |
 | Documentation | `docs/` | Universal guidance and per-tool setup guides |

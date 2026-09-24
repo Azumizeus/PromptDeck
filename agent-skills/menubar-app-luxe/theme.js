@@ -357,6 +357,56 @@ button.histrest:hover{border-color:var(--vio);color:var(--txt)}
 #werow .pri:hover{filter:brightness(1.08);color:#0b0c10}
 .lk{font-size:11px;filter:saturate(.9);margin-left:2px}
 
+/* ── ✕ effacer la recherche ── */
+#qclear{border:none;background:none;color:var(--mut);cursor:pointer;font-size:12px;
+  padding:2px 5px;border-radius:6px;line-height:1}
+#qclear:hover{color:var(--txt);background:var(--card2)}
+
+/* ── 📌 épingler le panneau ── */
+#pinb[aria-pressed="true"]{border-color:var(--vio);color:var(--txt);
+  background:rgba(153,69,255,.14)}
+
+/* ── ❔ aide intégrée : pop-up flottant au survol des boutons « ? » ── */
+.helpw{display:inline-flex;align-items:center}
+.helpb{border:1px solid var(--line);background:transparent;color:var(--mut);cursor:help;
+  font:700 9.5px/1 inherit;width:15px;height:15px;border-radius:50%;padding:0;
+  display:inline-flex;align-items:center;justify-content:center;transition:color .12s,border-color .12s}
+.helpb:hover,.helpb:focus{color:var(--txt);border-color:var(--vio)}
+#help{position:absolute;z-index:1200;max-width:300px;background:var(--card);
+  border:1px solid var(--line2);border-radius:10px;padding:9px 11px;font-size:11.5px;
+  line-height:1.45;color:var(--txt);box-shadow:0 12px 34px rgba(0,0,0,.45);pointer-events:none}
+#help[hidden]{display:none}
+
+/* ── 📂 modale glisser-déposer + overlay de dépôt ── */
+#dropmodal{position:fixed;inset:0;background:rgba(5,6,10,.55);backdrop-filter:blur(6px);
+  display:flex;align-items:center;justify-content:center;z-index:900}
+#dropmodal[hidden]{display:none}
+#dmbox{width:min(480px,94%);background:var(--card);border:1px solid var(--line2);
+  border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:10px;
+  box-shadow:0 24px 70px rgba(0,0,0,.5)}
+#dmbox h3{font-size:14px;font-weight:700;display:flex;align-items:center;gap:8px}
+#dmbox h3 button{margin-left:auto;border:none;background:none;color:var(--mut);cursor:pointer;
+  font-size:13px;padding:2px 4px;border-radius:6px}
+#dmbox h3 button:hover{color:var(--txt);background:var(--card2)}
+#dmbox .dmhint{font-size:11.5px;color:var(--mut)}
+#dmbox label{display:flex;flex-direction:column;gap:5px;font-size:11.5px;color:var(--txt2);font-weight:600}
+#dmbox input,#dmbox textarea{background:var(--card2);border:1px solid var(--line);border-radius:8px;
+  color:var(--txt);font:inherit;padding:8px 10px;outline:none;resize:vertical}
+#dmbox input:focus,#dmbox textarea:focus{border-color:var(--vio)}
+#dmrow{display:flex;gap:8px;align-items:center}
+#dmrow button{border:1px solid var(--line);background:none;color:var(--txt2);cursor:pointer;
+  font:inherit;font-size:12px;font-weight:600;padding:7px 14px;border-radius:8px;
+  transition:border-color .15s,color .15s}
+#dmrow button:hover{border-color:var(--line2);color:var(--txt)}
+#dmrow .pri{background:var(--grad);border:none;color:#0b0c10}
+#dmrow .pri:hover{filter:brightness(1.08);color:#0b0c10}
+.dmmut{font-size:10.5px;color:var(--mut);font-variant-numeric:tabular-nums}
+#dropzone{position:fixed;inset:0;z-index:950;background:rgba(11,12,16,.72);
+  display:flex;align-items:center;justify-content:center;pointer-events:none}
+#dropzone[hidden]{display:none}
+#dz{border:2px dashed var(--vio);border-radius:16px;padding:34px 44px;font-size:14px;
+  font-weight:600;color:var(--txt);background:rgba(153,69,255,.08)}
+
 @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
 @media (prefers-contrast: more){
   :root{--txt:#fff;--txt2:#d5d9e5;--line2:#565b6b;--panel:rgba(10,11,16,.97)}

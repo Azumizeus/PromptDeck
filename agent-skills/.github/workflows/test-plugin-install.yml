@@ -2,12 +2,61 @@ name: Test Plugin Installation
 
 on:
   push:
+    branches:
+      - master
   pull_request:
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
+  regenerate-routers:
+    name: Auto-regenerate OpenHands routers on skill description changes
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+
+      - name: Regenerate OpenHands routers from skill descriptions
+        run: node scripts/generate-openhands-routers.js
+
+      - name: Detect router drift
+        id: drift
+        run: |
+          if git diff --quiet -- .openhands/microagents/; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "Routers already in sync."
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            git diff --stat -- .openhands/microagents/
+          fi
+
+      - name: Validate regenerated routers
+        if: steps.drift.outputs.changed == 'true'
+        run: |
+          node scripts/validate-openhands-microagent.js
+          node scripts/openhands-loader-sim.js
+
+      - name: Auto-commit regenerated routers
+        if: steps.drift.outputs.changed == 'true' && github.event_name == 'push'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .openhands/microagents/
+          git commit -m "chore(openhands): regenerate routers from updated skill descriptions" \
+            --trailer "Generated-with=OpenHands-router-generator"
+          git push
+
   validate-skills:
     name: Validate skill content
+    needs: [regenerate-routers]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -45,6 +94,24 @@ jobs:
 
       - name: Test session-start hook payload
         run: bash hooks/session-start-test.sh
+
+      - name: Validate OpenHands microagents
+        run: node scripts/validate-openhands-microagent.js
+
+      - name: Test OpenHands microagent validator
+        run: node --test scripts/validate-openhands-microagent-test.js
+
+      - name: Simulate OpenHands conversation start
+        run: node scripts/openhands-loader-sim.js
+
+      - name: Test OpenHands loader simulator
+        run: node --test scripts/openhands-loader-sim-test.js
+
+      - name: Check generated OpenHands routers are in sync
+        run: node scripts/generate-openhands-routers.js --check
+
+      - name: Test OpenHands router generator
+        run: node --test scripts/generate-openhands-routers-test.js
 
   validate-commands:
     name: Validate command parity and description sync

@@ -42,6 +42,8 @@ contextBridge.exposeInMainWorld('mgp', {
   backupAutoNow: () => ipcRenderer.invoke('backup-auto-now'),
   customSave: (item) => ipcRenderer.send('custom-save', item),
   customDelete: (name) => ipcRenderer.send('custom-delete', name),
+  // 📌 « Garder le panneau visible » : bascule depuis le bouton 📌 du panneau
+  setKeepVisible: (on) => ipcRenderer.send('set-keep-visible', on),
   exportCustoms: () => ipcRenderer.invoke('export-customs'),
   onEditCustom: (cb) => ipcRenderer.on('edit-custom', (e, c) => cb(c)),
   // ── Atelier agents/skills + moteur LLM (API clé) ──

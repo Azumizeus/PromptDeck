@@ -30,11 +30,38 @@ rm -rf "$CONTENTS/Resources/default_app.asar"
 echo "• Copie des sources de l'app…"
 APP_DIR="$CONTENTS/Resources/app"
 mkdir -p "$APP_DIR"
-for f in main.js preload.js renderer.js index.html settings.html settings.js \
+# theme.js : CSS injecté par le renderer — OBLIGATOIRE. Sans lui, la fenêtre
+# transparent:true n'a aucun fond (#app{n'a plus background:rgba…}) et l'app
+# devient entièrement invisible. Piège historique du build (run du 24/09/2026).
+for f in main.js preload.js renderer.js theme.js demo-shim.js index.html settings.html settings.js \
          launcher.html mac-chrome.js standalone.html appIcon.png appIcon@2x.png \
          iconTemplate.png iconTemplate@2x.png package.json; do
   [ -f "$f" ] && cp "$f" "$APP_DIR/"
 done
+# Catalogue embarqué : interface/catalog-full.js attendu dans Contents/Resources/interface
+# (candidat n°2 de preload.js/main.js en mode packagé) — copié AVANT le garde-fou,
+# car launcher.html référence « ../interface/catalog-full.js ».
+mkdir -p "$CONTENTS/Resources/interface"
+cp "../interface/catalog-full.js" "$CONTENTS/Resources/interface/catalog-full.js"
+
+# Garde-fou : chaque .js/.css local référencé par les .html embarqués DOIT exister
+# dans le bundle (sinon CSP 'self' → 404 silencieux → page sans style/inerte).
+# « ../ » se résout depuis Resources/ (l'app vit dans Resources/app), le reste depuis app/.
+for h in "$APP_DIR"/*.html; do
+  for src in $(grep -o 'src="[^"]*"\|href="[^"]*\.js"' "$h" | sed -E 's/^(src|href)="//; s/"$//' | grep -v '^[a-z]*://'); do
+    case "$src" in
+      ../*) target="$CONTENTS/Resources/${src#../}" ;;
+      *)    target="$APP_DIR/$src" ;;
+    esac
+    if [ ! -f "$target" ]; then
+      echo "❌ $(basename "$h") référence « $src » absent du bundle — build annulé" >&2
+      exit 1
+    fi
+  done
+done
+
+echo "• Vérification : $(ls "$APP_DIR" | wc -l | tr -d ' ') fichiers dans Resources/app (theme.js présent : $([ -f "$APP_DIR/theme.js" ] && echo oui || echo NON))"
+
 # lib/ (modules requis par main.js : md-writer pour le containment des .md)
 if [ -d lib ]; then
   mkdir -p "$APP_DIR/lib"
@@ -48,11 +75,6 @@ for dep in auto-launch; do
     (cd "node_modules/$dep" && tar cf - --exclude '.DS_Store' .) | (cd "$APP_DIR/node_modules/$dep" && tar xf -)
   fi
 done
-
-# Catalogue embarqué : interface/catalog-full.js attendu dans Contents/Resources/interface
-# (candidat n°2 de preload.js en mode packagé)
-mkdir -p "$CONTENTS/Resources/interface"
-cp "../interface/catalog-full.js" "$CONTENTS/Resources/interface/catalog-full.js"
 
 # 4. Binaire renommé (le nom du process = nom de l'app dans la barre des menus)
 echo "• Binaire $APP_NAME…"

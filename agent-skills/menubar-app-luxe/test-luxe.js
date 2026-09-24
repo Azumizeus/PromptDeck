@@ -48,6 +48,12 @@ const ids = {};
 const byId = (id) => (ids[id] ||= makeEl('div'));
 const inputEl = makeEl('input');
 ids.q = inputEl;
+// 📌 bouton épinglage : simulateur d'attribut (le harnais renvoie null sinon)
+{
+  const pinEl = byId('pinb');
+  pinEl.getAttribute = (a) => (a === 'aria-pressed' ? (pinEl._pressed ? 'true' : 'false') : null);
+  pinEl.setAttribute = (a, v) => { if (a === 'aria-pressed') pinEl._pressed = v === 'true'; };
+}
 
 const copied = [], recents = [], opened = [], toasts = [], generated = [], mdStore = [], revealed = [];
 const favsStore = new Set();
@@ -58,11 +64,16 @@ const trashStore = []; // 🗑 corbeille en mémoire
 let trashSeq = 0; // ids uniques (Date.now() seul peut collider en rafale)
 let lastBackup = null; // 💾 dernière sauvegarde (harnais)
 const backupExports = [];
+// 📜 trace des titres de sections (pour relancer depuis une section précise)
+const track = [];
+const trackPush = (s) => { const m = /(\d+)\) /.exec(s); if (m) track.push({ s, i: parseInt(m[1], 10) }); };
 // 🧪 sonde fournisseurs (harnais : résultat contrôlé par les tests)
 const probeCalls = [];
 let probeResult = { ok: false, checked: [] };
 const autoBkStore = { last: '' }; // 💾 horodatage auto-backup (harnais)
 let defaultLLMStore = 'claude'; // le sélecteur du footer modifie la pref (comme l'IPC réel)
+let keepVisibleStore = false; // 📌 « garder le panneau visible » (harnais)
+const settingsEvents = []; // payload settings-changed envoyé aux Réglages (harnais)
 const sandbox = {
   console,
   document: {
@@ -90,9 +101,16 @@ sandbox.window.mgp = {
   hide() {},
   openLLM: (t, p) => opened.push([t, String(p || '')]),
   openSettings() {},
-  getPrefs: () => ({ favorites: [], recents: [], customs: customsStore, defaultLLM: defaultLLMStore, sendTargets: ['chatgpt', 'claude', 'clipboard'], hasApi: { groq: true }, lang: 'fr', theme: 'dark', workshopLocks: { agent: [...workshopStore.agent.filter((w) => w.locked).map((w) => w.name)], skill: [...workshopStore.skill.filter((w) => w.locked).map((w) => w.name)], team: [...teamStore.filter((t) => t.locked).map((t) => t.team || t.name)] } }),
+  getPrefs: () => ({ favorites: [], recents: [], customs: customsStore, defaultLLM: defaultLLMStore, sendTargets: ['chatgpt', 'claude', 'clipboard'], hasApi: { groq: true }, lang: 'fr', theme: 'dark', keepVisible: keepVisibleStore, dropMaxChars: 100000, workshopLocks: { agent: [...workshopStore.agent.filter((w) => w.locked).map((w) => w.name)], skill: [...workshopStore.skill.filter((w) => w.locked).map((w) => w.name)], team: [...teamStore.filter((t) => t.locked).map((t) => t.team || t.name)], custom: [...customsStore.filter((c) => c && c.locked).map((c) => c.name)] } }),
   toggleFav: (n) => { favsStore.has(n) ? favsStore.delete(n) : favsStore.add(n); },
-  customSave: (item) => { const i = customsStore.findIndex((c) => c.name === item.name); if (i >= 0) customsStore[i] = item; else customsStore.push(item); },
+  customSave: (item) => { // comme le main process réel : tag + 🔒 cadenas préservés
+    const prev = customsStore.find((c) => c.name === item.name);
+    const rec = { name: item.name, desc: item.desc, tag: (item.tag !== undefined ? item.tag : (prev && prev.tag) || '') };
+    if (item.locked === true || item.locked === false) rec.locked = !!item.locked;
+    else if (prev && prev.locked) rec.locked = true;
+    const i = customsStore.findIndex((c) => c.name === item.name);
+    if (i >= 0) customsStore[i] = rec; else customsStore.push(rec);
+  },
   customDelete: (n) => { const i = customsStore.findIndex((c) => c.name === n); if (i >= 0) customsStore.splice(i, 1); },
   onSettings: null,
   onEditCustom: null,
@@ -162,6 +180,8 @@ sandbox.window.mgp = {
   workshopMdCreate: async () => ({ ok: true, path: '/virtuel/x.md' }),
   // Sélecteur LLM du footer (harnais : la pref change, comme le main process réel)
   setDefaultLLM: (t) => { defaultLLMStore = t; },
+  setKeepVisible: (on) => { keepVisibleStore = !!on; }, // 📌 (comme l'IPC réel)
+  onSettingsChange: (p) => settingsEvents.push(p), // payload → Réglages (harnais)
   // 🕸 Équipes multi-agents (harnais : stubs déterministes)
   teamList: async () => teamStore,
   teamGenerate: async (p) => {
@@ -782,6 +802,77 @@ MGP.setProvChosen(false);
 probeCalls.length = 0;
 await MGP.autoPickProvider(true);
 check(probeCalls.length === 1 && probeCalls[0].force === true, 're-test forcé passe force=true');
+
+console.log('');
+console.log('25) 🆕 v2.9.6 — thème, 📌 épinglage, 🔒 cadenas ✍️, 📂 glisser-déposer, ✕ recherche :');
+// a) 🐛 fix thème clair : onSettings applique body.light sans recharger la page
+MGP.fireSettings({ theme: 'light' });
+check(sandbox.document.body.classList.contains('light'), 'thème clair appliqué au panneau via onSettings (fix 🐛)');
+MGP.fireSettings({ theme: 'dark' });
+check(!sandbox.document.body.classList.contains('light'), 'retour au thème sombre sans rechargement');
+// b) 📌 épinglage : bouton → pref + payload Réglages + état visuel
+check(MGP.pinState() === false, 'panneau non épinglé au départ');
+MGP.pinToggle();
+check(MGP.pinState() === true, 'bouton 📌 → panneau épinglé (aria-pressed)');
+check(keepVisibleStore === true, 'préférence keepVisible persistée via IPC');
+check(settingsEvents.length && settingsEvents[settingsEvents.length - 1].keepVisible === true, 'payload keepVisible envoyé aux Réglages');
+MGP.fireSettings({ keepVisible: false });
+check(MGP.pinState() === false, 'Réglages → bouton 📌 resynchronisé (keepVisible=false)');
+sandbox.window.mgp.setKeepVisible(false); // la fenêtre Réglages persiste la pref (comme l'IPC réel)
+check(keepVisibleStore === false, 'préférence keepVisible persistée à false via IPC');
+MGP.pinToggle();
+check(keepVisibleStore === true, 'ré-épinglé depuis le panneau');
+MGP.fireSettings({ keepVisible: false }); // nettoyage pour la suite
+// c) 🔒 cadenas sur un prompt ✍️ : lock via customSave (locked), exposé par workshopLocks.custom
+MGP.saveCustom('Prompt locké test', 'Contenu de test pour le cadenas');
+await MGP.toggleLock({ k: 'custom', x: { name: 'Prompt locké test' } });
+check(MGP.lockOf('custom', 'Prompt locké test') === true, 'cadenas ✍️ posé (LOCKS.custom)');
+check((customsStore.find((c) => c.name === 'Prompt locké test') || {}).locked === true, 'cadenas persisté sur l\'enregistrement custom (locked=true)');
+check(sandbox.window.mgp.getPrefs().workshopLocks.custom.includes('Prompt locké test'), 'workshopLocks.custom exposé par get-prefs');
+await MGP.toggleLock({ k: 'custom', x: { name: 'Prompt locké test' } });
+check(MGP.lockOf('custom', 'Prompt locké test') === false, 'cadenas ✍️ retiré');
+// d) 🔒 garde anti-suppression d'un ✍️ verrouillé
+MGP.saveCustom('Prompt à supprimer', 'Contenu à supprimer');
+await MGP.toggleLock({ k: 'custom', x: { name: 'Prompt à supprimer' } });
+MGP.deleteCustom('Prompt à supprimer'); // ouvre la modale puis clique Supprimer → doit être refusé
+check(customsStore.some((c) => c.name === 'Prompt à supprimer'), 'suppression REFUSÉE pour un ✍️ verrouillé (garde + IPC)');
+check(MGP.lockOf('custom', 'Prompt à supprimer') === true, 'le cadenas est toujours en place après la tentative');
+await MGP.toggleLock({ k: 'custom', x: { name: 'Prompt à supprimer' } });
+MGP.deleteCustom('Prompt à supprimer');
+check(!customsStore.some((c) => c.name === 'Prompt à supprimer'), 'suppression ACCEPTÉE une fois le cadenas retiré');
+// e) 📂 validation du glisser-déposer AVANT enregistrement
+const vd1 = MGP.validateDrop({ name: 'Test', text: '   ' });
+check(vd1.ok === false && vd1.error === 'empty', 'drop refusé : contenu vide');
+const vd2 = MGP.validateDrop({ name: 'Test', text: 'ok\u0000binaire' });
+check(vd2.ok === false && vd2.error === 'binary', 'drop refusé : fichier binaire (\u0000)');
+const vd3 = MGP.validateDrop({ name: 'Test', text: 'x'.repeat(100001), maxChars: 100000 });
+check(vd3.ok === false && vd3.error === 'too-big', 'drop refusé : dépasse dropMaxChars');
+const vd4 = MGP.validateDrop({ name: 'Skill Test Senior', text: 'Mon nouveau prompt', existing: ['Skill Test Senior', 'Autre'] });
+check(vd4.ok === true && vd4.name === 'Skill Test Senior-2', `collision de nom suffixée (${vd4.name})`);
+const vd5 = MGP.validateDrop({ name: '', text: 'Contenu correct', existing: [] });
+check(vd5.ok === true && !!vd5.name, `nom par défaut attribué (${vd5.name})`);
+// f) 📂 modale complète : enregistrement → CUSTOMS, jamais de pollution sans validation
+MGP.openDropModal({ name: 'Import test', text: 'Contenu du fichier glissé' });
+check(MGP.dropVisible() === true, 'modale de drop ouverte (validation avant enregistrement)');
+check(!customsStore.some((c) => c.name === 'Import test'), 'rien d\'enregistré tant que la modale n\'est pas validée');
+MGP.saveDropModal();
+const imp = customsStore.find((c) => c.name === 'Import test');
+check(!!imp && imp.desc === 'Contenu du fichier glissé' && imp.tag === 'importé', 'prompt ✍️ créé après validation (tag « importé »)');
+check(MGP.dropVisible() === false, 'modale fermée après enregistrement');
+MGP.openDropModal({ name: 'Trop gros', text: 'x'.repeat(100001) });
+MGP.saveDropModal();
+check(MGP.dropVisible() === false && !customsStore.some((c) => c.name === 'Trop gros'), 'drop trop gros : refus net, modale fermée, rien d\'enregistré');
+// g) ✕ effacer la recherche d'un coup
+MGP.search('solana');
+check(MGP.qClearVisible() === true, 'bouton ✕ visible quand la recherche est non vide');
+MGP.qClear();
+check(sandbox.document.getElementById('q').value === '' && MGP.qClearVisible() === false, '✕ vide la recherche d\'un coup (champ + état)');
+// h) ❔ tooltips d'aide : textes i18n présents dans les deux langues
+const T_fr = MGP.i18n(), T_en = MGP.i18n('en');
+['helpSearch', 'helpPin', 'helpLockCat', 'dropTitle', 'qClear', 'pinOn'].forEach((k) => {
+  check(typeof T_fr[k] === 'string' && T_fr[k].length > 10, `i18n fr « ${k} »`);
+  check(typeof T_en[k] === 'string' && T_en[k].length > 10, `i18n en « ${k} »`);
+});
 
 console.log('');
 if (fail) { console.log(`❌ ${fail} test(s) en échec`); process.exit(1); }

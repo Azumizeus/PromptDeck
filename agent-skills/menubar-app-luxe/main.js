@@ -32,7 +32,7 @@ let LANG = 'fr';
 const T = () => I18N[LANG] || I18N.fr;
 function prefsPath() { return path.join(app.getPath('userData'), 'mgp-prefs.json'); }
 // Préférences persistées : langue, favoris, récents, LLM par défaut, raccourci, auto-boot, géométrie
-let PREFS = { lang: 'fr', favorites: [], recents: [], customs: [], defaultLLM: 'claude', sendTargets: [], promptDir: '', shortcut: 'Alt+Space', autostart: false, favShortcuts: true, bounds: null, apiDefaultModel: '' };
+let PREFS = { lang: 'fr', favorites: [], recents: [], customs: [], defaultLLM: 'claude', sendTargets: [], promptDir: '', shortcut: 'Alt+Space', autostart: false, favShortcuts: true, bounds: null, apiDefaultModel: '', theme: 'dark', keepVisible: false, dropMaxChars: 100000 };
 
 // ── Ateliers (agents / skills / équipes créés dans l'app) — persistés à côté des prefs ──
 function workshopsPath(kind) { return path.join(app.getPath('userData'), kind === 'agent' ? 'my-agents.json' : kind === 'skill' ? 'my-skills.json' : 'my-teams.json'); }
@@ -744,6 +744,8 @@ function createPanel() {
   win.loadFile('index.html');
   win.once('ready-to-show', () => win.show());
   win.on('blur', () => {
+    // 📌 « Garder le panneau visible » (Réglages / bouton 📌) : ne pas masquer au clic ailleurs
+    if (PREFS.keepVisible) return;
     if (!settings || settings.isDestroyed()) win.hide();
   });
   win.on('closed', () => { win = null; });
@@ -1042,24 +1044,34 @@ ipcMain.on('restart-tour', () => {
     win.webContents.send('restart-tour');
   }
 });
-ipcMain.on('settings-changed', (e, { theme, lang, defaultLLM, sendTargets, autostart, favShortcuts, shortcut } = {}) => {
+ipcMain.on('settings-changed', (e, { theme, lang, defaultLLM, sendTargets, autostart, favShortcuts, shortcut, keepVisible } = {}) => {
   LANG = lang === 'en' ? 'en' : 'fr';
   PREFS.lang = LANG;
+  // 🐛 fix 2.9.6 : le thème choisi dans les Réglages n'était JAMAIS persisté — le panneau
+  // relisait getPrefs().theme (toujours absent) et restait sombre.
+  if (theme === 'light' || theme === 'dark') PREFS.theme = theme;
   if (defaultLLM) PREFS.defaultLLM = defaultLLM;
   if (Array.isArray(sendTargets)) PREFS.sendTargets = sendTargets.filter((t) => typeof t === 'string').slice(0, 12);
   if (typeof autostart === 'boolean') PREFS.autostart = autostart;
   if (typeof favShortcuts === 'boolean') PREFS.favShortcuts = favShortcuts;
   if (shortcut && SHORTCUTS[shortcut]) PREFS.shortcut = shortcut;
+  if (typeof keepVisible === 'boolean') PREFS.keepVisible = keepVisible;
   savePrefs();
   applyShortcut();
   applyAutostart();
   if (tray) tray.setToolTip('MEGA PACK — Skills & Agents');
   if (settings && !settings.isDestroyed()) settings.setTitle(T().settingsTitle);
-  // Propage le LLM par défaut au panneau (sélecteur du footer synchronisé entre fenêtres)
-  if (win && !win.isDestroyed()) win.webContents.send('settings-changed', { theme, lang, defaultLLM: PREFS.defaultLLM });
+  // Propage thème + LLM par défaut au panneau (sélecteur du footer synchronisé entre fenêtres)
+  if (win && !win.isDestroyed()) win.webContents.send('settings-changed', { theme: PREFS.theme, lang, defaultLLM: PREFS.defaultLLM, keepVisible: !!PREFS.keepVisible });
+});
+// Bouton 📌 du panneau : bascule « rester visible » sans passer par les Réglages
+ipcMain.on('set-keep-visible', (e, on) => {
+  PREFS.keepVisible = !!on;
+  savePrefs();
+  if (settings && !settings.isDestroyed()) settings.webContents.send('settings-changed', { theme: PREFS.theme, lang: LANG, keepVisible: PREFS.keepVisible });
 });
 ipcMain.on('get-prefs', (e) => {
-  e.returnValue = { defaultLLM: PREFS.defaultLLM, sendTargets: PREFS.sendTargets || [], shortcut: PREFS.shortcut, autostart: !!PREFS.autostart, favShortcuts: PREFS.favShortcuts !== false, favorites: PREFS.favorites, recents: PREFS.recents, customs: PREFS.customs, hasApi: Object.fromEntries(Object.keys(PROVIDERS).map((k) => [k, !!apiKeyFor(k)])), apiDefaultModel: PREFS.apiDefaultModel || '', workshopLocks: { agent: [...lockedNames('agent')], skill: [...lockedNames('skill')], team: [...lockedNames('team')] } };
+  e.returnValue = { theme: PREFS.theme === 'light' ? 'light' : 'dark', keepVisible: !!PREFS.keepVisible, dropMaxChars: PREFS.dropMaxChars || 100000, defaultLLM: PREFS.defaultLLM, sendTargets: PREFS.sendTargets || [], shortcut: PREFS.shortcut, autostart: !!PREFS.autostart, favShortcuts: PREFS.favShortcuts !== false, favorites: PREFS.favorites, recents: PREFS.recents, customs: PREFS.customs, hasApi: Object.fromEntries(Object.keys(PROVIDERS).map((k) => [k, !!apiKeyFor(k)])), apiDefaultModel: PREFS.apiDefaultModel || '', workshopLocks: { agent: [...lockedNames('agent')], skill: [...lockedNames('skill')], team: [...lockedNames('team')], custom: [...(PREFS.customs || []).filter((c) => c && c.locked).map((c) => c.name)] } };
 });
 // Sélecteur du LLM dans la barre du bas : changement instantané, persisté, propagé
 ipcMain.on('set-default-llm', (e, llm) => {
@@ -1683,8 +1695,13 @@ ipcMain.on('custom-save', (e, item) => {
   const name = item.name.trim().slice(0, 80);
   const desc = item.desc.trim();
   if (!name || !desc) return;
+  const prev = (PREFS.customs || []).find((c) => c.name === name);
+  const rec = { name, desc, tag: (typeof item.tag === 'string' && item.tag.trim()) ? item.tag.trim().slice(0, 40) : (prev && prev.tag) || '' };
+  // 🔒 verrou conservé : un custom verrouillé ne perd jamais son cadenas à l'édition
+  if (item.locked === true || item.locked === false) rec.locked = !!item.locked;
+  else if (prev && prev.locked) rec.locked = true;
   PREFS.customs = (PREFS.customs || []).filter((c) => c.name !== name);
-  PREFS.customs.push({ name, desc, tag: (typeof item.tag === 'string' && item.tag.trim()) ? item.tag.trim().slice(0, 40) : '' });
+  PREFS.customs.push(rec);
   savePrefs();
 });
 // Export de tous les ✍️ en un fichier Markdown (via boîte de sauvegarde)
@@ -1701,8 +1718,9 @@ ipcMain.handle('export-customs', async () => {
   try { fs.writeFileSync(r.filePath, parts.join('\n---\n\n')); return true; } catch (e) { return false; }
 });
 function deleteCustom(name) {
+  const victim = (PREFS.customs || []).find((c) => c.name === name);
+  if (victim && victim.locked) return; // 🔒 verrouillé : suppression refusée
   const cs = (PREFS.customs || []).filter((c) => c.name !== name);
-  const victim = (PREFS.customs || []).find((c) => c.name === name); // 🗑 en corbeille avant effacement
   if (victim) trashPush({ id: `custom:${name}:${Date.now()}`, kind: 'custom', name, rec: victim });
   PREFS.customs = cs;
   PREFS.favorites = (PREFS.favorites || []).filter((n) => n !== name);

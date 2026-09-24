@@ -1,6 +1,6 @@
 # 🖱️ Interface MEGA PACK — Skills & Agents activables par bouton
 
-> **Version :** 1.2.0 · 132 skills · 190 agents · compatible **tout LLM**
+> **Version :** 1.2.0 · 133 skills · 190 agents · compatible **tout LLM**
 >
 > 🇬🇧 Version anglaise : [`README-EN.md`](README-EN.md)
 

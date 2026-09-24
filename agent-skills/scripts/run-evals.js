@@ -657,4 +657,22 @@ function main(args = process.argv.slice(2)) {
 
 if (require.main === module) main();
 
-module.exports = { materializeWorkspace, parseGrading, networkWrapped, cleanupNetworkWrapper, NET_SB_PROFILE };
+// The TF-IDF engine (tokenize/stem/buildCorpus/rankSkills) is exported so other
+// tools — e.g. scripts/openhands-loader-sim.js — reuse the exact routing
+// math the eval tier runs, instead of forking a divergent copy.
+module.exports = {
+  materializeWorkspace,
+  parseGrading,
+  networkWrapped,
+  cleanupNetworkWrapper,
+  NET_SB_PROFILE,
+  STOP,
+  stem,
+  tokenize,
+  termFreq,
+  buildCorpus,
+  vec,
+  cosine,
+  rankSkills,
+  loadSkills,
+};

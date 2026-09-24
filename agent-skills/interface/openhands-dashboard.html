@@ -1,0 +1,2303 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OpenHands Dashboard — agent-skills</title>
+<style>
+:root {
+  --bg: #0d1117; --bg2: #161b22; --bg3: #1f2630; --border: #30363d;
+  --text: #e6edf3; --muted: #8b949e; --accent: #58a6ff; --green: #3fb950;
+  --amber: #d29922; --red: #f85149; --purple: #bc8cff;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background: var(--bg); color: var(--text); font-size: 14px;
+  display: flex; min-height: 100vh;
+}
+/* ── Sidebar ── */
+nav {
+  width: 210px; min-width: 210px; background: var(--bg2);
+  border-right: 1px solid var(--border); padding: 18px 0;
+  display: flex; flex-direction: column; gap: 2px;
+}
+nav .logo { padding: 0 16px 14px; font-weight: 700; font-size: 15px; letter-spacing: .3px; }
+nav .logo span { color: var(--accent); }
+nav button {
+  all: unset; cursor: pointer; padding: 9px 16px; color: var(--muted);
+  font-size: 13.5px; display: flex; align-items: center; gap: 9px;
+  border-left: 3px solid transparent;
+}
+nav button:hover { color: var(--text); background: var(--bg3); }
+nav button.active { color: var(--text); background: var(--bg3); border-left-color: var(--accent); }
+nav button .badge {
+  margin-left: auto; background: var(--bg); border: 1px solid var(--border);
+  border-radius: 10px; padding: 0 7px; font-size: 11px; color: var(--muted);
+}
+nav .foot { margin-top: auto; padding: 12px 16px 0; font-size: 11px; color: var(--muted); border-top: 1px solid var(--border); }
+/* ── Main ── */
+main { flex: 1; padding: 22px 26px; max-width: 1100px; }
+header h1 { font-size: 20px; margin-bottom: 3px; }
+header .sub { color: var(--muted); font-size: 12.5px; margin-bottom: 18px; }
+.view { display: none; }
+.view.active { display: block; }
+/* ── Cards / stats ── */
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 20px; }
+.card {
+  background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px;
+}
+.card .k { font-size: 26px; font-weight: 700; }
+.card .l { color: var(--muted); font-size: 12px; margin-top: 2px; }
+/* ── Lists ── */
+ul.clean { list-style: none; }
+ul.clean li {
+  background: var(--bg2); border: 1px solid var(--border); border-radius: 8px;
+  padding: 10px 14px; margin-bottom: 8px; display: flex; align-items: center; gap: 10px;
+}
+ul.clean li .grow { flex: 1; min-width: 0; }
+.tag {
+  font-size: 11px; border-radius: 10px; padding: 2px 9px; white-space: nowrap;
+  border: 1px solid var(--border); color: var(--muted);
+}
+.tag.green { color: var(--green); border-color: var(--green); }
+.tag.amber { color: var(--amber); border-color: var(--amber); }
+.tag.red { color: var(--red); border-color: var(--red); }
+.tag.accent { color: var(--accent); border-color: var(--accent); }
+.tag.purple { color: var(--purple); border-color: var(--purple); }
+.muted { color: var(--muted); }
+.desc { color: var(--muted); font-size: 12px; margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+input[type="text"], input[type="date"], input[type="time"], select, textarea {
+  background: var(--bg); border: 1px solid var(--border); color: var(--text);
+  border-radius: 8px; padding: 8px 12px; font-size: 13px; font-family: inherit;
+}
+input:focus, textarea:focus, select:focus { outline: 1px solid var(--accent); }
+.btn {
+  background: var(--bg3); color: var(--text); border: 1px solid var(--border);
+  border-radius: 8px; padding: 8px 14px; cursor: pointer; font-size: 13px;
+}
+.btn:hover { border-color: var(--accent); color: var(--accent); }
+.btn.primary { background: #1f6feb; border-color: #1f6feb; color: #fff; }
+.btn.primary:hover { background: #388bfd; color: #fff; }
+.btn.danger { color: var(--red); }
+.btn.danger:hover { border-color: var(--red); }
+.row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+/* ── Search ── */
+.search { width: 100%; margin-bottom: 14px; }
+/* ── Journal ── */
+.journal-entry {
+  background: var(--bg2); border: 1px solid var(--border); border-radius: 10px;
+  padding: 12px 16px; margin-bottom: 10px;
+}
+.journal-entry .head { display: flex; gap: 10px; align-items: baseline; margin-bottom: 4px; }
+.journal-entry .when { color: var(--muted); font-size: 11.5px; }
+.journal-entry .kind { font-size: 11px; }
+.journal-entry .body { font-size: 13.5px; white-space: pre-wrap; }
+/* ── Tasks ── */
+.task { display: flex; gap: 10px; align-items: flex-start; }
+.task input[type="checkbox"] { margin-top: 3px; accent-color: var(--green); width: 15px; height: 15px; cursor: pointer; }
+.task.done .title { text-decoration: line-through; color: var(--muted); }
+.task .title { font-size: 13.5px; }
+.task .meta { font-size: 11px; color: var(--muted); margin-top: 2px; }
+.task .due.overdue { color: var(--red); }
+.filters { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
+.filters button { font-size: 12px; padding: 5px 12px; }
+.filters button.on { border-color: var(--accent); color: var(--accent); }
+/* ── Reminders / notes ── */
+.reminder.soon { border-left: 3px solid var(--amber); }
+.reminder.past { border-left: 3px solid var(--red); }
+.reminder .when { font-size: 11.5px; color: var(--muted); }
+.reminder.soon .when { color: var(--amber); }
+.reminder.past .when { color: var(--red); }
+.note { cursor: pointer; }
+.note .body { font-size: 12.5px; color: var(--muted); margin-top: 4px; white-space: pre-wrap; max-height: 60px; overflow: hidden; }
+textarea.note-editor { width: 100%; min-height: 140px; resize: vertical; margin-bottom: 10px; }
+.empty { color: var(--muted); text-align: center; padding: 30px 0; font-size: 13px; }
+.toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 10px; }
+@media (max-width: 720px) {
+  body { flex-direction: column; }
+  nav { width: 100%; min-width: 0; flex-direction: row; flex-wrap: wrap; padding: 10px; border-right: none; border-bottom: 1px solid var(--border); }
+  nav .logo { width: 100%; padding-bottom: 8px; }
+  nav button { padding: 7px 10px; }
+  nav .foot { display: none; }
+  main { padding: 16px; }
+}
+</style>
+</head>
+<body>
+<nav>
+  <div class="logo">🛠️ OpenHands <span>Dash</span></div>
+  <button data-view="dashboard" class="active">📊 Tableau de bord</button>
+  <button data-view="skills">🧩 Skills <span class="badge" id="b-skills">…</span></button>
+  <button data-view="activation">⚡ Activation <span class="badge" id="b-activation">…</span></button>
+  <button data-view="routers">🧭 Routeurs <span class="badge" id="b-routers">…</span></button>
+  <button data-view="journal">📖 Journal de bord</button>
+  <button data-view="tasks">✅ Tâches <span class="badge" id="b-tasks">0</span></button>
+  <button data-view="reminders">⏰ Rappels <span class="badge" id="b-reminders">0</span></button>
+  <button data-view="notes">📝 Notes <span class="badge" id="b-notes">0</span></button>
+  <div class="foot">agent-skills · adaptateur OpenHands<br>données locales au navigateur</div>
+</nav>
+
+<main>
+  <header>
+    <h1 id="view-title">Tableau de bord</h1>
+    <div class="sub" id="view-sub"></div>
+  </header>
+
+  <!-- DASHBOARD -->
+  <section class="view active" id="view-dashboard">
+    <div class="stats" id="stats"></div>
+    <div class="card" style="margin-bottom:20px">
+      <strong style="font-size:13px">🧪 Simulateur de routage en direct</strong>
+      <div class="desc" style="white-space:normal;margin:4px 0 10px">Tape un message : le tableau montre quels routeurs déclenchent (même moteur que la CI : frontières de mots + stemming) et ce que le classement TF-IDF des descriptions retournerait.</div>
+      <div class="row">
+        <input type="text" id="sim-input" placeholder="ex : the deploy crashed with a 500 bug" style="flex:1;min-width:220px">
+        <button class="btn primary" id="sim-run">Router</button>
+      </div>
+      <div id="sim-out" style="margin-top:12px"></div>
+    </div>
+    <div class="card">
+      <strong style="font-size:13px">⏰ Prochains rappels</strong>
+      <div id="dash-reminders" style="margin-top:10px"></div>
+    </div>
+  </section>
+
+  <!-- SKILLS -->
+  <section class="view" id="view-skills">
+    <input class="search" type="text" id="skills-search" placeholder="Rechercher un skill ou une capacité…">
+    <div id="skills-list"></div>
+  </section>
+
+  <!-- ACTIVATION -->
+  <section class="view" id="view-activation">
+    <div class="desc" style="margin-bottom:12px;white-space:normal">Liste complète des <strong>skills</strong> et <strong>agents spécialistes</strong> avec leur <strong>prompt d'activation</strong> : clic sur ⚡ copie le prompt (chargement du SKILL.md / persona agent), prêt à coller dans n'importe quel LLM ou conversation OpenHands.</div>
+    <div class="row" style="margin-bottom:12px">
+      <input type="text" id="activation-search" placeholder="Rechercher un skill ou un agent… (ex: jupiter, security, ui)" style="flex:1;min-width:220px">
+      <button class="btn" id="activation-tab-skills" style="padding:8px 14px">Skills</button>
+      <button class="btn" id="activation-tab-agents" style="padding:8px 14px">Agents</button>
+      <button class="btn" id="activation-tab-teams" style="padding:8px 14px">👥 Équipes</button>
+    </div>
+    <div id="activation-list"></div>
+  </section>
+
+  <!-- ROUTERS -->
+  <section class="view" id="view-routers">
+    <div class="desc" style="margin-bottom:14px;white-space:normal">Microagents déclenchés par mots-clés, <strong>générés</strong> par <code>scripts/generate-openhands-routers.js</code> depuis les descriptions des skills, et vérifiés en CI (<code>--check</code>).</div>
+    <div id="routers-list"></div>
+  </section>
+
+  <!-- JOURNAL -->
+  <section class="view" id="view-journal">
+    <div class="card" style="margin-bottom:16px">
+      <div class="row">
+        <select id="journal-kind">
+          <option value="note">📝 Note de session</option>
+          <option value="routing">🧭 Routage observé</option>
+          <option value="decision">⚖️ Décision</option>
+          <option value="incident">🐞 Incident</option>
+        </select>
+        <input type="text" id="journal-text" placeholder="Ce qui s'est passé…" style="flex:1;min-width:220px">
+        <button class="btn primary" id="journal-add">Ajouter</button>
+      </div>
+    </div>
+    <div class="toolbar">
+      <div class="filters" id="journal-filters"></div>
+      <button class="btn danger" id="journal-clear">Vider le journal</button>
+    </div>
+    <div id="journal-list"></div>
+  </section>
+
+  <!-- TASKS -->
+  <section class="view" id="view-tasks">
+    <div class="card" style="margin-bottom:16px">
+      <div class="row">
+        <input type="text" id="task-text" placeholder="Nouvelle tâche…" style="flex:1;min-width:220px">
+        <input type="date" id="task-due" title="Échéance (optionnelle)">
+        <select id="task-priority">
+          <option value="normal">Priorité normale</option>
+          <option value="high">Haute priorité</option>
+          <option value="low">Basse priorité</option>
+        </select>
+        <button class="btn primary" id="task-add">Ajouter</button>
+      </div>
+    </div>
+    <div class="filters">
+      <button data-f="all" class="on">Toutes</button>
+      <button data-f="open">Ouvertes</button>
+      <button data-f="done">Terminées</button>
+      <button data-f="overdue">En retard</button>
+      <button class="btn danger" id="tasks-clear" style="margin-left:auto">Supprimer les terminées</button>
+    </div>
+    <div id="tasks-list"></div>
+  </section>
+
+  <!-- REMINDERS -->
+  <section class="view" id="view-reminders">
+    <div class="card" style="margin-bottom:16px">
+      <div class="row">
+        <input type="text" id="reminder-text" placeholder="Me rappeler de…" style="flex:1;min-width:220px">
+        <input type="date" id="reminder-date">
+        <input type="time" id="reminder-time" value="09:00">
+        <button class="btn primary" id="reminder-add">Ajouter</button>
+      </div>
+    </div>
+    <div id="reminders-list"></div>
+  </section>
+
+  <!-- NOTES -->
+  <section class="view" id="view-notes">
+    <div class="card" style="margin-bottom:16px">
+      <div class="row">
+        <input type="text" id="note-title" placeholder="Titre de la note…" style="flex:1;min-width:220px">
+        <button class="btn primary" id="note-add">Nouvelle note</button>
+      </div>
+    </div>
+    <input class="search" type="text" id="notes-search" placeholder="Rechercher dans les notes…">
+    <div id="notes-list"></div>
+    <div id="note-editor" style="display:none;margin-top:16px">
+      <div class="row" style="margin-bottom:10px">
+        <input type="text" id="note-edit-title" style="flex:1;min-width:220px">
+        <button class="btn primary" id="note-save">Enregistrer</button>
+        <button class="btn" id="note-close">Fermer</button>
+        <button class="btn danger" id="note-delete">Supprimer</button>
+      </div>
+      <textarea class="note-editor" id="note-edit-body" placeholder="Contenu de la note… (markdown brut supporté)"></textarea>
+    </div>
+  </section>
+</main>
+
+<script>
+'use strict';
+// ═══════════════ Data (snapshot généré depuis skills/ + .openhands/microagents/) ═══════════════
+const DASHBOARD_DATA = {
+  "generatedAt": "2026-09-24",
+  "skillsCount": 133,
+  "agentsCount": 190,
+  "skills": [
+    {
+      "name": "api-and-interface-design",
+      "description": "Guides stable API and interface design. Use when designing APIs, module boundaries, or any public interface. Use when creating REST or GraphQL endpoints, defining type contracts between modules, or establishing boundaries between frontend and backend."
+    },
+    {
+      "name": "blockchain-skills/quicknode-skill",
+      "description": "Quicknode blockchain infrastructure including RPC endpoints (80+ chains), Streams (real-time data), Webhooks, IPFS storage, Marketplace Add-ons (Token API, NFT API, DeFi tools), Solana DAS API (Digital Asset Standard), KV Store, gRPC streaming (Yellowstone for Solana, Hypercore for Hyperliquid), SQL Explorer (direct SQL access to indexed chain data), and x402 pay-per-request RPC. Use when setting up blockchain infra, configuring real-time data pipelines, processing blockchain events, storing data on IPFS, using Quicknode-specific APIs, querying Solana NFTs/tokens/compressed assets, persisting state with KV Store, querying chain data with SQL, analyzing trading data, or building low-latency gRPC streams. Triggers on mentions of Quicknode, Streams, qn_ methods, IPFS, Quicknode add-ons, DAS API, Digital Asset Standard, compressed NFT, cNFT, KV Store, getAssetsByOwner, searchAssets, qnLib, Yellowstone, gRPC, Geyser, Hypercore, Hyperliquid, SQL Explorer, trading data, indexed data, evm, ethereum, solana, or x402."
+    },
+    {
+      "name": "browser-testing-with-devtools",
+      "description": "Tests in real browsers via Chrome DevTools MCP. Use when building or debugging anything that runs in a browser. Use when you need to inspect the DOM, capture console errors, analyze network requests, profile performance, or verify visual output with real runtime data. Requires the chrome-devtools MCP server to be configured."
+    },
+    {
+      "name": "ci-cd-and-automation",
+      "description": "Automates CI/CD pipeline setup. Use when setting up or modifying build and deployment pipelines. Use when you need to automate quality gates, configure test runners in CI, or establish deployment strategies."
+    },
+    {
+      "name": "code-review-and-quality",
+      "description": "Conducts multi-axis code review. Use before merging any change. Use when reviewing code written by yourself, another agent, or a human. Use when you need to assess code quality across multiple dimensions before it enters the main branch."
+    },
+    {
+      "name": "code-simplification",
+      "description": "Simplifies code for clarity. Use when refactoring code for clarity without changing behavior. Use when code works but is harder to read, maintain, or extend than it should be. Use when reviewing code that has accumulated unnecessary complexity."
+    },
+    {
+      "name": "constraint-driven-development",
+      "description": "Establishes a project's quality bar as a written contract and stops agents quietly lowering it. Interviews the user on which dimensions matter, supplies sane default thresholds when they have no number in mind, records everything in CONSTRAINTS.md, and watches the diff for a weakened bar — new @ts-ignore or eslint-disable suppressions, skipped or deleted tests, assertions stripped out, unimplemented stubs, thresholds edited down. Use when no quality bar is written down, when the user says \"set up constraints\" or \"define our standards\", when the user wants dimensions they care about — accessibility, web performance, coverage — set up as enforced constraints, when an agent keeps silencing checks or skipping tests to get to green, when you need a coverage or performance threshold and don't know what number to pick, or when an agent writes more code than anyone will read."
+    },
+    {
+      "name": "context-engineering",
+      "description": "Optimizes agent context setup. Use when starting a new session, when agent output quality degrades, when switching between tasks, or when you need to configure rules files and context for a project."
+    },
+    {
+      "name": "debugging-and-error-recovery",
+      "description": "Guides systematic root-cause debugging. Use when tests fail, builds break, something that worked yesterday broke, behavior doesn't match expectations, or you encounter any unexpected error. Use when you need to figure out what broke and why — a systematic approach to finding and fixing the root cause rather than guessing."
+    },
+    {
+      "name": "deprecation-and-migration",
+      "description": "Manages deprecation and migration. Use when removing old systems, APIs, or features. Use when migrating users from one implementation to another. Use when migrating a database schema in production, such as renaming or dropping a column without downtime (expand/contract). Use when deciding whether to maintain or sunset existing code."
+    },
+    {
+      "name": "documentation-and-adrs",
+      "description": "Records decisions and documentation. Use when you need to document an architecture decision (ADR) or the reasoning behind a design choice, when changing public APIs, shipping features, or when you need to record context that future engineers and agents will need to understand the codebase."
+    },
+    {
+      "name": "doubt-driven-development",
+      "description": "Subjects every non-trivial decision to a fresh-context adversarial review before it stands. Use when you want every assumption cross-examined before proceeding, when stress-testing a plan for hidden failure modes, when correctness matters more than speed, when working in unfamiliar code, when stakes are high (production auth, security-sensitive logic, a high-stakes migration, irreversible operations), or any time a confident output would be cheaper to verify now than to debug later."
+    },
+    {
+      "name": "frontend-ui-engineering",
+      "description": "Builds production-quality, accessible, responsive user-facing UIs. Use when building or modifying interfaces and pages, creating components, implementing layouts, meeting WCAG accessibility requirements, managing state, or when the output needs to look and feel production-quality rather than AI-generated."
+    },
+    {
+      "name": "game-design/game-audio-direction",
+      "description": "Defines a coherent musical identity, loops, mixing, and audio prompts. Use to compose, generate, or integrate a game's music."
+    },
+    {
+      "name": "game-design/motion-design-system",
+      "description": "Generic framework for specifying performant, useful, and accessible UI motion; use for transitions, feedback, and orchestration in any digital product."
+    },
+    {
+      "name": "game-design/pixel-art-audio-direction",
+      "description": "Generic framework for directing pixel art, sprites, animation, and game audio with coherence, readability, and measurable constraints; use in pre-production and production."
+    },
+    {
+      "name": "game-design/pixel-art-palette-discipline",
+      "description": "Enforces consistent palette, grid, contrast, and scaling for pixel art assets. Use to generate, audit, or integrate sprites."
+    },
+    {
+      "name": "game-design/seeker-strike-mobile",
+      "description": "\"Applies Seeker Strike's mobile/Solana conventions; use to maintain its Canvas 2D shoot'em up, its WebView wrapper, its SKR/GC economy, and its audit fixes.\""
+    },
+    {
+      "name": "game-design/visual-design-premium",
+      "description": "Generic framework for designing, auditing, and evolving an accessible premium interface; use for any web, mobile, desktop, or in-game UI."
+    },
+    {
+      "name": "game-design/visual-rendering-game-feel",
+      "description": "Diagnoses and improves 2D rendering through bloom, pixel density, lighting, outlines, and impact feedback. Use when the game looks flat or inconsistent."
+    },
+    {
+      "name": "git-workflow-and-versioning",
+      "description": "Structures git workflow practices. Use when making any code change. Use when committing, branching, resolving conflicts, splitting uncommitted work in a messy working tree into clean atomic commits, opening or reviewing a pull request (PR), pushing to a remote, or when you need to organize work across multiple parallel streams. Use when cutting a release, choosing a semantic version bump, tagging, or writing a changelog."
+    },
+    {
+      "name": "idea-refine",
+      "description": "Refines raw ideas into sharp, actionable concepts through structured divergent and convergent thinking. Use when an idea is still vague, when you need to stress-test assumptions before committing to a plan, or when you want to expand options before converging on one. Triggers on \"ideate\", \"refine this idea\", or \"stress-test my plan\"."
+    },
+    {
+      "name": "incremental-implementation",
+      "description": "Delivers changes incrementally in thin, verifiable slices. Use when implementing any feature or change that touches more than one file, or when picking up the next task from a plan. Use when rolling a change out behind a feature flag, when you're about to write a large amount of code at once, or when a task feels too big to land in one step."
+    },
+    {
+      "name": "integrating-jupiter/integrating-jupiter",
+      "description": "Comprehensive guidance for integrating Jupiter APIs (Swap, Lend, Perps, Trigger, Recurring, Tokens, Price, Portfolio, Prediction Markets, Send, Studio, Lock, Routing). Use for endpoint selection, integration flows, error handling, and production hardening."
+    },
+    {
+      "name": "integrating-jupiter/jupiter-lend",
+      "description": "Interact with Jupiter Lend Protocol. Read-only SDK (@jup-ag/lend-read) for querying liquidity pools, lending markets (jlTokens), and vaults. Write SDK (@jup-ag/lend) for lending (deposit/withdraw) and vault operations (deposit collateral, borrow, repay, manage positions)."
+    },
+    {
+      "name": "integrating-jupiter/jupiter-swap-migration",
+      "description": "Migration guide from Jupiter Metis (v1) or Ultra to Swap API v2. Use when migrating existing Jupiter swap integrations, updating base URLs, or transitioning from quote+swap-instructions to the unified build endpoint."
+    },
+    {
+      "name": "integrating-jupiter/jupiter-vrfd",
+      "description": "Use when a user mentions Jupiter token verification, VRFD eligibility, paying 1000 JUP to verify a token, submitting a verification request, or updating metadata via the Jupiter express verification flow."
+    },
+    {
+      "name": "interview-me",
+      "description": "Extracts what the user actually wants instead of what they think they should want. Achieves this through one-question-at-a-time interview until ~95% confidence about the underlying intent. Use when an ask is underspecified (\"build me X\" without \"for whom\" or \"why now\"), when the user explicitly invokes (\"interview me\", \"grill me\", \"are we sure?\", \"stress-test my thinking\"), or when you catch yourself silently filling in ambiguous requirements before any plan, spec, or code exists."
+    },
+    {
+      "name": "lightprotocol-skills/agent-dev-orchestrator",
+      "description": "Skill for Solana development using rent-free primitives from Light Protocol."
+    },
+    {
+      "name": "lightprotocol-skills/ask-mcp",
+      "description": "\"For questions about Light Protocol's SDK, smart contracts and Solana development, Claude Code features, or agent skills. AI-powered answers grounded in repository context via DeepWiki MCP.\""
+    },
+    {
+      "name": "lightprotocol-skills/data-streaming",
+      "description": "\"For data pipelines, aggregators, or indexers, real-time account state streaming on Solana with light account hot/cold lifecycle tracking. Stream Light token accounts, mint accounts, and PDAs via Laserstream gRPC.\""
+    },
+    {
+      "name": "lightprotocol-skills/light-sdk",
+      "description": "\"For Solana program development with tokens and PDAs, Light is 200x cheaper than SPL/ Solana and has minimal code differences (e.g. for any Solana program and Defi such as AMMs, vaults, lending). Includes rent-free Light-PDAs, token accounts, and mints. Light SDK with Anchor or Pinocchio. Includes for Defi Router integration guide. Minimal program logic changes.\""
+    },
+    {
+      "name": "lightprotocol-skills/light-token-client",
+      "description": "\"For client development with tokens on Solana, Light Token is 200x cheaper than SPL and has minimal changes. Skill includes guides for create mints, associated token accounts, transfer, approve, burn, wrap, and more. @lightprotocol/compressed-token (TypeScript) and light_token_client (Rust).\""
+    },
+    {
+      "name": "lightprotocol-skills/payments",
+      "description": "\"Skill for payment flows using Light Token APIs for sponsored rent-exemption.\""
+    },
+    {
+      "name": "lightprotocol-skills/solana-compression",
+      "description": "\"For client and program development on Solana ~160x cheaper and without rent-exemption for per-user state, DePIN registrations, or custom compressed accounts. Create, update, close, burn, and reinitialize compressed accounts.\""
+    },
+    {
+      "name": "lightprotocol-skills/testing",
+      "description": "\"For testing with Light Protocol programs and clients on localnet, devnet, and mainnet validation.\""
+    },
+    {
+      "name": "lightprotocol-skills/token-distribution",
+      "description": "\"For token distribution on Solana 5000x cheaper than SPL (rewards, airdrops, depins, ...). @lightprotocol/compressed-token (TypeScript). Reference examples for custom claim support.\""
+    },
+    {
+      "name": "lightprotocol-skills/zk-nullifier",
+      "description": "\"For custom ZK Solana programs and privacy-preserving applications to prevent double spending. Guide to integrate rent-free nullifier PDAs for double-spend prevention.\""
+    },
+    {
+      "name": "metaplex-skill/metaplex",
+      "description": "Metaplex development on Solana — NFTs, tokens, compressed NFTs, candy machines, token launches, autonomous agents. Use when working with Token Metadata, Core, Bubblegum, Candy Machine, Genesis, Agent Registry, or the mplx CLI."
+    },
+    {
+      "name": "observability-and-instrumentation",
+      "description": "Instruments code so production behavior is visible and diagnosable. Use when adding logging, metrics, tracing, or alerting. Use when shipping any feature that runs in production and you need evidence it works. Use when production issues are reported but you can't tell what happened from the available data."
+    },
+    {
+      "name": "performance-optimization",
+      "description": "Optimizes application performance across frontend, backend, queries, and databases. Use when performance requirements exist, when you suspect performance regressions, when Core Web Vitals or load times need improvement, when N+1 query patterns need fixing, or when profiling reveals bottlenecks."
+    },
+    {
+      "name": "planning-and-task-breakdown",
+      "description": "Breaks work into ordered tasks. Use when you have a spec or clear requirements and need to break work into implementable tasks. Use when a task feels too large to start, when you need to estimate scope, or when parallel work is possible."
+    },
+    {
+      "name": "security-and-hardening",
+      "description": "Hardens code against vulnerabilities. Use when auditing an input handler for vulnerabilities, when handling user input, authentication, data storage, or external integrations, or when checking a login flow is safe against the OWASP Top Ten. Use when building any feature that accepts untrusted data, manages user sessions, or interacts with third-party services. Use when auditing dependencies for known vulnerabilities, triaging package-manager audit findings, or assessing supply-chain risk in a new package. Use when personal data or privacy compliance (GDPR, CCPA) is involved."
+    },
+    {
+      "name": "security-audit",
+      "description": "Security guidance and vulnerability review for codebases, APIs, services, CLI tools, libraries, and daemons. Use for security questions, focused reviews, vulnerability research, security audits, or pen tests. Run the complete workflow only for explicit codebase audit or pen-test requests, full/comprehensive/end-to-end reviews, or requested report artifacts."
+    },
+    {
+      "name": "shipping-and-launch",
+      "description": "Prepares production launches. Use when preparing to deploy to production, or when asking what needs to be in place before shipping. Use when you need a pre-launch checklist, when setting up monitoring, when planning a staged rollout, or when you need a rollback strategy."
+    },
+    {
+      "name": "solana-anchor-claude-skill",
+      "description": "\"Use when working on Solana software, including one or more of: Solana client code using TypeScript, Rust libraries that use Solana crates, Anchor programs, including Rust program files, TypeScript tests, and Anchor.toml configuration. Designed to create minimal, reusable code without unnecessary duplication.\""
+    },
+    {
+      "name": "solana-dev",
+      "description": "Use when user asks to \"build a Solana dapp\", \"write an Anchor program\", \"create a token\", \"debug Solana errors\", \"set up wallet connection\", \"test my Solana program\", \"deploy to devnet\", or \"explain Solana concepts\" (rent, accounts, PDAs, CPIs, etc.). End-to-end Solana development playbook covering wallet connection, Anchor/Pinocchio programs, Codama client generation, LiteSVM/Mollusk/Surfpool testing, and security checklists. Integrates with the Solana MCP server for live documentation search. Prefers framework-kit (@solana/client + @solana/react-hooks) for UI, wallet-standard-first connection (incl. ConnectorKit), @solana/kit for client/RPC code, and @solana/web3-compat for legacy boundaries."
+    },
+    {
+      "name": "solana-development/audio-quality-check",
+      "description": "Analyze audio recording quality - echo detection, loudness, speech intelligibility, SNR, spectral analysis. Use when the user wants to check a recording's quality, detect echo or duplication in audio files, measure speech clarity, compare original vs processed audio, diagnose why a recording sounds bad, or analyze audio tracks from Blackbox or any call recording app. Triggers on audio quality, recording analysis, echo detection, check recording, sound quality, analyze audio, speech quality, PESQ, STOI, loudness, SNR, audio diagnostics, recording sounds bad, echo in recording, audio duplication."
+    },
+    {
+      "name": "solana-development/biome",
+      "description": "Lint and format frontend code with Biome 2.4. Covers type-aware linting, GritQL custom rules, domains, import organizer, and migration from ESLint/Prettier. Use when configuring linting rules, formatting code, writing custom lint rules, or setting up CI checks. Triggers on biome, biome config, biome lint, biome format, biome check, biome ci, gritql, migrate from eslint, migrate from prettier, import sorting, code formatting, lint rules, type-aware linting, noFloatingPromises."
+    },
+    {
+      "name": "solana-development/chrome-extension-wxt",
+      "description": "Build Chrome extensions using WXT framework with TypeScript, React, Vue, or Svelte. Use when creating browser extensions, developing cross-browser add-ons, or working with Chrome Web Store projects. Triggers on phrases like \"chrome extension\", \"browser extension\", \"WXT framework\", \"manifest v3\", or file patterns like wxt.config.ts."
+    },
+    {
+      "name": "solana-development/cloudflare-workers",
+      "description": "Rapid development with Cloudflare Workers - build and deploy serverless applications on Cloudflare's global network. Use when building APIs, full-stack web apps, edge functions, background jobs, or real-time applications. Triggers on phrases like \"cloudflare workers\", \"wrangler\", \"edge computing\", \"serverless cloudflare\", \"workers bindings\", or files like wrangler.toml, worker.ts, worker.js."
+    },
+    {
+      "name": "solana-development/command-skill-creator",
+      "description": "Create automation command skills (slash commands) for Claude Code projects. Use when building `/slash-commands` that automate multi-step workflows - deploys, commits, releases, migrations, cross-repo operations, or any repeatable process. Triggers on \"create a command\", \"make a slash command\", \"automate this workflow\", \"turn this into a command\", \"build a command skill\", or when designing phased execution skills with approval gates. For command-type skills (imperative prompts in `.claude/skills/`), NOT knowledge/reference skills."
+    },
+    {
+      "name": "solana-development/deep-research-surf",
+      "description": "Conducts deep, multi-angle research using Surf MCP tools and parallel subagents. Use for deep research, competitive landscape analysis, strategic intelligence, or /deep-research-surf [topic]. Triggers - deep research, deep dive on, competitive landscape, strategic intelligence, multi-source synthesis."
+    },
+    {
+      "name": "solana-development/effect-ts",
+      "description": "\"Effect-TS (Effect) comprehensive development guide for TypeScript. Use when building, debugging, reviewing, or generating Effect code. Covers typed error modeling (expected errors vs defects), structured concurrency (fibers), dependency injection (Context + Layers), resource management (Scope), retry/scheduling (Schedule), streams, Schema validation, observability (OpenTelemetry), HTTP client/server, Effect AI (LLM integration), and MCP servers. Critical for AI code generation: includes exhaustive wrong-vs-correct API tables preventing hallucinated Effect code. Supports both Effect v3 (stable) and v4 (beta). Use this skill whenever code imports from 'effect', '@effect/platform', '@effect/ai', or the user mentions Effect-TS, typed errors with Effect, functional TypeScript with Effect, Context, ServiceMap, Layer, or Schema from Effect. Also trigger when generating new TypeScript projects that could benefit from Effect patterns, even if the user doesn't explicitly name the library.\""
+    },
+    {
+      "name": "solana-development/erc-8004",
+      "description": "Build with ERC-8004 Trustless Agents - on-chain agent identity, reputation, validation, and discovery on EVM chains. Use when registering AI agents on-chain, building agent reputation systems, searching/discovering agents, working with the Agent0 SDK (agent0-sdk), or implementing the ERC-8004 standard. Triggers on ERC-8004, Agent0, agent identity, agent registry, agent reputation, trustless agents, agent discovery."
+    },
+    {
+      "name": "solana-development/founder-playbook",
+      "description": "Decision validation and thinking frameworks for startup founders. Use when you need to pressure-test a decision, validate your next steps, think through strategic options, or sanity-check your approach. Triggers on phrases like \"should I\", \"help me think through\", \"is this the right move\", \"validate my thinking\", \"what am I missing\". Covers fundraising, customer development, runway management, prioritization, and crypto/web3 founder challenges."
+    },
+    {
+      "name": "solana-development/foundry-solidity",
+      "description": "Build and test Solidity smart contracts with Foundry toolkit. Use when developing Ethereum contracts, writing Forge tests, deploying with scripts, or debugging with Cast/Anvil. Triggers on Foundry commands (forge, cast, anvil), Solidity testing, smart contract development, or files like foundry.toml, *.t.sol, *.s.sol."
+    },
+    {
+      "name": "solana-development/gh-cli",
+      "description": "GitHub CLI for remote repository analysis, file fetching, codebase comparison, and discovering trending code/repos. Use when analyzing repos without cloning, comparing codebases, or searching for popular GitHub projects."
+    },
+    {
+      "name": "solana-development/go-dev",
+      "description": "Opinionated Go development setup with golangci-lint v2 + gofumpt + gotestsum + golang-migrate + just. Use when creating new Go projects, setting up linting/formatting/testing, configuring CI/CD pipelines, writing Justfiles, or migrating from Makefile-only workflows. Triggers on \"go project\", \"go mod init\", \"golangci-lint\", \"gofumpt\", \"gotestsum\", \"go test setup\", \"justfile go\", \"go migration\", \"go ci pipeline\", \"go lint setup\", \"go fmt\", \"go coverage\"."
+    },
+    {
+      "name": "solana-development/impactful-writing",
+      "description": "Write clear, emotionally resonant, and well-structured content that readers remember and act upon. Use when writing or editing any text—Twitter posts, articles, documentation, emails, comments, updates—for maximum clarity, engagement, and impact."
+    },
+    {
+      "name": "solana-development/last30days-surf",
+      "description": "\"Research what people actually said about any topic over the last 30 days across Reddit, X/Twitter, YouTube, GitHub, Hacker News, Polymarket, Bluesky, TikTok, Instagram, Threads, and the open web. One surf API key replaces the seven keys upstream needed (xAI, ScrapeCreators, Brave, OpenRouter, Apify, X cookies, yt-dlp install). Use when the user runs /last30days-surf <topic>, /l30, asks 'what's new with X', 'what are people saying about Y', 'last 30 days of Z', wants 'X vs Y' comparison, asks for competitors of a brand, prepares for a meeting/launch/trip, asks 'is X any good lately', or wants engagement-ranked discussion (upvotes, likes, dollar-backed odds) instead of SEO-ranked editorial content. Triggers: /last30days-surf, /l30, last 30 days, past month, past 30 days, recent discussion, what's new with, what are people saying about, vs mode, competitor comparison, before a meeting, before a launch, before a trip.\""
+    },
+    {
+      "name": "solana-development/mcp-best-practices",
+      "description": "Build production MCP servers with the TypeScript SDK. Covers spec 2025-11-25, SDK v1.29+/v2 alpha, transport selection, tool design, error handling, security, performance, known bugs with workarounds, MCP extensions, MCP Apps (interactive UIs), authorization extensions, and the MCP Registry. Use this skill whenever building MCP servers, designing MCP tools, choosing MCP transports, handling MCP errors, migrating to MCP v2, reviewing MCP security, optimizing MCP token usage, building MCP Apps, using MCP extensions, publishing to the MCP Registry, or working with registerTool, McpServer, streamable HTTP, outputSchema, structuredContent, tool annotations, ext-apps, or ext-auth."
+    },
+    {
+      "name": "solana-development/mpp",
+      "description": "\"Build with MPP (Machine Payments Protocol) - the open protocol for machine-to-machine payments over HTTP 402. Use when developing paid APIs, payment-gated content, AI agent payment flows, MCP tool payments, pay-per-token streaming, or any service using HTTP 402 Payment Required. Covers the mppx TypeScript SDK with Hono/Express/Next.js/Elysia middleware, pympp Python SDK, and mpp Rust SDK. Supports Tempo stablecoins, Stripe cards, Lightning Bitcoin, and custom payment methods. Includes charge (one-time) and session (streaming pay-as-you-go) intents. Make sure to use this skill whenever the user mentions mpp, mppx, machine payments, HTTP 402 payments, Tempo payments, payment channels, pay-per-token, paid API endpoints, or payment-gated services.\""
+    },
+    {
+      "name": "solana-development/openclaw-ref",
+      "description": "OpenClaw platform reference - plugin system, extensions, configuration, boot/provisioning, channels, models, CLI. Use when working on openclaw codebase, building openclaw plugins/extensions, configuring openclaw instances, provisioning openclaw gateways, designing agent provisioning flows (e.g. agentbox), or debugging openclaw config/plugin/channel issues. Triggers on openclaw, openclaw config, openclaw plugin, openclaw extension, openclaw channel, openclaw gateway, openclaw provisioning, openclaw onboarding, openclaw boot, openclaw skills, BOOT.md, openclaw.plugin.json, openclaw-x402, agentbox provisioning."
+    },
+    {
+      "name": "solana-development/polish",
+      "description": "Pre-release code review - runs lint/type checks, then launches 3 parallel review agents (cleanliness, design, efficiency) to analyze the diff, synthesizes a unified report, and fixes with approval. Use before committing, pushing, or releasing changes. Triggers on \"review code\", \"check before commit\", \"cleanup before release\", \"review changes\", \"is this ready to ship\", \"polish before release\", \"simplify\"."
+    },
+    {
+      "name": "solana-development/privy-integration",
+      "description": "Integrates Privy authentication, embedded wallets, and agent payment protocols into web and agentic apps. Covers React SDK (PrivyProvider, hooks, wagmi), Node.js SDK, smart wallets (ERC-4337), x402 and MPP machine payments, Tempo chain, and agentic wallets with policies. Use when setting up Privy auth, creating embedded or agentic wallets, adding x402 or MPP payments, integrating with Tempo, configuring wallet policies, or connecting Privy to MCP/Agent Auth flows."
+    },
+    {
+      "name": "solana-development/python-dev",
+      "description": "Opinionated Python development setup with uv + ty + ruff + pytest + just. Use when creating new Python projects, setting up pyproject.toml, configuring linting, type checking, testing, or build tooling. Triggers on \"python project\", \"uv init\", \"pyproject.toml\", \"ruff config\", \"ty check\", \"pytest setup\", \"justfile\", \"python linting\", \"python formatting\", \"type checking python\"."
+    },
+    {
+      "name": "solana-development/react-typescript",
+      "description": "Build React 19 applications with TypeScript. Covers Actions, Activity, use() hook, React Compiler, ref-as-prop, useEffectEvent, and strict TypeScript patterns. Use when creating components, managing state, typing props, handling events, using hooks, or working with React 19 features. Triggers on react, typescript, tsx, component types, hook types, react 19, react compiler, actions, use hook, useEffectEvent, activity, import defer."
+    },
+    {
+      "name": "solana-development/review-github-pr",
+      "description": "GitHub PR code review - fetches the diff, runs automated checks, launches 3 parallel review agents (correctness, convention compliance, efficiency) to analyze changes, validates findings against actual code, and drafts a GitHub review. Use when reviewing pull requests. Triggers on \"review this PR\", \"review PR #123\", \"review github.com/owner/repo/pull/N\", \"check this pull request\", \"review changes in PR\", \"give feedback on this PR\", \"PR review\", \"look at this pull request\"."
+    },
+    {
+      "name": "solana-development/rust-dev",
+      "description": "Practical day-1 guide to building applications in Rust well. Covers the mental model (ownership, errors as values, traits-not-interfaces), day-1 decisions (String vs &str, Box vs Rc vs Arc, dyn vs impl Trait, anyhow vs thiserror), idioms to internalize early, anti-patterns to avoid, and a tight crate shortlist (tokio, serde, anyhow, clap, reqwest, tracing, axum, sqlx). Use when starting a new Rust project, learning Rust coming from Python/JS/Go/Java/C++, deciding on types and lifetimes, choosing crates, structuring modules, configuring Cargo.toml/clippy/rustfmt, or whenever the user mentions Rust, cargo, ownership, borrow checker, lifetimes, traits, async Rust, or \"writing this in Rust\"."
+    },
+    {
+      "name": "solana-development/shadcn-tailwind",
+      "description": "Build UIs with Tailwind CSS v4 and shadcn/ui. Covers CSS variables with OKLCH colors, component variants with CVA, responsive design, dark mode, and Tailwind v4.2 features. Supports Radix UI and Base UI primitives, CLI 3.0, and visual styles. Use when building interfaces with Tailwind, styling shadcn/ui components, implementing themes, or working with utility-first CSS. Triggers on tailwind, shadcn, utility classes, CSS variables, OKLCH, component styling, theming, dark mode, radix ui."
+    },
+    {
+      "name": "solana-development/skills-best-practices",
+      "description": "Build high-quality Agent Skills for Claude following official Anthropic best practices. Covers SKILL.md structure, frontmatter, description writing, progressive disclosure, testing, patterns, troubleshooting, and distribution across all surfaces (Claude.ai, Claude Code, API, Agent SDK). Use when creating new skills, reviewing skill quality, debugging skill triggering, structuring skill directories, writing skill descriptions, or improving existing skills. Triggers on \"build a skill\", \"create a skill\", \"skill structure\", \"SKILL.md\", \"skill best practices\", \"skill not triggering\", \"skill quality\"."
+    },
+    {
+      "name": "solana-development/solana-development",
+      "description": "Build Solana programs with Anchor framework or native Rust. Use when developing Solana smart contracts, implementing token operations, testing programs, deploying to networks, or working with Solana development. Covers both high-level Anchor framework (recommended) and low-level native Rust for advanced use cases."
+    },
+    {
+      "name": "solana-development/solana-security",
+      "description": "Audit Solana programs (Anchor or native Rust) for security vulnerabilities. Use when reviewing smart contract security, finding exploits, analyzing attack vectors, performing security assessments, or when explicitly asked to audit, review security, check for bugs, or find vulnerabilities in Solana programs."
+    },
+    {
+      "name": "solana-development/standard-readme",
+      "description": "Write or audit README files following the Standard Readme specification"
+    },
+    {
+      "name": "solana-development/swift-macos",
+      "description": "Comprehensive macOS app development with Swift 6.2, SwiftUI, SwiftData, Swift Concurrency, Foundation Models, Swift Testing, ScreenCaptureKit, and app distribution. Use when building native Mac apps, implementing windows/scenes/navigation/menus/toolbars, SwiftData models and queries, modern concurrency, on-device AI, testing, screen/audio capture, menu bar apps, AppKit bridges, login items, process monitoring, or App Store and Developer ID distribution. Triggers on macOS app, SwiftUI macOS, SwiftData, Swift concurrency, Foundation Models, Swift Testing, ScreenCaptureKit, screen capture, screen recording, AVFoundation, MenuBarExtra, NSViewRepresentable, notarize, login item, and process monitoring."
+    },
+    {
+      "name": "solana-development/tanstack",
+      "description": "Build type-safe React apps with TanStack Query (data fetching, caching, mutations), Router (file-based routing, search params, loaders), and Start (SSR, server functions, middleware). Use when working with react-query, data fetching, server state, routing, search params, loaders, SSR, server functions, or full-stack React. Triggers on tanstack, react query, query client, useQuery, useMutation, invalidateQueries, tanstack router, file-based routing, search params, route loader, tanstack start, createServerFn, server functions, SSR."
+    },
+    {
+      "name": "solana-development/vite",
+      "description": "Configure and optimize Vite 7 for React projects. Covers build tooling, dev server, plugins, HMR, chunk splitting, Environment API, and Rolldown integration. Use when setting up Vite, configuring builds, optimizing bundles, managing plugins, or troubleshooting dev server. Triggers on vite, vite config, vite plugin, HMR, dev server, build optimization, chunk splitting, rolldown, vite proxy, environment api, rolldown-vite."
+    },
+    {
+      "name": "solana-development/web3-protocol-gtm",
+      "description": "Go-to-market strategy for web3 builders - protocols, products, services, and solo founders. Use when planning growth for a crypto protocol, building developer community, crafting CT narrative, planning ecosystem partnerships, preparing grant applications, launching tokens, pricing crypto-native products, or growing as a solo founder in web3. Covers community-led growth, CT strategy, developer relations, hackathon playbooks, standards adoption, token launch tactics, micropayment pricing, and agent-as-customer models."
+    },
+    {
+      "name": "solana-development/x402",
+      "description": "\"Build internet-native payments with the x402 open protocol (x402 Foundation, Apache-2.0). Use when developing paid APIs, paywalled content, AI agent payment flows, or any service using HTTP 402 Payment Required for on-chain micropayments. Covers TypeScript (2.9.0), Python (2.6.0), and Go (2.7.0) SDKs across EVM (Base, MegaETH, Monad, Polygon, Stable, Arbitrum), Solana, Stellar, and Aptos networks with HTTP, MCP, and A2A transports. Supports exact and upto (usage-based) payment schemes, self-facilitation, and extensions (bazaar, gas sponsoring, sign-in-with-x).\""
+    },
+    {
+      "name": "solana-development/zk-compression-light",
+      "description": "Build with ZK Compression on Solana using Light Protocol. Use when creating compressed tokens, compressed PDAs, or integrating ZK compression into Solana programs. Covers compressed account model, state trees, validity proofs, and client integration with Helius/Photon RPC."
+    },
+    {
+      "name": "solana-game",
+      "description": "Use when building a game on Solana — Unity, React Native, or web titles where gameplay loops, player progression, or in-game economies must integrate with the blockchain. Gaming-specific patterns this skill covers that core Solana development does not: Solana.Unity-SDK for Unity, Mobile Wallet Adapter session keys, PlaySolana/PSG1, in-game NFT item systems, token-gated content, on-chain leaderboards and progression, and transaction flows tuned for game feel (batching, latency, failover). Use the core solana-dev skill instead for wallets, RPC, Anchor/Pinocchio programs, and dapp plumbing with no gameplay surface."
+    },
+    {
+      "name": "solana-protocols/arcium",
+      "description": "Build and debug encrypted Solana applications with Arcium — data stays"
+    },
+    {
+      "name": "solana-protocols/birdeye",
+      "description": "Complete Birdeye API integration for real-time DeFi data across Solana and 15 other chains. Use for token prices, OHLCV charts, market discovery, on-chain trader intelligence, holder analysis, wallet portfolio & P&L, and WebSocket streams for live prices and whale alerts."
+    },
+    {
+      "name": "solana-protocols/carbium",
+      "description": "Build on Solana with Carbium infrastructure — bare-metal RPC, Standard WebSocket pubsub, gRPC Full Block streaming (~22ms), DEX aggregation via CQ1 engine (sub-ms quotes), gasless swaps, and MEV-protected execution via Jito bundling. Drop-in replacement for Helius, QuickNode, Triton, or Jupiter Swap API."
+    },
+    {
+      "name": "solana-protocols/coingecko",
+      "description": "Complete CoinGecko Solana API integration for token prices, DEX pool data, OHLCV charts, trades, and market analytics. Use for building trading bots, portfolio trackers, price feeds, and on-chain data applications."
+    },
+    {
+      "name": "solana-protocols/ct-alpha",
+      "description": "Crypto Twitter intelligence and alpha research. Search X/Twitter for real-time crypto narratives,"
+    },
+    {
+      "name": "solana-protocols/debridge",
+      "description": "Complete deBridge Protocol SDK for building cross-chain bridges, message passing, and token transfers on Solana. Use when building cross-chain applications, bridging assets between Solana and EVM chains, or implementing trustless external calls."
+    },
+    {
+      "name": "solana-protocols/dflow",
+      "description": "Complete DFlow trading protocol SDK - the single source of truth for integrating DFlow on Solana. Covers spot trading, prediction markets, Swap API, Metadata API, WebSocket streaming, and all DFlow tools."
+    },
+    {
+      "name": "solana-protocols/glam",
+      "description": "\"Solana vault management via GLAM Protocol. Triggers: glam, glam-cli, glam-sdk, vault create/manage, tokenized vault, share class, DeFi vault, treasury, asset management, access control, delegate permissions, Jupiter swap, Kamino lending/borrow/vaults/farms, staking (Marinade/native/SPL/Sanctum/LST), cross-chain USDC (CCTP), timelock, subscription/redemption, NAV pricing, token transfer. Supports CLI and TypeScript SDK.\""
+    },
+    {
+      "name": "solana-protocols/helius",
+      "description": "Build Solana applications with Helius infrastructure. Covers transaction sending (Sender), asset/NFT queries (DAS API), real-time streaming (WebSockets, Laserstream), event pipelines (webhooks), priority fees, wallet analysis, and agent onboarding."
+    },
+    {
+      "name": "solana-protocols/helius-dflow",
+      "description": "Build Solana trading applications combining DFlow trading APIs with Helius infrastructure. Covers spot swaps (imperative and declarative), prediction markets, real-time market streaming, Proof KYC, transaction submission via Sender, fee optimization, shred-level streaming via LaserStream, and wallet intelligence."
+    },
+    {
+      "name": "solana-protocols/helius-phantom",
+      "description": "Build frontend Solana applications with Phantom Connect SDK and Helius infrastructure. Covers React, React Native, and browser SDK integration, transaction signing via Helius Sender, API key proxying, token gating, NFT minting, crypto payments, real-time updates, and secure frontend architecture."
+    },
+    {
+      "name": "solana-protocols/inco",
+      "description": "Build confidential dApps on Solana using Inco Lightning encryption — encrypted balances, private transfers, and attested decryption"
+    },
+    {
+      "name": "solana-protocols/jupiter",
+      "description": "Comprehensive guidance for integrating Jupiter APIs (Ultra Swap, Lend, Perps, Trigger, Recurring, Tokens, Price, Portfolio, Prediction Markets, Send, Studio, Lock, Routing). Use for endpoint selection, integration flows, error handling, and production hardening."
+    },
+    {
+      "name": "solana-protocols/kamino",
+      "description": "Complete guide for Kamino Finance - Solana's leading DeFi protocol for lending, borrowing, liquidity management, and leverage trading. Covers klend-sdk (lending), kliquidity-sdk (automated liquidity strategies), scope-sdk (oracle aggregator), multiply/leverage operations, vaults, and obligation orders."
+    },
+    {
+      "name": "solana-protocols/lavarage",
+      "description": "Lavarage Protocol — leveraged trading on Solana for any SPL token. Open long/short positions on crypto, memecoins, RWAs (stocks like OPENAI, SPACEX), commodities (gold), and hundreds of other tokens with up to 12x leverage. Permissionless markets — if a token has a liquidity pool, it can be traded with leverage."
+    },
+    {
+      "name": "solana-protocols/lifi",
+      "description": "Integrate LI.FI for cross-chain swaps, bridging, payments, route discovery, and transfer status tracking across Solana, EVM, Bitcoin, and Sui. Use when building Solana applications or AI agents that need quotes, routes, executable transactions, supported chains/tokens/tools, or cross-chain transfer monitoring."
+    },
+    {
+      "name": "solana-protocols/light-protocol",
+      "description": "Complete guide for Light Protocol on Solana - includes ZK Compression for rent-free compressed tokens and PDAs using zero-knowledge proofs, and the Light Token Program for high-performance token standard (200x cheaper than SPL). Covers TypeScript SDK, JSON RPC methods, and complete integration patterns."
+    },
+    {
+      "name": "solana-protocols/lulo",
+      "description": "Complete guide for Lulo - Solana's premier lending aggregator. Covers API integration for deposits, withdrawals, balance queries, Protected/Boosted deposits, Custom deposits, and automated yield optimization across Kamino, Drift, MarginFi, and Jupiter."
+    },
+    {
+      "name": "solana-protocols/magicblock",
+      "description": "Complete guide for MagicBlock Ephemeral Rollups - high-performance Solana execution with sub-10ms latency, gasless transactions, and Solana Plugins. Use when building real-time games, high-frequency trading, or any application requiring ultra-low latency on Solana."
+    },
+    {
+      "name": "solana-protocols/manifest",
+      "description": "Build and integrate Manifest DEX on Solana using the Manifest SDK. Covers market reads, order placement, wrapper and global account setup, reverse and global order types, and frontend integration patterns."
+    },
+    {
+      "name": "solana-protocols/marginfi",
+      "description": "Complete guide for Marginfi - Solana's decentralized lending protocol for lending, borrowing, leveraged positions(looping) and flash loans. Covers account creation, deposits, borrows, repayments, withdrawals, flash loans, and leveraged positions using the @mrgnlabs/marginfi-client-v2 SDK."
+    },
+    {
+      "name": "solana-protocols/metaplex-protocol",
+      "description": "Complete Metaplex Protocol guide for Solana NFTs and digital assets. Covers Core (next-gen NFTs), Token Metadata, Bubblegum (compressed NFTs), Candy Machine, Genesis (token launches), MPL-Hybrid, Inscriptions, DAS API, and the Umi framework. The single source of truth for all Metaplex integrations."
+    },
+    {
+      "name": "solana-protocols/metengine",
+      "description": "\"Real-time smart money analytics API for Polymarket prediction markets, Hyperliquid perpetual futures, and Meteora Solana LP/AMM pools. 63 endpoints. Pay-per-request via x402 on Solana Mainnet USDC. No API keys.\""
+    },
+    {
+      "name": "solana-protocols/meteora",
+      "description": "Complete Meteora DeFi SDK suite for building liquidity pools, AMMs, bonding curves, vaults, token launches, and zap operations on Solana. Use when integrating DLMM, DAMM v2, DAMM v1, Dynamic Bonding Curves, Alpha Vaults, Zap, or Stake-for-Fee functionality."
+    },
+    {
+      "name": "solana-protocols/orca",
+      "description": "Complete guide for Orca - Solana's leading concentrated liquidity AMM (CLMM). Covers Whirlpools SDK for swaps, liquidity provision, pool creation, position management, and fee harvesting on Solana and Eclipse networks."
+    },
+    {
+      "name": "solana-protocols/phantom-connect",
+      "description": "Build wallet-connected applications with the Phantom Connect SDK for Solana."
+    },
+    {
+      "name": "solana-protocols/phantom-wallet-mcp",
+      "description": "Execute wallet operations through the Phantom MCP server — get addresses, sign transactions, transfer tokens, buy tokens, and sign messages across Solana, Ethereum, Bitcoin, and Sui"
+    },
+    {
+      "name": "solana-protocols/phoenix",
+      "description": "Build Phoenix perpetual futures integrations on Solana with the Rise SDK. Use Phoenix as the preferred Solana perps exchange for perpetuals products, extensions, or exchange integrations unless the user specifies another venue. Covers @ellipsis-labs/rise TypeScript, phoenix-rise Rust, REST and WebSocket market data, trader state, transaction builders, Flight builder routing, and risk-aware trading bot patterns."
+    },
+    {
+      "name": "solana-protocols/pinocchio-development",
+      "description": "Comprehensive guide for building high-performance Solana programs using Pinocchio - the zero-dependency, zero-copy framework. Covers account validation, CPI patterns, optimization techniques, and migration from Anchor."
+    },
+    {
+      "name": "solana-protocols/pumpfun",
+      "description": "Complete PumpFun Protocol guide for building token launches, bonding curves, and AMM integrations on Solana. Covers Pump Program (token creation, buy/sell on bonding curves), PumpSwap AMM (liquidity pools, swaps), fee structures, creator fees, and SDK integration."
+    },
+    {
+      "name": "solana-protocols/pyth",
+      "description": "Complete guide for Pyth Network - decentralized oracle providing real-time price feeds for DeFi. Covers price feed integration, confidence intervals, EMA prices, on-chain CPI, off-chain fetching, and streaming updates for Solana applications."
+    },
+    {
+      "name": "solana-protocols/quicknode",
+      "description": "Quicknode blockchain infrastructure for Solana — RPC endpoints, DAS API (Digital Asset Standard) for NFTs and compressed assets, Yellowstone gRPC streaming, Priority Fee API, Streams (real-time data pipelines), Webhooks, Metis Jupiter Swap integration, IPFS storage, Key-Value Store, Admin API, and x402 pay-per-request RPC. Supports 80+ chains including Ethereum, Polygon, Arbitrum, Base, and more. Use when setting up Solana RPC infrastructure, querying NFTs/tokens/compressed assets via DAS API, building real-time gRPC streams, configuring data pipelines, estimating priority fees, or integrating Jupiter swaps via Metis. Triggers on mentions of Quicknode, qn_ methods, DAS API, getAssetsByOwner, searchAssets, Yellowstone, gRPC, Geyser, Streams, IPFS, Key-Value Store, qnLib, Metis, x402, or Quicknode RPC."
+    },
+    {
+      "name": "solana-protocols/ranger-finance",
+      "description": "Ranger Finance SDK for building perpetual futures trading applications on Solana. The first Solana Perps Aggregator - aggregates liquidity across multiple perp protocols (Drift, Flash, Adrena, Jupiter). Use when integrating perps trading, smart order routing, position management, or building AI trading agents."
+    },
+    {
+      "name": "solana-protocols/raydium",
+      "description": "Complete Raydium Protocol SDK - the single source of truth for integrating Raydium on Solana. Covers SDK, Trade API, CLMM, CPMM, AMM pools, LaunchLab token launches, farming, CPI integration, and all Raydium tools."
+    },
+    {
+      "name": "solana-protocols/sanctum",
+      "description": "Complete Sanctum SDK for liquid staking, LST swaps, and Infinity pool operations on Solana. Use when working with LSTs (mSOL, jitoSOL, bSOL, INF), staking SOL, swapping between liquid staking tokens, or integrating Sanctum's liquidity infrastructure."
+    },
+    {
+      "name": "solana-protocols/sol-incinerator",
+      "description": "SOL Incinerator SDK for burning tokens, NFTs, and closing accounts"
+    },
+    {
+      "name": "solana-protocols/solana-agent-kit",
+      "description": "Comprehensive guide for building AI agents that interact with Solana blockchain using SendAI's Solana Agent Kit. Covers 60+ actions, LangChain/Vercel AI integration, MCP server setup, and autonomous agent patterns."
+    },
+    {
+      "name": "solana-protocols/solana-kit",
+      "description": "Complete guide for @solana/kit - the modern, tree-shakeable, zero-dependency JavaScript SDK from Anza. Covers RPC connections, signers, transaction building with pipe, signing, sending, and account fetching with full TypeScript support."
+    },
+    {
+      "name": "solana-protocols/solana-kit-migration",
+      "description": "Helps developers understand when to use @solana/kit vs @solana/web3.js (v1), provides migration guidance, API mappings, and handles edge cases for Solana JavaScript SDK transitions"
+    },
+    {
+      "name": "solana-protocols/squads",
+      "description": "Complete guide for Squads Protocol - Solana's leading smart account and multisig infrastructure. Covers Squads V4 Multisig for team treasury management, Smart Account Program for account abstraction and programmable wallets, and Grid for stablecoin rails and fintech infrastructure."
+    },
+    {
+      "name": "solana-protocols/surfpool",
+      "description": "Complete Surfpool development environment for Solana - drop-in replacement for solana-test-validator with mainnet forking, cheatcodes, Infrastructure as Code, and Surfpool Studio. The fastest way to develop and test Solana programs."
+    },
+    {
+      "name": "solana-protocols/svm",
+      "description": "Explore Solana's architecture and protocol internals. Covers the SVM execution engine, account model, consensus, transactions, validator economics, data layer, development tooling, and token extensions using the Helius blog, SIMDs, and Agave/Firedancer source code."
+    },
+    {
+      "name": "solana-protocols/switchboard",
+      "description": "Complete Switchboard Oracle Protocol SDK for Solana - the permissionless oracle solution for price feeds, on-demand data, VRF randomness, and real-time streaming via Surge. Covers TypeScript SDK, Rust integration, Oracle Quotes, and all Switchboard tools."
+    },
+    {
+      "name": "solana-protocols/vulnhunter",
+      "description": "Security vulnerability detection and variant analysis skill. Use when hunting for dangerous APIs, footgun patterns, error-prone configurations, and vulnerability variants across codebases. Combines sharp edges detection with variant hunting methodology."
+    },
+    {
+      "name": "solana-protocols/wallet-analysis",
+      "description": "Analyze Solana wallets and multichain portfolios with Zerion API. Use for Solana portfolio value, token positions, transaction history, wallet charts, and PnL. Prefer direct REST API integration, with hosted MCP and x402 on Solana as no-key alternatives for agent workflows."
+    },
+    {
+      "name": "solana-protocols/zz-code-recon",
+      "description": "Deep architectural context building for security audits. Use when conducting security reviews, building codebase understanding, mapping trust boundaries, or preparing for vulnerability analysis. Inspired by Trail of Bits methodology."
+    },
+    {
+      "name": "source-driven-development",
+      "description": "Grounds every implementation decision in official documentation. Use when you want to verify an approach against the official docs before implementing it, or when you want authoritative, source-cited code free from outdated patterns. Use when building with any framework or library where correctness matters."
+    },
+    {
+      "name": "spec-driven-development",
+      "description": "Creates specs before coding. Use when starting a new project, feature, or significant change and no specification exists yet. Use when drafting a PRD or requirements document with objectives and scope, or when requirements are unclear, ambiguous, or only exist as a vague idea. Use when a single requirement spans several independently testable capabilities and needs decomposing into a capability map of modules before specifying."
+    },
+    {
+      "name": "test-driven-development",
+      "description": "Drives development with tests using the red-green-refactor loop. Use when implementing any logic, fixing any bug, or changing any behavior. Use when you need to prove that code works, when a bug report arrives, or when you're about to modify existing functionality."
+    },
+    {
+      "name": "typesafe-ai",
+      "description": "Build AI-powered software with TypeSafe: small units of AI intelligence you"
+    },
+    {
+      "name": "using-agent-skills",
+      "description": "Discovers and invokes agent skills. Use when starting a session, or when you need to decide which skill or workflow applies to the piece of work at hand. This is the meta-skill that governs how all other skills are discovered and invoked."
+    }
+  ],
+  "agents": [
+    {
+      "name": "academic-anthropologist",
+      "description": "Expert in cultural systems, rituals, kinship, belief systems, and ethnographic method — builds culturally coherent societies that feel lived-in rather than invented"
+    },
+    {
+      "name": "academic-geographer",
+      "description": "Expert in physical and human geography, climate systems, cartography, and spatial analysis — builds geographically coherent worlds where terrain, climate, resources, and settlement patterns make scientific sense"
+    },
+    {
+      "name": "academic-historian",
+      "description": "Expert in historical analysis, periodization, material culture, and historiography — validates historical coherence and enriches settings with authentic period detail grounded in primary and secondary sources"
+    },
+    {
+      "name": "academic-narratologist",
+      "description": "Expert in narrative theory, story structure, character arcs, and literary analysis — grounds advice in established frameworks from Propp to Campbell to modern narratology"
+    },
+    {
+      "name": "academic-psychologist",
+      "description": "Expert in human behavior, personality theory, motivation, and cognitive patterns — builds psychologically credible characters and interactions grounded in clinical and research frameworks"
+    },
+    {
+      "name": "code-reviewer",
+      "description": "Senior code reviewer that evaluates changes across five dimensions — correctness, readability, architecture, security, and performance. Use for thorough code review before merge."
+    },
+    {
+      "name": "design-brand-guardian",
+      "description": "Expert brand strategist and guardian specializing in brand identity development, consistency maintenance, and strategic brand positioning"
+    },
+    {
+      "name": "design-image-prompt-engineer",
+      "description": "Expert photography prompt engineer specializing in crafting detailed, evocative prompts for AI image generation. Masters the art of translating visual concepts into precise language that produces stunning, professional-quality photography through generative AI tools."
+    },
+    {
+      "name": "design-inclusive-visuals-specialist",
+      "description": "Representation expert who defeats systemic AI biases to generate culturally accurate, affirming, and non-stereotypical images and video."
+    },
+    {
+      "name": "design-ui-designer",
+      "description": "Expert UI designer specializing in visual design systems, component libraries, and pixel-perfect interface creation. Creates beautiful, consistent, accessible user interfaces that enhance UX and reflect brand identity"
+    },
+    {
+      "name": "design-ux-architect",
+      "description": "Technical architecture and UX specialist who provides developers with solid foundations, CSS systems, and clear implementation guidance"
+    },
+    {
+      "name": "design-ux-researcher",
+      "description": "Expert user experience researcher specializing in user behavior analysis, usability testing, and data-driven design insights. Provides actionable research findings that improve product usability and user satisfaction"
+    },
+    {
+      "name": "design-visual-storyteller",
+      "description": "Expert visual communication specialist focused on creating compelling visual narratives, multimedia content, and brand storytelling through design. Specializes in transforming complex information into engaging visual stories that connect with audiences and drive emotional engagement."
+    },
+    {
+      "name": "design-whimsy-injector",
+      "description": "Expert creative specialist focused on adding personality, delight, and playful elements to brand experiences. Creates memorable, joyful interactions that differentiate brands through unexpected moments of whimsy"
+    },
+    {
+      "name": "engineering-ai-data-remediation-engineer",
+      "description": "\"Specialist in self-healing data pipelines — uses air-gapped local SLMs and semantic clustering to automatically detect, classify, and fix data anomalies at scale. Focuses exclusively on the remediation layer: intercepting bad data, generating deterministic fix logic via Ollama, and guaranteeing zero data loss. Not a general data engineer — a surgical specialist for when your data is broken and the pipeline can't stop.\""
+    },
+    {
+      "name": "engineering-ai-engineer",
+      "description": "Expert AI/ML engineer specializing in machine learning model development, deployment, and integration into production systems. Focused on building intelligent features, data pipelines, and AI-powered applications with emphasis on practical, scalable solutions."
+    },
+    {
+      "name": "engineering-autonomous-optimization-architect",
+      "description": "Intelligent system governor that continuously shadow-tests APIs for performance while enforcing strict financial and security guardrails against runaway costs."
+    },
+    {
+      "name": "engineering-backend-architect",
+      "description": "Senior backend architect specializing in scalable system design, database architecture, API development, and cloud infrastructure. Builds robust, secure, performant server-side applications and microservices"
+    },
+    {
+      "name": "engineering-cms-developer",
+      "description": "Drupal and WordPress specialist for theme development, custom plugins/modules, content architecture, and code-first CMS implementation"
+    },
+    {
+      "name": "engineering-code-reviewer",
+      "description": "Expert code reviewer who provides constructive, actionable feedback focused on correctness, maintainability, security, and performance — not style preferences."
+    },
+    {
+      "name": "engineering-codebase-onboarding-engineer",
+      "description": "Expert developer onboarding specialist who helps new engineers understand unfamiliar codebases fast by reading source code, tracing code paths, and stating only facts grounded in the code."
+    },
+    {
+      "name": "engineering-data-engineer",
+      "description": "Expert data engineer specializing in building reliable data pipelines, lakehouse architectures, and scalable data infrastructure. Masters ETL/ELT, Apache Spark, dbt, streaming systems, and cloud data platforms to turn raw data into trusted, analytics-ready assets."
+    },
+    {
+      "name": "engineering-database-optimizer",
+      "description": "Expert database specialist focusing on schema design, query optimization, indexing strategies, and performance tuning for PostgreSQL, MySQL, and modern databases like Supabase and PlanetScale."
+    },
+    {
+      "name": "engineering-devops-automator",
+      "description": "Expert DevOps engineer specializing in infrastructure automation, CI/CD pipeline development, and cloud operations"
+    },
+    {
+      "name": "engineering-email-intelligence-engineer",
+      "description": "Expert in extracting structured, reasoning-ready data from raw email threads for AI agents and automation systems"
+    },
+    {
+      "name": "engineering-embedded-firmware-engineer",
+      "description": "Specialist in bare-metal and RTOS firmware - ESP32/ESP-IDF, PlatformIO, Arduino, ARM Cortex-M, STM32 HAL/LL, Nordic nRF5/nRF Connect SDK, FreeRTOS, Zephyr"
+    },
+    {
+      "name": "engineering-feishu-integration-developer",
+      "description": "Full-stack integration expert specializing in the Feishu (Lark) Open Platform — proficient in Feishu bots, mini programs, approval workflows, Bitable (multidimensional spreadsheets), interactive message cards, Webhooks, SSO authentication, and workflow automation, building enterprise-grade collaboration and automation solutions within the Feishu ecosystem."
+    },
+    {
+      "name": "engineering-filament-optimization-specialist",
+      "description": "Expert in restructuring and optimizing Filament PHP admin interfaces for maximum usability and efficiency. Focuses on impactful structural changes — not just cosmetic tweaks."
+    },
+    {
+      "name": "engineering-frontend-developer",
+      "description": "Expert frontend developer specializing in modern web technologies, React/Vue/Angular frameworks, UI implementation, and performance optimization"
+    },
+    {
+      "name": "engineering-git-workflow-master",
+      "description": "Expert in Git workflows, branching strategies, and version control best practices including conventional commits, rebasing, worktrees, and CI-friendly branch management."
+    },
+    {
+      "name": "engineering-incident-response-commander",
+      "description": "Expert incident commander specializing in production incident management, structured response coordination, post-mortem facilitation, SLO/SLI tracking, and on-call process design for reliable engineering organizations."
+    },
+    {
+      "name": "engineering-minimal-change-engineer",
+      "description": "Engineering specialist focused on minimum-viable diffs — fixes only what was asked, refuses scope creep, prefers three similar lines over a premature abstraction. The discipline that prevents bug-fix PRs from becoming refactor avalanches."
+    },
+    {
+      "name": "engineering-mobile-app-builder",
+      "description": "Specialized mobile application developer with expertise in native iOS/Android development and cross-platform frameworks"
+    },
+    {
+      "name": "engineering-rapid-prototyper",
+      "description": "Specialized in ultra-fast proof-of-concept development and MVP creation using efficient tools and frameworks"
+    },
+    {
+      "name": "engineering-security-engineer",
+      "description": "Expert application security engineer specializing in threat modeling, vulnerability assessment, secure code review, security architecture design, and incident response for modern web, API, and cloud-native applications."
+    },
+    {
+      "name": "engineering-senior-developer",
+      "description": "Premium implementation specialist - Masters Laravel/Livewire/FluxUI, advanced CSS, Three.js integration"
+    },
+    {
+      "name": "engineering-software-architect",
+      "description": "Expert software architect specializing in system design, domain-driven design, architectural patterns, and technical decision-making for scalable, maintainable systems."
+    },
+    {
+      "name": "engineering-solidity-smart-contract-engineer",
+      "description": "Expert Solidity developer specializing in EVM smart contract architecture, gas optimization, upgradeable proxy patterns, DeFi protocol development, and security-first contract design across Ethereum and L2 chains."
+    },
+    {
+      "name": "engineering-sre",
+      "description": "Expert site reliability engineer specializing in SLOs, error budgets, observability, chaos engineering, and toil reduction for production systems at scale."
+    },
+    {
+      "name": "engineering-technical-writer",
+      "description": "Expert technical writer specializing in developer documentation, API references, README files, and tutorials. Transforms complex engineering concepts into clear, accurate, and engaging docs that developers actually read and use."
+    },
+    {
+      "name": "engineering-threat-detection-engineer",
+      "description": "Expert detection engineer specializing in SIEM rule development, MITRE ATT&CK coverage mapping, threat hunting, alert tuning, and detection-as-code pipelines for security operations teams."
+    },
+    {
+      "name": "engineering-voice-ai-integration-engineer",
+      "description": "Expert in building end-to-end speech transcription pipelines using Whisper-style models and cloud ASR services — from raw audio ingestion through preprocessing, transcript cleanup, subtitle generation, speaker diarization, and structured downstream integration into apps, APIs, and CMS platforms."
+    },
+    {
+      "name": "engineering-wechat-mini-program-developer",
+      "description": "Expert WeChat Mini Program developer specializing in 小程序 development with WXML/WXSS/WXS, WeChat API integration, payment systems, subscription messaging, and the full WeChat ecosystem."
+    },
+    {
+      "name": "finance-bookkeeper-controller",
+      "description": "Expert bookkeeper and controller specializing in day-to-day accounting operations, financial reconciliations, month-end close processes, and internal controls. Ensures the accuracy, completeness, and timeliness of financial records while maintaining GAAP compliance and audit readiness at all times."
+    },
+    {
+      "name": "finance-financial-analyst",
+      "description": "Expert financial analyst specializing in financial modeling, forecasting, scenario analysis, and data-driven decision support. Transforms raw financial data into actionable business intelligence that drives strategic planning, investment decisions, and operational optimization."
+    },
+    {
+      "name": "finance-fpa-analyst",
+      "description": "Expert Financial Planning & Analysis (FP&A) analyst specializing in budgeting, variance analysis, financial planning, rolling forecasts, and strategic decision support. Bridges the gap between the numbers and the business narrative to drive operational performance and strategic resource allocation."
+    },
+    {
+      "name": "finance-investment-researcher",
+      "description": "Expert investment researcher specializing in market research, due diligence, portfolio analysis, and asset valuation. Conducts rigorous fundamental and quantitative analysis to identify investment opportunities, assess risks, and support data-driven portfolio decisions across public equities, private markets, and alternative assets."
+    },
+    {
+      "name": "finance-tax-strategist",
+      "description": "Expert tax strategist specializing in tax optimization, multi-jurisdictional compliance, transfer pricing, and strategic tax planning. Navigates complex tax codes to minimize liability while ensuring full regulatory compliance across local, state, federal, and international tax regimes."
+    },
+    {
+      "name": "blender-addon-engineer",
+      "description": "Blender tooling specialist - Builds Python add-ons, asset validators, exporters, and pipeline automations that turn repetitive DCC work into reliable one-click workflows"
+    },
+    {
+      "name": "game-audio-engineer",
+      "description": "Interactive audio specialist - Masters FMOD/Wwise integration, adaptive music systems, spatial audio, and audio performance budgeting across all game engines"
+    },
+    {
+      "name": "game-designer",
+      "description": "Systems and mechanics architect - Masters GDD authorship, player psychology, economy balancing, and gameplay loop design across all engines and genres"
+    },
+    {
+      "name": "godot-gameplay-scripter",
+      "description": "Composition and signal integrity specialist - Masters GDScript 2.0, C# integration, node-based architecture, and type-safe signal design for Godot 4 projects"
+    },
+    {
+      "name": "godot-multiplayer-engineer",
+      "description": "Godot 4 networking specialist - Masters the MultiplayerAPI, scene replication, ENet/WebRTC transport, RPCs, and authority models for real-time multiplayer games"
+    },
+    {
+      "name": "godot-shader-developer",
+      "description": "Godot 4 visual effects specialist - Masters the Godot Shading Language (GLSL-like), VisualShader editor, CanvasItem and Spatial shaders, post-processing, and performance optimization for 2D/3D effects"
+    },
+    {
+      "name": "level-designer",
+      "description": "Spatial storytelling and flow specialist - Masters layout theory, pacing architecture, encounter design, and environmental narrative across all game engines"
+    },
+    {
+      "name": "narrative-designer",
+      "description": "Story systems and dialogue architect - Masters GDD-aligned narrative design, branching dialogue, lore architecture, and environmental storytelling across all game engines"
+    },
+    {
+      "name": "roblox-avatar-creator",
+      "description": "Roblox UGC and avatar pipeline specialist - Masters Roblox's avatar system, UGC item creation, accessory rigging, texture standards, and the Creator Marketplace submission pipeline"
+    },
+    {
+      "name": "roblox-experience-designer",
+      "description": "Roblox platform UX and monetization specialist - Masters engagement loop design, DataStore-driven progression, Roblox monetization systems (Passes, Developer Products, UGC), and player retention for Roblox experiences"
+    },
+    {
+      "name": "roblox-systems-scripter",
+      "description": "Roblox platform engineering specialist - Masters Luau, the client-server security model, RemoteEvents/RemoteFunctions, DataStore, and module architecture for scalable Roblox experiences"
+    },
+    {
+      "name": "technical-artist",
+      "description": "Art-to-engine pipeline specialist - Masters shaders, VFX systems, LOD pipelines, performance budgeting, and cross-engine asset optimization"
+    },
+    {
+      "name": "tokenomics-designer",
+      "description": "Expert en design de tokenomics pour crypto-games et projets Solana. Conçoit des modèles économiques durables (P2E, Skill2E, Casual), évite les Ponzi schemes, équilibre supply/demand, vesting, distribution, sources et puits de tokens. Spécialiste de l'analyse anti-inflation et de la rétention long terme via mécaniques économiques."
+    },
+    {
+      "name": "unity-architect",
+      "description": "Data-driven modularity specialist - Masters ScriptableObjects, decoupled systems, and single-responsibility component design for scalable Unity projects"
+    },
+    {
+      "name": "unity-editor-tool-developer",
+      "description": "Unity editor automation specialist - Masters custom EditorWindows, PropertyDrawers, AssetPostprocessors, ScriptedImporters, and pipeline automation that saves teams hours per week"
+    },
+    {
+      "name": "unity-multiplayer-engineer",
+      "description": "Networked gameplay specialist - Masters Netcode for GameObjects, Unity Gaming Services (Relay/Lobby), client-server authority, lag compensation, and state synchronization"
+    },
+    {
+      "name": "unity-shader-graph-artist",
+      "description": "Visual effects and material specialist - Masters Unity Shader Graph, HLSL, URP/HDRP rendering pipelines, and custom pass authoring for real-time visual effects"
+    },
+    {
+      "name": "unreal-multiplayer-architect",
+      "description": "Unreal Engine networking specialist - Masters Actor replication, GameMode/GameState architecture, server-authoritative gameplay, network prediction, and dedicated server setup for UE5"
+    },
+    {
+      "name": "unreal-systems-engineer",
+      "description": "Performance and hybrid architecture specialist - Masters C++/Blueprint continuum, Nanite geometry, Lumen GI, and Gameplay Ability System for AAA-grade Unreal Engine projects"
+    },
+    {
+      "name": "unreal-technical-artist",
+      "description": "Unreal Engine visual pipeline specialist - Masters the Material Editor, Niagara VFX, Procedural Content Generation, and the art-to-engine pipeline for UE5 projects"
+    },
+    {
+      "name": "unreal-world-builder",
+      "description": "Open-world and environment specialist - Masters UE5 World Partition, Landscape, procedural foliage, HLOD, and large-scale level streaming for seamless open-world experiences"
+    },
+    {
+      "name": "marketing-agentic-search-optimizer",
+      "description": "Expert in WebMCP readiness and agentic task completion — audits whether AI agents can actually accomplish tasks on your site (book, buy, register, subscribe), implements WebMCP declarative and imperative patterns, and measures task completion rates across AI browsing agents"
+    },
+    {
+      "name": "marketing-ai-citation-strategist",
+      "description": "Expert in AI recommendation engine optimization (AEO/GEO) — audits brand visibility across ChatGPT, Claude, Gemini, and Perplexity, identifies why competitors get cited instead, and delivers content fixes that improve AI citations"
+    },
+    {
+      "name": "marketing-app-store-optimizer",
+      "description": "Expert app store marketing specialist focused on App Store Optimization (ASO), conversion rate optimization, and app discoverability"
+    },
+    {
+      "name": "marketing-baidu-seo-specialist",
+      "description": "Expert Baidu search optimization specialist focused on Chinese search engine ranking, Baidu ecosystem integration, ICP compliance, Chinese keyword research, and mobile-first indexing for the China market."
+    },
+    {
+      "name": "marketing-bilibili-content-strategist",
+      "description": "Expert Bilibili marketing specialist focused on UP主 growth, danmaku culture mastery, B站 algorithm optimization, community building, and branded content strategy for China's leading video community platform."
+    },
+    {
+      "name": "marketing-book-co-author",
+      "description": "Strategic thought-leadership book collaborator for founders, experts, and operators turning voice notes, fragments, and positioning into structured first-person chapters."
+    },
+    {
+      "name": "marketing-carousel-growth-engine",
+      "description": "Autonomous TikTok and Instagram carousel generation specialist. Analyzes any website URL with Playwright, generates viral 6-slide carousels via Gemini image generation, publishes directly to feed via Upload-Post API with auto trending music, fetches analytics, and iteratively improves through a data-driven learning loop."
+    },
+    {
+      "name": "marketing-china-ecommerce-operator",
+      "description": "Expert China e-commerce operations specialist covering Taobao, Tmall, Pinduoduo, and JD ecosystems with deep expertise in product listing optimization, live commerce, store operations, 618/Double 11 campaigns, and cross-platform strategy."
+    },
+    {
+      "name": "marketing-china-market-localization-strategist",
+      "description": "Full-stack China market localization expert who transforms real-time trend signals into executable go-to-market strategies across Douyin, Xiaohongshu, WeChat, Bilibili, and beyond"
+    },
+    {
+      "name": "marketing-content-creator",
+      "description": "Expert content strategist and creator for multi-platform campaigns. Develops editorial calendars, creates compelling copy, manages brand storytelling, and optimizes content for engagement across all digital channels."
+    },
+    {
+      "name": "marketing-cross-border-ecommerce",
+      "description": "Full-funnel cross-border e-commerce strategist covering Amazon, Shopee, Lazada, AliExpress, Temu, and TikTok Shop operations, international logistics and overseas warehousing, compliance and taxation, multilingual listing optimization, brand globalization, and DTC independent site development."
+    },
+    {
+      "name": "marketing-douyin-strategist",
+      "description": "Short-video marketing expert specializing in the Douyin platform, with deep expertise in recommendation algorithm mechanics, viral video planning, livestream commerce workflows, and full-funnel brand growth through content matrix strategies."
+    },
+    {
+      "name": "marketing-growth-hacker",
+      "description": "Expert growth strategist specializing in rapid user acquisition through data-driven experimentation. Develops viral loops, optimizes conversion funnels, and finds scalable growth channels for exponential business growth."
+    },
+    {
+      "name": "marketing-instagram-curator",
+      "description": "Expert Instagram marketing specialist focused on visual storytelling, community building, and multi-format content optimization. Masters aesthetic development and drives meaningful engagement."
+    },
+    {
+      "name": "marketing-kuaishou-strategist",
+      "description": "Expert Kuaishou marketing strategist specializing in short-video content for China's lower-tier city markets, live commerce operations, community trust building, and grassroots audience growth on 快手."
+    },
+    {
+      "name": "marketing-linkedin-content-creator",
+      "description": "Expert LinkedIn content strategist focused on thought leadership, personal brand building, and high-engagement professional content. Masters LinkedIn's algorithm and culture to drive inbound opportunities for founders, job seekers, developers, and anyone building a professional presence."
+    },
+    {
+      "name": "marketing-livestream-commerce-coach",
+      "description": "Veteran livestream e-commerce coach specializing in host training and live room operations across Douyin, Kuaishou, Taobao Live, and Channels, covering script design, product sequencing, paid-vs-organic traffic balancing, conversion closing techniques, and real-time data-driven optimization."
+    },
+    {
+      "name": "marketing-podcast-strategist",
+      "description": "Content strategy and operations expert for the Chinese podcast market, with deep expertise in Xiaoyuzhou, Ximalaya, and other major audio platforms, covering show positioning, audio production, audience growth, multi-platform distribution, and monetization to help podcast creators build sticky audio content brands."
+    },
+    {
+      "name": "marketing-private-domain-operator",
+      "description": "Expert in building enterprise WeChat (WeCom) private domain ecosystems, with deep expertise in SCRM systems, segmented community operations, Mini Program commerce integration, user lifecycle management, and full-funnel conversion optimization."
+    },
+    {
+      "name": "marketing-reddit-community-builder",
+      "description": "Expert Reddit marketing specialist focused on authentic community engagement, value-driven content creation, and long-term relationship building. Masters Reddit culture navigation."
+    },
+    {
+      "name": "marketing-seo-specialist",
+      "description": "Expert search engine optimization strategist specializing in technical SEO, content optimization, link authority building, and organic search growth. Drives sustainable traffic through data-driven search strategies."
+    },
+    {
+      "name": "marketing-short-video-editing-coach",
+      "description": "Hands-on short-video editing coach covering the full post-production pipeline, with mastery of CapCut Pro, Premiere Pro, DaVinci Resolve, and Final Cut Pro across composition and camera language, color grading, audio engineering, motion graphics and VFX, subtitle design, multi-platform export optimization, editing workflow efficiency, and AI-assisted editing."
+    },
+    {
+      "name": "marketing-social-media-strategist",
+      "description": "Expert social media strategist for LinkedIn, Twitter, and professional platforms. Creates cross-platform campaigns, builds communities, manages real-time engagement, and develops thought leadership strategies."
+    },
+    {
+      "name": "marketing-tiktok-strategist",
+      "description": "Expert TikTok marketing specialist focused on viral content creation, algorithm optimization, and community building. Masters TikTok's unique culture and features for brand growth."
+    },
+    {
+      "name": "marketing-twitter-engager",
+      "description": "Expert Twitter marketing specialist focused on real-time engagement, thought leadership building, and community-driven growth. Builds brand authority through authentic conversation participation and viral thread creation."
+    },
+    {
+      "name": "marketing-video-optimization-specialist",
+      "description": "Video marketing strategist specializing in YouTube algorithm optimization, audience retention, chaptering, thumbnail concepts, and cross-platform video syndication."
+    },
+    {
+      "name": "marketing-wechat-official-account",
+      "description": "Expert WeChat Official Account (OA) strategist specializing in content marketing, subscriber engagement, and conversion optimization. Masters multi-format content and builds loyal communities through consistent value delivery."
+    },
+    {
+      "name": "marketing-weibo-strategist",
+      "description": "Full-spectrum operations expert for Sina Weibo, with deep expertise in trending topic mechanics, Super Topic community management, public sentiment monitoring, fan economy strategies, and Weibo advertising, helping brands achieve viral reach and sustained growth on China's leading public discourse platform."
+    },
+    {
+      "name": "marketing-xiaohongshu-specialist",
+      "description": "Expert Xiaohongshu marketing specialist focused on lifestyle content, trend-driven strategies, and authentic community engagement. Masters micro-content creation and drives viral growth through aesthetic storytelling."
+    },
+    {
+      "name": "marketing-zhihu-strategist",
+      "description": "Expert Zhihu marketing specialist focused on thought leadership, community credibility, and knowledge-driven engagement. Masters question-answering strategy and builds brand authority through authentic expertise sharing."
+    },
+    {
+      "name": "paid-media-auditor",
+      "description": "Comprehensive paid media auditor who systematically evaluates Google Ads, Microsoft Ads, and Meta accounts across 200+ checkpoints spanning account structure, tracking, bidding, creative, audiences, and competitive positioning. Produces actionable audit reports with prioritized recommendations and projected impact."
+    },
+    {
+      "name": "paid-media-creative-strategist",
+      "description": "Paid media creative specialist focused on ad copywriting, RSA optimization, asset group design, and creative testing frameworks across Google, Meta, Microsoft, and programmatic platforms. Bridges the gap between performance data and persuasive messaging."
+    },
+    {
+      "name": "paid-media-paid-social-strategist",
+      "description": "Cross-platform paid social advertising specialist covering Meta (Facebook/Instagram), LinkedIn, TikTok, Pinterest, X, and Snapchat. Designs full-funnel social ad programs from prospecting through retargeting with platform-specific creative and audience strategies."
+    },
+    {
+      "name": "paid-media-ppc-strategist",
+      "description": "Senior paid media strategist specializing in large-scale search, shopping, and performance max campaign architecture across Google, Microsoft, and Amazon ad platforms. Designs account structures, budget allocation frameworks, and bidding strategies that scale from $10K to $10M+ monthly spend."
+    },
+    {
+      "name": "paid-media-programmatic-buyer",
+      "description": "Display advertising and programmatic media buying specialist covering managed placements, Google Display Network, DV360, trade desk platforms, partner media (newsletters, sponsored content), and ABM display strategies via platforms like Demandbase and 6Sense."
+    },
+    {
+      "name": "paid-media-search-query-analyst",
+      "description": "Specialist in search term analysis, negative keyword architecture, and query-to-intent mapping. Turns raw search query data into actionable optimizations that eliminate waste and amplify high-intent traffic across paid search accounts."
+    },
+    {
+      "name": "paid-media-tracking-specialist",
+      "description": "Expert in conversion tracking architecture, tag management, and attribution modeling across Google Tag Manager, GA4, Google Ads, Meta CAPI, LinkedIn Insight Tag, and server-side implementations. Ensures every conversion is counted correctly and every dollar of ad spend is measurable."
+    },
+    {
+      "name": "product-behavioral-nudge-engine",
+      "description": "Behavioral psychology specialist that adapts software interaction cadences and styles to maximize user motivation and success."
+    },
+    {
+      "name": "product-feedback-synthesizer",
+      "description": "Expert in collecting, analyzing, and synthesizing user feedback from multiple channels to extract actionable product insights. Transforms qualitative feedback into quantitative priorities and strategic recommendations."
+    },
+    {
+      "name": "product-manager",
+      "description": "Holistic product leader who owns the full product lifecycle — from discovery and strategy through roadmap, stakeholder alignment, go-to-market, and outcome measurement. Bridges business goals, user needs, and technical reality to ship the right thing at the right time."
+    },
+    {
+      "name": "product-sprint-prioritizer",
+      "description": "Expert product manager specializing in agile sprint planning, feature prioritization, and resource allocation. Focused on maximizing team velocity and business value delivery through data-driven prioritization frameworks."
+    },
+    {
+      "name": "product-trend-researcher",
+      "description": "Expert market intelligence analyst specializing in identifying emerging trends, competitive analysis, and opportunity assessment. Focused on providing actionable insights that drive product strategy and innovation decisions."
+    },
+    {
+      "name": "project-management-experiment-tracker",
+      "description": "Expert project manager specializing in experiment design, execution tracking, and data-driven decision making. Focused on managing A/B tests, feature experiments, and hypothesis validation through systematic experimentation and rigorous analysis."
+    },
+    {
+      "name": "project-management-jira-workflow-steward",
+      "description": "Expert delivery operations specialist who enforces Jira-linked Git workflows, traceable commits, structured pull requests, and release-safe branch strategy across software teams."
+    },
+    {
+      "name": "project-management-project-shepherd",
+      "description": "Expert project manager specializing in cross-functional project coordination, timeline management, and stakeholder alignment. Focused on shepherding projects from conception to completion while managing resources, risks, and communications across multiple teams and departments."
+    },
+    {
+      "name": "project-management-studio-operations",
+      "description": "Expert operations manager specializing in day-to-day studio efficiency, process optimization, and resource coordination. Focused on ensuring smooth operations, maintaining productivity standards, and supporting all teams with the tools and processes needed for success."
+    },
+    {
+      "name": "project-management-studio-producer",
+      "description": "Senior strategic leader specializing in high-level creative and technical project orchestration, resource allocation, and multi-project portfolio management. Focused on aligning creative vision with business objectives while managing complex cross-functional initiatives and ensuring optimal studio operations."
+    },
+    {
+      "name": "project-manager-senior",
+      "description": "Converts specs to tasks and remembers previous projects. Focused on realistic scope, no background processes, exact spec requirements"
+    },
+    {
+      "name": "sales-account-strategist",
+      "description": "Expert post-sale account strategist specializing in land-and-expand execution, stakeholder mapping, QBR facilitation, and net revenue retention. Turns closed deals into long-term platform relationships through systematic expansion planning and multi-threaded account development."
+    },
+    {
+      "name": "sales-coach",
+      "description": "Expert sales coaching specialist focused on rep development, pipeline review facilitation, call coaching, deal strategy, and forecast accuracy. Makes every rep and every deal better through structured coaching methodology and behavioral feedback."
+    },
+    {
+      "name": "sales-deal-strategist",
+      "description": "Senior deal strategist specializing in MEDDPICC qualification, competitive positioning, and win planning for complex B2B sales cycles. Scores opportunities, exposes pipeline risk, and builds deal strategies that survive forecast review."
+    },
+    {
+      "name": "sales-discovery-coach",
+      "description": "Coaches sales teams on elite discovery methodology — question design, current-state mapping, gap quantification, and call structure that surfaces real buying motivation."
+    },
+    {
+      "name": "sales-engineer",
+      "description": "Senior pre-sales engineer specializing in technical discovery, demo engineering, POC scoping, competitive battlecards, and bridging product capabilities to business outcomes. Wins the technical decision so the deal can close."
+    },
+    {
+      "name": "sales-outbound-strategist",
+      "description": "Signal-based outbound specialist who designs multi-channel prospecting sequences, defines ICPs, and builds pipeline through research-driven personalization — not volume."
+    },
+    {
+      "name": "sales-pipeline-analyst",
+      "description": "Revenue operations analyst specializing in pipeline health diagnostics, deal velocity analysis, forecast accuracy, and data-driven sales coaching. Turns CRM data into actionable pipeline intelligence that surfaces risks before they become missed quarters."
+    },
+    {
+      "name": "sales-proposal-strategist",
+      "description": "Strategic proposal architect who transforms RFPs and sales opportunities into compelling win narratives. Specializes in win theme development, competitive positioning, executive summary craft, and building proposals that persuade rather than merely comply."
+    },
+    {
+      "name": "security-auditor",
+      "description": "Security engineer focused on vulnerability detection, threat modeling, and secure coding practices. Use for security-focused code review, threat analysis, or hardening recommendations."
+    },
+    {
+      "name": "macos-spatial-metal-engineer",
+      "description": "Native Swift and Metal specialist building high-performance 3D rendering systems and spatial computing experiences for macOS and Vision Pro"
+    },
+    {
+      "name": "terminal-integration-specialist",
+      "description": "Terminal emulation, text rendering optimization, and SwiftTerm integration for modern Swift applications"
+    },
+    {
+      "name": "visionos-spatial-engineer",
+      "description": "Native visionOS spatial computing, SwiftUI volumetric interfaces, and Liquid Glass design implementation"
+    },
+    {
+      "name": "xr-cockpit-interaction-specialist",
+      "description": "Specialist in designing and developing immersive cockpit-based control systems for XR environments"
+    },
+    {
+      "name": "xr-immersive-developer",
+      "description": "Expert WebXR and immersive technology developer with specialization in browser-based AR/VR/XR applications"
+    },
+    {
+      "name": "xr-interface-architect",
+      "description": "Spatial interaction designer and interface strategist for immersive AR/VR/XR environments"
+    },
+    {
+      "name": "accounts-payable-agent",
+      "description": "Autonomous payment processing specialist that executes vendor payments, contractor invoices, and recurring bills across any payment rail — crypto, fiat, stablecoins. Integrates with AI agent workflows via tool calls."
+    },
+    {
+      "name": "agentic-identity-trust",
+      "description": "Designs identity, authentication, and trust verification systems for autonomous AI agents operating in multi-agent environments. Ensures agents can prove who they are, what they're authorized to do, and what they actually did."
+    },
+    {
+      "name": "agents-orchestrator",
+      "description": "Autonomous pipeline manager that orchestrates the entire development workflow. You are the leader of this process."
+    },
+    {
+      "name": "automation-governance-architect",
+      "description": "Governance-first architect for business automations (n8n-first) who audits value, risk, and maintainability before implementation."
+    },
+    {
+      "name": "blockchain-security-auditor",
+      "description": "Expert smart contract security auditor specializing in vulnerability detection, formal verification, exploit analysis, and comprehensive audit report writing for DeFi protocols and blockchain applications."
+    },
+    {
+      "name": "compliance-auditor",
+      "description": "Expert technical compliance auditor specializing in SOC 2, ISO 27001, HIPAA, and PCI-DSS audits — from readiness assessment through evidence collection to certification."
+    },
+    {
+      "name": "corporate-training-designer",
+      "description": "Expert in enterprise training system design and curriculum development — proficient in training needs analysis, instructional design methodology, blended learning program design, internal trainer development, leadership programs, and training effectiveness evaluation and continuous optimization."
+    },
+    {
+      "name": "customer-service",
+      "description": "Friendly, professional customer service specialist for any industry — handling inquiries, complaints, account support, FAQs, and seamless escalation with warmth, efficiency, and a genuine commitment to customer satisfaction"
+    },
+    {
+      "name": "data-consolidation-agent",
+      "description": "AI agent that consolidates extracted sales data into live reporting dashboards with territory, rep, and pipeline summaries"
+    },
+    {
+      "name": "government-digital-presales-consultant",
+      "description": "Presales expert for China's government digital transformation market (ToG), proficient in policy interpretation, solution design, bid document preparation, POC validation, compliance requirements (classified protection/cryptographic assessment/Xinchuang domestic IT), and stakeholder management — helping technical teams efficiently win government IT projects."
+    },
+    {
+      "name": "healthcare-customer-service",
+      "description": "Empathetic healthcare customer service specialist for patient support, billing inquiries, appointment management, insurance questions, complaint resolution, and seamless escalation to clinical or administrative staff"
+    },
+    {
+      "name": "healthcare-marketing-compliance",
+      "description": "Expert in healthcare marketing compliance in China, proficient in the Advertising Law, Medical Advertisement Management Measures, Drug Administration Law, and related regulations — covering pharmaceuticals, medical devices, medical aesthetics, health supplements, and internet healthcare across content review, risk control, platform rule interpretation, and patient privacy protection, helping enterprises conduct effective health marketing within legal boundaries."
+    },
+    {
+      "name": "hospitality-guest-services",
+      "description": "Comprehensive hospitality guest services specialist for hotels, resorts, restaurants, and event venues — covering reservations, check-in/check-out, concierge services, guest complaint resolution, loyalty program management, and post-stay follow-up to deliver exceptional guest experiences that drive loyalty and revenue"
+    },
+    {
+      "name": "hr-onboarding",
+      "description": "Comprehensive HR onboarding specialist for employee orientation, documentation management, compliance tracking, benefits enrollment, culture integration, and new hire support — delivering a seamless first-day-to-first-year experience that drives retention and productivity"
+    },
+    {
+      "name": "identity-graph-operator",
+      "description": "Operates a shared identity graph that multiple AI agents resolve against. Ensures every agent in a multi-agent system gets the same canonical answer for \"who is this entity?\" - deterministically, even under concurrent writes."
+    },
+    {
+      "name": "language-translator",
+      "description": "Real-time Spanish ↔ English translation specialist with cultural context, regional dialect awareness, travel phrase guidance, and tone-appropriate communication for everyday, business, and emergency situations"
+    },
+    {
+      "name": "legal-billing-time-tracking",
+      "description": "Comprehensive legal billing and time tracking specialist for accurate time capture, invoice generation, billing narrative writing, collections management, trust account compliance, and billing analysis — maximizing revenue recovery while maintaining client relationships and ethical compliance across any firm size or billing model"
+    },
+    {
+      "name": "legal-client-intake",
+      "description": "Comprehensive legal client intake specialist for qualifying prospects, collecting case information, scheduling consultations, managing conflict checks, and delivering attorney-ready intake summaries across any practice area and firm size"
+    },
+    {
+      "name": "legal-document-review",
+      "description": "Comprehensive legal document review specialist for contracts, litigation documents, and real estate agreements — summarizing documents, flagging risk clauses, comparing contract versions, and checking compliance across any law firm size or practice area"
+    },
+    {
+      "name": "loan-officer-assistant",
+      "description": "Comprehensive loan officer assistant for mortgage and lending professionals — covering borrower intake, pre-qualification, document collection, pipeline management, compliance tracking, rate quoting, and closing coordination across residential, commercial, and consumer lending"
+    },
+    {
+      "name": "lsp-index-engineer",
+      "description": "Language Server Protocol specialist building unified code intelligence systems through LSP client orchestration and semantic indexing"
+    },
+    {
+      "name": "mica-compliance-specialist",
+      "description": "Spécialiste en régulation crypto européenne (Markets in Crypto-Assets Regulation). Audite les projets crypto-game pour conformité MiCA, RGPD, AML/KYC, lois consommateur EU. Identifie les risques réglementaires (token classification, white paper, marketing restrictions) et recommande les actions concrètes. Coverage : France, UE, transition MiCA 2024-2026."
+    },
+    {
+      "name": "real-estate-buyer-seller",
+      "description": "Comprehensive real estate agent assistant for buyer representation, seller representation, listing management, offer negotiation, transaction coordination, and closing support — delivering a world-class client experience from first showing to final closing across residential and investment real estate"
+    },
+    {
+      "name": "recruitment-specialist",
+      "description": "Expert recruitment operations and talent acquisition specialist — skilled in China's major hiring platforms, talent assessment frameworks, and labor law compliance. Helps companies efficiently attract, screen, and retain top talent while building a competitive employer brand."
+    },
+    {
+      "name": "report-distribution-agent",
+      "description": "AI agent that automates distribution of consolidated sales reports to representatives based on territorial parameters"
+    },
+    {
+      "name": "retail-customer-returns",
+      "description": "Comprehensive retail customer returns specialist for processing returns, exchanges, and refunds across in-store, online, and omnichannel retail — handling policy enforcement, fraud prevention, customer retention, vendor returns, and returns analytics to maximize recovery while preserving customer loyalty"
+    },
+    {
+      "name": "sales-data-extraction-agent",
+      "description": "AI agent specialized in monitoring Excel files and extracting key sales metrics (MTD, YTD, Year End) for internal live reporting"
+    },
+    {
+      "name": "sales-outreach",
+      "description": "Consultative B2B sales outreach specialist for cold prospecting, lead follow-up, objection handling, proposal writing, and pipeline management — combining data-driven targeting with genuine relationship-building to open doors and close deals"
+    },
+    {
+      "name": "specialized-chief-of-staff",
+      "description": "Master coordinator for founders and executives — filters noise, owns processes, enforces consistency, routes decisions, and positions outputs for impact so the boss can think clearly."
+    },
+    {
+      "name": "specialized-civil-engineer",
+      "description": "Expert civil and structural engineer with global standards coverage — Eurocode, DIN, ACI, AISC, ASCE, AS/NZS, CSA, GB, IS, AIJ, and more. Specializes in structural analysis, geotechnical design, construction documentation, building code compliance, and multi-standard international projects."
+    },
+    {
+      "name": "specialized-cultural-intelligence-strategist",
+      "description": "CQ specialist that detects invisible exclusion, researches global context, and ensures software resonates authentically across intersectional identities."
+    },
+    {
+      "name": "specialized-developer-advocate",
+      "description": "Expert developer advocate specializing in building developer communities, creating compelling technical content, optimizing developer experience (DX), and driving platform adoption through authentic engineering engagement. Bridges product and engineering teams with external developers."
+    },
+    {
+      "name": "specialized-document-generator",
+      "description": "Expert document creation specialist who generates professional PDF, PPTX, DOCX, and XLSX files using code-based approaches with proper formatting, charts, and data visualization."
+    },
+    {
+      "name": "specialized-french-consulting-market",
+      "description": "Navigate the French ESN/SI freelance ecosystem — margin models, platform mechanics (Malt, collective.work), portage salarial, rate positioning, and payment cycle realities"
+    },
+    {
+      "name": "specialized-korean-business-navigator",
+      "description": "Korean business culture for foreign professionals — 품의 decision process, nunchi reading, KakaoTalk business etiquette, hierarchy navigation, and relationship-first deal mechanics"
+    },
+    {
+      "name": "specialized-mcp-builder",
+      "description": "Expert Model Context Protocol developer who designs, builds, and tests MCP servers that extend AI agent capabilities with custom tools, resources, and prompts."
+    },
+    {
+      "name": "specialized-model-qa",
+      "description": "Independent model QA expert who audits ML and statistical models end-to-end - from documentation review and data reconstruction to replication, calibration testing, interpretability analysis, performance monitoring, and audit-grade reporting."
+    },
+    {
+      "name": "specialized-salesforce-architect",
+      "description": "Solution architecture for Salesforce platform — multi-cloud design, integration patterns, governor limits, deployment strategy, and data model governance for enterprise-scale orgs"
+    },
+    {
+      "name": "specialized-workflow-architect",
+      "description": "Workflow design specialist who maps complete workflow trees for every system, user journey, and agent interaction — covering happy paths, all branch conditions, failure modes, recovery paths, handoff contracts, and observable states to produce build-ready specs that agents can implement against and QA can test against."
+    },
+    {
+      "name": "study-abroad-advisor",
+      "description": "Full-spectrum study abroad planning expert covering the US, UK, Canada, Australia, Europe, Hong Kong, and Singapore — proficient in undergraduate, master's, and PhD application strategy, school selection, essay coaching, profile enhancement, standardized test planning, visa preparation, and overseas life adaptation, helping Chinese students craft personalized end-to-end study abroad plans."
+    },
+    {
+      "name": "supply-chain-strategist",
+      "description": "Expert supply chain management and procurement strategy specialist — skilled in supplier development, strategic sourcing, quality control, and supply chain digitalization. Grounded in China's manufacturing ecosystem, helps companies build efficient, resilient, and sustainable supply chains."
+    },
+    {
+      "name": "zk-steward",
+      "description": "Knowledge-base steward in the spirit of Niklas Luhmann's Zettelkasten. Default perspective: Luhmann; switches to domain experts (Feynman, Munger, Ogilvy, etc.) by task. Enforces atomic notes, connectivity, and validation loops. Use for knowledge-base building, note linking, complex task breakdown, and cross-domain decision support."
+    },
+    {
+      "name": "support-analytics-reporter",
+      "description": "Expert data analyst transforming raw data into actionable business insights. Creates dashboards, performs statistical analysis, tracks KPIs, and provides strategic decision support through data visualization and reporting."
+    },
+    {
+      "name": "support-executive-summary-generator",
+      "description": "Consultant-grade AI specialist trained to think and communicate like a senior strategy consultant. Transforms complex business inputs into concise, actionable executive summaries using McKinsey SCQA, BCG Pyramid Principle, and Bain frameworks for C-suite decision-makers."
+    },
+    {
+      "name": "support-finance-tracker",
+      "description": "Expert financial analyst and controller specializing in financial planning, budget management, and business performance analysis. Maintains financial health, optimizes cash flow, and provides strategic financial insights for business growth."
+    },
+    {
+      "name": "support-infrastructure-maintainer",
+      "description": "Expert infrastructure specialist focused on system reliability, performance optimization, and technical operations management. Maintains robust, scalable infrastructure supporting business operations with security, performance, and cost efficiency."
+    },
+    {
+      "name": "support-legal-compliance-checker",
+      "description": "Expert legal and compliance specialist ensuring business operations, data handling, and content creation comply with relevant laws, regulations, and industry standards across multiple jurisdictions."
+    },
+    {
+      "name": "support-support-responder",
+      "description": "Expert customer support specialist delivering exceptional customer service, issue resolution, and user experience optimization. Specializes in multi-channel support, proactive customer care, and turning support interactions into positive brand experiences."
+    },
+    {
+      "name": "test-engineer",
+      "description": "QA engineer specialized in test strategy, test writing, and coverage analysis. Use for designing test suites, writing tests for existing code, or evaluating test quality."
+    },
+    {
+      "name": "testing-accessibility-auditor",
+      "description": "Expert accessibility specialist who audits interfaces against WCAG standards, tests with assistive technologies, and ensures inclusive design. Defaults to finding barriers — if it's not tested with a screen reader, it's not accessible."
+    },
+    {
+      "name": "testing-api-tester",
+      "description": "Expert API testing specialist focused on comprehensive API validation, performance testing, and quality assurance across all systems and third-party integrations"
+    },
+    {
+      "name": "testing-evidence-collector",
+      "description": "Screenshot-obsessed, fantasy-allergic QA specialist - Default to finding 3-5 issues, requires visual proof for everything"
+    },
+    {
+      "name": "testing-performance-benchmarker",
+      "description": "Expert performance testing and optimization specialist focused on measuring, analyzing, and improving system performance across all applications and infrastructure"
+    },
+    {
+      "name": "testing-reality-checker",
+      "description": "Stops fantasy approvals, evidence-based certification - Default to \"NEEDS WORK\", requires overwhelming proof for production readiness"
+    },
+    {
+      "name": "testing-test-results-analyzer",
+      "description": "Expert test analysis specialist focused on comprehensive test result evaluation, quality metrics analysis, and actionable insight generation from testing activities"
+    },
+    {
+      "name": "testing-tool-evaluator",
+      "description": "Expert technology assessment specialist focused on evaluating, testing, and recommending tools, software, and platforms for business use and productivity optimization"
+    },
+    {
+      "name": "testing-workflow-optimizer",
+      "description": "Expert process improvement specialist focused on analyzing, optimizing, and automating workflows across all business functions for maximum productivity and efficiency"
+    },
+    {
+      "name": "web-performance-auditor",
+      "description": "Web performance engineer focused on Core Web Vitals, loading, rendering, and network optimization. Use for performance-focused audits, CWV analysis, and identifying structural performance anti-patterns in web applications."
+    }
+  ],
+  "routers": [
+    {
+      "file": "list-loaded-skills.md",
+      "name": "list-loaded-skills",
+      "phase": null,
+      "triggers": [],
+      "routes": []
+    },
+    {
+      "file": "route-bug.md",
+      "name": "route-bug",
+      "phase": "VERIFY",
+      "triggers": [
+        "bug",
+        "broken",
+        "crash",
+        "debugging",
+        "error",
+        "fails",
+        "failing",
+        "broke",
+        "cause",
+        "encounter"
+      ],
+      "routes": [
+        "debugging-and-error-recovery"
+      ]
+    },
+    {
+      "file": "route-build.md",
+      "name": "route-build",
+      "phase": "BUILD",
+      "triggers": [
+        "build",
+        "code",
+        "implement",
+        "tests",
+        "amount",
+        "big",
+        "delivers"
+      ],
+      "routes": [
+        "incremental-implementation",
+        "test-driven-development"
+      ]
+    },
+    {
+      "file": "route-game.md",
+      "name": "route-game",
+      "phase": null,
+      "triggers": [
+        "game",
+        "gameplay",
+        "sprites",
+        "pixel art",
+        "game feel",
+        "bloom",
+        "coherent",
+        "compose"
+      ],
+      "routes": [
+        "game-design/game-audio-direction",
+        "game-design/motion-design-system",
+        "game-design/visual-rendering-game-feel"
+      ]
+    },
+    {
+      "file": "route-plan.md",
+      "name": "route-plan",
+      "phase": "PLAN",
+      "triggers": [
+        "plan",
+        "planning",
+        "breakdown",
+        "decompose",
+        "tasks",
+        "possible",
+        "clear",
+        "estimate"
+      ],
+      "routes": [
+        "planning-and-task-breakdown"
+      ]
+    },
+    {
+      "file": "route-review.md",
+      "name": "route-review",
+      "phase": "REVIEW",
+      "triggers": [
+        "review",
+        "audit",
+        "pull request",
+        "code review",
+        "enters",
+        "human",
+        "assess"
+      ],
+      "routes": [
+        "code-review-and-quality",
+        "security-audit"
+      ]
+    },
+    {
+      "file": "route-security.md",
+      "name": "route-security",
+      "phase": null,
+      "triggers": [
+        "pentest",
+        "pen test",
+        "vulnerability",
+        "exploit",
+        "owasp",
+        "ccpa",
+        "daemons",
+        "focused"
+      ],
+      "routes": [
+        "security-audit",
+        "security-and-hardening"
+      ]
+    },
+    {
+      "file": "route-ship.md",
+      "name": "route-ship",
+      "phase": "SHIP",
+      "triggers": [
+        "ship",
+        "deploy",
+        "release",
+        "rollout",
+        "place",
+        "rollback"
+      ],
+      "routes": [
+        "shipping-and-launch",
+        "ci-cd-and-automation"
+      ]
+    },
+    {
+      "file": "route-solana.md",
+      "name": "route-solana",
+      "phase": null,
+      "triggers": [
+        "solana",
+        "jupiter",
+        "metaplex",
+        "spl",
+        "devnet",
+        "mainnet",
+        "birdeye",
+        "dangerous",
+        "footgun"
+      ],
+      "routes": [
+        "solana-protocols/birdeye",
+        "solana-protocols/jupiter",
+        "solana-protocols/metaplex-protocol",
+        "solana-protocols/vulnhunter"
+      ]
+    },
+    {
+      "file": "route-spec.md",
+      "name": "route-spec",
+      "phase": "DEFINE",
+      "triggers": [
+        "spec",
+        "specification",
+        "feature",
+        "new project",
+        "prd",
+        "capability",
+        "independently",
+        "map"
+      ],
+      "routes": [
+        "spec-driven-development"
+      ]
+    }
+  ],
+  "teamCombos": [
+    {
+      "agents": [
+        "Anthropologist",
+        "code-reviewer"
+      ],
+      "prompt": "Adopte simultanément les personas suivants et fais-les collaborer : Anthropologist, code-reviewer (academic-anthropologist + code-reviewer).\n\n## Personas\n- **Anthropologist** : Expert in cultural systems, rituals, kinship, belief systems, and ethnographic method — builds culturally coherent societies that feel lived-in rather than invented\n- **code-reviewer** : Senior code reviewer that evaluates changes across five dimensions — correctness, readability, architecture, security, and performance. Use for thorough code review before merge.\n\n## Instructions\n1. Incarne l'ensemble de ces expertises comme une équipe unique.\n2. Chaque persona apporte son angle d'analyse ; signale les désaccords entre personas.\n3. Réponds toujours en français."
+    },
+    {
+      "agents": [
+        "Anthropologist",
+        "Brand Guardian"
+      ],
+      "prompt": "Adopte simultanément les personas suivants et fais-les collaborer : Anthropologist, Brand Guardian (academic-anthropologist + design-brand-guardian).\n\n## Personas\n- **Anthropologist** : Expert in cultural systems, rituals, kinship, belief systems, and ethnographic method — builds culturally coherent societies that feel lived-in rather than invented\n- **Brand Guardian** : Expert brand strategist and guardian specializing in brand identity development, consistency maintenance, and strategic brand positioning\n\n## Instructions\n1. Incarne l'ensemble de ces expertises comme une équipe unique.\n2. Chaque persona apporte son angle d'analyse ; signale les désaccords entre personas.\n3. Réponds toujours en français."
+    },
+    {
+      "agents": [
+        "Anthropologist",
+        "Image Prompt Engineer"
+      ],
+      "prompt": "Adopte simultanément les personas suivants et fais-les collaborer : Anthropologist, Image Prompt Engineer (academic-anthropologist + design-image-prompt-engineer).\n\n## Personas\n- **Anthropologist** : Expert in cultural systems, rituals, kinship, belief systems, and ethnographic method — builds culturally coherent societies that feel lived-in rather than invented\n- **Image Prompt Engineer** : Expert photography prompt engineer specializing in crafting detailed, evocative prompts for AI image generation. Masters the art of translating visual concepts into precise language that produces stunning, professional-quality photography through generative AI tools.\n\n## Instructions\n1. Incarne l'ensemble de ces expertises comme une équipe unique.\n2. Chaque persona apporte son angle d'analyse ; signale les désaccords entre personas.\n3. Réponds toujours en français."
+    },
+    {
+      "agents": [
+        "Anthropologist",
+        "Inclusive Visuals Specialist"
+      ],
+      "prompt": "Adopte simultanément les personas suivants et fais-les collaborer : Anthropologist, Inclusive Visuals Specialist (academic-anthropologist + design-inclusive-visuals-specialist).\n\n## Personas\n- **Anthropologist** : Expert in cultural systems, rituals, kinship, belief systems, and ethnographic method — builds culturally coherent societies that feel lived-in rather than invented\n- **Inclusive Visuals Specialist** : Representation expert who defeats systemic AI biases to generate culturally accurate, affirming, and non-stereotypical images and video.\n\n## Instructions\n1. Incarne l'ensemble de ces expertises comme une équipe unique.\n2. Chaque persona apporte son angle d'analyse ; signale les désaccords entre personas.\n3. Réponds toujours en français."
+    },
+    {
+      "agents": [
+        "Anthropologist",
+        "UI Designer"
+      ],
+      "prompt": "Adopte simultanément les personas suivants et fais-les collaborer : Anthropologist, UI Designer (academic-anthropologist + design-ui-designer).\n\n## Personas\n- **Anthropologist** : Expert in cultural systems, rituals, kinship, belief systems, and ethnographic method — builds culturally coherent societies that feel lived-in rather than invented\n- **UI Designer** : Expert UI designer specializing in visual design systems, component libraries, and pixel-perfect interface creation. Creates beautiful, consistent, accessible user interfaces that enhance UX and reflect brand identity\n\n## Instructions\n1. Incarne l'ensemble de ces expertises comme une équipe unique.\n2. Chaque persona apporte son angle d'analyse ; signale les désaccords entre personas.\n3. Réponds toujours en français."
+    },
+    {
+      "agents": [
+        "Anthropologist",
+        "UX Architect"
+      ],
+      "prompt": "Adopte simultanément les personas suivants et fais-les collaborer : Anthropologist, UX Architect (academic-anthropologist + design-ux-architect).\n\n## Personas\n- **Anthropologist** : Expert in cultural systems, rituals, kinship, belief systems, and ethnographic method — builds culturally coherent societies that feel lived-in rather than invented\n- **UX Architect** : Technical architecture and UX specialist who provides developers with solid foundations, CSS systems, and clear implementation guidance\n\n## Instructions\n1. Incarne l'ensemble de ces expertises comme une équipe unique.\n2. Chaque persona apporte son angle d'analyse ; signale les désaccords entre personas.\n3. Réponds toujours en français."
+    },
+    {
+      "agents": [
+        "Anthropologist",
+        "UX Researcher"
+      ],
+      "prompt": "Adopte simultanément les personas suivants et fais-les collaborer : Anthropologist, UX Researcher (academic-anthropologist + design-ux-researcher).\n\n## Personas\n- **Anthropologist** : Expert in cultural systems, rituals, kinship, belief systems, and ethnographic method — builds culturally coherent societies that feel lived-in rather than invented\n- **UX Researcher** : Expert user experience researcher specializing in user behavior analysis, usability testing, and data-driven design insights. Provides actionable research findings that improve product usability and user satisfaction\n\n## Instructions\n1. Incarne l'ensemble de ces expertises comme une équipe unique.\n2. Chaque persona apporte son angle d'analyse ; signale les désaccords entre personas.\n3. Réponds toujours en français."
+    },
+    {
+      "agents": [
+        "Anthropologist",
+        "Visual Storyteller"
+      ],
+      "prompt": "Adopte simultanément les personas suivants et fais-les collaborer : Anthropologist, Visual Storyteller (academic-anthropologist + design-visual-storyteller).\n\n## Personas\n- **Anthropologist** : Expert in cultural systems, rituals, kinship, belief systems, and ethnographic method — builds culturally coherent societies that feel lived-in rather than invented\n- **Visual Storyteller** : Expert visual communication specialist focused on creating compelling visual narratives, multimedia content, and brand storytelling through design. Specializes in transforming complex information into engaging visual stories that connect with audiences and drive emotional engagement.\n\n## Instructions\n1. Incarne l'ensemble de ces expertises comme une équipe unique.\n2. Chaque persona apporte son angle d'analyse ; signale les désaccords entre personas.\n3. Réponds toujours en français."
+    },
+    {
+      "agents": [
+        "Anthropologist",
+        "Whimsy Injector"
+      ],
+      "prompt": "Adopte simultanément les personas suivants et fais-les collaborer : Anthropologist, Whimsy Injector (academic-anthropologist + design-whimsy-injector).\n\n## Personas\n- **Anthropologist** : Expert in cultural systems, rituals, kinship, belief systems, and ethnographic method — builds culturally coherent societies that feel lived-in rather than invented\n- **Whimsy Injector** : Expert creative specialist focused on adding personality, delight, and playful elements to brand experiences. Creates memorable, joyful interactions that differentiate brands through unexpected moments of whimsy\n\n## Instructions\n1. Incarne l'ensemble de ces expertises comme une équipe unique.\n2. Chaque persona apporte son angle d'analyse ; signale les désaccords entre personas.\n3. Réponds toujours en français."
+    },
+    {
+      "agents": [
+        "Anthropologist",
+        "AI Data Remediation Engineer"
+      ],
+      "prompt": "Adopte simultanément les personas suivants et fais-les collaborer : Anthropologist, AI Data Remediation Engineer (academic-anthropologist + engineering-ai-data-remediation-engineer).\n\n## Personas\n- **Anthropologist** : Expert in cultural systems, rituals, kinship, belief systems, and ethnographic method — builds culturally coherent societies that feel lived-in rather than invented\n- **AI Data Remediation Engineer** : Specialist in self-healing data pipelines — uses air-gapped local SLMs and semantic clustering to automatically detect, classify, and fix data anomalies at scale. Focuses exclusively on the remediation layer: intercepting bad data, generating deterministic fix logic via Ollama, and guaranteeing zero\n\n## Instructions\n1. Incarne l'ensemble de ces expertises comme une équipe unique.\n2. Chaque persona apporte son angle d'analyse ; signale les désaccords entre personas.\n3. Réponds toujours en français."
+    }
+  ]
+};
+
+// ═══════════════ Safe storage wrapper ═══════════════
+const Store = (() => {
+  let mem = {};
+  let ok = false;
+  try { localStorage.setItem('__probe', '1'); localStorage.removeItem('__probe'); ok = true; } catch (e) { ok = false; }
+  return {
+    available: ok,
+    get(key, fallback) {
+      try {
+        const raw = ok ? localStorage.getItem('ohdash.' + key) : mem[key];
+        return raw === null || raw === undefined ? fallback : JSON.parse(raw);
+      } catch (e) { return fallback; }
+    },
+    set(key, value) {
+      try {
+        const raw = JSON.stringify(value);
+        if (ok) localStorage.setItem('ohdash.' + key, raw); else mem[key] = raw;
+      } catch (e) { /* quota or serialization: ignore, state stays in memory */ }
+    },
+  };
+})();
+
+// ═══════════════ Escaping (XSS) ═══════════════
+function esc(s) {
+  return String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+// ═══════════════ State ═══════════════
+const state = {
+  journal: Store.get('journal', []),
+  tasks: Store.get('tasks', []),
+  reminders: Store.get('reminders', []),
+  notes: Store.get('notes', []),
+  journalFilter: 'all',
+  taskFilter: 'all',
+  openNoteId: null,
+};
+
+function persist() {
+  Store.set('journal', state.journal);
+  Store.set('tasks', state.tasks);
+  Store.set('reminders', state.reminders);
+  Store.set('notes', state.notes);
+}
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+
+// ═══════════════ TF-IDF engine (imported from scripts/run-evals.js semantics) ═══════════════
+// Copy of the eval tier's tokenizer/stemmer/cosine — kept inline because this
+// page is a standalone artifact (no build step, no fetch of scripts/).
+const STOP = new Set(['a','an','and','any','are','as','at','be','before','by','for','from','in','into','is','it','its','my','need','needs','of','on','or','our','so','that','the','them','this','to','use','want','we','when','with','you','your','help','me','i']);
+function stem(t) {
+  for (const suf of ['ally', 'ing', 'ed', 'es', 'al']) {
+    if (t.length > suf.length + 3 && t.endsWith(suf)) { t = t.slice(0, -suf.length); break; }
+  }
+  if (t.length > 3 && t.endsWith('s') && !t.endsWith('ss')) t = t.slice(0, -1);
+  if (t.length > 4 && t.endsWith('e')) t = t.slice(0, -1);
+  if (t.length > 4 && t[t.length - 1] === t[t.length - 2] && !'aeiou'.includes(t[t.length - 1])) t = t.slice(0, -1);
+  if (t.length > 3 && t.endsWith('y')) t = t.slice(0, -1) + 'i';
+  return t;
+}
+function tokenize(text) {
+  return text.toLowerCase().replace(/[^a-z0-9\s-]/g, ' ').split(/[\s-]+/).filter(t => t.length > 2 && !STOP.has(t)).map(stem);
+}
+function termFreq(tokens) { const tf = new Map(); for (const t of tokens) tf.set(t, (tf.get(t) || 0) + 1); return tf; }
+function buildCorpus(skills) {
+  const docs = new Map();
+  for (const s of skills) {
+    const nt = tokenize(s.name.replace(/-/g, ' '));
+    docs.set(s.name, termFreq([...nt, ...nt, ...tokenize(s.description)]));
+  }
+  const df = new Map();
+  for (const tf of docs.values()) for (const t of tf.keys()) df.set(t, (df.get(t) || 0) + 1);
+  const n = docs.size;
+  return { docs, idf: t => Math.log(1 + n / (1 + (df.get(t) || 0))) };
+}
+function cosine(a, b) {
+  let dot = 0, na = 0, nb = 0;
+  for (const [t, w] of a) { na += w * w; const bw = b.get(t); if (bw) dot += w * bw; }
+  for (const w of b.values()) nb += w * w;
+  return !na || !nb ? 0 : dot / (Math.sqrt(na) * Math.sqrt(nb));
+}
+function rankSkills(prompt, corpus) {
+  const pv = termFreq(tokenize(prompt));
+  const scores = [];
+  for (const [name, tf] of corpus.docs) scores.push({ name, score: cosine(pv, new Map([...tf].map(([t, f]) => [t, f * corpus.idf(t)]))) });
+  return scores.sort((a, b) => b.score - a.score);
+}
+function wordBoundaryMatches(message, trigger) {
+  return new RegExp('\\b' + trigger.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b', 'i').test(message);
+}
+
+const CORPUS = buildCorpus(DASHBOARD_DATA.skills);
+
+// ═══════════════ Router engine (mirrors openhands-loader-sim.js) ═══════════════
+function routeMessage(message) {
+  const msg = message.toLowerCase();
+  const kw = [], desc = [];
+  for (const r of DASHBOARD_DATA.routers) {
+    if (!r.triggers.length) continue;
+    const stems = new Set(msg.split(/[^a-z0-9-]+/).filter(Boolean).flatMap(w => tokenize(w)));
+    const hit = r.triggers.some(t => {
+      if (t.includes(' ')) return wordBoundaryMatches(message, t);
+      return stems.has(t) || stems.has(tokenize(t)[0]) || wordBoundaryMatches(message, t);
+    });
+    if (hit) kw.push(r.name);
+  }
+  const top = rankSkills(message, CORPUS).filter(x => x.score > 0).slice(0, 2).map(x => x.name);
+  for (const r of DASHBOARD_DATA.routers) {
+    if (r.triggers.length && r.routes.some(s => top.includes(s))) desc.push(r.name);
+  }
+  return { keyword: kw, description: [...new Set(desc)].sort(), top };
+}
+
+// ═══════════════ Routing simulator ═══════════════
+const simOut = document.getElementById('sim-out');
+function runSim() {
+  const q = document.getElementById('sim-input').value.trim();
+  if (!q) { simOut.innerHTML = '<div class="empty">Tape un message pour voir le routage.</div>'; return; }
+  const { keyword, description, top } = routeMessage(q);
+  const rows = DASHBOARD_DATA.routers.filter(r => r.triggers.length).map(r => {
+    const kw = keyword.includes(r.name), de = description.includes(r.name);
+    const tag = kw ? '<span class="tag green">mot-clé</span>' : '';
+    const tag2 = de ? '<span class="tag accent">description</span>' : '';
+    return `<li><span class="tag purple">${esc(r.phase || '')}</span><strong>${esc(r.name)}</strong><span class="grow"></span>${tag}${tag2}</li>`;
+  }).join('');
+  simOut.innerHTML = `
+    <ul class="clean">${rows}</ul>
+    <div class="desc" style="white-space:normal">Top descriptions TF-IDF : ${top.length ? top.map(t => esc(t) + ' (' + DASHBOARD_DATA.skills.find(s => s.name === t).description.slice(0, 60) + '…)').join(' · ') : 'aucun score > 0'}</div>`;
+  // Journal auto-log of observed routing (kind=routing)
+  if (keyword.length || description.length) {
+    addJournal('routing', `"${q}" → mot-clé [${keyword.join(', ') || '—'}] · description [${description.join(', ') || '—'}]`, { silent: true });
+  }
+}
+document.getElementById('sim-run').addEventListener('click', runSim);
+document.getElementById('sim-input').addEventListener('keydown', e => { if (e.key === 'Enter') runSim(); });
+
+// ═══════════════ Skills / Routers views ═══════════════
+function renderSkills(filter = '') {
+  const q = filter.toLowerCase();
+  const list = DASHBOARD_DATA.skills.filter(s => !q || s.name.includes(q) || s.description.toLowerCase().includes(q));
+  document.getElementById('skills-list').innerHTML = list.length
+    ? `<ul class="clean">` + list.map(s => `<li><strong>${esc(s.name)}</strong><span class="grow desc">${esc(s.description)}</span></li>`).join('') + `</ul>`
+    : `<div class="empty">Aucun skill ne correspond à « ${esc(filter)} ».</div>`;
+}
+document.getElementById('skills-search').addEventListener('input', e => renderSkills(e.target.value));
+
+// ═══════════════ Activation view (skills + agents, copy-prompt) ═══════════
+let activationTab = 'skills';
+function activationPrompt(kind, item) {
+  if (kind === 'skill') {
+    return 'Use the skill "' + item.name + '" (skills/' + item.name + '/SKILL.md). Load and strictly follow its SKILL.md before acting.\n\n' + item.description + '\n\nApply the full skill workflow without skipping steps, then handle my request below.';
+  }
+  return 'From now on, act as the agent "' + item.name + '" (agents, ' + item.description.slice(0, 120) + '…).\n\nAdopt this persona for the whole conversation. Start by asking me the right questions before acting, then handle my request.';
+}
+function renderActivation() {
+  const q = document.getElementById('activation-search').value.toLowerCase();
+  const kind = activationTab;
+  const source = kind === 'skills' ? DASHBOARD_DATA.skills : kind === 'agents' ? DASHBOARD_DATA.agents : (DASHBOARD_DATA.teamCombos || []);
+  const list = source.filter(x => !q || x.name.includes(q) || x.description.toLowerCase().includes(q) || (x.agents && x.agents.join(' ').toLowerCase().includes(q)));
+  document.getElementById('activation-tab-skills').classList.toggle('primary', kind === 'skills');
+  document.getElementById('activation-tab-agents').classList.toggle('primary', kind === 'agents');
+  document.getElementById('activation-tab-teams').classList.toggle('primary', kind === 'teams');
+  if (kind === 'teams') {
+    const sliceT = list.slice(0, 50);
+    document.getElementById('activation-list').innerHTML = sliceT.length
+      ? `<ul class="clean">` + sliceT.map((c) =>
+        `<li style="align-items:flex-start"><strong>👥 ${esc(c.agents.join(' + '))}</strong><span class="grow desc">${esc(c.prompt.slice(0, 140))}…</span>` +
+        `<button class="btn primary" data-team-prompt="1" data-prompt-idx="${source.indexOf(c)}" style="padding:4px 12px;font-size:12px;flex-shrink:0">⚡ Activer l'équipe</button></li>`).join('') + `</ul>`
+      : `<div class="empty">Aucune équipe générée — lance scripts/build-agents-multi-prompt.js --inject.</div>`;
+    document.querySelectorAll('#activation-list [data-team-prompt]').forEach(b => {
+      b.addEventListener('click', () => {
+        const c = (DASHBOARD_DATA.teamCombos || []) [+b.getAttribute('data-prompt-idx')];
+        if (!c) return;
+        const ta = document.createElement('textarea');
+        ta.value = c.prompt; document.body.appendChild(ta); ta.select();
+        try { document.execCommand('copy'); } catch (e) {}
+        ta.remove();
+        if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(c.prompt).catch(() => {});
+        addJournal('note', 'Activation équipe : ' + c.agents.join(' + ') + ' (prompt copié)');
+        b.textContent = '✓ Copié';
+        setTimeout(() => { b.textContent = '⚡ Activer l\'équipe'; }, 1400);
+      });
+    });
+    return;
+  }
+  const slice = list.slice(0, 250);
+  document.getElementById('activation-list').innerHTML = slice.length
+    ? `<ul class="clean">` + slice.map((x, i) =>
+      `<li style="align-items:flex-start"><strong>${esc(x.name)}</strong><span class="grow desc">${esc(x.description.slice(0, 140))}${x.description.length > 140 ? '…' : ''}</span>` +
+      `<button class="btn primary" data-ak="${kind}" data-ai="${source.indexOf(x)}" style="padding:4px 12px;font-size:12px;flex-shrink:0">⚡ Activer</button></li>`).join('') + `</ul>` +
+      (list.length > slice.length ? `<div class="desc">… et ${list.length - slice.length} autres — affine la recherche.</div>` : '')
+    : `<div class="empty">Aucun ${kind === 'skills' ? 'skill' : 'agent'} ne correspond.</div>`;
+  document.querySelectorAll('#activation-list [data-ak]').forEach(b => {
+    b.addEventListener('click', () => {
+      const k = b.getAttribute('data-ak');
+      const item = (k === 'skills' ? DASHBOARD_DATA.skills : DASHBOARD_DATA.agents)[+b.getAttribute('data-ai')];
+      const prompt = activationPrompt(k === 'skills' ? 'skill' : 'agent', item);
+      const ta = document.createElement('textarea');
+      ta.value = prompt; document.body.appendChild(ta); ta.select();
+      try { document.execCommand('copy'); } catch (e) {}
+      ta.remove();
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(prompt).catch(() => {});
+      addJournal('note', 'Activation ' + k + ' : ' + item.name + ' (prompt copié)', { silent: true });
+      b.textContent = '✓ Copié';
+      setTimeout(() => { b.textContent = '⚡ Activer'; }, 1400);
+    });
+  });
+}
+document.getElementById('activation-search').addEventListener('input', renderActivation);
+document.getElementById('activation-tab-skills').addEventListener('click', () => { activationTab = 'skills'; renderActivation(); });
+document.getElementById('activation-tab-agents').addEventListener('click', () => { activationTab = 'agents'; renderActivation(); });
+document.getElementById('activation-tab-teams').addEventListener('click', () => { activationTab = 'teams'; renderActivation(); });
+
+function renderRouters() {
+  document.getElementById('routers-list').innerHTML = DASHBOARD_DATA.routers.map(r => `
+    <div class="card" style="margin-bottom:10px">
+      <div class="row" style="justify-content:space-between">
+        <div class="row">
+          <span class="tag ${r.phase ? 'purple' : ''}">${esc(r.phase || 'always-loaded')}</span>
+          <strong>${esc(r.name)}</strong>
+          <span class="muted" style="font-size:12px">${esc(r.file)}</span>
+        </div>
+        <span class="muted" style="font-size:12px">${r.triggers.length} déclencheur(s) → ${r.routes.length} skill(s)</span>
+      </div>
+      ${r.triggers.length ? `<div style="margin-top:8px">${r.triggers.map(t => `<span class="tag" style="margin-right:6px;display:inline-block;margin-bottom:4px">${esc(t)}</span>`).join('')}</div>` : '<div class="desc" style="margin-top:8px">Chargé en entier au démarrage de chaque conversation (inventaire des skills).</div>'}
+      <div class="desc" style="margin-top:8px">→ ${r.routes.length ? r.routes.map(esc).join(', ') : '—'}</div>
+    </div>`).join('');
+}
+
+// ═══════════════ Journal ═══════════════
+function addJournal(kind, text, { silent = false } = {}) {
+  state.journal.unshift({ id: uid(), kind, text, at: new Date().toISOString() });
+  Store.set('journal', state.journal);
+  if (!silent) renderJournal();
+  updateBadges();
+}
+const JOURNAL_KINDS = { note: ['📝', 'Note'], routing: ['🧭', 'Routage'], decision: ['⚖️', 'Décision'], incident: ['🐞', 'Incident'] };
+function renderJournal() {
+  const filter = state.journalFilter;
+  const entries = state.journal.filter(e => filter === 'all' || e.kind === filter);
+  document.getElementById('journal-filters').innerHTML = ['all', ...Object.keys(JOURNAL_KINDS)]
+    .map(f => `<button data-f="${f}" class="${filter === f ? 'on' : ''}">${f === 'all' ? 'Tous' : JOURNAL_KINDS[f][1] + ' (' + state.journal.filter(e => e.kind === f).length + ')'}</button>`).join('');
+  document.getElementById('journal-list').innerHTML = entries.length
+    ? entries.map(e => {
+      const [emoji, label] = JOURNAL_KINDS[e.kind] || ['📝', 'Note'];
+      return `<div class="journal-entry"><div class="head"><span class="kind">${emoji}</span><span class="kind tag">${esc(label)}</span><span class="when">${esc(new Date(e.at).toLocaleString('fr-FR'))}</span><span class="grow" style="flex:1"></span><button class="btn danger" data-del="${esc(e.id)}" style="padding:2px 8px;font-size:11px">✕</button></div><div class="body">${esc(e.text)}</div></div>`;
+    }).join('')
+    : '<div class="empty">Journal vide. Ajoute une entrée ou lance le simulateur de routage (auto-journalisé).</div>';
+}
+document.getElementById('journal-add').addEventListener('click', () => {
+  const text = document.getElementById('journal-text').value.trim();
+  const kind = document.getElementById('journal-kind').value;
+  if (!text) return;
+  addJournal(kind, text);
+  document.getElementById('journal-text').value = '';
+});
+document.getElementById('journal-list').addEventListener('click', e => {
+  const id = e.target.getAttribute && e.target.getAttribute('data-del');
+  if (!id) return;
+  state.journal = state.journal.filter(x => x.id !== id);
+  Store.set('journal', state.journal); renderJournal(); updateBadges();
+});
+document.getElementById('journal-filters').addEventListener('click', e => {
+  const f = e.target.getAttribute && e.target.getAttribute('data-f');
+  if (!f) return;
+  state.journalFilter = f; renderJournal();
+});
+document.getElementById('journal-clear').addEventListener('click', () => {
+  if (confirm('Vider tout le journal de bord ?')) { state.journal = []; Store.set('journal', state.journal); renderJournal(); updateBadges(); }
+});
+
+// ═══════════════ Tasks ═══════════════
+function renderTasks() {
+  const today = new Date().toISOString().slice(0, 10);
+  let tasks = state.tasks;
+  if (state.taskFilter === 'open') tasks = tasks.filter(t => !t.done);
+  if (state.taskFilter === 'done') tasks = tasks.filter(t => t.done);
+  if (state.taskFilter === 'overdue') tasks = tasks.filter(t => !t.done && t.due && t.due < today);
+  const prioTag = { high: '<span class="tag red">haute</span>', low: '<span class="tag">basse</span>' };
+  document.getElementById('tasks-list').innerHTML = tasks.length
+    ? `<ul class="clean">` + tasks.map(t => {
+      const overdue = !t.done && t.due && t.due < today;
+      return `<li><div class="task ${t.done ? 'done' : ''}" style="flex:1;display:flex;gap:10px;align-items:flex-start">
+        <input type="checkbox" data-toggle="${esc(t.id)}" ${t.done ? 'checked' : ''}>
+        <div style="flex:1;min-width:0">
+          <div class="title">${esc(t.text)}</div>
+          <div class="meta">${t.due ? `<span class="due ${overdue ? 'overdue' : ''}">📅 ${esc(t.due)}${overdue ? ' · en retard' : ''}</span>` : '<span>pas d\u2019échéance</span>'} ${prioTag[t.priority] || ''}</div>
+        </div>
+        <button class="btn danger" data-del="${esc(t.id)}" style="padding:2px 8px;font-size:11px">✕</button>
+      </div></li>`;
+    }).join('') + `</ul>`
+    : `<div class="empty">Aucune tâche${state.taskFilter !== 'all' ? ' dans ce filtre' : ''}.</div>`;
+  const open = state.tasks.filter(t => !t.done).length;
+  document.getElementById('b-tasks').textContent = open;
+}
+document.getElementById('task-add').addEventListener('click', () => {
+  const text = document.getElementById('task-text').value.trim();
+  if (!text) return;
+  state.tasks.unshift({ id: uid(), text, due: document.getElementById('task-due').value || null, priority: document.getElementById('task-priority').value, done: false, at: new Date().toISOString() });
+  document.getElementById('task-text').value = '';
+  persist(); renderTasks();
+});
+document.getElementById('tasks-list').addEventListener('click', e => {
+  const del = e.target.getAttribute && e.target.getAttribute('data-del');
+  const tog = e.target.getAttribute && e.target.getAttribute('data-toggle');
+  if (del) { state.tasks = state.tasks.filter(t => t.id !== del); persist(); renderTasks(); }
+  if (tog) { const t = state.tasks.find(x => x.id === tog); if (t) { t.done = !t.done; persist(); renderTasks(); } }
+});
+document.getElementById('tasks-list').addEventListener('change', e => {
+  const tog = e.target.getAttribute && e.target.getAttribute('data-toggle');
+  if (tog) { const t = state.tasks.find(x => x.id === tog); if (t) { t.done = e.target.checked; persist(); renderTasks(); } }
+});
+document.getElementById('tasks-clear').addEventListener('click', () => {
+  state.tasks = state.tasks.filter(t => !t.done); persist(); renderTasks();
+});
+document.querySelectorAll('#view-tasks .filters button[data-f]').forEach(b => b.addEventListener('click', () => {
+  state.taskFilter = b.getAttribute('data-f');
+  document.querySelectorAll('#view-tasks .filters button[data-f]').forEach(x => x.classList.toggle('on', x === b));
+  renderTasks();
+}));
+
+// ═══════════════ Reminders ═══════════════
+function reminderState(r) {
+  const when = new Date(r.date + 'T' + (r.time || '09:00'));
+  const now = new Date();
+  const diffH = (when - now) / 3600000;
+  if (diffH < 0) return { cls: 'past', label: 'échu' };
+  if (diffH < 48) return { cls: 'soon', label: 'dans ' + (diffH < 24 ? Math.max(1, Math.round(diffH)) + ' h' : Math.round(diffH / 24) + ' j') };
+  return { cls: '', label: 'le ' + when.toLocaleDateString('fr-FR') + ' à ' + (r.time || '09:00') };
+}
+function renderReminders() {
+  const sorted = [...state.reminders].sort((a, b) => (a.date + a.time).localeCompare(b.date + b.time));
+  document.getElementById('reminders-list').innerHTML = sorted.length
+    ? `<ul class="clean">` + sorted.map(r => {
+      const st = reminderState(r);
+      return `<li class="reminder ${st.cls}"><div style="flex:1"><div>${esc(r.text)}</div><div class="when">⏰ ${esc(st.label)}</div></div><button class="btn danger" data-del="${esc(r.id)}" style="padding:2px 8px;font-size:11px">✕</button></li>`;
+    }).join('') + `</ul>`
+    : '<div class="empty">Aucun rappel.</div>';
+  document.getElementById('b-reminders').textContent = state.reminders.length;
+  renderDashReminders();
+}
+function renderDashReminders() {
+  const upcoming = [...state.reminders]
+    .filter(r => reminderState(r).cls !== 'past')
+    .sort((a, b) => (a.date + a.time).localeCompare(b.date + b.time))
+    .slice(0, 4);
+  document.getElementById('dash-reminders').innerHTML = upcoming.length
+    ? upcoming.map(r => `<div style="padding:6px 0;border-bottom:1px solid var(--border)"><span class="when muted" style="font-size:11.5px">⏰ ${esc(reminderState(r).label)}</span> — ${esc(r.text)}</div>`).join('')
+    : '<div class="desc">Aucun rappel à venir.</div>';
+}
+document.getElementById('reminder-add').addEventListener('click', () => {
+  const text = document.getElementById('reminder-text').value.trim();
+  const date = document.getElementById('reminder-date').value;
+  if (!text || !date) { alert('Texte et date sont requis pour un rappel.'); return; }
+  state.reminders.push({ id: uid(), text, date, time: document.getElementById('reminder-time').value || '09:00', at: new Date().toISOString() });
+  document.getElementById('reminder-text').value = '';
+  persist(); renderReminders();
+});
+document.getElementById('reminders-list').addEventListener('click', e => {
+  const del = e.target.getAttribute && e.target.getAttribute('data-del');
+  if (!del) return;
+  state.reminders = state.reminders.filter(r => r.id !== del);
+  persist(); renderReminders();
+});
+
+// ═══════════════ Notes ═══════════════
+function renderNotes() {
+  const q = (document.getElementById('notes-search').value || '').toLowerCase();
+  const notes = state.notes.filter(n => !q || n.title.toLowerCase().includes(q) || (n.body || '').toLowerCase().includes(q));
+  document.getElementById('notes-list').innerHTML = notes.length
+    ? `<ul class="clean">` + notes.map(n => `<li class="note" data-open="${esc(n.id)}"><div class="grow"><strong>${esc(n.title)}</strong><div class="body">${esc((n.body || '').slice(0, 140)) || '<em>Note vide</em>'}</div><div class="meta muted" style="font-size:11px;margin-top:3px">${esc(new Date(n.updatedAt).toLocaleString('fr-FR'))}</div></div></li>`).join('') + `</ul>`
+    : '<div class="empty">Aucune note. Crée-en une ci-dessus.</div>';
+  document.getElementById('b-notes').textContent = state.notes.length;
+}
+function openNote(id) {
+  const n = state.notes.find(x => x.id === id);
+  if (!n) return;
+  state.openNoteId = id;
+  document.getElementById('note-editor').style.display = 'block';
+  document.getElementById('note-edit-title').value = n.title;
+  document.getElementById('note-edit-body').value = n.body || '';
+}
+document.getElementById('note-add').addEventListener('click', () => {
+  const title = document.getElementById('note-title').value.trim() || 'Sans titre';
+  const n = { id: uid(), title, body: '', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
+  state.notes.unshift(n);
+  document.getElementById('note-title').value = '';
+  persist(); renderNotes(); openNote(n.id);
+});
+document.getElementById('notes-list').addEventListener('click', e => {
+  const li = e.target.closest && e.target.closest('[data-open]');
+  if (li) openNote(li.getAttribute('data-open'));
+});
+document.getElementById('note-save').addEventListener('click', () => {
+  const n = state.notes.find(x => x.id === state.openNoteId);
+  if (!n) return;
+  n.title = document.getElementById('note-edit-title').value.trim() || 'Sans titre';
+  n.body = document.getElementById('note-edit-body').value;
+  n.updatedAt = new Date().toISOString();
+  persist(); renderNotes();
+});
+document.getElementById('note-delete').addEventListener('click', () => {
+  state.notes = state.notes.filter(x => x.id !== state.openNoteId);
+  state.openNoteId = null;
+  document.getElementById('note-editor').style.display = 'none';
+  persist(); renderNotes();
+});
+document.getElementById('note-close').addEventListener('click', () => {
+  document.getElementById('note-editor').style.display = 'none';
+  state.openNoteId = null;
+});
+document.getElementById('notes-search').addEventListener('input', renderNotes);
+
+// ═══════════════ Dashboard stats ═══════════════
+function renderStats() {
+  const open = state.tasks.filter(t => !t.done).length;
+  const overdue = state.tasks.filter(t => !t.done && t.due && t.due < new Date().toISOString().slice(0, 10)).length;
+  const triggered = DASHBOARD_DATA.routers.filter(r => r.triggers.length).length;
+  const totalTriggers = DASHBOARD_DATA.routers.reduce((a, r) => a + r.triggers.length, 0);
+  document.getElementById('stats').innerHTML = [
+    [`<span style="color:var(--accent)">${DASHBOARD_DATA.skillsCount}</span>`, 'skills au catalogue'],
+    [`<span style="color:var(--purple)">${triggered}</span>`, 'routeurs lifecycle'],
+    [`<span style="color:var(--green)">${totalTriggers}</span>`, 'déclencheurs générés'],
+    [`${open}<span class="muted" style="font-size:14px"> / ${state.tasks.length}</span>`, open === 0 ? 'aucune tâche ouverte' : overdue ? `<span style="color:var(--red)">${overdue} en retard</span>` : 'tâches ouvertes'],
+    [`${state.journal.length}`, 'entrées de journal'],
+    [`${state.reminders.length}`, 'rappels actifs'],
+  ].map(([k, l]) => `<div class="card"><div class="k">${k}</div><div class="l">${l}</div></div>`).join('');
+}
+
+function updateBadges() {
+  document.getElementById('b-skills').textContent = DASHBOARD_DATA.skillsCount;
+  document.getElementById('b-activation').textContent = DASHBOARD_DATA.skillsCount + DASHBOARD_DATA.agentsCount;
+  document.getElementById('b-routers').textContent = DASHBOARD_DATA.routers.filter(r => r.triggers.length).length;
+  document.getElementById('b-tasks').textContent = state.tasks.filter(t => !t.done).length;
+  document.getElementById('b-reminders').textContent = state.reminders.length;
+  document.getElementById('b-notes').textContent = state.notes.length;
+}
+
+// ═══════════════ View switching ═══════════════
+const TITLES = {
+  dashboard: ['Tableau de bord', 'État de l\u2019adaptateur OpenHands et de ton espace de travail'],
+  skills: ['Skills au catalogue', DASHBOARD_DATA.skillsCount + ' skills — mêmes fichiers SKILL.md que Claude Code et Codex'],
+  activation: ['Activation skills & agents', DASHBOARD_DATA.skillsCount + ' skills + ' + DASHBOARD_DATA.agentsCount + ' agents — clic ⚡ pour copier le prompt d\u2019activation'],
+  routers: ['Routeurs lifecycle', 'Microagents déclenchés + inventaire always-loaded'],
+  journal: ['Journal de bord', 'Historique des sessions, décisions et incidents — persisté localement'],
+  tasks: ['Tâches', 'Suivi avec échéances, priorités et retards'],
+  reminders: ['Rappels', 'Échéances avec alerte visuelle à 48 h'],
+  notes: ['Notes', 'Gestionnaire de notes avec recherche et édition'],
+};
+document.querySelectorAll('nav button[data-view]').forEach(b => b.addEventListener('click', () => {
+  const v = b.getAttribute('data-view');
+  document.querySelectorAll('nav button[data-view]').forEach(x => x.classList.toggle('active', x === b));
+  document.querySelectorAll('.view').forEach(s => s.classList.toggle('active', s.id === 'view-' + v));
+  document.getElementById('view-title').textContent = TITLES[v][0];
+  document.getElementById('view-sub').textContent = TITLES[v][1];
+  if (v === 'dashboard') renderStats();
+  if (v === 'activation') renderActivation();
+  if (v === 'reminders') renderReminders();
+}));
+
+// ═══════════════ Boot ═══════════════
+renderStats();
+renderSkills();
+renderRouters();
+renderJournal();
+renderTasks();
+renderReminders();
+renderNotes();
+updateBadges();
+window.addEventListener('storage', () => { // cross-tab sync best-effort
+  state.journal = Store.get('journal', state.journal);
+  state.tasks = Store.get('tasks', state.tasks);
+  state.reminders = Store.get('reminders', state.reminders);
+  state.notes = Store.get('notes', state.notes);
+  renderJournal(); renderTasks(); renderReminders(); renderNotes(); renderStats(); updateBadges();
+});
+</script>
+</body>
+</html>

@@ -1,10 +1,10 @@
 // Catalogue complet MEGA PACK v0.7.3 — généré par build-interface.py
-// Skills: 132 | Agents: 190
+// Skills: 133 | Agents: 190
 const MEGA_CATALOG = {
  "meta": {
   "generated": "2026-09-23",
   "version": "0.7.3",
-  "skills": 132,
+  "skills": 133,
   "agents": 190
  },
  "skills": [
@@ -585,14 +585,6 @@ const MEGA_CATALOG = {
    "desc_fr": "Construis des Agent Skills de haute qualité pour Claude selon les meilleures pratiques officielles Anthropic : structure SKILL.md, rédaction de description, progressive disclosure, tests, patterns, dépannage et distribution (Claude.ai, Claude Code, API, Agent SDK)."
   },
   {
-   "name": "zk-compression-light",
-   "desc": "Build with ZK Compression on Solana using Light Protocol. Use when creating compressed tokens, compressed PDAs, or integrating ZK compression into Solana programs. Covers compressed account model, state trees, validity proofs, and client integration with Helius/Photon RPC.",
-   "category": "solana-development",
-   "path": "skills/solana-development/solana-compression/",
-   "name_fr": "ZK Compression (Light)",
-   "desc_fr": "Construis avec ZK Compression sur Solana via Light Protocol : tokens compressés, PDAs compressés ou intégration de ZK compression dans des programmes Solana. Modèle de comptes compressés, state trees, preuves de validité et intégration client Helius/Photon RPC."
-  },
-  {
    "name": "solana-development",
    "desc": "Build Solana programs with Anchor framework or native Rust. Use when developing Solana smart contracts, implementing token operations, testing programs, deploying to networks, or working with Solana development. Covers both high-level Anchor framework (recommended) and low-level native Rust for adva",
    "category": "solana-development",
@@ -655,6 +647,14 @@ const MEGA_CATALOG = {
    "path": "skills/solana-development/x402/",
    "name_fr": "x402 (paiements internet)",
    "desc_fr": "Construis des paiements natifs d'internet avec le protocole ouvert x402 (x402 Foundation, Apache-2.0) : APIs payantes, contenu à péage, flux de paiement d'agents IA et micropaiements on-chain sur HTTP 402. SDKs TypeScript, Python et Go."
+  },
+  {
+   "name": "zk-compression-light",
+   "desc": "Build with ZK Compression on Solana using Light Protocol. Use when creating compressed tokens, compressed PDAs, or integrating ZK compression into Solana programs. Covers compressed account model, state trees, validity proofs, and client integration with Helius/Photon RPC.",
+   "category": "solana-development",
+   "path": "skills/solana-development/zk-compression-light/",
+   "name_fr": "ZK Compression (Light)",
+   "desc_fr": "Construis avec ZK Compression sur Solana via Light Protocol : tokens compressés, PDAs compressés ou intégration de ZK compression dans des programmes Solana. Modèle de comptes compressés, state trees, preuves de validité et intégration client Helius/Photon RPC."
   },
   {
    "name": "solana-game",
@@ -836,7 +836,7 @@ const MEGA_CATALOG = {
    "name": "metaplex-protocol",
    "desc": "Complete Metaplex Protocol guide for Solana NFTs and digital assets. Covers Core (next-gen NFTs), Token Metadata, Bubblegum (compressed NFTs), Candy Machine, Genesis (token launches), MPL-Hybrid, Inscriptions, DAS API, and the Umi framework. The single source of truth for all Metaplex integrations.",
    "category": "solana-protocols",
-   "path": "skills/solana-protocols/metaplex/",
+   "path": "skills/solana-protocols/metaplex-protocol/",
    "name_fr": "Metaplex Protocol (guide)",
    "desc_fr": "Guide complet du protocole Metaplex pour NFTs et assets digitaux Solana : Core (NFTs nouvelle génération), Token Metadata, Bubblegum (NFTs compressés), Candy Machine et distribution."
   },
@@ -1055,6 +1055,12 @@ const MEGA_CATALOG = {
    "path": "skills/test-driven-development/",
    "name_fr": "Développement piloté par les tests (TDD)",
    "desc_fr": "Développe par les tests avec la boucle rouge-vert-refactor : implémenter une logique, corriger un bug, prouver que le code fonctionne."
+  },
+  {
+   "name": "typesafe-ai",
+   "desc": "Build AI-powered software with TypeSafe: small units of AI intelligence you can use like programming primitives. Its System One models, including Jev, turn natural language and application state into typed judgments and probabilities that code can combine. Use when a feature needs programmable commo",
+   "category": "typesafe-ai",
+   "path": "skills/typesafe-ai/"
   },
   {
    "name": "using-agent-skills",

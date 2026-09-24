@@ -11,7 +11,10 @@
 
 // ---------- Langue ----------
 const LANG = (window.mgp.getPrefs() || {}).lang === 'en' ? 'en' : 'fr';
-const T = LANG === 'fr' ? {
+
+// ---------- i18n panneau (fr/en) — dictionnaires complets (export __mgp.i18n pour les tests) ----------
+const I18N_PANEL = {
+fr: {
   ph: 'Rechercher un skill, un agent, un prompt…', all: 'Tout', skills: 'Skills',
   agents: 'Agents', perso: '✍️ Perso', favs: '★ Favoris', results: 'résultats',
   copy: '⧉ Copier', open: '⌘⏎ Ouvrir dans {x}', gpt: '⇧⏎ ChatGPT',
@@ -178,7 +181,44 @@ const T = LANG === 'fr' ? {
   restoreErr: '⏪ Restauration impossible',
   // 💾 Auto-backup hebdo
   autoBkOn: (d) => `💾 Sauvegarde auto hebdomadaire active — dossier : ${d}`,
-} : {
+  // 📌 Garder le panneau visible
+  pinOn: '📌 Panneau épinglé — il reste visible quand tu cliques ailleurs',
+  pinOff: '📌 Épinglage retiré — le panneau se masque au clic ailleurs',
+  pinT: 'Garder le panneau visible (ne pas masquer au clic ailleurs)',
+  // ✕ Effacer la recherche
+  qClear: 'Effacer la recherche',
+  // 📂 Glisser-déposer de fichier → prompt ✍️
+  dropTitle: '📂 Fichier glissé → nouveau prompt ✍️',
+  dropEditHint: 'Le contenu du fichier est chargé ci-dessous — ajuste-le avant d\'enregistrer.',
+  dropName: 'Nom du prompt',
+  dropSave: '✓ Enregistrer le prompt',
+  dropCancel: 'Annuler',
+  dropDropHere: 'Dépose ton fichier (.md, .txt, texte) n\'importe où dans le panneau',
+  dropOk: (n, c) => `✍️ Prompt « ${n} » créé depuis le fichier (${c} caractères)`,
+  dropReadErr: '📂 Lecture du fichier impossible',
+  dropTooBig: (m) => `Fichier trop volumineux (max ${m.toLocaleString('fr-FR')} caractères)`,
+  dropEmpty: 'Le fichier est vide — rien à enregistrer',
+  dropBinary: 'Fichier binaire non textuel refusé (ouvre-le et copie la partie utile)',
+  dropNoName: 'Donne un nom au prompt',
+  dropDuplicate: (n) => `Un prompt « ${n} » existe déjà — nom changé en « {new} »`,
+  dropTooBigTitle: 'Fichier trop volumineux',
+  // ❔ Aide intégrée (survol des boutons)
+  helpSearch: '🔍 Recherche — tape un mot : filtre skills, agents, équipes et prompts ✍️ en direct. ↑↓ navigue, ⏎ copie le prompt, ⌘⏎ ouvre le LLM.',
+  helpTabs: 'Onglets — Tout / Skills / Agents / Équipes / ✍️ Perso / ★ Favoris : filtre la liste par type.',
+  helpCompose: '✚ Composer — envoie les prompts sélectionnés (⌘-clic) en un seul message combiné.',
+  helpLlm: '⌨ LLM — choisit la destination par défaut : ⏎ copie le prompt, ⌘⏎ ouvre ce chat directement.',
+  helpLkf: '🔒 Filtre — n\'affiche que les éléments verrouillés (protégés contre la suppression).',
+  helpAtb: '🛠 Atelier — crée tes propres agents, skills et équipes, générés par IA ou écrits à la main.',
+  helpTrb: '🗑 Corbeille — les éléments supprimés y restent restaurables (60 maximum).',
+  helpNewp: '＋ Nouveau prompt ✍️ — ajoute ton propre prompt réutilisable.',
+  helpLang: 'FR/EN — bascule toute l\'interface (panneau + réglages).',
+  helpPin: '📌 Épingler — quand c\'est actif, le panneau ne se masque plus quand tu cliques dans une autre fenêtre (aussi dans Réglages).',
+  helpLockItem: '🔒 Verrouiller — protège cet élément : suppression et écrasement impossibles (clic droit pour retirer).',
+  helpLockCat: '🔒 Verrouiller — disponible pour tes créations (Atelier, équipes, prompts ✍️). Pour modifier un skill/agent du catalogue, utilise « Copier dans l\'Atelier ».',
+  helpHelp: '❔ — survole les boutons « ? » pour une explication de chaque fonction.',
+},
+
+en: {
   ph: 'Search a skill, an agent, a prompt…', all: 'All', skills: 'Skills',
   agents: 'Agents', perso: '✍️ Custom', favs: '★ Favorites', results: 'results',
   copy: '⧉ Copy', open: '⌘⏎ Open in {x}', gpt: '⇧⏎ ChatGPT',
@@ -318,6 +358,38 @@ const T = LANG === 'fr' ? {
   histRow: (n, d) => `${n} field${n > 1 ? 's' : ''} changed · ${d}`,
   histShow: '🕘 History',
   histHide: 'Hide history',
+  // 📌 Keep visible · ✕ clear search · 📂 drag & drop · ❔ help (feature parity)
+  pinOn: '📌 Panel pinned — it stays visible when you click elsewhere',
+  pinOff: '📌 Unpinned — the panel hides when you click elsewhere',
+  pinT: 'Keep the panel visible (don\'t hide when clicking elsewhere)',
+  qClear: 'Clear search',
+  dropTitle: '📂 Dropped file → new prompt ✍️',
+  dropEditHint: 'The file content is loaded below — adjust it before saving.',
+  dropName: 'Prompt name',
+  dropSave: '✓ Save prompt',
+  dropCancel: 'Cancel',
+  dropDropHere: 'Drop your file (.md, .txt, text) anywhere in the panel',
+  dropOk: (n, c) => `✍️ Prompt “${n}” created from file (${c} characters)`,
+  dropReadErr: '📂 Could not read the file',
+  dropTooBig: (m) => `File too large (max ${m.toLocaleString('en-US')} characters)`,
+  dropEmpty: 'The file is empty — nothing to save',
+  dropBinary: 'Non-text (binary) file refused — open it and copy the useful part',
+  dropNoName: 'Give the prompt a name',
+  dropDuplicate: (n) => `A prompt “${n}” already exists — renamed to “{new}”`,
+  dropTooBigTitle: 'File too large',
+  helpSearch: '🔍 Search — type a word: filters skills, agents, teams and ✍️ prompts live. ↑↓ navigate, ⏎ copies the prompt, ⌘⏎ opens the LLM.',
+  helpTabs: 'Tabs — All / Skills / Agents / Teams / ✍️ Custom / ★ Favorites: filter the list by type.',
+  helpCompose: '✚ Compose — sends the selected prompts (⌘-click) as one combined message.',
+  helpLlm: '⌨ LLM — picks the default destination: ⏎ copies the prompt, ⌘⏎ opens that chat directly.',
+  helpLkf: '🔒 Filter — shows only locked items (protected against deletion).',
+  helpAtb: '🛠 Workshop — build your own agents, skills and teams, AI-generated or hand-written.',
+  helpTrb: '🗑 Trash — deleted items stay restorable here (60 max).',
+  helpNewp: '＋ New prompt ✍️ — add your own reusable prompt.',
+  helpLang: 'FR/EN — switches the whole interface (panel + settings).',
+  helpPin: '📌 Pin — when active, the panel no longer hides when you click another window (also in Settings).',
+  helpLockItem: '🔒 Lock — protects this item: it cannot be deleted or overwritten (right-click to remove).',
+  helpLockCat: '🔒 Lock — available for your own creations (Workshop, teams, ✍️ prompts). To adapt a catalog skill/agent, use “Copy to Workshop”.',
+  helpHelp: '❔ — hover the “?” marks for an explanation of every control.',
   tplBtn: '📋 Templates',
   tplT: '📋 Ready-to-use team templates',
   tplHint: 'Created as ordinary teams: editable, deletable, lockable.',
@@ -335,7 +407,10 @@ const T = LANG === 'fr' ? {
   restoreDone: (f) => `⏪ Version restored (${f} field${f > 1 ? 's' : ''} reverted)`,
   restoreErr: '⏪ Restore failed',
   autoBkOn: (d) => `💾 Weekly auto-backup active — folder: ${d}`,
+},
 };
+
+const T = (LANG === 'fr' ? I18N_PANEL.fr : I18N_PANEL.en);
 
 // ---------- Catalogue + prefs ----------
 const CAT = (window.mgp && window.mgp.catalog) || { meta: { version: '?' }, skills: [], agents: [] };
@@ -350,6 +425,7 @@ const LOCKS = {
   agent: new Set((SYS.workshopLocks && SYS.workshopLocks.agent) || []),
   skill: new Set((SYS.workshopLocks && SYS.workshopLocks.skill) || []),
   team: new Set((SYS.workshopLocks && SYS.workshopLocks.team) || []),
+  custom: new Set((SYS.workshopLocks && SYS.workshopLocks.custom) || []),
 };
 const lockOf = (k, name) => !!(LOCKS[k] && LOCKS[k].has(name));
 // Un item est verrouillé si le Set local le dit OU si son enregistrement porte le flag (source de vérité disque)
@@ -424,6 +500,8 @@ APP_PARENT.insertAdjacentHTML('afterbegin', `
     <span id="lupa" aria-hidden="true">⌕</span>
     <input id="q" type="text" role="searchbox" placeholder="${T.ph}" aria-label="${T.ph}"
       autocomplete="off" spellcheck="false" autofocus>
+    <button id="qclear" title="${T.qClear}" aria-label="${T.qClear}" hidden>✕</button>
+    <span class="helpw"><button id="hs" class="helpb" data-help="helpSearch" aria-label="${T.helpSearch}">?</button></span>
   </div>
   <nav id="tabs" role="tablist" aria-label="${LANG === 'fr' ? 'Catégories' : 'Categories'}">
     ${TABS.map((f) =>
@@ -444,14 +522,37 @@ APP_PARENT.insertAdjacentHTML('afterbegin', `
       <button id="llmbtn" title="${T.llmSelT}" aria-haspopup="menu" aria-expanded="false">⌨ ${esc(T.llm)} <b>${esc(tgtLabel(DEFAULT_LLM))}</b> ▾</button>
       <span id="llmmenu" role="menu" hidden></span>
     </span>
-    <button id="lkf" title="${T.lockFilterT}" aria-pressed="false">🔒</button>
+    <span id="lkfwrap" style="display:flex;gap:2px;align-items:center">
+      <button id="lkf" title="${T.lockFilterT}" aria-pressed="false">🔒</button>
+      <span class="helpw"><button id="hlkf" class="helpb" data-help="helpLkf" aria-label="${T.helpLkf}">?</button></span>
+    </span>
     <button id="atb" title="${T.atelierT}" aria-haspopup="dialog">🛠 ${T.atelier}</button>
+    <span class="helpw"><button id="hatb" class="helpb" data-help="helpAtb" aria-label="${T.helpAtb}">?</button></span>
     <button id="trb" title="${T.trashT}" aria-haspopup="dialog">${T.trashBtn}</button>
+    <span class="helpw"><button id="htrb" class="helpb" data-help="helpTrb" aria-label="${T.helpTrb}">?</button></span>
+    <button id="pinb" title="${T.pinT}" aria-pressed="false">📌</button>
+    <span class="helpw"><button id="hpin" class="helpb" data-help="helpPin" aria-label="${T.helpPin}">?</button></span>
     <span id="cnt" role="status" aria-live="polite"></span>
   </footer>
   <div id="tip" role="tooltip" hidden></div>
+  <div id="help" role="tooltip" hidden></div>
   <div id="ctx" role="menu" hidden></div>
   <div id="toast" role="status" aria-live="polite" hidden></div>
+  <div id="dropmodal" role="dialog" aria-modal="true" aria-label="${T.dropTitle}" hidden>
+    <div id="dmbox">
+      <h3>📂 ${T.dropTitle}<button id="dm-x" aria-label="${T.dropCancel}">✕</button></h3>
+      <p class="dmhint">${T.dropEditHint}</p>
+      <label>${T.dropName}<input id="dm-name" type="text" maxlength="60"></label>
+      <label>${LANG === 'fr' ? 'Contenu' : 'Content'}<textarea id="dm-txt" rows="10"></textarea></label>
+      <div id="dmrow">
+        <button id="dm-save" class="pri">${T.dropSave}</button>
+        <span id="dm-count" class="dmmut"></span>
+        <span style="flex:1"></span>
+        <button id="dm-cancel">${T.dropCancel}</button>
+      </div>
+    </div>
+  </div>
+  <div id="dropzone" hidden><div id="dz">📂 ${T.dropDropHere}</div></div>
   <div id="wmodal" role="dialog" aria-modal="true" aria-label="${T.atelierT}" hidden>
     <div id="wbox">
       <h3>${T.atelierT}<button id="w-close" title="${LANG === 'fr' ? 'Fermer l\'atelier (Échap)' : 'Close the workshop (Esc)'}" aria-label="${LANG === 'fr' ? 'Fermer' : 'Close'}">✕</button></h3>
@@ -635,6 +736,31 @@ list.addEventListener('mouseout', (e) => {
 });
 tip.addEventListener('mouseenter', hideTip); // le tooltip ne gêne jamais le clic
 
+// ❔ Aide intégrée : survol d'un bouton « ? » → popup flottant avec description claire
+const help = $('help');
+function showHelp(el) {
+  const key = el.getAttribute('data-help');
+  const txt = key ? T[key] : '';
+  if (!txt) return;
+  help.innerHTML = esc(txt);
+  help.hidden = false;
+  const hr = help.getBoundingClientRect(), er = el.getBoundingClientRect(), ar = $('app').getBoundingClientRect();
+  let x = er.left + er.width / 2 - hr.width / 2;
+  x = Math.max(ar.left + 6, Math.min(x, ar.right - hr.width - 6));
+  let y = er.top - hr.height - 6; // au-dessus du bouton ; en dessous si collé en haut
+  if (y < ar.top + 6) y = er.bottom + 6;
+  help.style.left = `${Math.round(x - ar.left)}px`;
+  help.style.top = `${Math.round(y - ar.top)}px`;
+}
+function hideHelp() { help.hidden = true; }
+document.querySelectorAll('.helpb').forEach((b) => {
+  b.addEventListener('mouseenter', () => showHelp(b));
+  b.addEventListener('mouseleave', hideHelp);
+  b.addEventListener('focus', () => showHelp(b)); // accessible au clavier aussi
+  b.addEventListener('blur', hideHelp);
+  b.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); }); // jamais d'action au clic
+});
+
 // ────────────────────────────────────────────────────────────────────────────
 //  Menu contextuel (clic droit) — envoi vers le(s) LLM choisis dans Réglages
 // ────────────────────────────────────────────────────────────────────────────
@@ -662,10 +788,11 @@ function ctxHtml(it) {
     ) : it.k === 'custom' ? `<button role="menuitem" data-a="edit-custom">${T.editItem}</button>`
     : it.k === 'team' ? `<button role="menuitem" data-a="edit-team">${T.editItem}</button><button role="menuitem" data-a="copy-ws">${T.copyToWorkshop}</button>`
     : ''}
-    ${(((it.k === 'agent' || it.k === 'skill') && !it.x.path) || it.k === 'team') ? (
-      (() => { const lk = it.k === 'team' ? lockOf('team', x.team || x.name) : lockOf(it.k, x.name);
-        return `<button role="menuitem" data-a="lock">${lk ? T.unlockItem : T.lockItem}</button>`; })()
-    ) : ''}`;
+    ${((it.k === 'agent' || it.k === 'skill') && !it.x.path) || it.k === 'team' || it.k === 'custom' ? (
+      (() => { const lk = it.k === 'team' ? lockOf('team', x.team || x.name)
+        : it.k === 'custom' ? lockOf('custom', x.name) : lockOf(it.k, x.name);
+        return `<button role="menuitem" data-a="lock"${lk ? '' : ` title="${T.helpLockItem}"`}>${lk ? T.unlockItem : T.lockItem}</button>`; })()
+    ) : ((it.k === 'agent' || it.k === 'skill') && it.x.path) ? `<span class="chelp">${T.helpLockCat}</span>` : ''}`;
 }
 function openCtx(el, it, cx, cy) {
   ctx.innerHTML = ctxHtml(it);
@@ -990,6 +1117,19 @@ async function toggleLock(it) {
   const name = k === 'team' ? (x.team || x.name) : x.name;
   const kind = k === 'team' ? 'team' : k;
   const on = !lockOf(kind, name);
+  // ✍️ Prompts perso : le cadenas vit sur l'enregistrement custom (locked) — persisté
+  // par custom-save, exposé par get-prefs → workshopLocks.custom. Les items du catalogue
+  // (avec un .path repo) ne sont pas verrouillables : « Copier dans l'Atelier » d'abord.
+  if (kind === 'custom') {
+    const rec = CUSTOMS.find((c) => c.name === name);
+    if (!rec) return;
+    window.mgp.customSave && window.mgp.customSave({ ...rec, locked: on });
+    rec.locked = on;
+    setLockLocal('custom', name, on);
+    showToast(on ? T.lockedOn(name) : T.lockedOff(name), 'ok');
+    render();
+    return;
+  }
   if (!window.mgp.workshopLock) return;
   const r = await window.mgp.workshopLock(kind, name, on);
   if (r && r.ok) {
@@ -1207,6 +1347,11 @@ async function doBackupImport() {
 
 // ---------- Modal ✍️ ----------
 let editing = null;
+// Reconstruit ALL (skills + agents + customs) après toute mutation de CUSTOMS
+function rebuildAll() {
+  ALL.length = 0;
+  ALL.push(...S.map((x) => ({ x, k: 'skill' })), ...A.map((x) => ({ x, k: 'agent' })), ...CUSTOMS.map((x) => ({ x, k: 'custom' })));
+}
 function openModal(c) {
   editing = c ? c.name : null;
   $('e-name').value = c ? c.name : '';
@@ -1221,18 +1366,22 @@ $('e-x').onclick = closeModal;
 $('e-save').onclick = () => {
   const name = $('e-name').value.trim(), desc = $('e-txt').value.trim();
   if (!name || !desc) return;
-  window.mgp.customSave && window.mgp.customSave({ name, desc });
   const i = CUSTOMS.findIndex((c) => c.name === name);
-  const rec = { name, desc };
+  const prev = i >= 0 ? CUSTOMS[i] : null;
+  // tag + 🔒 cadenas préservés à l'édition (le main process les conserve aussi)
+  const rec = { name, desc, ...(prev && prev.tag ? { tag: prev.tag } : {}), ...(prev && prev.locked ? { locked: true } : {}) };
+  window.mgp.customSave && window.mgp.customSave(rec);
   if (i >= 0) CUSTOMS[i] = rec; else CUSTOMS.push(rec);
-  ALL.length = 0; ALL.push(...S.map((x) => ({ x, k: 'skill' })), ...A.map((x) => ({ x, k: 'agent' })), ...CUSTOMS.map((x) => ({ x, k: 'custom' })));
+  rebuildAll();
   closeModal(); render();
 };
 $('e-del').onclick = () => {
   if (!editing) return;
+  const victim = CUSTOMS.find((c) => c.name === editing);
+  if (victim && itemLocked('custom', victim)) { showToast(T.delLocked, 'err'); return; } // 🔒 garde anti-suppression
   window.mgp.customDelete && window.mgp.customDelete(editing);
   CUSTOMS = CUSTOMS.filter((c) => c.name !== editing);
-  ALL.length = 0; ALL.push(...S.map((x) => ({ x, k: 'skill' })), ...A.map((x) => ({ x, k: 'agent' })), ...CUSTOMS.map((x) => ({ x, k: 'custom' })));
+  rebuildAll();
   closeModal(); render();
 };
 $('e-txt').addEventListener('keydown', (e) => { if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') $('e-save').onclick(); });
@@ -1253,7 +1402,96 @@ $('tabs').querySelectorAll('[data-f]').forEach((b) => {
     render();
   };
 });
-q.addEventListener('input', () => { query = q.value.trim().toLowerCase(); idx = 0; render(); });
+q.addEventListener('input', () => { query = q.value.trim().toLowerCase(); idx = 0; render(); $('qclear').hidden = !q.value; });
+// ✕ Efface la recherche d'un coup (visible seulement quand le champ est non vide)
+$('qclear').onclick = () => {
+  q.value = ''; query = ''; idx = 0;
+  $('qclear').hidden = true;
+  render(); q.focus();
+};
+// 📌 « Garder le panneau visible » : bascule persistée (préférence keepVisible)
+$('pinb').onclick = () => {
+  const on = $('pinb').getAttribute('aria-pressed') !== 'true';
+  $('pinb').setAttribute('aria-pressed', String(on));
+  $('pinb').classList.toggle('pinned', on);
+  try { window.mgp.setKeepVisible && window.mgp.setKeepVisible(on); } catch (e) {}
+  try { window.mgp.onSettingsChange && window.mgp.onSettingsChange({ keepVisible: on }); } catch (e) {}
+  showToast(on ? T.pinOn : T.pinOff, 'ok');
+};
+// ---------- 📂 Glisser-déposer de fichier → prompt ✍️ ----------
+// Validation AVANT enregistrement (aucune pollution des ✍️ existants) :
+// non vide, texte (pas de \u0000), taille ≤ dropMaxChars (préférence), nom unique (suffixe -2).
+const DROP_EXT = /\.(md|markdown|txt|text|prompt)$/i;
+function validateDrop({ name, text, maxChars = 100000, existing = [] } = {}) {
+  const t = String(text == null ? '' : text);
+  if (!t.trim()) return { ok: false, error: 'empty' };
+  if (t.includes('\u0000')) return { ok: false, error: 'binary' };
+  if (t.length > maxChars) return { ok: false, error: 'too-big' };
+  let n = String(name || '').trim().slice(0, 60) || (LANG === 'fr' ? 'Prompt importé' : 'Imported prompt');
+  if (existing.includes(n)) {
+    let i = 2;
+    while (existing.includes(`${n}-${i}`)) i++;
+    n = `${n}-${i}`; // suffixe plutôt qu'un refus : le glisser ne doit pas se perdre
+  }
+  return { ok: true, name: n, text: t };
+}
+let dropFile = null; // { name, text }
+function openDropModal(f) {
+  dropFile = f || { name: '', text: '' };
+  $('dm-name').value = dropFile.name;
+  $('dm-txt').value = dropFile.text || '';
+  $('dm-count').textContent = `${($('dm-txt').value || '').length} ${LANG === 'fr' ? 'car.' : 'chars'}`;
+  $('dropmodal').hidden = false;
+  $('dm-name').focus();
+}
+function closeDropModal() { $('dropmodal').hidden = true; dropFile = null; }
+function saveDropModal() {
+  if (!dropFile) return;
+  const maxChars = SYS.dropMaxChars || 100000;
+  const v = validateDrop({ name: $('dm-name').value.trim() || dropFile.name, text: $('dm-txt').value, maxChars, existing: CUSTOMS.map((c) => c.name) });
+  if (!v.ok) {
+    showToast(v.error === 'empty' ? T.dropEmpty : v.error === 'binary' ? T.dropBinary : T.dropTooBig(maxChars), 'err');
+    if (v.error === 'too-big') closeDropModal();
+    return;
+  }
+  const rec = { name: v.name, desc: v.text, tag: LANG === 'fr' ? 'importé' : 'imported', locked: false };
+  window.mgp.customSave && window.mgp.customSave(rec);
+  const i = CUSTOMS.findIndex((c) => c.name === v.name);
+  if (i >= 0) CUSTOMS[i] = rec; else CUSTOMS.push(rec);
+  setLockLocal('custom', v.name, false);
+  rebuildAll();
+  closeDropModal();
+  render();
+  showToast(T.dropOk(v.name, v.text.length), 'ok');
+}
+$('dm-save').onclick = saveDropModal;
+$('dm-cancel').onclick = closeDropModal;
+$('dm-x').onclick = closeDropModal;
+$('dm-txt').addEventListener('input', () => { $('dm-count').textContent = `${$('dm-txt').value.length} ${LANG === 'fr' ? 'car.' : 'chars'}`; });
+// ── DnD sur tout le panneau : overlay « dépose ici » pendant le survol, modale au drop ──
+let dragDepth = 0;
+const dz = $('dropzone');
+document.addEventListener('dragenter', (e) => { e.preventDefault(); if (!$('dropmodal').hidden) return; dragDepth++; dz.hidden = false; });
+document.addEventListener('dragover', (e) => { e.preventDefault(); if (e.dataTransfer) e.dataTransfer.dropEffect = 'copy'; });
+document.addEventListener('dragleave', (e) => { e.preventDefault(); dragDepth = Math.max(0, dragDepth - 1); if (!dragDepth) dz.hidden = true; });
+document.addEventListener('drop', (e) => {
+  e.preventDefault(); dragDepth = 0; dz.hidden = true;
+  const dt = e.dataTransfer;
+  if (!dt) return;
+  const f = dt.files && dt.files[0];
+  if (f) {
+    // types binaires évidents refusés ; texte par nature accepté (.md, .txt, sans type…)
+    if (f.type && !/^(text\/|application\/(json|xml|javascript|yaml|x-yaml))/.test(f.type) && !DROP_EXT.test(f.name)) { showToast(T.dropBinary, 'err'); return; }
+    const reader = new FileReader();
+    reader.onload = () => openDropModal({ name: String(f.name || '').replace(DROP_EXT, ''), text: String(reader.result || '') });
+    reader.onerror = () => showToast(T.dropReadErr, 'err');
+    reader.readAsText(f);
+  } else {
+    const txt = dt.getData && (dt.getData('text/plain') || dt.getData('text'));
+    if (txt && txt.trim()) openDropModal({ name: LANG === 'fr' ? 'Texte collé' : 'Pasted text', text: txt });
+  }
+});
+
 // 🔒 Filtre « verrouillés seulement » : cumulable avec l'onglet actif et la recherche
 $('lkf').onclick = () => {
   lockOnly = !lockOnly;
@@ -1322,7 +1560,13 @@ function applyTheme() {
   const dark = (window.mgp.getPrefs() || {}).theme !== 'light';
   document.body.classList.toggle('light', !dark);
 }
-try { window.mgp.onSettings(({ theme, lang: l }) => { if (l && l !== LANG) location.reload(); applyTheme(); }); } catch (e) {}
+function onPanelSettings({ theme, lang: l, keepVisible, defaultLLM: dL } = {}) {
+  if (l && l !== LANG) location.reload();
+  if (theme) document.body.classList.toggle('light', theme === 'light');
+  if (typeof keepVisible === 'boolean') { $('pinb').setAttribute('aria-pressed', String(keepVisible)); $('pinb').classList.toggle('pinned', keepVisible); }
+  if (dL) { DEFAULT_LLM = dL; renderLlmBtn(); }
+}
+try { window.mgp.onSettings(onPanelSettings); } catch (e) {}
 applyTheme();
 
 // ────────────────────────────────────────────────────────────────────────────
@@ -1689,11 +1933,12 @@ setTimeout(tourMaybeStart, 600); // laisse le premier rendu se poser avant le po
 try { window.mgp.onRestartTour && window.mgp.onRestartTour(() => { try { localStorage.removeItem(TOUR_SEEN_KEY); } catch (e) {} tourShow(0); }); } catch (e) {}
 
 render();
+const pinbSet = ($('pinb').getAttribute('aria-pressed') === 'true'); // état initial (préférence persistée)
 window.__mgp = {
   list: () => results,
   filters: () => filter,
   select: (f) => { filter = f; render(); },
-  search: (s) => { query = String(s || '').toLowerCase(); q.value = query; render(); return results.length; },
+  search: (s) => { query = String(s || '').toLowerCase(); q.value = query; $('qclear').hidden = !q.value; render(); return results.length; },
   selection: () => [...sel],
   toggleSel: (n) => { sel.has(n) ? sel.delete(n) : sel.add(n); render(); },
   nav: (d) => { idx = d > 0 ? Math.min(idx + 1, results.length - 1) : Math.max(idx - 1, 0); render(); return idx; },
@@ -1771,4 +2016,18 @@ window.__mgp = {
   lockFilterOn: () => lockOnly,
   counts: () => ({ all: ALL.length, skills: S.length, agents: A.length, customs: CUSTOMS.length, favs: FAVS.size, teams: TEAMS.length }),
   tabs: () => TABS.slice(),
+  // 📌 épinglage · ✕ recherche · 📂 drop · ❔ aide (tests + raccourcis)
+  fireSettings: (p) => onPanelSettings(p || {}),
+  i18n: (l) => (l === 'en' ? I18N_PANEL.en : T),
+  pinVisible: () => pinbSet,
+  pinToggle: () => $('pinb').onclick(),
+  pinState: () => $('pinb').getAttribute('aria-pressed') === 'true',
+  qClear: () => $('qclear').onclick(),
+  qClearVisible: () => !$('qclear').hidden,
+  validateDrop: (o) => validateDrop(o || {}),
+  openDropModal: (f) => openDropModal(f),
+  dropVisible: () => !$('dropmodal').hidden,
+  saveDropModal: () => saveDropModal(),
+  closeDropModal: () => closeDropModal(),
+  dropValues: () => ({ name: $('dm-name').value, text: $('dm-txt').value }),
 };

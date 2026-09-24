@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OpenHands Dashboard — agent-skills</title>
+<style>
+:root {
+  --bg: #0d1117; --bg2: #161b22; --bg3: #1f2630; --border: #30363d;
+  --text: #e6edf3; --muted: #8b949e; --accent: #58a6ff; --green: #3fb950;
+  --amber: #d29922; --red: #f85149; --purple: #bc8cff;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background: var(--bg); color: var(--text); font-size: 14px;
+  display: flex; min-height: 100vh;
+}
+/* ── Sidebar ── */
+nav {
+  width: 210px; min-width: 210px; background: var(--bg2);
+  border-right: 1px solid var(--border); padding: 18px 0;
+  display: flex; flex-direction: column; gap: 2px;
+}
+nav .logo { padding: 0 16px 14px; font-weight: 700; font-size: 15px; letter-spacing: .3px; }
+nav .logo span { color: var(--accent); }
+nav button {
+  all: unset; cursor: pointer; padding: 9px 16px; color: var(--muted);
+  font-size: 13.5px; display: flex; align-items: center; gap: 9px;
+  border-left: 3px solid transparent;
+}
+nav button:hover { color: var(--text); background: var(--bg3); }
+nav button.active { color: var(--text); background: var(--bg3); border-left-color: var(--accent); }
+nav button .badge {
+  margin-left: auto; background: var(--bg); border: 1px solid var(--border);
+  border-radius: 10px; padding: 0 7px; font-size: 11px; color: var(--muted);
+}
+nav .foot { margin-top: auto; padding: 12px 16px 0; font-size: 11px; color: var(--muted); border-top: 1px solid var(--border); }
+/* ── Main ── */
+main { flex: 1; padding: 22px 26px; max-width: 1100px; }
+header h1 { font-size: 20px; margin-bottom: 3px; }
+header .sub { color: var(--muted); font-size: 12.5px; margin-bottom: 18px; }
+.view { display: none; }
+.view.active { display: block; }
+/* ── Cards / stats ── */
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 20px; }
+.card {
+  background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px;
+}
+.card .k { font-size: 26px; font-weight: 700; }
+.card .l { color: var(--muted); font-size: 12px; margin-top: 2px; }
+/* ── Lists ── */
+ul.clean { list-style: none; }
+ul.clean li {
+  background: var(--bg2); border: 1px solid var(--border); border-radius: 8px;
+  padding: 10px 14px; margin-bottom: 8px; display: flex; align-items: center; gap: 10px;
+}
+ul.clean li .grow { flex: 1; min-width: 0; }
+.tag {
+  font-size: 11px; border-radius: 10px; padding: 2px 9px; white-space: nowrap;
+  border: 1px solid var(--border); color: var(--muted);
+}
+.tag.green { color: var(--green); border-color: var(--green); }
+.tag.amber { color: var(--amber); border-color: var(--amber); }
+.tag.red { color: var(--red); border-color: var(--red); }
+.tag.accent { color: var(--accent); border-color: var(--accent); }
+.tag.purple { color: var(--purple); border-color: var(--purple); }
+.muted { color: var(--muted); }
+.desc { color: var(--muted); font-size: 12px; margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+input[type="text"], input[type="date"], input[type="time"], select, textarea {
+  background: var(--bg); border: 1px solid var(--border); color: var(--text);
+  border-radius: 8px; padding: 8px 12px; font-size: 13px; font-family: inherit;
+}
+input:focus, textarea:focus, select:focus { outline: 1px solid var(--accent); }
+.btn {
+  background: var(--bg3); color: var(--text); border: 1px solid var(--border);
+  border-radius: 8px; padding: 8px 14px; cursor: pointer; font-size: 13px;
+}
+.btn:hover { border-color: var(--accent); color: var(--accent); }
+.btn.primary { background: #1f6feb; border-color: #1f6feb; color: #fff; }
+.btn.primary:hover { background: #388bfd; color: #fff; }
+.btn.danger { color: var(--red); }
+.btn.danger:hover { border-color: var(--red); }
+.row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+/* ── Search ── */
+.search { width: 100%; margin-bottom: 14px; }
+/* ── Journal ── */
+.journal-entry {
+  background: var(--bg2); border: 1px solid var(--border); border-radius: 10px;
+  padding: 12px 16px; margin-bottom: 10px;
+}
+.journal-entry .head { display: flex; gap: 10px; align-items: baseline; margin-bottom: 4px; }
+.journal-entry .when { color: var(--muted); font-size: 11.5px; }
+.journal-entry .kind { font-size: 11px; }
+.journal-entry .body { font-size: 13.5px; white-space: pre-wrap; }
+/* ── Tasks ── */
+.task { display: flex; gap: 10px; align-items: flex-start; }
+.task input[type="checkbox"] { margin-top: 3px; accent-color: var(--green); width: 15px; height: 15px; cursor: pointer; }
+.task.done .title { text-decoration: line-through; color: var(--muted); }
+.task .title { font-size: 13.5px; }
+.task .meta { font-size: 11px; color: var(--muted); margin-top: 2px; }
+.task .due.overdue { color: var(--red); }
+.filters { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
+.filters button { font-size: 12px; padding: 5px 12px; }
+.filters button.on { border-color: var(--accent); color: var(--accent); }
+/* ── Reminders / notes ── */
+.reminder.soon { border-left: 3px solid var(--amber); }
+.reminder.past { border-left: 3px solid var(--red); }
+.reminder .when { font-size: 11.5px; color: var(--muted); }
+.reminder.soon .when { color: var(--amber); }
+.reminder.past .when { color: var(--red); }
+.note { cursor: pointer; }
+.note .body { font-size: 12.5px; color: var(--muted); margin-top: 4px; white-space: pre-wrap; max-height: 60px; overflow: hidden; }
+textarea.note-editor { width: 100%; min-height: 140px; resize: vertical; margin-bottom: 10px; }
+.empty { color: var(--muted); text-align: center; padding: 30px 0; font-size: 13px; }
+.toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 10px; }
+@media (max-width: 720px) {
+  body { flex-direction: column; }
+  nav { width: 100%; min-width: 0; flex-direction: row; flex-wrap: wrap; padding: 10px; border-right: none; border-bottom: 1px solid var(--border); }
+  nav .logo { width: 100%; padding-bottom: 8px; }
+  nav button { padding: 7px 10px; }
+  nav .foot { display: none; }
+  main { padding: 16px; }
+}
+</style>
+</head>
+<body>
+<nav>
+  <div class="logo">🛠️ OpenHands <span>Dash</span></div>
+  <button data-view="dashboard" class="active">📊 Tableau de bord</button>
+  <button data-view="skills">🧩 Skills <span class="badge" id="b-skills">…</span></button>
+  <button data-view="activation">⚡ Activation <span class="badge" id="b-activation">…</span></button>
+  <button data-view="routers">🧭 Routeurs <span class="badge" id="b-routers">…</span></button>
+  <button data-view="journal">📖 Journal de bord</button>
+  <button data-view="tasks">✅ Tâches <span class="badge" id="b-tasks">0</span></button>
+  <button data-view="reminders">⏰ Rappels <span class="badge" id="b-reminders">0</span></button>
+  <button data-view="notes">📝 Notes <span class="badge" id="b-notes">0</span></button>
+  <div class="foot">agent-skills · adaptateur OpenHands<br>données locales au navigateur</div>
+</nav>
+
+<main>
+  <header>
+    <h1 id="view-title">Tableau de bord</h1>
+    <div class="sub" id="view-sub"></div>
+  </header>
+
+  <!-- DASHBOARD -->
+  <section class="view active" id="view-dashboard">
+    <div class="stats" id="stats"></div>
+    <div class="card" style="margin-bottom:20px">
+      <strong style="font-size:13px">🧪 Simulateur de routage en direct</strong>
+      <div class="desc" style="white-space:normal;margin:4px 0 10px">Tape un message : le tableau montre quels routeurs déclenchent (même moteur que la CI : frontières de mots + stemming) et ce que le classement TF-IDF des descriptions retournerait.</div>
+      <div class="row">
+        <input type="text" id="sim-input" placeholder="ex : the deploy crashed with a 500 bug" style="flex:1;min-width:220px">
+        <button class="btn primary" id="sim-run">Router</button>
+      </div>
+      <div id="sim-out" style="margin-top:12px"></div>
+    </div>
+    <div class="card">
+      <strong style="font-size:13px">⏰ Prochains rappels</strong>
+      <div id="dash-reminders" style="margin-top:10px"></div>
+    </div>
+  </section>
+
+  <!-- SKILLS -->
+  <section class="view" id="view-skills">
+    <input class="search" type="text" id="skills-search" placeholder="Rechercher un skill ou une capacité…">
+    <div id="skills-list"></div>
+  </section>
+
+  <!-- ACTIVATION -->
+  <section class="view" id="view-activation">
+    <div class="desc" style="margin-bottom:12px;white-space:normal">Liste complète des <strong>skills</strong> et <strong>agents spécialistes</strong> avec leur <strong>prompt d'activation</strong> : clic sur ⚡ copie le prompt (chargement du SKILL.md / persona agent), prêt à coller dans n'importe quel LLM ou conversation OpenHands.</div>
+    <div class="row" style="margin-bottom:12px">
+      <input type="text" id="activation-search" placeholder="Rechercher un skill ou un agent… (ex: jupiter, security, ui)" style="flex:1;min-width:220px">
+      <button class="btn" id="activation-tab-skills" style="padding:8px 14px">Skills</button>
+      <button class="btn" id="activation-tab-agents" style="padding:8px 14px">Agents</button>
+      <button class="btn" id="activation-tab-teams" style="padding:8px 14px">👥 Équipes</button>
+    </div>
+    <div id="activation-list"></div>
+  </section>
+
+  <!-- ROUTERS -->
+  <section class="view" id="view-routers">
+    <div class="desc" style="margin-bottom:14px;white-space:normal">Microagents déclenchés par mots-clés, <strong>générés</strong> par <code>scripts/generate-openhands-routers.js</code> depuis les descriptions des skills, et vérifiés en CI (<code>--check</code>).</div>
+    <div id="routers-list"></div>
+  </section>
+
+  <!-- JOURNAL -->
+  <section class="view" id="view-journal">
+    <div class="card" style="margin-bottom:16px">
+      <div class="row">
+        <select id="journal-kind">
+          <option value="note">📝 Note de session</option>
+          <option value="routing">🧭 Routage observé</option>
+          <option value="decision">⚖️ Décision</option>
+          <option value="incident">🐞 Incident</option>
+        </select>
+        <input type="text" id="journal-text" placeholder="Ce qui s'est passé…" style="flex:1;min-width:220px">
+        <button class="btn primary" id="journal-add">Ajouter</button>
+      </div>
+    </div>
+    <div class="toolbar">
+      <div class="filters" id="journal-filters"></div>
+      <button class="btn danger" id="journal-clear">Vider le journal</button>
+    </div>
+    <div id="journal-list"></div>
+  </section>
+
+  <!-- TASKS -->
+  <section class="view" id="view-tasks">
+    <div class="card" style="margin-bottom:16px">
+      <div class="row">
+        <input type="text" id="task-text" placeholder="Nouvelle tâche…" style="flex:1;min-width:220px">
+        <input type="date" id="task-due" title="Échéance (optionnelle)">
+        <select id="task-priority">
+          <option value="normal">Priorité normale</option>
+          <option value="high">Haute priorité</option>
+          <option value="low">Basse priorité</option>
+        </select>
+        <button class="btn primary" id="task-add">Ajouter</button>
+      </div>
+    </div>
+    <div class="filters">
+      <button data-f="all" class="on">Toutes</button>
+      <button data-f="open">Ouvertes</button>
+      <button data-f="done">Terminées</button>
+      <button data-f="overdue">En retard</button>
+      <button class="btn danger" id="tasks-clear" style="margin-left:auto">Supprimer les terminées</button>
+    </div>
+    <div id="tasks-list"></div>
+  </section>
+
+  <!-- REMINDERS -->
+  <section class="view" id="view-reminders">
+    <div class="card" style="margin-bottom:16px">
+      <div class="row">
+        <input type="text" id="reminder-text" placeholder="Me rappeler de…" style="flex:1;min-width:220px">
+        <input type="date" id="reminder-date">
+        <input type="time" id="reminder-time" value="09:00">
+        <button class="btn primary" id="reminder-add">Ajouter</button>
+      </div>
+    </div>
+    <div id="reminders-list"></div>
+  </section>
+
+  <!-- NOTES -->
+  <section class="view" id="view-notes">
+    <div class="card" style="margin-bottom:16px">
+      <div class="row">
+        <input type="text" id="note-title" placeholder="Titre de la note…" style="flex:1;min-width:220px">
+        <button class="btn primary" id="note-add">Nouvelle note</button>
+      </div>
+    </div>
+    <input class="search" type="text" id="notes-search" placeholder="Rechercher dans les notes…">
+    <div id="notes-list"></div>
+    <div id="note-editor" style="display:none;margin-top:16px">
+      <div class="row" style="margin-bottom:10px">
+        <input type="text" id="note-edit-title" style="flex:1;min-width:220px">
+        <button class="btn primary" id="note-save">Enregistrer</button>
+        <button class="btn" id="note-close">Fermer</button>
+        <button class="btn danger" id="note-delete">Supprimer</button>
+      </div>
+      <textarea class="note-editor" id="note-edit-body" placeholder="Contenu de la note… (markdown brut supporté)"></textarea>
+    </div>
+  </section>
+</main>
+
+<script>
+'use strict';
+// ═══════════════ Data (snapshot généré depuis skills/ + .openhands/microagents/) ═══════════════
+const DASHBOARD_DATA = __DATA_PLACEHOLDER__;
+
+// ═══════════════ Safe storage wrapper ═══════════════
+const Store = (() => {
+  let mem = {};
+  let ok = false;
+  try { localStorage.setItem('__probe', '1'); localStorage.removeItem('__probe'); ok = true; } catch (e) { ok = false; }
+  return {
+    available: ok,
+    get(key, fallback) {
+      try {
+        const raw = ok ? localStorage.getItem('ohdash.' + key) : mem[key];
+        return raw === null || raw === undefined ? fallback : JSON.parse(raw);
+      } catch (e) { return fallback; }
+    },
+    set(key, value) {
+      try {
+        const raw = JSON.stringify(value);
+        if (ok) localStorage.setItem('ohdash.' + key, raw); else mem[key] = raw;
+      } catch (e) { /* quota or serialization: ignore, state stays in memory */ }
+    },
+  };
+})();
+
+// ═══════════════ Escaping (XSS) ═══════════════
+function esc(s) {
+  return String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+// ═══════════════ State ═══════════════
+const state = {
+  journal: Store.get('journal', []),
+  tasks: Store.get('tasks', []),
+  reminders: Store.get('reminders', []),
+  notes: Store.get('notes', []),
+  journalFilter: 'all',
+  taskFilter: 'all',
+  openNoteId: null,
+};
+
+function persist() {
+  Store.set('journal', state.journal);
+  Store.set('tasks', state.tasks);
+  Store.set('reminders', state.reminders);
+  Store.set('notes', state.notes);
+}
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+
+// ═══════════════ TF-IDF engine (imported from scripts/run-evals.js semantics) ═══════════════
+// Copy of the eval tier's tokenizer/stemmer/cosine — kept inline because this
+// page is a standalone artifact (no build step, no fetch of scripts/).
+const STOP = new Set(['a','an','and','any','are','as','at','be','before','by','for','from','in','into','is','it','its','my','need','needs','of','on','or','our','so','that','the','them','this','to','use','want','we','when','with','you','your','help','me','i']);
+function stem(t) {
+  for (const suf of ['ally', 'ing', 'ed', 'es', 'al']) {
+    if (t.length > suf.length + 3 && t.endsWith(suf)) { t = t.slice(0, -suf.length); break; }
+  }
+  if (t.length > 3 && t.endsWith('s') && !t.endsWith('ss')) t = t.slice(0, -1);
+  if (t.length > 4 && t.endsWith('e')) t = t.slice(0, -1);
+  if (t.length > 4 && t[t.length - 1] === t[t.length - 2] && !'aeiou'.includes(t[t.length - 1])) t = t.slice(0, -1);
+  if (t.length > 3 && t.endsWith('y')) t = t.slice(0, -1) + 'i';
+  return t;
+}
+function tokenize(text) {
+  return text.toLowerCase().replace(/[^a-z0-9\s-]/g, ' ').split(/[\s-]+/).filter(t => t.length > 2 && !STOP.has(t)).map(stem);
+}
+function termFreq(tokens) { const tf = new Map(); for (const t of tokens) tf.set(t, (tf.get(t) || 0) + 1); return tf; }
+function buildCorpus(skills) {
+  const docs = new Map();
+  for (const s of skills) {
+    const nt = tokenize(s.name.replace(/-/g, ' '));
+    docs.set(s.name, termFreq([...nt, ...nt, ...tokenize(s.description)]));
+  }
+  const df = new Map();
+  for (const tf of docs.values()) for (const t of tf.keys()) df.set(t, (df.get(t) || 0) + 1);
+  const n = docs.size;
+  return { docs, idf: t => Math.log(1 + n / (1 + (df.get(t) || 0))) };
+}
+function cosine(a, b) {
+  let dot = 0, na = 0, nb = 0;
+  for (const [t, w] of a) { na += w * w; const bw = b.get(t); if (bw) dot += w * bw; }
+  for (const w of b.values()) nb += w * w;
+  return !na || !nb ? 0 : dot / (Math.sqrt(na) * Math.sqrt(nb));
+}
+function rankSkills(prompt, corpus) {
+  const pv = termFreq(tokenize(prompt));
+  const scores = [];
+  for (const [name, tf] of corpus.docs) scores.push({ name, score: cosine(pv, new Map([...tf].map(([t, f]) => [t, f * corpus.idf(t)]))) });
+  return scores.sort((a, b) => b.score - a.score);
+}
+function wordBoundaryMatches(message, trigger) {
+  return new RegExp('\\b' + trigger.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b', 'i').test(message);
+}
+
+const CORPUS = buildCorpus(DASHBOARD_DATA.skills);
+
+// ═══════════════ Router engine (mirrors openhands-loader-sim.js) ═══════════════
+function routeMessage(message) {
+  const msg = message.toLowerCase();
+  const kw = [], desc = [];
+  for (const r of DASHBOARD_DATA.routers) {
+    if (!r.triggers.length) continue;
+    const stems = new Set(msg.split(/[^a-z0-9-]+/).filter(Boolean).flatMap(w => tokenize(w)));
+    const hit = r.triggers.some(t => {
+      if (t.includes(' ')) return wordBoundaryMatches(message, t);
+      return stems.has(t) || stems.has(tokenize(t)[0]) || wordBoundaryMatches(message, t);
+    });
+    if (hit) kw.push(r.name);
+  }
+  const top = rankSkills(message, CORPUS).filter(x => x.score > 0).slice(0, 2).map(x => x.name);
+  for (const r of DASHBOARD_DATA.routers) {
+    if (r.triggers.length && r.routes.some(s => top.includes(s))) desc.push(r.name);
+  }
+  return { keyword: kw, description: [...new Set(desc)].sort(), top };
+}
+
+// ═══════════════ Routing simulator ═══════════════
+const simOut = document.getElementById('sim-out');
+function runSim() {
+  const q = document.getElementById('sim-input').value.trim();
+  if (!q) { simOut.innerHTML = '<div class="empty">Tape un message pour voir le routage.</div>'; return; }
+  const { keyword, description, top } = routeMessage(q);
+  const rows = DASHBOARD_DATA.routers.filter(r => r.triggers.length).map(r => {
+    const kw = keyword.includes(r.name), de = description.includes(r.name);
+    const tag = kw ? '<span class="tag green">mot-clé</span>' : '';
+    const tag2 = de ? '<span class="tag accent">description</span>' : '';
+    return `<li><span class="tag purple">${esc(r.phase || '')}</span><strong>${esc(r.name)}</strong><span class="grow"></span>${tag}${tag2}</li>`;
+  }).join('');
+  simOut.innerHTML = `
+    <ul class="clean">${rows}</ul>
+    <div class="desc" style="white-space:normal">Top descriptions TF-IDF : ${top.length ? top.map(t => esc(t) + ' (' + DASHBOARD_DATA.skills.find(s => s.name === t).description.slice(0, 60) + '…)').join(' · ') : 'aucun score > 0'}</div>`;
+  // Journal auto-log of observed routing (kind=routing)
+  if (keyword.length || description.length) {
+    addJournal('routing', `"${q}" → mot-clé [${keyword.join(', ') || '—'}] · description [${description.join(', ') || '—'}]`, { silent: true });
+  }
+}
+document.getElementById('sim-run').addEventListener('click', runSim);
+document.getElementById('sim-input').addEventListener('keydown', e => { if (e.key === 'Enter') runSim(); });
+
+// ═══════════════ Skills / Routers views ═══════════════
+function renderSkills(filter = '') {
+  const q = filter.toLowerCase();
+  const list = DASHBOARD_DATA.skills.filter(s => !q || s.name.includes(q) || s.description.toLowerCase().includes(q));
+  document.getElementById('skills-list').innerHTML = list.length
+    ? `<ul class="clean">` + list.map(s => `<li><strong>${esc(s.name)}</strong><span class="grow desc">${esc(s.description)}</span></li>`).join('') + `</ul>`
+    : `<div class="empty">Aucun skill ne correspond à « ${esc(filter)} ».</div>`;
+}
+document.getElementById('skills-search').addEventListener('input', e => renderSkills(e.target.value));
+
+// ═══════════════ Activation view (skills + agents, copy-prompt) ═══════════
+let activationTab = 'skills';
+function activationPrompt(kind, item) {
+  if (kind === 'skill') {
+    return 'Use the skill "' + item.name + '" (skills/' + item.name + '/SKILL.md). Load and strictly follow its SKILL.md before acting.\n\n' + item.description + '\n\nApply the full skill workflow without skipping steps, then handle my request below.';
+  }
+  return 'From now on, act as the agent "' + item.name + '" (agents, ' + item.description.slice(0, 120) + '…).\n\nAdopt this persona for the whole conversation. Start by asking me the right questions before acting, then handle my request.';
+}
+function renderActivation() {
+  const q = document.getElementById('activation-search').value.toLowerCase();
+  const kind = activationTab;
+  const source = kind === 'skills' ? DASHBOARD_DATA.skills : kind === 'agents' ? DASHBOARD_DATA.agents : (DASHBOARD_DATA.teamCombos || []);
+  const list = source.filter(x => !q || x.name.includes(q) || x.description.toLowerCase().includes(q) || (x.agents && x.agents.join(' ').toLowerCase().includes(q)));
+  document.getElementById('activation-tab-skills').classList.toggle('primary', kind === 'skills');
+  document.getElementById('activation-tab-agents').classList.toggle('primary', kind === 'agents');
+  document.getElementById('activation-tab-teams').classList.toggle('primary', kind === 'teams');
+  if (kind === 'teams') {
+    const sliceT = list.slice(0, 50);
+    document.getElementById('activation-list').innerHTML = sliceT.length
+      ? `<ul class="clean">` + sliceT.map((c) =>
+        `<li style="align-items:flex-start"><strong>👥 ${esc(c.agents.join(' + '))}</strong><span class="grow desc">${esc(c.prompt.slice(0, 140))}…</span>` +
+        `<button class="btn primary" data-team-prompt="1" data-prompt-idx="${source.indexOf(c)}" style="padding:4px 12px;font-size:12px;flex-shrink:0">⚡ Activer l'équipe</button></li>`).join('') + `</ul>`
+      : `<div class="empty">Aucune équipe générée — lance scripts/build-agents-multi-prompt.js --inject.</div>`;
+    document.querySelectorAll('#activation-list [data-team-prompt]').forEach(b => {
+      b.addEventListener('click', () => {
+        const c = (DASHBOARD_DATA.teamCombos || []) [+b.getAttribute('data-prompt-idx')];
+        if (!c) return;
+        const ta = document.createElement('textarea');
+        ta.value = c.prompt; document.body.appendChild(ta); ta.select();
+        try { document.execCommand('copy'); } catch (e) {}
+        ta.remove();
+        if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(c.prompt).catch(() => {});
+        addJournal('note', 'Activation équipe : ' + c.agents.join(' + ') + ' (prompt copié)');
+        b.textContent = '✓ Copié';
+        setTimeout(() => { b.textContent = '⚡ Activer l\'équipe'; }, 1400);
+      });
+    });
+    return;
+  }
+  const slice = list.slice(0, 250);
+  document.getElementById('activation-list').innerHTML = slice.length
+    ? `<ul class="clean">` + slice.map((x, i) =>
+      `<li style="align-items:flex-start"><strong>${esc(x.name)}</strong><span class="grow desc">${esc(x.description.slice(0, 140))}${x.description.length > 140 ? '…' : ''}</span>` +
+      `<button class="btn primary" data-ak="${kind}" data-ai="${source.indexOf(x)}" style="padding:4px 12px;font-size:12px;flex-shrink:0">⚡ Activer</button></li>`).join('') + `</ul>` +
+      (list.length > slice.length ? `<div class="desc">… et ${list.length - slice.length} autres — affine la recherche.</div>` : '')
+    : `<div class="empty">Aucun ${kind === 'skills' ? 'skill' : 'agent'} ne correspond.</div>`;
+  document.querySelectorAll('#activation-list [data-ak]').forEach(b => {
+    b.addEventListener('click', () => {
+      const k = b.getAttribute('data-ak');
+      const item = (k === 'skills' ? DASHBOARD_DATA.skills : DASHBOARD_DATA.agents)[+b.getAttribute('data-ai')];
+      const prompt = activationPrompt(k === 'skills' ? 'skill' : 'agent', item);
+      const ta = document.createElement('textarea');
+      ta.value = prompt; document.body.appendChild(ta); ta.select();
+      try { document.execCommand('copy'); } catch (e) {}
+      ta.remove();
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(prompt).catch(() => {});
+      addJournal('note', 'Activation ' + k + ' : ' + item.name + ' (prompt copié)', { silent: true });
+      b.textContent = '✓ Copié';
+      setTimeout(() => { b.textContent = '⚡ Activer'; }, 1400);
+    });
+  });
+}
+document.getElementById('activation-search').addEventListener('input', renderActivation);
+document.getElementById('activation-tab-skills').addEventListener('click', () => { activationTab = 'skills'; renderActivation(); });
+document.getElementById('activation-tab-agents').addEventListener('click', () => { activationTab = 'agents'; renderActivation(); });
+document.getElementById('activation-tab-teams').addEventListener('click', () => { activationTab = 'teams'; renderActivation(); });
+
+function renderRouters() {
+  document.getElementById('routers-list').innerHTML = DASHBOARD_DATA.routers.map(r => `
+    <div class="card" style="margin-bottom:10px">
+      <div class="row" style="justify-content:space-between">
+        <div class="row">
+          <span class="tag ${r.phase ? 'purple' : ''}">${esc(r.phase || 'always-loaded')}</span>
+          <strong>${esc(r.name)}</strong>
+          <span class="muted" style="font-size:12px">${esc(r.file)}</span>
+        </div>
+        <span class="muted" style="font-size:12px">${r.triggers.length} déclencheur(s) → ${r.routes.length} skill(s)</span>
+      </div>
+      ${r.triggers.length ? `<div style="margin-top:8px">${r.triggers.map(t => `<span class="tag" style="margin-right:6px;display:inline-block;margin-bottom:4px">${esc(t)}</span>`).join('')}</div>` : '<div class="desc" style="margin-top:8px">Chargé en entier au démarrage de chaque conversation (inventaire des skills).</div>'}
+      <div class="desc" style="margin-top:8px">→ ${r.routes.length ? r.routes.map(esc).join(', ') : '—'}</div>
+    </div>`).join('');
+}
+
+// ═══════════════ Journal ═══════════════
+function addJournal(kind, text, { silent = false } = {}) {
+  state.journal.unshift({ id: uid(), kind, text, at: new Date().toISOString() });
+  Store.set('journal', state.journal);
+  if (!silent) renderJournal();
+  updateBadges();
+}
+const JOURNAL_KINDS = { note: ['📝', 'Note'], routing: ['🧭', 'Routage'], decision: ['⚖️', 'Décision'], incident: ['🐞', 'Incident'] };
+function renderJournal() {
+  const filter = state.journalFilter;
+  const entries = state.journal.filter(e => filter === 'all' || e.kind === filter);
+  document.getElementById('journal-filters').innerHTML = ['all', ...Object.keys(JOURNAL_KINDS)]
+    .map(f => `<button data-f="${f}" class="${filter === f ? 'on' : ''}">${f === 'all' ? 'Tous' : JOURNAL_KINDS[f][1] + ' (' + state.journal.filter(e => e.kind === f).length + ')'}</button>`).join('');
+  document.getElementById('journal-list').innerHTML = entries.length
+    ? entries.map(e => {
+      const [emoji, label] = JOURNAL_KINDS[e.kind] || ['📝', 'Note'];
+      return `<div class="journal-entry"><div class="head"><span class="kind">${emoji}</span><span class="kind tag">${esc(label)}</span><span class="when">${esc(new Date(e.at).toLocaleString('fr-FR'))}</span><span class="grow" style="flex:1"></span><button class="btn danger" data-del="${esc(e.id)}" style="padding:2px 8px;font-size:11px">✕</button></div><div class="body">${esc(e.text)}</div></div>`;
+    }).join('')
+    : '<div class="empty">Journal vide. Ajoute une entrée ou lance le simulateur de routage (auto-journalisé).</div>';
+}
+document.getElementById('journal-add').addEventListener('click', () => {
+  const text = document.getElementById('journal-text').value.trim();
+  const kind = document.getElementById('journal-kind').value;
+  if (!text) return;
+  addJournal(kind, text);
+  document.getElementById('journal-text').value = '';
+});
+document.getElementById('journal-list').addEventListener('click', e => {
+  const id = e.target.getAttribute && e.target.getAttribute('data-del');
+  if (!id) return;
+  state.journal = state.journal.filter(x => x.id !== id);
+  Store.set('journal', state.journal); renderJournal(); updateBadges();
+});
+document.getElementById('journal-filters').addEventListener('click', e => {
+  const f = e.target.getAttribute && e.target.getAttribute('data-f');
+  if (!f) return;
+  state.journalFilter = f; renderJournal();
+});
+document.getElementById('journal-clear').addEventListener('click', () => {
+  if (confirm('Vider tout le journal de bord ?')) { state.journal = []; Store.set('journal', state.journal); renderJournal(); updateBadges(); }
+});
+
+// ═══════════════ Tasks ═══════════════
+function renderTasks() {
+  const today = new Date().toISOString().slice(0, 10);
+  let tasks = state.tasks;
+  if (state.taskFilter === 'open') tasks = tasks.filter(t => !t.done);
+  if (state.taskFilter === 'done') tasks = tasks.filter(t => t.done);
+  if (state.taskFilter === 'overdue') tasks = tasks.filter(t => !t.done && t.due && t.due < today);
+  const prioTag = { high: '<span class="tag red">haute</span>', low: '<span class="tag">basse</span>' };
+  document.getElementById('tasks-list').innerHTML = tasks.length
+    ? `<ul class="clean">` + tasks.map(t => {
+      const overdue = !t.done && t.due && t.due < today;
+      return `<li><div class="task ${t.done ? 'done' : ''}" style="flex:1;display:flex;gap:10px;align-items:flex-start">
+        <input type="checkbox" data-toggle="${esc(t.id)}" ${t.done ? 'checked' : ''}>
+        <div style="flex:1;min-width:0">
+          <div class="title">${esc(t.text)}</div>
+          <div class="meta">${t.due ? `<span class="due ${overdue ? 'overdue' : ''}">📅 ${esc(t.due)}${overdue ? ' · en retard' : ''}</span>` : '<span>pas d\u2019échéance</span>'} ${prioTag[t.priority] || ''}</div>
+        </div>
+        <button class="btn danger" data-del="${esc(t.id)}" style="padding:2px 8px;font-size:11px">✕</button>
+      </div></li>`;
+    }).join('') + `</ul>`
+    : `<div class="empty">Aucune tâche${state.taskFilter !== 'all' ? ' dans ce filtre' : ''}.</div>`;
+  const open = state.tasks.filter(t => !t.done).length;
+  document.getElementById('b-tasks').textContent = open;
+}
+document.getElementById('task-add').addEventListener('click', () => {
+  const text = document.getElementById('task-text').value.trim();
+  if (!text) return;
+  state.tasks.unshift({ id: uid(), text, due: document.getElementById('task-due').value || null, priority: document.getElementById('task-priority').value, done: false, at: new Date().toISOString() });
+  document.getElementById('task-text').value = '';
+  persist(); renderTasks();
+});
+document.getElementById('tasks-list').addEventListener('click', e => {
+  const del = e.target.getAttribute && e.target.getAttribute('data-del');
+  const tog = e.target.getAttribute && e.target.getAttribute('data-toggle');
+  if (del) { state.tasks = state.tasks.filter(t => t.id !== del); persist(); renderTasks(); }
+  if (tog) { const t = state.tasks.find(x => x.id === tog); if (t) { t.done = !t.done; persist(); renderTasks(); } }
+});
+document.getElementById('tasks-list').addEventListener('change', e => {
+  const tog = e.target.getAttribute && e.target.getAttribute('data-toggle');
+  if (tog) { const t = state.tasks.find(x => x.id === tog); if (t) { t.done = e.target.checked; persist(); renderTasks(); } }
+});
+document.getElementById('tasks-clear').addEventListener('click', () => {
+  state.tasks = state.tasks.filter(t => !t.done); persist(); renderTasks();
+});
+document.querySelectorAll('#view-tasks .filters button[data-f]').forEach(b => b.addEventListener('click', () => {
+  state.taskFilter = b.getAttribute('data-f');
+  document.querySelectorAll('#view-tasks .filters button[data-f]').forEach(x => x.classList.toggle('on', x === b));
+  renderTasks();
+}));
+
+// ═══════════════ Reminders ═══════════════
+function reminderState(r) {
+  const when = new Date(r.date + 'T' + (r.time || '09:00'));
+  const now = new Date();
+  const diffH = (when - now) / 3600000;
+  if (diffH < 0) return { cls: 'past', label: 'échu' };
+  if (diffH < 48) return { cls: 'soon', label: 'dans ' + (diffH < 24 ? Math.max(1, Math.round(diffH)) + ' h' : Math.round(diffH / 24) + ' j') };
+  return { cls: '', label: 'le ' + when.toLocaleDateString('fr-FR') + ' à ' + (r.time || '09:00') };
+}
+function renderReminders() {
+  const sorted = [...state.reminders].sort((a, b) => (a.date + a.time).localeCompare(b.date + b.time));
+  document.getElementById('reminders-list').innerHTML = sorted.length
+    ? `<ul class="clean">` + sorted.map(r => {
+      const st = reminderState(r);
+      return `<li class="reminder ${st.cls}"><div style="flex:1"><div>${esc(r.text)}</div><div class="when">⏰ ${esc(st.label)}</div></div><button class="btn danger" data-del="${esc(r.id)}" style="padding:2px 8px;font-size:11px">✕</button></li>`;
+    }).join('') + `</ul>`
+    : '<div class="empty">Aucun rappel.</div>';
+  document.getElementById('b-reminders').textContent = state.reminders.length;
+  renderDashReminders();
+}
+function renderDashReminders() {
+  const upcoming = [...state.reminders]
+    .filter(r => reminderState(r).cls !== 'past')
+    .sort((a, b) => (a.date + a.time).localeCompare(b.date + b.time))
+    .slice(0, 4);
+  document.getElementById('dash-reminders').innerHTML = upcoming.length
+    ? upcoming.map(r => `<div style="padding:6px 0;border-bottom:1px solid var(--border)"><span class="when muted" style="font-size:11.5px">⏰ ${esc(reminderState(r).label)}</span> — ${esc(r.text)}</div>`).join('')
+    : '<div class="desc">Aucun rappel à venir.</div>';
+}
+document.getElementById('reminder-add').addEventListener('click', () => {
+  const text = document.getElementById('reminder-text').value.trim();
+  const date = document.getElementById('reminder-date').value;
+  if (!text || !date) { alert('Texte et date sont requis pour un rappel.'); return; }
+  state.reminders.push({ id: uid(), text, date, time: document.getElementById('reminder-time').value || '09:00', at: new Date().toISOString() });
+  document.getElementById('reminder-text').value = '';
+  persist(); renderReminders();
+});
+document.getElementById('reminders-list').addEventListener('click', e => {
+  const del = e.target.getAttribute && e.target.getAttribute('data-del');
+  if (!del) return;
+  state.reminders = state.reminders.filter(r => r.id !== del);
+  persist(); renderReminders();
+});
+
+// ═══════════════ Notes ═══════════════
+function renderNotes() {
+  const q = (document.getElementById('notes-search').value || '').toLowerCase();
+  const notes = state.notes.filter(n => !q || n.title.toLowerCase().includes(q) || (n.body || '').toLowerCase().includes(q));
+  document.getElementById('notes-list').innerHTML = notes.length
+    ? `<ul class="clean">` + notes.map(n => `<li class="note" data-open="${esc(n.id)}"><div class="grow"><strong>${esc(n.title)}</strong><div class="body">${esc((n.body || '').slice(0, 140)) || '<em>Note vide</em>'}</div><div class="meta muted" style="font-size:11px;margin-top:3px">${esc(new Date(n.updatedAt).toLocaleString('fr-FR'))}</div></div></li>`).join('') + `</ul>`
+    : '<div class="empty">Aucune note. Crée-en une ci-dessus.</div>';
+  document.getElementById('b-notes').textContent = state.notes.length;
+}
+function openNote(id) {
+  const n = state.notes.find(x => x.id === id);
+  if (!n) return;
+  state.openNoteId = id;
+  document.getElementById('note-editor').style.display = 'block';
+  document.getElementById('note-edit-title').value = n.title;
+  document.getElementById('note-edit-body').value = n.body || '';
+}
+document.getElementById('note-add').addEventListener('click', () => {
+  const title = document.getElementById('note-title').value.trim() || 'Sans titre';
+  const n = { id: uid(), title, body: '', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
+  state.notes.unshift(n);
+  document.getElementById('note-title').value = '';
+  persist(); renderNotes(); openNote(n.id);
+});
+document.getElementById('notes-list').addEventListener('click', e => {
+  const li = e.target.closest && e.target.closest('[data-open]');
+  if (li) openNote(li.getAttribute('data-open'));
+});
+document.getElementById('note-save').addEventListener('click', () => {
+  const n = state.notes.find(x => x.id === state.openNoteId);
+  if (!n) return;
+  n.title = document.getElementById('note-edit-title').value.trim() || 'Sans titre';
+  n.body = document.getElementById('note-edit-body').value;
+  n.updatedAt = new Date().toISOString();
+  persist(); renderNotes();
+});
+document.getElementById('note-delete').addEventListener('click', () => {
+  state.notes = state.notes.filter(x => x.id !== state.openNoteId);
+  state.openNoteId = null;
+  document.getElementById('note-editor').style.display = 'none';
+  persist(); renderNotes();
+});
+document.getElementById('note-close').addEventListener('click', () => {
+  document.getElementById('note-editor').style.display = 'none';
+  state.openNoteId = null;
+});
+document.getElementById('notes-search').addEventListener('input', renderNotes);
+
+// ═══════════════ Dashboard stats ═══════════════
+function renderStats() {
+  const open = state.tasks.filter(t => !t.done).length;
+  const overdue = state.tasks.filter(t => !t.done && t.due && t.due < new Date().toISOString().slice(0, 10)).length;
+  const triggered = DASHBOARD_DATA.routers.filter(r => r.triggers.length).length;
+  const totalTriggers = DASHBOARD_DATA.routers.reduce((a, r) => a + r.triggers.length, 0);
+  document.getElementById('stats').innerHTML = [
+    [`<span style="color:var(--accent)">${DASHBOARD_DATA.skillsCount}</span>`, 'skills au catalogue'],
+    [`<span style="color:var(--purple)">${triggered}</span>`, 'routeurs lifecycle'],
+    [`<span style="color:var(--green)">${totalTriggers}</span>`, 'déclencheurs générés'],
+    [`${open}<span class="muted" style="font-size:14px"> / ${state.tasks.length}</span>`, open === 0 ? 'aucune tâche ouverte' : overdue ? `<span style="color:var(--red)">${overdue} en retard</span>` : 'tâches ouvertes'],
+    [`${state.journal.length}`, 'entrées de journal'],
+    [`${state.reminders.length}`, 'rappels actifs'],
+  ].map(([k, l]) => `<div class="card"><div class="k">${k}</div><div class="l">${l}</div></div>`).join('');
+}
+
+function updateBadges() {
+  document.getElementById('b-skills').textContent = DASHBOARD_DATA.skillsCount;
+  document.getElementById('b-activation').textContent = DASHBOARD_DATA.skillsCount + DASHBOARD_DATA.agentsCount;
+  document.getElementById('b-routers').textContent = DASHBOARD_DATA.routers.filter(r => r.triggers.length).length;
+  document.getElementById('b-tasks').textContent = state.tasks.filter(t => !t.done).length;
+  document.getElementById('b-reminders').textContent = state.reminders.length;
+  document.getElementById('b-notes').textContent = state.notes.length;
+}
+
+// ═══════════════ View switching ═══════════════
+const TITLES = {
+  dashboard: ['Tableau de bord', 'État de l\u2019adaptateur OpenHands et de ton espace de travail'],
+  skills: ['Skills au catalogue', DASHBOARD_DATA.skillsCount + ' skills — mêmes fichiers SKILL.md que Claude Code et Codex'],
+  activation: ['Activation skills & agents', DASHBOARD_DATA.skillsCount + ' skills + ' + DASHBOARD_DATA.agentsCount + ' agents — clic ⚡ pour copier le prompt d\u2019activation'],
+  routers: ['Routeurs lifecycle', 'Microagents déclenchés + inventaire always-loaded'],
+  journal: ['Journal de bord', 'Historique des sessions, décisions et incidents — persisté localement'],
+  tasks: ['Tâches', 'Suivi avec échéances, priorités et retards'],
+  reminders: ['Rappels', 'Échéances avec alerte visuelle à 48 h'],
+  notes: ['Notes', 'Gestionnaire de notes avec recherche et édition'],
+};
+document.querySelectorAll('nav button[data-view]').forEach(b => b.addEventListener('click', () => {
+  const v = b.getAttribute('data-view');
+  document.querySelectorAll('nav button[data-view]').forEach(x => x.classList.toggle('active', x === b));
+  document.querySelectorAll('.view').forEach(s => s.classList.toggle('active', s.id === 'view-' + v));
+  document.getElementById('view-title').textContent = TITLES[v][0];
+  document.getElementById('view-sub').textContent = TITLES[v][1];
+  if (v === 'dashboard') renderStats();
+  if (v === 'activation') renderActivation();
+  if (v === 'reminders') renderReminders();
+}));
+
+// ═══════════════ Boot ═══════════════
+renderStats();
+renderSkills();
+renderRouters();
+renderJournal();
+renderTasks();
+renderReminders();
+renderNotes();
+updateBadges();
+window.addEventListener('storage', () => { // cross-tab sync best-effort
+  state.journal = Store.get('journal', state.journal);
+  state.tasks = Store.get('tasks', state.tasks);
+  state.reminders = Store.get('reminders', state.reminders);
+  state.notes = Store.get('notes', state.notes);
+  renderJournal(); renderTasks(); renderReminders(); renderNotes(); renderStats(); updateBadges();
+});
+</script>
+</body>
+</html>
