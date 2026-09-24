@@ -47,6 +47,12 @@ jobs:
           node test-fr.js
           node test-custom.js
 
+      - name: Tests réparation OpenHands (fork api_key, script bash)
+        run: |
+          python3 -m venv .venv-openhands-test
+          .venv-openhands-test/bin/pip install --quiet cryptography
+          PATH="$PWD/.venv-openhands-test/bin:$PATH" node --test scripts/fix-openhands-fork-apikey-test.js
+
   build-macos:
     name: Build macOS — DMG x64 + arm64 + universel
     needs: tests

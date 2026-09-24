@@ -205,6 +205,74 @@ node test-fr.js           # i18n : 321/321 items traduits, recherche bilingue
 node test-custom.js       # prompts personnalisés : 28/28 (créer, chercher, épingler, éditer…)
 ```
 
+## 🔧 Maintenance OpenHands (bonus)
+
+Le dossier `~/.openhands` de l'app OpenHands Canvas (Docker) contient un script de réparation
+pour son intégration MCP, qui casse facilement quand la config référence `npx` ou des chemins
+macOS inexistants dans le conteneur (`MCPTimeoutError` à chaque message envoyé) :
+
+```bash
+bash scripts/fix-openhands-mcp.sh          # répare config globale + snapshots + redémarre
+bash scripts/fix-openhands-mcp.sh --no-restart
+```
+
+Le script : installe `helius-mcp` en dur dans le volume persistant `~/.openhands/mcp-servers`,
+injecte la clé `HELIUS_API_KEY` (extraite de l'URL Helius du `.env` de BuildPact si dispo),
+applique la config canonique (helius local activé, chrome-devtools désactivé — pas de Chrome
+ dans le conteneur) à la fois dans `settings.json` **et** dans le snapshot `base_state.json`
+de chaque conversation (elles figent leur copie de la config à leur création), puis vérifie
+health + handshake MCP.
+
+### Réparer les conversations dont le fork a perdu la clé API
+
+Autre panne courante : quand une conversation est forkée dans l'app (« (branch) »), sa copie
+figée (`base_state.json`) peut perdre le champ `api_key` du LLM — le modèle et l'URL sont
+conservés, mais plus la clé. Chaque message échoue alors avec :
+
+```
+litellm.AuthenticationError: The api_key client option must be set either by passing
+api_key to the client or by setting the OPENAI_API_KEY environment variable
+```
+
+C'est le pendant « clé API » de `fix-openhands-mcp.sh` : lui répare la config MCP,
+celui-ci répare la clé LLM. Même mécanique (stop conteneur → réparation → start → health),
+même principe (jamais de modification sans sauvegarde horodatée, dry-run par défaut).
+
+```bash
+bash scripts/fix-openhands-fork-apikey.sh                # scan seul (dry-run, ne modifie rien)
+bash scripts/fix-openhands-fork-apikey.sh --apply        # répare : stop → injection → start → health
+bash scripts/fix-openhands-fork-apikey.sh --apply --no-restart   # sans toucher au conteneur
+bash scripts/fix-openhands-fork-apikey.sh --json         # rapport machine-readable (stdout = JSON pur)
+```
+
+Le script scanne `conversations/` **et** `conversations-archive/`, associe chaque fichier cassé
+au profil `~/.openhands/profiles/*.json` du même modèle (vérifié par déchiffrement réel avec la
+clé maître), réinjecte le token chiffré dans les nœuds LLM concernés (agent **et** condenser),
+puis re-scanne : exit 1 s'il reste des nœuds cassés. Les nœuds branchés sur une provider
+connection sont ignorés (ils s'authentifient autrement).
+
+Option `--set-model <id>` (+ `--from-model <id>` pour cibler) : bascule aussi le modèle des
+nœuds réparés — utile quand le modèle d'origine est saturé côté fournisseur (ex.
+`ResourceExhausted: Worker local total request limit reached` sur `integrate.api.nvidia.com`).
+
+Exemple de rapport JSON :
+
+```json
+{
+  "ok": true,
+  "mode": "apply",
+  "broken_file_count": 1,
+  "profiles_verified": ["openai/nvidia/nemotron-3.5-lightning-30b-a3b"],
+  "files": [{ "file": "agent-canvas/conversations/<id>/base_state.json",
+              "nodes": 2, "repaired": true, "set_model": "openai/nvidia/nemotron-3-super-120b-a12b" }],
+  "remaining_broken_nodes": 0
+}
+```
+
+Prérequis : `python3` avec le module `cryptography` sur l'hôte (docker n'est requis que si
+`--apply` sans `--no-restart`). Testé par `node --test scripts/fix-openhands-fork-apikey-test.js`
+(ou `npm run test:openhands-fix`), également exécuté en CI.
+
 ## 🛠️ Technologies
 
 Electron 33 · JavaScript vanilla · HTML/CSS · scripts bash (`build-app.sh` : packaging
