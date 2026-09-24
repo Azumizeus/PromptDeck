@@ -7,3 +7,8 @@ node_modules/
 .claude/sdd-cache/
 evals/results/
 __pycache__/
+
+# Artefacts locaux de l app MEGA PACK (build non versionné)
+menubar-app-luxe/dist/
+menubar-app-luxe/package-lock.json
+menubar-app-luxe/standalone-inline.html

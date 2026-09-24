@@ -7,6 +7,7 @@
 #   ./build-app.sh --no-launch            → build sans relancer
 #
 # Étapes automatisées :
+#   0. Catalogue agents (AGENTS-CATALOGUE.md vérifié, régénéré si périmé)
 #   1. Icônes (menu bar + app)                    [node build-icon.js]
 #   2. .icns (Dock, Finder, ⌘Tab)                 [sips + iconutil]
 #   3. Packaging : runtime Electron local (x64) ou officiel téléchargé (arm64)
@@ -61,6 +62,21 @@ EOF
 
 command -v node >/dev/null 2>&1 || die "node introuvable — installe Node.js"
 command -v sips >/dev/null 2>&1 || die "sips introuvable — macOS requis"
+
+# ── 0bis. Catalogue agents (AGENTS-CATALOGUE.md) ──────────────────────────────
+# Vérifie que le doc est à jour avec agent-skills/agents/ ; régénère si périmé,
+# pour que le catalogue embarqué/ne reflète jamais des agents obsolètes.
+CATALOGUE_SCRIPT="../../scripts/generate-agents-catalogue.js"
+if [[ -f "$CATALOGUE_SCRIPT" ]]; then
+  if node "$CATALOGUE_SCRIPT" --check >/dev/null 2>&1; then
+    log "Catalogue agents : AGENTS-CATALOGUE.md à jour"
+  else
+    log "Catalogue agents périmé → régénération"
+    node "$CATALOGUE_SCRIPT" || die "régénération du catalogue agents échouée"
+  fi
+elif [[ ! -f ../../AGENTS-CATALOGUE.md ]]; then
+  echo "⚠️  AGENTS-CATALOGUE.md absent et $CATALOGUE_SCRIPT introuvable — continue sans vérification" >&2
+fi
 
 ELECTRON_VERSION="$(node -p "require('./node_modules/electron/package.json').version")"
 APP_VERSION="$(node -p "require('./package.json').version")"
