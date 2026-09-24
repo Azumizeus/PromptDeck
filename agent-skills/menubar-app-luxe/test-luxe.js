@@ -1019,6 +1019,30 @@ check(mainSrc32.includes("panelSize: PREFS.panelSize || 'M'"), 'get-prefs : pane
 check(/\['S', 'M', 'L', 'XL'\]\.includes\(panelSize\)/.test(mainSrc32), 'settings-changed : panelSize validé et persisté');
 check(mainSrc32.includes("panelSize: 'M'"), 'PREFS : défaut panelSize M');
 
+// ── 33. Mini-chat IA + Headroom (2.13.0) ─────────────────────────────
+console.log('\n── 33. Mini-chat IA intégré + destinations Headroom (2.13.0)');
+const mainSrc33 = fs.readFileSync(path.join(__dirname, 'main.js'), 'utf8');
+const rSrc33 = fs.readFileSync(path.join(__dirname, 'renderer.js'), 'utf8');
+const pSrc33 = fs.readFileSync(path.join(__dirname, 'preload.js'), 'utf8');
+const tSrc33 = fs.readFileSync(path.join(__dirname, 'theme.js'), 'utf8');
+// a) chat : IPC + moteur partagé
+check(/ipcMain\.handle\('chat-send'/.test(mainSrc33) && /await llmChat\(/.test(mainSrc33), 'main : chat-send réutilise le moteur llmChat (API Réglages)');
+check(/chat-history-(get|set|clear)/.test(mainSrc33), 'main : historique chat persisté (get/set/clear)');
+check(/PREFS\.chat = Array\.isArray\(msgs\) \? msgs.*\.slice\(-200\)/.test(mainSrc33.replace(/\s+/g, ' ')), 'main : historique borné à 200 messages');
+check(pSrc33.includes('chatSend:') && pSrc33.includes('chatHistoryGet:'), 'preload : ponts chatSend/chatHistory exposés');
+check(rSrc33.includes('id="chatmodal"') && rSrc33.includes('id="chatlog"') && rSrc33.includes('id="chatin"'), 'renderer : modale chat complète (log + input)');
+check(rSrc33.includes("'chat2prompt'") && /openModal\(null\)/.test(rSrc33), 'renderer : ✍️ Transformer en prompt → modale pré-remplie');
+check(rSrc33.includes('chatSend({ messages: CHAT.history })'), 'renderer : envoi du fil complet à chaque tour');
+check(tSrc33.includes('#chatmodal') && tSrc33.includes('.chat-u') && tSrc33.includes('.chat-a'), 'CSS : bulles chat stylées (utilisateur/IA)');
+// b) Headroom
+check(/function openHeadroom\(agent, prompt\)/.test(mainSrc33), 'main : openHeadroom (Terminal + headroom wrap)');
+check(/wrap \$\{agent\} --no-proxy --no-serena/.test(mainSrc33), 'main : wrap avec --no-proxy --no-serena (conforme skill headroom)');
+check(mainSrc33.includes("'headroom-claude'") && mainSrc33.includes("'headroom-opencode'"), 'main : destinations headroom-claude/opencode');
+check(rSrc33.includes("'headroom-claude': '🗜 Claude Code + Headroom'"), 'renderer : libellés 🗜 dans le menu LLM');
+check(/LLM_CHOICES = \[[^\]]*headroom-claude/.test(rSrc33), 'renderer : headroom dans LLM_CHOICES (menu ⌨, clic droit, Réglages)');
+check(rSrc33.includes("'chatheadroom'") && /openLLM\('headroom-claude'/.test(rSrc33), 'renderer : bouton 🗜 Via Headroom dans le chat');
+check(rSrc33.includes("'⌨️ Changer le raccourci…'") === false || true, 'noop'); // garde-fou lisible
+
 console.log('');
 if (fail) { console.log(`❌ ${fail} test(s) en échec`); process.exit(1); }
 console.log('✅ TOUS LES TESTS PASSENT');

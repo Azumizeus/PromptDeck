@@ -99,8 +99,10 @@ function arenaEventsPath() { return path.join(app.getPath('userData'), 'arena-ev
   } catch (e) { /* pas de .zshrc : tant pis */ }
 })();
 
+
 // ── Clés partagées avec OpenCode (~/.config/opencode + auth.json) : Gemini,
 // omniroute, FreeLLM… La config opencode.json passe avant auth.json (clés plus fraîches).
+
 const OPENCODE_KEYS = {};
 (function loadOpenCodeKeys() {
   const home = os.homedir();
@@ -120,6 +122,7 @@ const OPENCODE_KEYS = {};
     }
   } catch (e) { /* pas d'auth.json */ }
 })();
+
 
 // ── Fournisseurs LLM (API clé) — tous en OpenAI-compatible sauf Anthropic ──
 const PROVIDERS = {
@@ -949,6 +952,10 @@ function openLLM(target, prompt) {
     const script = `tell application "Terminal"\n activate\n do script "exec ${bin || 'opencode'}"\n end tell`;
     try { execFile('osascript', ['-e', script], () => {}); return; } catch (e) { /* fallback ci-dessous */ }
   }
+  if (target === 'headroom-claude' || target === 'headroom-opencode') { // 🗜 session agent compressée (Headroom, port 8787)
+    openHeadroom(target === 'headroom-claude' ? 'claude' : 'opencode', p);
+    return;
+  }
   shell.openExternal(urls[target] || urls.claude);
 }
 
@@ -961,6 +968,25 @@ function resolveOpenCode() {
   ];
   for (const p of cands) { try { fs.accessSync(p, fs.constants.X_OK); return p; } catch (e) { /* suivant */ } }
   return null;
+}
+
+// 🗜 Headroom : lance une session d'agent COMPRESSÉE (proxy local 8787) dans un Terminal dédié.
+// Le prompt est copié au presse-papiers — colle-le dans la session (le headroom skill source ~/.secrets).
+function openHeadroom(agent, prompt) {
+  clipboard.writeText(String(prompt || ''));
+  const bin = path.join(process.env.HOME || '', '.local/bin/headroom');
+  const hasBin = (() => { try { fs.accessSync(bin, fs.constants.X_OK); return true; } catch (e) { return false; } })();
+  const cmd = hasBin ? bin : 'headroom';
+  const script = `tell application "Terminal"\n activate\n do script "exec ${cmd} wrap ${agent} --no-proxy --no-serena"\n end tell`;
+  try { execFile('osascript', ['-e', script], () => {}); } catch (e) { /* best effort */ }
+  try {
+    const { Notification } = require('electron');
+    new Notification({
+      title: 'MEGA PACK · Headroom',
+      body: LANG === 'en' ? `🗜 Compressed ${agent} session — prompt in clipboard, paste it in the terminal` : `🗜 Session ${agent} compressée — prompt au presse-papiers, colle-le dans le terminal`,
+      silent: true,
+    }).show();
+  } catch (e) { /* notification optionnelle */ }
 }
 
 // Capture d'écran pour la documentation (README) : 
@@ -1166,15 +1192,21 @@ if (!CAPTURE_MODE && !app.requestSingleInstanceLock()) {
   // 🖥 Écrans : si la config change (débranchement externe…), ramène la fenêtre épinglée
   // dans une zone visible — sinon elle reste « ouverte » hors écran, invisible (bug constaté).
   // Les bounds clampées sont re-persistées (sinon l'ancienne position hors écran revient
-  // au prochain lancement — audit prefs 2.11).
-  screen.on('display-metrics-changed', () => {
-    if (win && !win.isDestroyed()) {
-      const before = win.getBounds();
-      const vis = clampToScreen(before);
-      if (vis !== before) { win.setBounds(vis); PREFS.bounds = vis; savePrefs(); }
-    }
+  // au prochain lancement — audit prefs 2.11). NB : 'screen' est inutilisable avant
+  // l'événement ready — l'enregistrer au chargement du module plantait TOUTE l'app
+  // ('screen before ready' : 2.10.1 → 2.12.0 ne démarraient pas du tout).
+  app.whenReady().then(() => {
+    screen.on('display-metrics-changed', () => {
+      if (win && !win.isDestroyed()) {
+        const before = win.getBounds();
+        const vis = clampToScreen(before);
+        if (vis !== before) { win.setBounds(vis); PREFS.bounds = vis; savePrefs(); }
+      }
+    });
   });
 }
+
+// 🖥 Fin du bloc écrans — plus aucun screen.* au niveau module.
 
 // IPC
 const { Notification } = require('electron');
@@ -1190,6 +1222,42 @@ ipcMain.on('copy', (e, text) => {
   } catch (err) { /* notification optionnelle */ }
 });
 ipcMain.on('hide', () => { if (win && !win.isDestroyed()) win.hide(); });
+// 💬 Mini-chat IA intégré : même moteur que l'Atelier (llmChat), historique dans PREFS.chat.
+// Cascade de providers : demandé → apiProvider (Réglages) → tous ceux avec une clé.
+// Si le premier échoue (403, quota, réseau…), le suivant prend le relais — le chat marche
+// dès qu'UN SEUL provider configuré fonctionne.
+ipcMain.handle('chat-send', async (e, { messages, provider, model } = {}) => {
+  const wanted = [];
+  if (PROVIDERS[provider]) wanted.push(provider);
+  if (PREFS.apiProvider && PROVIDERS[PREFS.apiProvider]) wanted.push(PREFS.apiProvider);
+  for (const p of (PROBE_PRIORITY || [])) if (PROVIDERS[p]) wanted.push(p);
+  const errors = [];
+  for (const prov of [...new Set(wanted)].slice(0, 5)) {
+    try {
+      const key = apiKeyFor(prov);
+      const local = /ollama|127\.0\.0\.1|localhost/.test(PROVIDERS[prov].base || '');
+      if (!key && !local) continue; // pas de clé : provider suivant
+      const { text, model: usedModel, latency } = await llmChat({
+        provider: prov,
+        model: String(model || '').trim() || (PREFS.apiModels && PREFS.apiModels[prov]) || (prov === 'groq' ? 'openai/gpt-oss-120b' : ''),
+        maxTokens: 2048,
+        temperature: 0.7,
+        messages: (messages || []).slice(-24).map((m) => ({ role: m && m.role === 'assistant' ? 'assistant' : 'user', content: String((m && m.content) || '').slice(0, 24000) })),
+      });
+      return { ok: true, text, model: usedModel, latency, provider: prov };
+    } catch (err) {
+      errors.push(prov + ': ' + ((err && err.message) || String(err)));
+    }
+  }
+  return { ok: false, error: errors.join(' · ') || (LANG === 'en' ? 'No provider with API key — add one in Settings' : 'Aucun provider avec clé API — ajoute-en un dans Réglages') };
+});
+ipcMain.handle('chat-history-get', () => PREFS.chat || []);
+ipcMain.handle('chat-history-set', (e, msgs) => {
+  PREFS.chat = Array.isArray(msgs) ? msgs.filter((m) => m && typeof m.content === 'string').slice(-200) : [];
+  savePrefs();
+  return true;
+});
+ipcMain.handle('chat-history-clear', () => { PREFS.chat = []; savePrefs(); return true; });
 ipcMain.on('open-llm', (e, { target, prompt }) => {
   win && !win.isDestroyed() && win.hide();
   openLLM(target, prompt);

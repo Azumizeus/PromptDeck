@@ -63,6 +63,11 @@ contextBridge.exposeInMainWorld('mgp', {
   llmGenerate: (payload) => ipcRenderer.invoke('llm-generate', payload),
   llmTest: (payload) => ipcRenderer.invoke('llm-test', payload),
   apiSet: (payload) => ipcRenderer.invoke('api-set', payload),
+  // ── 💬 Mini-chat IA intégré (même moteur API que l'Atelier) ──
+  chatSend: (payload) => ipcRenderer.invoke('chat-send', payload),
+  chatHistoryGet: () => ipcRenderer.invoke('chat-history-get'),
+  chatHistorySet: (msgs) => ipcRenderer.invoke('chat-history-set', msgs),
+  chatHistoryClear: () => ipcRenderer.invoke('chat-history-clear'),
   // ── Dossier MEGA PROMPT (fichiers .md sur le disque) ──
   promptDirGet: () => ipcRenderer.invoke('promptdir-get'),
   promptDirChoose: () => ipcRenderer.invoke('promptdir-choose'),

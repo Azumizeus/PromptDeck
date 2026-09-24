@@ -288,6 +288,28 @@ body{font:13.5px/1.45 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-se
   transition:border-color .15s,color .15s}
 #erow button:hover{border-color:var(--line2);color:var(--txt)}
 #erow .pri{background:var(--grad);border:none;color:#0b0c10}
+/* ── 💬 Mini-chat IA intégré ── */
+#chatmodal{position:fixed;inset:0;background:rgba(5,6,10,.55);backdrop-filter:blur(6px);z-index:90}
+#chatmodal[hidden]{display:none}
+#chatbox{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:min(560px,94%);
+  max-height:86%;display:flex;flex-direction:column;gap:10px;background:var(--card);
+  border:1px solid var(--line2);border-radius:14px;padding:14px;box-shadow:0 24px 70px rgba(0,0,0,.5)}
+#chatbox h3{font-size:14px;font-weight:700}
+#chatmodel{font-size:10.5px;font-weight:600;color:var(--txt2);margin-left:6px}
+#chatlog{flex:1;min-height:220px;max-height:46vh;overflow-y:auto;display:flex;flex-direction:column;gap:8px;padding:4px 2px}
+.chatmsg{max-width:88%;padding:8px 11px;border-radius:11px;font-size:12.5px;line-height:1.5;white-space:pre-wrap;word-break:break-word}
+.chat-u{align-self:flex-end;background:var(--grad);color:#0b0c10;font-weight:600}
+.chat-a{align-self:flex-start;background:var(--card2);border:1px solid var(--line);color:var(--txt)}
+.chat-hint{align-self:center;background:none;border:1px dashed var(--line);color:var(--txt2);font-size:11.5px;text-align:center}
+#chatrow{display:flex;gap:7px}
+#chatin{flex:1;background:var(--card2);border:1px solid var(--line);border-radius:9px;color:var(--txt);
+  font:inherit;padding:9px 11px;outline:none}
+#chatin:focus{border-color:var(--vio)}
+#chatsend{border:none;background:var(--grad);color:#0b0c10;border-radius:9px;width:40px;cursor:pointer;font-weight:700}
+#chatrow2{display:flex;gap:7px;align-items:center}
+#chatrow2 button{border:1px solid var(--line);background:none;color:var(--txt2);cursor:pointer;
+  font:inherit;font-size:11.5px;font-weight:600;padding:6px 10px;border-radius:8px;transition:border-color .15s,color .15s}
+#chatrow2 button:hover{border-color:var(--line2);color:var(--txt)}
 #erow .pri:hover{filter:brightness(1.08);color:#0b0c10}
 /* 📋 Modèles d'équipes + 🕘 Historique */
 #w-tpl{display:flex;flex-direction:column;gap:4px;margin-top:2px}

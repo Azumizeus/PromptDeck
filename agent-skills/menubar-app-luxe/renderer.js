@@ -190,6 +190,8 @@ fr: {
   pinOn: '📌 Panneau épinglé — il reste visible quand tu cliques ailleurs',
   pinOff: '📌 Épinglage retiré — le panneau se masque au clic ailleurs',
   pinT: 'Garder le panneau visible (ne pas masquer au clic ailleurs)',
+  chatT: 'Mini-chat IA (API configurée dans Réglages)',
+  helpChat: 'Ouvre un mini-chat IA intégré utilisant la clé API configurée dans Réglages (⚙). Historique conservé localement, bouton « Transformer en prompt » pour convertir une réponse en prompt ✍️ réutilisable, et routage « via Headroom » vers Claude Code / OpenCode compressés.',
   // ✕ Effacer la recherche
   qClear: 'Effacer la recherche',
   // 📂 Glisser-déposer de fichier → prompt ✍️
@@ -372,6 +374,8 @@ en: {
   pinOn: '📌 Panel pinned — it stays visible when you click elsewhere',
   pinOff: '📌 Unpinned — the panel hides when you click elsewhere',
   pinT: 'Keep the panel visible (don\'t hide when clicking elsewhere)',
+  chatT: 'Mini AI chat (API configured in Settings)',
+  helpChat: 'Opens a built-in mini AI chat using the API key configured in Settings (⚙). History kept locally, a "Turn into prompt" button converts any answer into a reusable ✍️ prompt, and "via Headroom" routing sends it to compressed Claude Code / OpenCode sessions.',
   qClear: 'Clear search',
   dropTitle: '📂 Dropped file → new prompt ✍️',
   dropEditHint: 'The file content is loaded below — adjust it before saving.',
@@ -442,12 +446,12 @@ const lockOf = (k, name) => !!(LOCKS[k] && LOCKS[k].has(name));
 const itemLocked = (k, rec) => !!(lockOf(k, rec && rec.name) || (rec && rec.locked));
 const setLockLocal = (k, name, on) => { on ? LOCKS[k].add(name) : LOCKS[k].delete(name); };
 const isFav = (n) => FAVS.has(n);
-const LLM_LABEL = { claude: 'Claude', chatgpt: 'ChatGPT', perplexity: 'Perplexity', copilot: 'Copilot', deepseek: 'DeepSeek', zai: 'Z.ai', kimi: 'Kimi', mammouth: 'Mammouth', manus: 'Manus (agent)', noah: 'Noah', 'llm-api': LANG === 'fr' ? '🔑 API' : '🔑 API', 'claude-app': LANG === 'fr' ? 'Claude (app macOS)' : 'Claude (macOS app)', 'claude-code': 'Claude Code (web)', openhands: 'OpenHands (local)', chrome: 'Chrome (onglet)', brave: 'Brave (onglet)' };
+const LLM_LABEL = { claude: 'Claude', chatgpt: 'ChatGPT', perplexity: 'Perplexity', copilot: 'Copilot', deepseek: 'DeepSeek', zai: 'Z.ai', kimi: 'Kimi', mammouth: 'Mammouth', manus: 'Manus (agent)', noah: 'Noah', 'llm-api': LANG === 'fr' ? '🔑 API' : '🔑 API', 'claude-app': LANG === 'fr' ? 'Claude (app macOS)' : 'Claude (macOS app)', 'claude-code': 'Claude Code (web)', openhands: 'OpenHands (local)', chrome: 'Chrome (onglet)', brave: 'Brave (onglet)', 'headroom-claude': '🗜 Claude Code + Headroom', 'headroom-opencode': '🗜 OpenCode + Headroom' };
 const TGT_META = { freebuff: 'Freebuff (app)', 'opencode-app': 'OpenCode (desktop)', opencode: 'OpenCode (terminal)', clipboard: LANG === 'fr' ? 'Presse-papiers' : 'Clipboard' };
 const tgtLabel = (t) => TGT_META[t] || LLM_LABEL[t] || t;
 // Sélecteur de LLM (barre du bas) : les modèles de base de l'app + l'API si clé présente
 // Toutes les destinations (apps locales + services web utilisés) — le sélecteur ⌨ du footer et le clic droit les listent
-const LLM_CHOICES = ['claude', 'chatgpt', 'perplexity', 'copilot', 'deepseek', 'zai', 'kimi', 'mammouth', 'manus', 'noah', 'llm-api', 'claude-app', 'claude-code', 'openhands', 'chrome', 'brave', 'freebuff', 'opencode-app', 'opencode', 'clipboard'];
+const LLM_CHOICES = ['claude', 'chatgpt', 'perplexity', 'copilot', 'deepseek', 'zai', 'kimi', 'mammouth', 'manus', 'noah', 'llm-api', 'claude-app', 'claude-code', 'openhands', 'chrome', 'brave', 'headroom-claude', 'headroom-opencode', 'freebuff', 'opencode-app', 'opencode', 'clipboard'];
 const hasAnyApi = () => Object.values(SYS.hasApi || {}).some(Boolean);
 const llmChoices = () => (hasAnyApi() ? LLM_CHOICES : LLM_CHOICES.slice(0, -1));
 // LLM par défaut réactif : les Réglages (ou le sélecteur du footer) peuvent le changer à chaud
@@ -544,6 +548,8 @@ APP_PARENT.insertAdjacentHTML('afterbegin', `
     <span class="helpw"><button id="htrb" class="helpb" data-help="helpTrb" aria-label="${T.helpTrb}">?</button></span>
     <button id="pinb" title="${T.pinT}" aria-pressed="false">📌</button>
     <span class="helpw"><button id="hpin" class="helpb" data-help="helpPin" aria-label="${T.helpPin}">?</button></span>
+    <button id="chatb" title="${T.chatT}" aria-haspopup="dialog">💬</button>
+    <span class="helpw"><button id="hchat" class="helpb" data-help="helpChat" aria-label="${T.helpChat}">?</button></span>
     <span id="cnt" role="status" aria-live="polite"></span>
   </footer>
   <div id="tip" role="tooltip" hidden></div>
@@ -660,6 +666,23 @@ APP_PARENT.insertAdjacentHTML('afterbegin', `
         <button id="e-del" hidden>${LANG === 'fr' ? 'Supprimer' : 'Delete'}</button>
         <span style="flex:1"></span>
         <button id="e-x">${LANG === 'fr' ? 'Annuler' : 'Cancel'}</button>
+      </div>
+    </div>
+  </div>
+  <div id="chatmodal" role="dialog" aria-modal="true" aria-label="${T.chatT}" hidden>
+    <div id="chatbox">
+      <h3>💬 ${LANG === 'fr' ? 'Mini-chat IA' : 'Mini AI chat'} <span id="chatmodel"></span></h3>
+      <div id="chatlog" aria-live="polite"></div>
+      <div id="chatrow">
+        <input id="chatin" type="text" maxlength="8000" placeholder="${LANG === 'fr' ? 'Écris à l\'IA… (⏎ envoyer)' : 'Write to the AI… (Enter to send)'}">
+        <button id="chatsend" class="pri">➤</button>
+      </div>
+      <div id="chatrow2">
+        <button id="chat2prompt">✍️ ${LANG === 'fr' ? 'Transformer en prompt' : 'Turn into prompt'}</button>
+        <button id="chatheadroom">🗜 ${LANG === 'fr' ? 'Via Headroom' : 'Via Headroom'}</button>
+        <span style="flex:1"></span>
+        <button id="chatclear">${LANG === 'fr' ? 'Effacer' : 'Clear'}</button>
+        <button id="chatx">✕</button>
       </div>
     </div>
   </div>
@@ -1042,6 +1065,103 @@ function openLlmMenu() {
 function hideLlmMenu() { llmmenu.hidden = true; llmbtn.setAttribute('aria-expanded', 'false'); }
 llmbtn.onclick = (e) => { e.stopPropagation(); llmmenu.hidden ? openLlmMenu() : hideLlmMenu(); };
 document.addEventListener('click', (e) => { if (!llmmenu.hidden && !e.target.closest('#llmwrap')) hideLlmMenu(); });
+
+// ────────────────────────────────────────────────────────────────────────────
+//  💬 Mini-chat IA intégré — moteur API (même que l'Atelier), historique local,
+//  « Transformer en prompt ✍️ » et routage 🗜 Headroom (sessions compressées).
+// ────────────────────────────────────────────────────────────────────────────
+const CHAT = { history: [], busy: false };
+function chatBubble(m) {
+  const d = document.createElement('div');
+  d.className = 'chatmsg ' + (m.role === 'assistant' ? 'chat-a' : 'chat-u');
+  d.textContent = m.content;
+  return d;
+}
+function chatRender() {
+  const log = document.getElementById('chatlog');
+  if (!log) return;
+  log.innerHTML = '';
+  if (!CHAT.history.length) {
+    const p = document.createElement('div');
+    p.className = 'chatmsg chat-hint';
+    p.textContent = LANG === 'fr' ? 'Pose ta question — l\'IA répond avec la clé API des Réglages. Sélectionne une réponse puis « ✍️ Transformer en prompt ».' : 'Ask anything — the AI answers with the Settings API key. Select an answer then "✍️ Turn into prompt".';
+    log.appendChild(p);
+  }
+  for (const m of CHAT.history) log.appendChild(chatBubble(m));
+  log.scrollTop = log.scrollHeight;
+}
+function openChat() {
+  document.getElementById('chatmodal').hidden = false;
+  if (!CHAT.loaded) {
+    CHAT.loaded = true;
+    Promise.resolve(window.mgp.chatHistoryGet && window.mgp.chatHistoryGet()).then((h) => { CHAT.history = Array.isArray(h) ? h : []; chatRender(); });
+  }
+  chatRender();
+  document.getElementById('chatin').focus();
+}
+function closeChat() { document.getElementById('chatmodal').hidden = true; }
+async function chatSubmit() {
+  if (CHAT.busy) return;
+  const inp = document.getElementById('chatin');
+  const text = (inp.value || '').trim();
+  if (!text) return;
+  inp.value = '';
+  CHAT.history.push({ role: 'user', content: text });
+  chatRender();
+  CHAT.busy = true;
+  const send = document.getElementById('chatsend');
+  const oldLabel = send.textContent;
+  send.textContent = '…';
+  try {
+    const res = await Promise.resolve(window.mgp.chatSend({ messages: CHAT.history }));
+    if (res && res.ok) {
+      CHAT.history.push({ role: 'assistant', content: res.text });
+      const cm = document.getElementById('chatmodel');
+      if (cm) cm.textContent = res.model ? `· ${res.model}${res.latency ? ` · ${res.latency} ms` : ''}` : '';
+    } else {
+      CHAT.history.push({ role: 'assistant', content: (LANG === 'fr' ? '⚠️ Erreur : ' : '⚠️ Error: ') + ((res && res.error) || 'unknown') });
+    }
+  } catch (e) {
+    CHAT.history.push({ role: 'assistant', content: (LANG === 'fr' ? '⚠️ Erreur : ' : '⚠️ Error: ') + e.message });
+  }
+  CHAT.busy = false;
+  send.textContent = oldLabel;
+  chatRender();
+  Promise.resolve(window.mgp.chatHistorySet && window.mgp.chatHistorySet(CHAT.history));
+}
+function chatSelection() {
+  const log = document.getElementById('chatlog');
+  const s = String(log.getSelection ? log.getSelection() : window.getSelection());
+  if (s && s.trim()) return s.trim();
+  // Sans sélection : la dernière réponse de l'assistant
+  for (let i = CHAT.history.length - 1; i >= 0; i--) if (CHAT.history[i].role === 'assistant') return CHAT.history[i].content;
+  return '';
+}
+$('chatb').onclick = openChat;
+$('hchat').onclick = (e) => { e.stopPropagation(); showHelp(e.currentTarget); };
+$('chatsend').onclick = chatSubmit;
+document.getElementById('chatin').addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); chatSubmit(); } });
+$('chatx').onclick = closeChat;
+$('chatclear').onclick = () => { CHAT.history = []; chatRender(); Promise.resolve(window.mgp.chatHistoryClear && window.mgp.chatHistoryClear()); };
+// ✍️ Transformer en prompt : ouvre la modale ✍️ pré-remplie avec la réponse choisie
+$('chat2prompt').onclick = () => {
+  const txt = chatSelection();
+  if (!txt) { showToast(LANG === 'fr' ? 'Sélectionne une réponse d\'abord' : 'Select an answer first', 'err'); return; }
+  closeChat();
+  openModal(null);
+  const nameI = document.getElementById('e-name');
+  const txtI = document.getElementById('e-txt');
+  if (nameI && !nameI.value) nameI.value = (LANG === 'fr' ? 'Chat ' : 'Chat ') + new Date().toLocaleDateString('fr-FR');
+  if (txtI) { txtI.value = txt; txtI.focus(); }
+};
+// 🗜 Via Headroom : le fil complet part vers Claude Code / OpenCode compressés (proxy 8787)
+$('chatheadroom').onclick = () => {
+  const txt = chatSelection();
+  const thread = CHAT.history.map((m) => (m.role === 'user' ? '## Toi' : '## IA') + '\n' + m.content).join('\n\n');
+  const payload = (thread && CHAT.history.length ? thread : txt) || '';
+  window.mgp.openLLM && window.mgp.openLLM('headroom-claude', payload);
+  showToast(LANG === 'fr' ? '🗜 Session Claude Code compressée lancée — colle le prompt' : '🗜 Compressed Claude Code session launched — paste the prompt', 'ok');
+};
 
 // ---------- Actions ----------
 function activate(it, el) {
