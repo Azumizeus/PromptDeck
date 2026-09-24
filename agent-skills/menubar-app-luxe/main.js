@@ -20,11 +20,19 @@ const I18N = {
   fr: { open: 'Ouvrir le panneau', launcher: 'Ouvrir le Launcheur HTML', help: 'Aide (mode d\'emploi)', settings: 'Réglages…', quit: 'Quitter', openIn: 'Ouvrir dans', settingsTitle: 'MEGA PACK — Réglages',
     descClaude: 'Claude (web)', descChatgpt: 'ChatGPT (web)', descPerplexity: 'Perplexity (web)', descCopilot: 'Copilot (web)',
     descDeepseek: 'DeepSeek (web)', descZai: 'Z.ai (web)', descKimi: 'Kimi (web)', descMammouth: 'Mammouth.ia — multi-modèles',
+    descManus: 'Manus — agent autonome (web)', descNoah: 'Noah — trynoah.ai (web)', descOpenhands: 'OpenHands local (Docker :8000)',
+    arena: "🎮 Ouvrir l'arène (jeu)", descArena: 'MEGA PACK ARENA — chaque agent généré entre dans le jeu à son nom',
+    descClaudeApp: 'Claude Desktop (app macOS)', descClaudeCode: 'Claude Code web (claude.ai/code)',
+    descChrome: 'Nouvel onglet Chrome — colle le prompt', descBrave: 'Nouvel onglet Brave — colle le prompt',
     descLlmApi: 'Chat IA via clé API (Atelier · Réglages → Intelligence) — le prompt est copié',
     descFreebuff: 'App Freebuff — collez le prompt dans le chat', descOpencodeApp: 'App desktop OpenCode', descOpencode: 'OpenCode dans un nouveau Terminal',    descClipboard: 'Copie seule — collez où vous voulez' },
   en: { open: 'Open the panel', launcher: 'Open the HTML Launcher', help: 'Help (user guide)', settings: 'Settings…', quit: 'Quit', openIn: 'Open in', settingsTitle: 'MEGA PACK — Settings',
     descClaude: 'Claude (web)', descChatgpt: 'ChatGPT (web)', descPerplexity: 'Perplexity (web)', descCopilot: 'Copilot (web)',
-    descDeepseek: 'DeepSeek (web)', descZai: 'Z.ai (web)', descKimi: 'Kimi (web)', descMammouth: 'Mammouth.ia — multi-model',
+    descDeepseek: 'DeepSeek (web)', descZai: 'Z.ai (web)', descKimi: 'Kimi (web)', descMammouth: 'Mammouth — multi-model',
+    descManus: 'Manus — autonomous agent (web)', descNoah: 'Noah — trynoah.ai (web)', descOpenhands: 'OpenHands local (Docker :8000)',
+    arena: '🎮 Open the Arena (game)', descArena: 'MEGA PACK ARENA — every agent you generate enters the game under its own name',
+    descClaudeApp: 'Claude Desktop (macOS app)', descClaudeCode: 'Claude Code web (claude.ai/code)',
+    descChrome: 'New Chrome tab — paste the prompt', descBrave: 'New Brave tab — paste the prompt',
     descLlmApi: 'AI chat via API key (Workshop · Settings → Intelligence) — the prompt is copied',
     descFreebuff: 'Freebuff app — paste the prompt in its chat', descOpencodeApp: 'OpenCode desktop app', descOpencode: 'OpenCode in a new Terminal window',    descClipboard: 'Copy only — paste anywhere' },
 };
@@ -32,7 +40,7 @@ let LANG = 'fr';
 const T = () => I18N[LANG] || I18N.fr;
 function prefsPath() { return path.join(app.getPath('userData'), 'mgp-prefs.json'); }
 // Préférences persistées : langue, favoris, récents, LLM par défaut, raccourci, auto-boot, géométrie
-let PREFS = { lang: 'fr', favorites: [], recents: [], customs: [], defaultLLM: 'claude', sendTargets: [], promptDir: '', shortcut: 'Alt+Space', autostart: false, favShortcuts: true, bounds: null, apiDefaultModel: '', theme: 'dark', keepVisible: false, dropMaxChars: 100000 };
+let PREFS = { lang: 'fr', favorites: [], recents: [], customs: [], defaultLLM: 'claude', sendTargets: [], promptDir: '', shortcut: 'Alt+Space', autostart: false, favShortcuts: true, bounds: null, panelSize: 'M', apiDefaultModel: '', theme: 'dark', keepVisible: false, dropMaxChars: 100000, arenaBus: true, arenaDir: '' };
 
 // ── Ateliers (agents / skills / équipes créés dans l'app) — persistés à côté des prefs ──
 function workshopsPath(kind) { return path.join(app.getPath('userData'), kind === 'agent' ? 'my-agents.json' : kind === 'skill' ? 'my-skills.json' : 'my-teams.json'); }
@@ -63,6 +71,18 @@ function trashFind(id) { return loadTrash().find((t) => t.id === id); }
 // 🔒 Cadenas : un item verrouillé ne peut plus être supprimé ni écrasé.
 // Le verrou vit sur l'enregistrement (w.locked) — il survit aux mises à jour.
 function lockedNames(kind) { return new Set(loadWorkshops(kind).filter((w) => w && w.locked).map((w) => w.name)); }
+
+// ── 🎮 Bus d'événements ARENA : chaque action notable du deck/atelier est écrite en
+// NDJSON (un JSON par ligne, append-only) que le jeu MEGA PACK ARENA lit en direct.
+// Best effort : jamais d'échec d'écriture ne doit casser une action utilisateur.
+function arenaEvent(type, data = {}) {
+  if (PREFS.arenaBus === false) return; // Réglages : bus d'événements désactivé
+  try {
+    fs.mkdirSync(path.dirname(arenaEventsPath()), { recursive: true });
+    fs.appendFileSync(arenaEventsPath(), JSON.stringify({ type, at: new Date().toISOString(), ...data }) + '\n');
+  } catch (e) { /* jeu non installé, disque plein : on ignore */ }
+}
+function arenaEventsPath() { return path.join(app.getPath('userData'), 'arena-events.ndjson'); }
 
 // ── Clés du shell : lance depuis le Finder, l'app ne voit pas le .zshrc →
 // on le charge une fois au boot (variables déjà présentes : on n'écrase pas).
@@ -323,7 +343,12 @@ function teamSystemPrompt(lang) {
 const { mdSafe, containedJoin } = require('./lib/md-writer');
 const fr = () => LANG !== 'en';
 function promptDir() {
-  return PREFS.promptDir || path.join(app.getPath('documents'), 'MEGA PROMPT');
+  // Audit prefs 2.11 : si le dossier choisi a été supprimé/déplacé, retombe sur le défaut
+  if (PREFS.promptDir) {
+    try { if (fs.existsSync(PREFS.promptDir)) return PREFS.promptDir; } catch (e) {}
+    PREFS.promptDir = ''; savePrefs();
+  }
+  return path.join(app.getPath('documents'), 'MEGA PROMPT');
 }
 function mdForItem(it) {
   const x = it.x, k = it.k;
@@ -463,6 +488,7 @@ function savePrefs() {
 function addRecent(name) {
   PREFS.recents = [name, ...PREFS.recents.filter((n) => n !== name)].slice(0, 8);
   savePrefs();
+  arenaEvent('prompt-sent', { name }); // 🎮 ARENA : prompt copié = coup d'épée / boost nitro
 }
 // ✍️ Exemples de prompts personnalisés — seed au premier lancement uniquement
 function seedCustoms() {
@@ -488,6 +514,8 @@ function applyShortcut() {
   const acc = SHORTCUTS[PREFS.shortcut] ? PREFS.shortcut : 'Alt+Space';
   globalShortcut.register(acc, togglePanel);
   globalShortcut.register('CommandOrControl+Shift+Space', createSettings);
+  // 📌 Épinglage global : bascule depuis n'importe quelle application (chemin unique partagé avec le tray)
+  globalShortcut.register('Alt+P', () => toggleKeepVisible());
 }
 function applyAutostart() {
   try { app.setLoginItemSettings({ openAtLogin: !!PREFS.autostart, path: process.execPath }); } catch (e) { /* best effort */ }
@@ -532,6 +560,31 @@ function openInterface(file) {
   for (const p of cands) { if (fs.existsSync(p)) { shell.openExternal('file://' + p); return; } }
 }
 
+// 🎮 MEGA PACK ARENA : dossier du jeu + lancement (dev : ../arena-app, sinon pref Réglages)
+function arenaAppDir() {
+  const cands = [PREFS.arenaDir, path.join(__dirname, '..', 'arena-app'),
+    path.join(app.getPath('home'), 'Desktop', 'Skill Install', 'agent-skills', 'arena-app')].filter(Boolean);
+  for (const p of cands) { try { if (fs.existsSync(path.join(p, 'main.js'))) return p; } catch (e) { /* suivant */ } }
+  if (PREFS.arenaDir) { PREFS.arenaDir = ''; savePrefs(); } // audit prefs : dossier périmé oublié
+  return null;
+}
+ipcMain.handle('arena-open', () => {
+  const dir = arenaAppDir();
+  if (!dir) return { ok: false, error: 'not-found' };
+  const electronDev = path.join(__dirname, 'node_modules', 'electron', 'dist', 'Electron.app');
+  if (fs.existsSync(electronDev)) execFile('open', ['-a', electronDev, '--args', dir, '--opened-from-launcher'], () => {});
+  else execFile('open', [path.join(dir, 'LANCER-ARENA.command')], () => {}); // app packagée : via le lanceur
+  return { ok: true, dir };
+});
+ipcMain.handle('arena-dir-choose', async () => {
+  const r = await dialog.showOpenDialog({ title: LANG === 'en' ? 'MEGA PACK ARENA folder' : 'Dossier de MEGA PACK ARENA', properties: ['openDirectory'] });
+  if (r.canceled || !r.filePaths[0]) return null;
+  const p = r.filePaths[0];
+  if (!fs.existsSync(path.join(p, 'main.js'))) return { ok: false, error: 'invalid' };
+  PREFS.arenaDir = p; savePrefs();
+  return { ok: true, dir: p };
+});
+
 // Sous-menus par catégorie — chaque item a un sous-menu « Ouvrir dans » (Claude,
 // ChatGPT, Perplexity ou Copilot) : 1 clic supplémentaire pour choisir le LLM.
 function openInSubmenu(x, isSkill) {
@@ -545,7 +598,14 @@ function openInSubmenu(x, isSkill) {
     ['zai', 'Z.ai', 'descZai'],
     ['kimi', 'Kimi', 'descKimi'],
     ['mammouth', 'Mammouth.ia', 'descMammouth'],
+    ['manus', 'Manus (agent)', 'descManus'],
+    ['noah', 'Noah', 'descNoah'],
     ['llm-api', LANG === 'en' ? '🔑 API (integrated)' : '🔑 API (intégré)', 'descLlmApi'],
+    ['claude-app', LANG === 'en' ? 'Claude (macOS app)' : 'Claude (app macOS)', 'descClaudeApp'],
+    ['claude-code', 'Claude Code (web)', 'descClaudeCode'],
+    ['openhands', 'OpenHands (local)', 'descOpenhands'],
+    ['chrome', 'Chrome (onglet)', 'descChrome'],
+    ['brave', 'Brave (onglet)', 'descBrave'],
     ['freebuff', 'Freebuff (app)', 'descFreebuff'],
     ['opencode-app', 'OpenCode (desktop)', 'descOpencodeApp'],
     ['opencode', 'OpenCode (terminal)', 'descOpencode'],
@@ -576,6 +636,34 @@ function itemsByCategory(pool, isSkill) {
         submenu: [openInSubmenu(x, isSkill)],
       })),
   }));
+}
+
+// 📌 Épinglage partagé : un seul chemin de vérité pour ⌥P et le menu tray (pas de double canal)
+function toggleKeepVisible(on) {
+  const target = typeof on === 'boolean' ? on : !PREFS.keepVisible;
+  PREFS.keepVisible = target;
+  savePrefs();
+  if (target) {
+    // Épingler ON : le panneau doit exister et être visible — sinon « rien ne se passe » (bug constaté)
+    if (!win || win.isDestroyed()) createPanel();
+    else {
+      if (!win.isVisible()) { const b = win.getBounds(); const vis = clampToScreen(b); if (vis !== b) win.setBounds(vis); win.show(); }
+      win.focus();
+    }
+  } else if (win && !win.isDestroyed() && !win.isFocused()) {
+    // OFF : si la fenêtre n'a pas le focus, on la masque tout de suite (feedback cohérent)
+    win.hide();
+  }
+  if (win && !win.isDestroyed()) win.webContents.send('settings-changed', { keepVisible: PREFS.keepVisible });
+  if (settings && !settings.isDestroyed()) settings.webContents.send('settings-changed', { theme: PREFS.theme, lang: LANG, keepVisible: PREFS.keepVisible });
+  try {
+    const { Notification } = require('electron');
+    new Notification({
+      title: 'MEGA PACK',
+      body: PREFS.keepVisible ? (LANG === 'en' ? '📌 Panel pinned — stays visible' : '📌 Panneau épinglé — reste visible') : (LANG === 'en' ? '📌 Unpinned — hides on blur' : '📌 Désépinglé — se masque au blur'),
+      silent: true,
+    }).show();
+  } catch (e) { /* notification optionnelle */ }
 }
 
 function buildMenuTemplate() {
@@ -667,9 +755,34 @@ function buildMenuTemplate() {
     { type: 'separator' },
     { label: T().open, click: () => createPanel() },
     { label: T().launcher, click: () => openInterface('mega-pack-launcher.html') },
-    { label: T().help, click: () => openInterface('MODE-DEMPLOI.html') },
+    { label: T().arena, toolTip: T().descArena || '', click: () => {
+      const dir = arenaAppDir();
+      if (!dir) { openInterface('arena-game-prompt.md'); return; } // jeu introuvable ici : la doc
+      const electronDev = path.join(__dirname, 'node_modules', 'electron', 'dist', 'Electron.app');
+      if (fs.existsSync(electronDev)) execFile('open', ['-a', electronDev, '--args', dir, '--opened-from-launcher'], () => {});
+      else execFile('open', [path.join(dir, 'LANCER-ARENA.command')], () => {});
+    } },
     { type: 'separator' },
+    // ⚡ Section fenêtre : pin avec coche d'état, réglages, raccourci, arène
+    {
+      label: (LANG === 'fr' ? '📌 Épingler le panneau (reste visible)' : '📌 Pin panel (stays visible)'),
+      type: 'checkbox',
+      checked: !!PREFS.keepVisible,
+      click: () => toggleKeepVisible(),
+    },
     { label: T().settings, accelerator: 'Cmd+,', click: createSettings },
+    {
+      label: LANG === 'fr' ? '⌨️ Changer le raccourci…' : '⌨️ Change shortcut…',
+      click: () => { createSettings(); setTimeout(() => { try { if (settings && !settings.isDestroyed()) settings.webContents.send('goto-shortcut'); } catch (e) {} }, 600); },
+    },
+    { label: T().arena, toolTip: T().descArena || '', click: () => {
+      const dir = arenaAppDir();
+      if (!dir) { openInterface('arena-game-prompt.md'); return; } // jeu introuvable ici : la doc
+      const electronDev = path.join(__dirname, 'node_modules', 'electron', 'dist', 'Electron.app');
+      if (fs.existsSync(electronDev)) execFile('open', ['-a', electronDev, '--args', dir, '--opened-from-launcher'], () => {});
+      else execFile('open', [path.join(dir, 'LANCER-ARENA.command')], () => {});
+    } },
+    { type: 'separator' },
     { label: T().quit, role: 'quit' },
   ];
 }
@@ -705,10 +818,31 @@ function panelRect() {
   return { x, y, width: W, height: H };
 }
 
+// Vérifie que des bounds restent visibles sur AU MOINS un écran branché ;
+// sinon recentre sur l'écran du tray (écran externe débranché, résolution changée…).
+function clampToScreen(b) {
+  if (!b) return panelRect();
+  const onSomeDisplay = screen.getAllDisplays().some((d) => {
+    const wa = d.workArea;
+    return b.x + b.width > wa.x + 60 && b.x < wa.x + wa.width - 60 && b.y + b.height > wa.y + 40 && b.y < wa.y + wa.height - 40;
+  });
+  if (onSomeDisplay) return b;
+  const r = panelRect();
+  return { x: r.x, y: r.y, width: b.width, height: b.height }; // taille gardée, position sûre
+}
+
 function createPanel() {
-  if (win && !win.isDestroyed()) { win.show(); win.focus(); return; }
-  // Géométrie mémorisée (position + taille), sinon placement sous l'icône ⚡
-  const r = (PREFS.bounds && PREFS.bounds.width >= 300 && PREFS.bounds.height >= 300) ? PREFS.bounds : panelRect();
+  if (win && !win.isDestroyed()) {
+    // 📌 Réapparition sûre : la fenêtre peut exister mais être hors écran (écran externe retiré)
+    const b = win.getBounds();
+    const vis = clampToScreen(b);
+    if (vis !== b) win.setBounds(vis);
+    win.show(); win.focus();
+    return;
+  }
+  // Géométrie mémorisée (position + taille), sinon placement sous l'icône ⚡ — toujours clampée
+  const saved = (PREFS.bounds && PREFS.bounds.width >= 300 && PREFS.bounds.height >= 300) ? PREFS.bounds : null;
+  const r = clampToScreen(saved);
   win = new BrowserWindow({
     ...r,
     show: false,
@@ -744,16 +878,20 @@ function createPanel() {
   win.loadFile('index.html');
   win.once('ready-to-show', () => win.show());
   win.on('blur', () => {
-    // 📌 « Garder le panneau visible » (Réglages / bouton 📌) : ne pas masquer au clic ailleurs
-    if (PREFS.keepVisible) return;
-    if (!settings || settings.isDestroyed()) win.hide();
+    // 📌 « Garder le panneau visible » (Réglages / bouton 📌) : ne pas masquer au clic ailleurs.
+    // Petit délai : cliquer 📌 fait perdre le focus AVANT que la pref soit persistée —
+    // sans délai, le blur du clic même qui active le pin cachait la fenêtre (bug constaté).
+    setTimeout(() => {
+      if (!win || win.isDestroyed() || PREFS.keepVisible) return;
+      if (!settings || settings.isDestroyed()) win.hide();
+    }, 220);
   });
   win.on('closed', () => { win = null; });
 }
 
 function togglePanel() {
-  if (win && !win.isDestroyed() && win.isVisible()) win.hide();
-  else createPanel();
+  if (win && !win.isDestroyed() && win.isVisible()) { win.hide(); return; }
+  createPanel(); // createPanel re-clampe les bounds hors écran + show/focus
 }
 
 function createSettings() {
@@ -784,7 +922,15 @@ function openLLM(target, prompt) {
     zai: `https://chat.z.ai/?q=${q}`,
     kimi: `https://www.kimi.com/?q=${q}`,
     mammouth: 'https://mammouth.ai/',
+    manus: `https://manus.im/app?queue=${q}`,
+    noah: 'https://trynoah.ai/',
+    openhands: 'http://localhost:8000',
+    'claude-code': 'https://claude.ai/code',
   };
+  if (target === 'claude-app') { shell.openPath('/Applications/Claude.app').catch(() => {}); return; } // Claude Desktop — coller le prompt
+  if (target === 'chrome') { shell.openExternal('https://www.google.com', { activate: true }); clipboard.writeText(p); return; } // déjà copié ci-dessus
+  if (target === 'brave') { shell.openExternal('https://www.google.com', { activate: true }); return; }
+  if (target === 'openhands') { shell.openExternal('http://localhost:8000', { activate: true }); return; } // Docker local — coller dans le chat
   if (target === 'freebuff') { shell.openExternal('freebuff://'); return; } // app native — coller le prompt dans le chat
   if (target === 'llm-api') { // panneau API (Atelier/Réglages) : le prompt est copié, on ouvre le chat intégré
     try {
@@ -1017,6 +1163,17 @@ if (!CAPTURE_MODE && !app.requestSingleInstanceLock()) {
   });
 
   app.on('window-all-closed', (e) => { /* reste résident dans la menu bar */ });
+  // 🖥 Écrans : si la config change (débranchement externe…), ramène la fenêtre épinglée
+  // dans une zone visible — sinon elle reste « ouverte » hors écran, invisible (bug constaté).
+  // Les bounds clampées sont re-persistées (sinon l'ancienne position hors écran revient
+  // au prochain lancement — audit prefs 2.11).
+  screen.on('display-metrics-changed', () => {
+    if (win && !win.isDestroyed()) {
+      const before = win.getBounds();
+      const vis = clampToScreen(before);
+      if (vis !== before) { win.setBounds(vis); PREFS.bounds = vis; savePrefs(); }
+    }
+  });
 }
 
 // IPC
@@ -1044,7 +1201,7 @@ ipcMain.on('restart-tour', () => {
     win.webContents.send('restart-tour');
   }
 });
-ipcMain.on('settings-changed', (e, { theme, lang, defaultLLM, sendTargets, autostart, favShortcuts, shortcut, keepVisible } = {}) => {
+ipcMain.on('settings-changed', (e, { theme, lang, defaultLLM, sendTargets, autostart, favShortcuts, shortcut, keepVisible, arenaBus, panelSize } = {}) => {
   LANG = lang === 'en' ? 'en' : 'fr';
   PREFS.lang = LANG;
   // 🐛 fix 2.9.6 : le thème choisi dans les Réglages n'était JAMAIS persisté — le panneau
@@ -1056,6 +1213,8 @@ ipcMain.on('settings-changed', (e, { theme, lang, defaultLLM, sendTargets, autos
   if (typeof favShortcuts === 'boolean') PREFS.favShortcuts = favShortcuts;
   if (shortcut && SHORTCUTS[shortcut]) PREFS.shortcut = shortcut;
   if (typeof keepVisible === 'boolean') PREFS.keepVisible = keepVisible;
+  if (typeof arenaBus === 'boolean') PREFS.arenaBus = arenaBus; // 🎮 bus d'événements ARENA
+  if (typeof panelSize === 'string' && ['S', 'M', 'L', 'XL'].includes(panelSize)) PREFS.panelSize = panelSize; // preset resize mémorisé
   savePrefs();
   applyShortcut();
   applyAutostart();
@@ -1068,10 +1227,12 @@ ipcMain.on('settings-changed', (e, { theme, lang, defaultLLM, sendTargets, autos
 ipcMain.on('set-keep-visible', (e, on) => {
   PREFS.keepVisible = !!on;
   savePrefs();
+  // 📌 Si la fenêtre vient d'être épinglée alors qu'elle était cachée/blur, on la remontre
+  if (PREFS.keepVisible && win && !win.isDestroyed() && !win.isVisible()) win.show();
   if (settings && !settings.isDestroyed()) settings.webContents.send('settings-changed', { theme: PREFS.theme, lang: LANG, keepVisible: PREFS.keepVisible });
 });
 ipcMain.on('get-prefs', (e) => {
-  e.returnValue = { theme: PREFS.theme === 'light' ? 'light' : 'dark', keepVisible: !!PREFS.keepVisible, dropMaxChars: PREFS.dropMaxChars || 100000, defaultLLM: PREFS.defaultLLM, sendTargets: PREFS.sendTargets || [], shortcut: PREFS.shortcut, autostart: !!PREFS.autostart, favShortcuts: PREFS.favShortcuts !== false, favorites: PREFS.favorites, recents: PREFS.recents, customs: PREFS.customs, hasApi: Object.fromEntries(Object.keys(PROVIDERS).map((k) => [k, !!apiKeyFor(k)])), apiDefaultModel: PREFS.apiDefaultModel || '', workshopLocks: { agent: [...lockedNames('agent')], skill: [...lockedNames('skill')], team: [...lockedNames('team')], custom: [...(PREFS.customs || []).filter((c) => c && c.locked).map((c) => c.name)] } };
+  e.returnValue = { theme: PREFS.theme === 'light' ? 'light' : 'dark', keepVisible: !!PREFS.keepVisible, dropMaxChars: PREFS.dropMaxChars || 100000, arenaBus: PREFS.arenaBus !== false, panelSize: PREFS.panelSize || 'M', defaultLLM: PREFS.defaultLLM, sendTargets: PREFS.sendTargets || [], shortcut: PREFS.shortcut, autostart: !!PREFS.autostart, favShortcuts: PREFS.favShortcuts !== false, favorites: PREFS.favorites, recents: PREFS.recents, customs: PREFS.customs, hasApi: Object.fromEntries(Object.keys(PROVIDERS).map((k) => [k, !!apiKeyFor(k)])), apiDefaultModel: PREFS.apiDefaultModel || '', workshopLocks: { agent: [...lockedNames('agent')], skill: [...lockedNames('skill')], team: [...lockedNames('team')], custom: [...(PREFS.customs || []).filter((c) => c && c.locked).map((c) => c.name)] } };
 });
 // Sélecteur du LLM dans la barre du bas : changement instantané, persisté, propagé
 ipcMain.on('set-default-llm', (e, llm) => {
@@ -1095,6 +1256,7 @@ ipcMain.handle('workshop-delete', (e, { kind, name }) => {
   const [rec] = list.splice(i, 1);
   saveWorkshops(wk, list);
   trashPush({ id: `${wk}:${name}:${Date.now()}`, kind: wk, name, rec }); // 🗑 restaurable
+  arenaEvent('item-deleted', { kind: wk, name }); // 🎮 ARENA : l'ennemi « Bug » perd un PV
   return true;
 });
 ipcMain.handle('workshop-export', async (e, { kind, name }) => {
@@ -1169,6 +1331,10 @@ ipcMain.handle('workshop-create', (e, { kind, rec }) => {
   }
   list.push(copy);
   saveWorkshops(wk, list);
+  // 🎮 ARENA : un agent/skill/équipe créé entre dans le jeu — agent = fighter à son nom
+  if (wk === 'agent') arenaEvent('agent-created', { name: copy.name, category: copy.category || '', origin: copy.origin || 'workshop' });
+  else if (wk === 'skill') arenaEvent('skill-created', { name: copy.name, category: copy.category || '' });
+  else if (wk === 'team') arenaEvent('team-created', { name: copy.team || copy.name, agents: (copy.agents || []).length });
   return { ok: true, item: copy };
 });
 ipcMain.handle('workshop-lock', (e, { kind, name, locked }) => {
@@ -1179,6 +1345,7 @@ ipcMain.handle('workshop-lock', (e, { kind, name, locked }) => {
   if (!w) return { ok: false, error: 'introuvable' };
   w.locked = !!locked;
   saveWorkshops(wk, list);
+  arenaEvent('item-locked', { kind: wk, name, on: !!locked }); // 🎮 ARENA : armure/châssis blindé
   return { ok: true, locked: w.locked };
 });
 
@@ -1587,6 +1754,7 @@ ipcMain.handle('team-generate', async (e, p) => {
     const i = list.findIndex((w) => (w.team || w.name) === team.team);
     if (i >= 0) list[i] = team; else list.push(team);
     saveWorkshops('team', list);
+    arenaEvent('team-created', { name: team.team, agents: team.agents.length, generated: true }); // 🎮 ARENA
     return { ok: true, item: team, model: usedModel, latency };
   } catch (err) {
     return { ok: false, error: String(err.message || err) };
@@ -1703,6 +1871,8 @@ ipcMain.on('custom-save', (e, item) => {
   PREFS.customs = (PREFS.customs || []).filter((c) => c.name !== name);
   PREFS.customs.push(rec);
   savePrefs();
+  const isNew = !prev; // 🎮 ARENA : un ✍️ fraîchement créé (kit inclus) = ramassage de fragment
+  arenaEvent(isNew ? 'custom-created' : 'custom-edited', { name: rec.name, tag: rec.tag || '', chars: rec.desc.length });
 });
 // Export de tous les ✍️ en un fichier Markdown (via boîte de sauvegarde)
 ipcMain.handle('export-customs', async () => {
@@ -1725,6 +1895,7 @@ function deleteCustom(name) {
   PREFS.customs = cs;
   PREFS.favorites = (PREFS.favorites || []).filter((n) => n !== name);
   savePrefs();
+  arenaEvent('custom-deleted', { name }); // 🎮 ARENA
 }
 ipcMain.on('custom-delete', (e, name) => { if (typeof name === 'string' && name) deleteCustom(name); });
 // Export / import de la configuration (favoris, récents, préférences) en JSON

@@ -1,0 +1,13 @@
+{
+  "name": "megapack-arena",
+  "productName": "MEGA PACK ARENA",
+  "version": "0.1.0",
+  "description": "Jeu 2D vectoriel connecté à l'activité du prompt deck MEGA PACK — chaque agent généré entre dans l'arène à son nom",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "devDependencies": {
+    "electron": "^31.0.0"
+  }
+}

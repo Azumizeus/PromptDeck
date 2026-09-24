@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         MEGA PACK Panel Luxe — Skills, Agents & Équipes pour tout LLM
 // @namespace    mega-pack
-// @version      2.9.0
+// @version      2.10.1
 // @description  Panneau flottant Édition Luxe dans une fenêtre macOS : 131 skills + 190 agents + 🕸 équipes + ✍️ prompts perso + ★ favoris, recherche instantanée, tooltip expert, clic droit multi-LLM, sélecteur de LLM par défaut, composeur ⌘-clic — injectable dans n'importe quelle conversation LLM (Claude, ChatGPT, Gemini, Perplexity, Mistral, OpenCode Web…)
 // @author       MEGA PACK
 // @match        *://*/*
@@ -341,8 +341,11 @@ window.MG_OPENHANDS = MG_OPENHANDS; // une const globale n'existe pas sur window
   }
 
   // ── LLM par défaut (sélecteur, persisté) + destinations ───────────────────
-  const LLMS = ['claude', 'chatgpt', 'perplexity', 'copilot', 'deepseek', 'zai', 'kimi', 'mammouth'];
-  const LLM_LABEL = { claude: 'Claude', chatgpt: 'ChatGPT', perplexity: 'Perplexity', copilot: 'Copilot', deepseek: 'DeepSeek', zai: 'Z.ai', kimi: 'Kimi', mammouth: 'Mammouth' };
+  // Toutes les destinations (web + apps locales + onglets) — aligné sur l'app Electron 2.10
+  const LLMS = ['claude', 'chatgpt', 'perplexity', 'copilot', 'deepseek', 'zai', 'kimi', 'mammouth', 'manus', 'noah', 'claude-code', 'openhands', 'chrome', 'brave'];
+  const LLM_LABEL = { claude: 'Claude', chatgpt: 'ChatGPT', perplexity: 'Perplexity', copilot: 'Copilot', deepseek: 'DeepSeek', zai: 'Z.ai', kimi: 'Kimi', mammouth: 'Mammouth', manus: 'Manus (agent)', noah: 'Noah', 'claude-code': 'Claude Code (web)', openhands: 'OpenHands (local)', chrome: 'Chrome (onglet)', brave: 'Brave (onglet)' };
+  // Libellé localisé : les « onglet » deviennent « tab » en anglais (le reste est identique FR/EN)
+  function llmLabel(t) { const l = LLM_LABEL[t] || t; return LANG === 'en' ? l.replace('(onglet)', '(tab)') : l; }
   function defaultLLM() { return store.get('defaultLLM', 'claude'); }
 
   // ── Insertion dans la zone de saisie du LLM ───────────────────────────────
@@ -387,10 +390,16 @@ window.MG_OPENHANDS = MG_OPENHANDS; // une const globale n'existe pas sur window
     claude: 'https://claude.ai/new?q=', chatgpt: 'https://chatgpt.com/?q=',
     perplexity: 'https://www.perplexity.ai/search?q=', copilot: 'https://copilot.microsoft.com/?q=',
     deepseek: 'https://chat.deepseek.com/?q=', zai: 'https://chat.z.ai/?q=', kimi: 'https://www.kimi.com/?q=', mammouth: 'https://mammouth.ai/',
+    manus: 'https://manus.im/app?queue=', noah: 'https://trynoah.ai/',
+    'claude-code': 'https://claude.ai/code', openhands: 'http://localhost:8000',
   };
   function openLLM(kind, txt) {
     copy(txt); // le prompt est toujours copié, quelle que soit la destination
     if (kind === 'clipboard') return; // presse-papiers : la copie suffit
+    if (kind === 'chrome' || kind === 'brave') { // nouvel onglet du navigateur hôte — colle le prompt
+      window.open('https://www.google.com', '_blank', 'noopener');
+      return;
+    }
     const q = encodeURIComponent(txt);
     window.open((LLM_URLS[kind] || LLM_URLS.claude) + q, '_blank', 'noopener');
   }
@@ -674,7 +683,7 @@ window.MG_OPENHANDS = MG_OPENHANDS; // une const globale n'existe pas sur window
     const items = [].concat(
       '<span class="ch">' + lname(x) + '</span>',
       '<span class="cs">' + T().sendTo + '</span>',
-      tgts.map(function (t) { return '<button data-t="' + t + '">▸ ' + (LLM_LABEL[t] || t) + '</button>'; }).join(''),
+      tgts.map(function (t) { return '<button data-t="' + t + '">▸ ' + llmLabel(t) + '</button>'; }).join(''),
       '<span class="cs">···</span>',
       x.path ? '<button data-a="reveal">📂 ' + (LANG === 'fr' ? 'Ouvrir le .md source' : 'Open source .md') + '</button>' : '',
       '<button data-a="md">📄 ' + (LANG === 'fr' ? 'Créer le .md (fiche + prompt)' : 'Create .md (sheet + prompt)') + '</button>',
@@ -721,13 +730,12 @@ window.MG_OPENHANDS = MG_OPENHANDS; // une const globale n'existe pas sur window
 
   // ── Sélecteur de LLM (barre du bas) ───────────────────────────────────────
   function renderLlmBtn() {
-    const cur = defaultLLM();
-  panel.querySelector('#mgp-llmbtn').innerHTML = '⌨ ' + T().llm + ' <b>' + (cur === 'clipboard' ? T().clipboard : (LLM_LABEL[cur] || cur)) + '</b> ▾';
+    const cur = defaultLLM();    panel.querySelector('#mgp-llmbtn').innerHTML = '⌨ ' + T().llm + ' <b>' + (cur === 'clipboard' ? T().clipboard : llmLabel(cur)) + '</b> ▾';
   }
   function renderLlmMenu() {
     const m = panel.querySelector('#mgp-llmmenu');
     m.innerHTML = LLMS.concat(['clipboard']).map(function (t) {
-      const lb = t === 'clipboard' ? '⧉ ' + T().clipboard : (LLM_LABEL[t] || t);
+      const lb = t === 'clipboard' ? '⧉ ' + T().clipboard : llmLabel(t);
       return '<button data-t="' + t + '" class="' + (t === defaultLLM() ? 'on' : '') + '">' +
         (t === defaultLLM() ? '✓ ' : '▸ ') + lb + '</button>';
     }).join('');
@@ -1017,7 +1025,7 @@ window.MG_OPENHANDS = MG_OPENHANDS; // une const globale n'existe pas sur window
     const cur = defaultLLM();
     const tgts = sendTargets();
     const opts = LLMS.concat(['clipboard']).map(function (t) {
-      const lb = t === 'clipboard' ? T().clipboard : (LLM_LABEL[t] || t);
+      const lb = t === 'clipboard' ? T().clipboard : llmLabel(t);
       return '<option value="' + t + '"' + (t === cur ? ' selected' : '') + '>' + lb + '</option>';
     }).join('');
     dlg.innerHTML =
@@ -1032,7 +1040,7 @@ window.MG_OPENHANDS = MG_OPENHANDS; // une const globale n'existe pas sur window
       '<div class="row col"><b>' + T().setSend + '</b><span class="hint">' + T().setSendHint + '</span>' +
         '<span class="chips" id="mgp-s-send">' +
         LLMS.concat(['clipboard']).map(function (t) {
-          const lb = t === 'clipboard' ? '⧉ ' + T().clipboard : (LLM_LABEL[t] || t);
+          const lb = t === 'clipboard' ? '⧉ ' + T().clipboard : llmLabel(t);
           return '<button data-t="' + t + '" class="' + (tgts.indexOf(t) >= 0 ? 'on' : '') + '">' + lb + '</button>';
         }).join('') +
       '</span></div>' +

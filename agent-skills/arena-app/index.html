@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>MEGA PACK ARENA</title>
+<style>
+  :root{ --vio:#9945ff; --grn:#14f195; --bg:#0b0c10; --card:#14151c; --line:#23252f; --txt:#eef0f6; --mut:#6b7080; }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%;overflow:hidden}
+  body{font:13px/1.45 -apple-system,BlinkMacSystemFont,sans-serif;background:var(--bg);color:var(--txt)}
+  #app{display:flex;height:100vh}
+  #stage{flex:1;position:relative}
+  svg{width:100%;height:100%;display:block}
+  #side{width:270px;border-left:1px solid var(--line);background:var(--card);display:flex;flex-direction:column}
+  #side h1{font-size:14px;padding:12px 14px;border-bottom:1px solid var(--line);letter-spacing:.4px}
+  #side h1 b{background:linear-gradient(120deg,var(--vio),var(--grn));-webkit-background-clip:text;background-clip:text;color:transparent}
+  #subtitle{padding:6px 14px;font-size:11px;color:var(--mut);border-bottom:1px solid var(--line)}
+  #log{flex:1;overflow-y:auto;padding:8px 12px;font-size:11.5px}
+  .ev{padding:5px 0;border-bottom:1px dashed var(--line);color:var(--mut)}
+  .ev b{color:var(--txt)}
+  .ev .t{color:var(--vio);font-weight:700;margin-right:6px}
+  .ev.spawn{color:var(--grn)}
+  #hud{padding:10px 14px;border-top:1px solid var(--line);font-size:12px;display:flex;gap:14px}
+  #hud b{color:var(--grn);font-variant-numeric:tabular-nums}
+  #hint{padding:8px 14px;color:var(--mut);font-size:10.5px;border-top:1px solid var(--line)}
+  .spawnring{animation:ring 1.2s ease-out forwards}
+  @keyframes ring{from{opacity:.9;r:6}to{opacity:0;r:70}}
+  /* NB : jamais animer `transform` sur les groupes positionnés par attribut SVG
+     translate() — le fill-mode écraserait la position. On fond en opacité. */
+  .fighter{animation:fadein .45s ease-out both}
+  @keyframes fadein{from{opacity:0}to{opacity:1}}
+  .slash{animation:slash .5s ease-out forwards}
+  @keyframes slash{from{opacity:1}to{opacity:0}}
+  .boost{animation:boost .7s ease-out forwards}
+  @keyframes boost{from{opacity:1}to{opacity:0}}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="stage"><svg id="svg" viewBox="0 0 1000 700" preserveAspectRatio="xMidYMid meet"></svg></div>
+  <div id="side">
+    <h1>⚡ <b>MEGA PACK ARENA</b></h1>
+    <div id="subtitle">Mode du jour : détection…</div>
+    <div id="log"></div>
+    <div id="hud">
+      <span>Fighters <b id="h-fighters">0</b></span>
+      <span>Véhicules <b id="h-vehicles">0</b></span>
+      <span>XP <b id="h-xp">0</b></span>
+    </div>
+    <div id="hint">Chaque agent MEGA PACK entre en jeu à son nom.<br>Espace : pause · A : démo attaque/nitro · M : combat ↔ course</div>
+  </div>
+</div>
+<script src="renderer.js"></script>
+</body>
+</html>

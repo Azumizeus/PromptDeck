@@ -2,8 +2,8 @@
 
 // i18n de la fenêtre Réglages (langue partagée avec le panneau via mgp.lang)
 const I18N = {
-  fr: { title: 'MEGA PACK — Réglages', h2: '⚡ MEGA PACK — Réglages', cat: 'Catalogue :', genFrom: '· généré depuis', theme: 'Thème', themeD: 'Appliqué au panneau et à cette fenêtre', dark: '🌙 Sombre', light: '☀️ Clair', lang: 'Langue', langD: 'Interface du panneau', gs: 'Recherche globale', gsD: 'Raccourci système (⌘Espace est réservé par Spotlight)', set: 'Réglages', setD: 'Ouvrir cette fenêtre', dllm: 'LLM par défaut', dllmD: '⌘⏎ dans le panneau ouvre ce chat', tgt: 'Destinations du clic droit', tgtD: 'Menu flottant sur un agent/skill : envoi en un clic vers plusieurs LLM (le premier est prioritaire)', tgtHint: 'Clique pour ajouter/retirer — ordre = priorité', auto: 'Lancement au démarrage', autoD: "Ouvre MEGA PACK à l'ouverture de session", fsc: 'Raccourcis favoris', fscD: '⌘1 à ⌘9 lancent les 9 premiers favoris (menu du ⚡ ouvert)', keep: '📌 Garder le panneau visible', keepD: 'Le panneau ne se masque plus quand tu cliques dans une autre fenêtre (aussi via le bouton 📌 du panneau)', pdir: '📁 Dossier MEGA PROMPT (.md)', pdirD: "Bibliothèque locale : skills/, agents/, perso/ — chaque prompt de l'app en fichier .md, avec le prompt d'activation prêt à coller", pdirChoose: 'Choisir', pdirOpen: 'Ouvrir', pdirSync: 'Générer tous les .md (catalogue + perso)', pdirSynced: (n, p) => `✓ ${n} fichiers .md générés — ${p}`, pdirTree: 'Arborescence : skills/<catégorie>/ · agents/<catégorie>/ · perso/<tag>/ + LISEZMOI.md', cfg: 'Configuration', cfgD: 'Favoris, récents et préférences en JSON', xp: 'Mes prompts ✍️', xpD: 'Télécharge tous tes prompts en Markdown', osel: 'Ouvrir la sélection', oselD: 'Dans le panneau : ⏎ copie · ⌘⏎ LLM par défaut · ⇧⏎ ChatGPT', tour: '🎓 Mode d\'emploi interactif', tourD: 'Revoit la visite guidée en 7 étapes : recherche, LLM, clic droit, Atelier, équipes…', tourBtn: 'Relancer la visite', saved: '✓ Enregistré', noCat: 'catalogue introuvable', intel: '🧠 Intelligence — génération IA (Atelier)', intelD: "Clé API pour générer agents & skills. Chiffrée par macOS — refusée si le chiffrement OS est indisponible (jamais stockée en clair) ; ou variable d'environnement (GROQ_API_KEY, OPENAI_API_KEY…)", apiSave: 'Enregistrer la clé', apiTest: 'Tester', apiModels: 'Modèles conseillés', apiSaved: '✓ Clé enregistrée', apiDeleted: 'Clé effacée', apiTesting: 'Test en cours…', apiOk: (m, l) => `✓ Connecté — ${m} (${l} ms)`, apiFail: '✗ Échec' },
-  en: { title: 'MEGA PACK — Settings', h2: '⚡ MEGA PACK — Settings', cat: 'Catalog:', genFrom: '· generated from', theme: 'Theme', themeD: 'Applied to the panel and this window', dark: '🌙 Dark', light: '☀️ Light', lang: 'Language', langD: 'Panel interface', gs: 'Global search', gsD: 'System shortcut (⌘Space is reserved by Spotlight)', set: 'Settings', setD: 'Open this window', dllm: 'Default LLM', dllmD: '⌘⏎ in the panel opens this chat', tgt: 'Right-click destinations', tgtD: 'Floating menu on an agent/skill: one-click send to several LLMs (first one wins priority)', tgtHint: 'Click to add/remove — order = priority', auto: 'Launch at startup', autoD: 'Open MEGA PACK at login', fsc: 'Favorite shortcuts', fscD: '⌘1 to ⌘9 launch the first 9 favorites (open ⚡ menu)', keep: '📌 Keep the panel visible', keepD: 'The panel no longer hides when you click another window (also via the panel 📌 button)', pdir: '📁 MEGA PROMPT folder (.md)', pdirD: "Local library: skills/, agents/, perso/ — every prompt of the app as a .md file, with the activation prompt ready to paste", pdirChoose: 'Choose', pdirOpen: 'Open', pdirSync: 'Generate all .md files (catalog + custom)', pdirSynced: (n, p) => `✓ ${n} .md files generated — ${p}`, pdirTree: 'Tree: skills/<category>/ · agents/<category>/ · perso/<tag>/ + LISEZMOI.md', cfg: 'Configuration', cfgD: 'Favorites, recents and preferences as JSON', xp: 'My prompts ✍️', xpD: 'Download all your prompts as Markdown', osel: 'Open selection', oselD: 'In the panel: ⏎ copy · ⌘⏎ default LLM · ⇧⏎ ChatGPT', tour: '🎓 Interactive guide', tourD: 'Replays the 7-step guided tour: search, LLM, right-click, Workshop, teams…', tourBtn: 'Replay the tour', saved: '✓ Saved', noCat: 'catalog not found', intel: '🧠 Intelligence — AI generation (Workshop)', intelD: 'API key used to generate agents & skills. Encrypted by macOS — refused when OS encryption is unavailable (never stored in clear text); or use env variables (GROQ_API_KEY, OPENAI_API_KEY…)', apiSave: 'Save key', apiTest: 'Test', apiModels: 'Suggested models', apiSaved: '✓ Key saved', apiDeleted: 'Key cleared', apiTesting: 'Testing…', apiOk: (m, l) => `✓ Connected — ${m} (${l} ms)`, apiFail: '✗ Failed' },
+  fr: { title: 'MEGA PACK — Réglages', h2: '⚡ MEGA PACK — Réglages', cat: 'Catalogue :', genFrom: '· généré depuis', theme: 'Thème', themeD: 'Appliqué au panneau et à cette fenêtre', dark: '🌙 Sombre', light: '☀️ Clair', lang: 'Langue', langD: 'Interface du panneau', gs: 'Recherche globale', gsD: 'Raccourci système (⌘Espace est réservé par Spotlight)', set: 'Réglages', setD: 'Ouvrir cette fenêtre', dllm: 'LLM par défaut', dllmD: '⌘⏎ dans le panneau ouvre ce chat', tgt: 'Destinations du clic droit', tgtD: 'Menu flottant sur un agent/skill : envoi en un clic vers plusieurs LLM (le premier est prioritaire)', tgtHint: 'Clique pour ajouter/retirer — ordre = priorité', auto: 'Lancement au démarrage', autoD: "Ouvre MEGA PACK à l'ouverture de session", fsc: 'Raccourcis favoris', fscD: '⌘1 à ⌘9 lancent les 9 premiers favoris (menu du ⚡ ouvert)', keep: '📌 Garder le panneau visible', keepD: 'Le panneau ne se masque plus quand tu cliques dans une autre fenêtre (aussi via le bouton 📌 du panneau)', arenaBus: '🎮 Bus d\'événements ARENA', arenaBusD: "Écrit en local l'activité (agents générés, prompts copiés…) pour le jeu MEGA PACK ARENA — rien ne quitte ta machine", arenaDir: '🎮 Dossier MEGA PACK ARENA', arenaDirD: 'Où se trouve le jeu (arena-app) — détection automatique sinon', arenaOpen: "Ouvrir l'arène", arenaChosen: '✓ Dossier ARENA enregistré', arenaBad: '✗ Dossier invalide (main.js introuvable)', arenaOpenErr: "✗ Arène introuvable — choisnis son dossier d'abord", pdir: '📁 Dossier MEGA PROMPT (.md)', pdirD: "Bibliothèque locale : skills/, agents/, perso/ — chaque prompt de l'app en fichier .md, avec le prompt d'activation prêt à coller", pdirChoose: 'Choisir', pdirOpen: 'Ouvrir', pdirSync: 'Générer tous les .md (catalogue + perso)', pdirSynced: (n, p) => `✓ ${n} fichiers .md générés — ${p}`, pdirTree: 'Arborescence : skills/<catégorie>/ · agents/<catégorie>/ · perso/<tag>/ + LISEZMOI.md', cfg: 'Configuration', cfgD: 'Favoris, récents et préférences en JSON', xp: 'Mes prompts ✍️', xpD: 'Télécharge tous tes prompts en Markdown', osel: 'Ouvrir la sélection', oselD: 'Dans le panneau : ⏎ copie · ⌘⏎ LLM par défaut · ⇧⏎ ChatGPT', tour: '🎓 Mode d\'emploi interactif', tourD: 'Revoit la visite guidée en 7 étapes : recherche, LLM, clic droit, Atelier, équipes…', tourBtn: 'Relancer la visite', saved: '✓ Enregistré', noCat: 'catalogue introuvable', intel: '🧠 Intelligence — génération IA (Atelier)', intelD: "Clé API pour générer agents & skills. Chiffrée par macOS — refusée si le chiffrement OS est indisponible (jamais stockée en clair) ; ou variable d'environnement (GROQ_API_KEY, OPENAI_API_KEY…)", apiSave: 'Enregistrer la clé', apiTest: 'Tester', apiModels: 'Modèles conseillés', apiSaved: '✓ Clé enregistrée', apiDeleted: 'Clé effacée', apiTesting: 'Test en cours…', apiOk: (m, l) => `✓ Connecté — ${m} (${l} ms)`, apiFail: '✗ Échec' },
+  en: { title: 'MEGA PACK — Settings', h2: '⚡ MEGA PACK — Settings', cat: 'Catalog:', genFrom: '· generated from', theme: 'Theme', themeD: 'Applied to the panel and this window', dark: '🌙 Dark', light: '☀️ Light', lang: 'Language', langD: 'Panel interface', gs: 'Global search', gsD: 'System shortcut (⌘Space is reserved by Spotlight)', set: 'Settings', setD: 'Open this window', dllm: 'Default LLM', dllmD: '⌘⏎ in the panel opens this chat', tgt: 'Right-click destinations', tgtD: 'Floating menu on an agent/skill: one-click send to several LLMs (first one wins priority)', tgtHint: 'Click to add/remove — order = priority', auto: 'Launch at startup', autoD: 'Open MEGA PACK at login', fsc: 'Favorite shortcuts', fscD: '⌘1 to ⌘9 launch the first 9 favorites (open ⚡ menu)', keep: '📌 Keep the panel visible', keepD: 'The panel no longer hides when you click another window (also via the panel 📌 button)', arenaBus: '🎮 ARENA event bus', arenaBusD: 'Writes your activity locally (agents generated, prompts copied…) for the MEGA PACK ARENA game — nothing leaves your machine', arenaDir: '🎮 MEGA PACK ARENA folder', arenaDirD: 'Where the game (arena-app) lives — auto-detected otherwise', arenaOpen: 'Open the Arena', arenaChosen: '✓ ARENA folder saved', arenaBad: '✗ Invalid folder (main.js not found)', arenaOpenErr: '✗ Arena not found — choose its folder first', pdir: '📁 MEGA PROMPT folder (.md)', pdirD: "Local library: skills/, agents/, perso/ — every prompt of the app as a .md file, with the activation prompt ready to paste", pdirChoose: 'Choose', pdirOpen: 'Open', pdirSync: 'Generate all .md files (catalog + custom)', pdirSynced: (n, p) => `✓ ${n} .md files generated — ${p}`, pdirTree: 'Tree: skills/<category>/ · agents/<category>/ · perso/<tag>/ + LISEZMOI.md', cfg: 'Configuration', cfgD: 'Favorites, recents and preferences as JSON', xp: 'My prompts ✍️', xpD: 'Download all your prompts as Markdown', osel: 'Open selection', oselD: 'In the panel: ⏎ copy · ⌘⏎ default LLM · ⇧⏎ ChatGPT', tour: '🎓 Interactive guide', tourD: 'Replays the 7-step guided tour: search, LLM, right-click, Workshop, teams…', tourBtn: 'Replay the tour', saved: '✓ Saved', noCat: 'catalog not found', intel: '🧠 Intelligence — AI generation (Workshop)', intelD: 'API key used to generate agents & skills. Encrypted by macOS — refused when OS encryption is unavailable (never stored in clear text); or use env variables (GROQ_API_KEY, OPENAI_API_KEY…)', apiSave: 'Save key', apiTest: 'Test', apiModels: 'Suggested models', apiSaved: '✓ Key saved', apiDeleted: 'Key cleared', apiTesting: 'Testing…', apiOk: (m, l) => `✓ Connected — ${m} (${l} ms)`, apiFail: '✗ Failed' },
 };
 let LANG = 'fr';
 try { LANG = localStorage.getItem('mgp.lang') || 'fr'; } catch (e) {}
@@ -23,6 +23,9 @@ const dllmSel = document.getElementById('dllm');
 const autostartCb = document.getElementById('autostart');
 const favShortcutsCb = document.getElementById('favshortcuts');
 const keepVisibleCb = document.getElementById('keepvisible');
+const arenaBusCb = document.getElementById('arenabus');
+const arenaOpenBtn = document.getElementById('arenaOpen');
+const arenaChooseBtn = document.getElementById('arenaChoose');
 const saved = document.getElementById('saved');
 const targetsBox = document.getElementById('targets');
 const apiProv = document.getElementById('apiProv');
@@ -59,6 +62,9 @@ if (pdirPath) {
 const ALL_TARGETS = [
   ['claude', 'Claude'], ['chatgpt', 'ChatGPT'], ['perplexity', 'Perplexity'], ['copilot', 'Copilot'],
   ['deepseek', 'DeepSeek'], ['zai', 'Z.ai'], ['kimi', 'Kimi'], ['mammouth', 'Mammouth.ia'],
+  ['manus', 'Manus (agent)'], ['noah', 'Noah'],
+  ['claude-app', 'Claude (app macOS)'], ['claude-code', 'Claude Code (web)'],
+  ['openhands', 'OpenHands (local)'], ['chrome', 'Chrome (onglet)'], ['brave', 'Brave (onglet)'],
   ['freebuff', 'Freebuff (app)'], ['opencode-app', 'OpenCode (desktop)'], ['opencode', 'OpenCode (terminal)'], ['clipboard', '📋 Presse-papiers'],
 ];
 let sendTargets = [];
@@ -97,6 +103,7 @@ try {
   autostartCb.checked = !!P.autostart;
   if (typeof P.favShortcuts === 'boolean') favShortcutsCb.checked = P.favShortcuts;
   if (keepVisibleCb) keepVisibleCb.checked = !!P.keepVisible; // 📌 « garder le panneau visible »
+  if (arenaBusCb) arenaBusCb.checked = P.arenaBus !== false; // 🎮 bus d'événements ARENA (ON par défaut)
 } catch (e) { /* défauts */ }
 renderTargets();
 
@@ -144,6 +151,7 @@ function persist() {
     autostart: autostartCb.checked,
     favShortcuts: favShortcutsCb.checked,
     keepVisible: keepVisibleCb.checked,
+    arenaBus: arenaBusCb ? arenaBusCb.checked : true,
   });
   saved.classList.add('show');
   setTimeout(() => saved.classList.remove('show'), 1200);
@@ -155,6 +163,16 @@ dllmSel.onchange = persist;
 autostartCb.onchange = persist;
 favShortcutsCb.onchange = persist;
 if (keepVisibleCb) keepVisibleCb.onchange = persist;
+if (arenaBusCb) arenaBusCb.onchange = persist;
+if (arenaOpenBtn) arenaOpenBtn.onclick = async () => {
+  const r = await window.mgp.arenaOpen();
+  if (!r || !r.ok) { saved.textContent = '✗ ' + (I18N[LANG] || I18N.fr).arenaOpenErr; saved.classList.add('show'); setTimeout(() => saved.classList.remove('show'), 1500); }
+};
+if (arenaChooseBtn) arenaChooseBtn.onclick = async () => {
+  const r = await window.mgp.arenaDirChoose();
+  if (r && r.ok) { saved.textContent = '✓ ' + (I18N[LANG] || I18N.fr).arenaChosen; saved.classList.add('show'); setTimeout(() => saved.classList.remove('show'), 1500); }
+  else if (r && r.error === 'invalid') { saved.textContent = (I18N[LANG] || I18N.fr).arenaBad; saved.classList.add('show'); setTimeout(() => saved.classList.remove('show'), 1500); }
+};
 
 // ── Intelligence : clé API + test de connexion (via main process) ──
 const MODELS_HINT = {
@@ -245,8 +263,18 @@ if (window.mgp && window.mgp.onSettings) {
   window.mgp.onSettings(({ theme, lang, keepVisible }) => {
     themeSel.value = theme; langSel.value = lang;
     if (typeof keepVisible === 'boolean' && keepVisibleCb) keepVisibleCb.checked = keepVisible; // bouton 📌 du panneau ↔ réglages
+    if (typeof keepVisible === 'boolean' && arenaBusCb) { /* resync bus via import de config */ }
     LANG = lang; applyLang();
     document.body.className = theme === 'light' ? 'light' : '';
+  });
+}
+// Menu tray → « ⌨️ Changer le raccourci… » : met en évidence le select du raccourci
+if (window.mgp && window.mgp.onGotoShortcut) {
+  window.mgp.onGotoShortcut(() => {
+    shortcutSel.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    shortcutSel.focus();
+    shortcutSel.style.outline = '2px solid var(--acc)';
+    setTimeout(() => { shortcutSel.style.outline = ''; }, 2500);
   });
 }
 document.body.className = themeSel.value === 'light' ? 'light' : '';

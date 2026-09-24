@@ -366,6 +366,22 @@ button.histrest:hover{border-color:var(--vio);color:var(--txt)}
 #pinb[aria-pressed="true"]{border-color:var(--vio);color:var(--txt);
   background:rgba(153,69,255,.14)}
 
+/* ── ⚙ réglages dans le header ── */
+#setb{min-width:28px;height:28px;border-radius:8px;border:1px solid var(--line);
+  background:transparent;color:var(--txt2);cursor:pointer;font-size:13px}
+#setb:hover{border-color:var(--line2);color:var(--txt)}
+
+/* ── ↘ poignées de redimensionnement aux 4 coins (invisibles au repos) ── */
+.rz{position:fixed;z-index:10000;width:18px;height:18px;opacity:0;transition:opacity .15s;cursor:nwse-resize}
+.rz.nw{top:0;left:0;cursor:nwse-resize}
+.rz.ne{top:0;right:0;cursor:nesw-resize}
+.rz.sw{bottom:0;left:0;cursor:nesw-resize}
+.rz.se{bottom:0;right:0;cursor:nwse-resize}
+#app:hover .rz{opacity:.55}
+.rz:hover{opacity:1 !important;background:linear-gradient(135deg,transparent 45%,var(--vio) 50%,var(--grn) 55%,transparent 60%)}
+body.rz-dragging{user-select:none;cursor:inherit}
+body.rz-dragging .rz{opacity:1}
+
 /* ── ❔ aide intégrée : pop-up flottant au survol des boutons « ? » ── */
 .helpw{display:inline-flex;align-items:center}
 .helpb{border:1px solid var(--line);background:transparent;color:var(--mut);cursor:help;

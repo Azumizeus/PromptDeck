@@ -179,6 +179,11 @@ fr: {
   restoreT: 'Restaurer cette version',
   restoreDone: (f) => `⏪ Version restaurée (${f} champ${f > 1 ? 's' : ''} reverti${f > 1 ? 's' : ''})`,
   restoreErr: '⏪ Restauration impossible',
+  // 🧰 Prompts Kit (Atelier → deck ✍️)
+  kitBtn: 'Prompts Kit',
+  kitT: 'Crée la suite complète : prompt final (méta-prompt IA) + baseline + évaluateur /25 — dans tes prompts ✍️',
+  kitSaved: (n) => `🧰 ${n} prompts ajoutés au deck ✍️ (tag « prompting »)`,
+  kitNeedIntent: "Décris d'abord ton besoin dans la zone de texte de l'Atelier — le Kit l'utilise pour construire les prompts.",
   // 💾 Auto-backup hebdo
   autoBkOn: (d) => `💾 Sauvegarde auto hebdomadaire active — dossier : ${d}`,
   // 📌 Garder le panneau visible
@@ -356,6 +361,11 @@ en: {
   histT: '🕘 Change history',
   histEmpty: 'No changes recorded yet — history starts with your first edit.',
   histRow: (n, d) => `${n} field${n > 1 ? 's' : ''} changed · ${d}`,
+  // 🧰 Prompts Kit (Workshop → deck)
+  kitBtn: 'Prompts Kit',
+  kitT: 'Creates the full suite: final prompt (AI meta-prompt) + baseline + /25 evaluator — in your ✍️ prompts',
+  kitSaved: (n) => `🧰 ${n} prompts added to the ✍️ deck (tag “prompting”)`,
+  kitNeedIntent: 'First describe your need in the Workshop text area — the Kit builds the prompts from it.',
   histShow: '🕘 History',
   histHide: 'Hide history',
   // 📌 Keep visible · ✕ clear search · 📂 drag & drop · ❔ help (feature parity)
@@ -432,11 +442,12 @@ const lockOf = (k, name) => !!(LOCKS[k] && LOCKS[k].has(name));
 const itemLocked = (k, rec) => !!(lockOf(k, rec && rec.name) || (rec && rec.locked));
 const setLockLocal = (k, name, on) => { on ? LOCKS[k].add(name) : LOCKS[k].delete(name); };
 const isFav = (n) => FAVS.has(n);
-const LLM_LABEL = { claude: 'Claude', chatgpt: 'ChatGPT', perplexity: 'Perplexity', copilot: 'Copilot', deepseek: 'DeepSeek', zai: 'Z.ai', kimi: 'Kimi', mammouth: 'Mammouth', 'llm-api': LANG === 'fr' ? '🔑 API' : '🔑 API' };
+const LLM_LABEL = { claude: 'Claude', chatgpt: 'ChatGPT', perplexity: 'Perplexity', copilot: 'Copilot', deepseek: 'DeepSeek', zai: 'Z.ai', kimi: 'Kimi', mammouth: 'Mammouth', manus: 'Manus (agent)', noah: 'Noah', 'llm-api': LANG === 'fr' ? '🔑 API' : '🔑 API', 'claude-app': LANG === 'fr' ? 'Claude (app macOS)' : 'Claude (macOS app)', 'claude-code': 'Claude Code (web)', openhands: 'OpenHands (local)', chrome: 'Chrome (onglet)', brave: 'Brave (onglet)' };
 const TGT_META = { freebuff: 'Freebuff (app)', 'opencode-app': 'OpenCode (desktop)', opencode: 'OpenCode (terminal)', clipboard: LANG === 'fr' ? 'Presse-papiers' : 'Clipboard' };
 const tgtLabel = (t) => TGT_META[t] || LLM_LABEL[t] || t;
 // Sélecteur de LLM (barre du bas) : les modèles de base de l'app + l'API si clé présente
-const LLM_CHOICES = ['claude', 'chatgpt', 'perplexity', 'copilot', 'deepseek', 'zai', 'kimi', 'mammouth', 'llm-api'];
+// Toutes les destinations (apps locales + services web utilisés) — le sélecteur ⌨ du footer et le clic droit les listent
+const LLM_CHOICES = ['claude', 'chatgpt', 'perplexity', 'copilot', 'deepseek', 'zai', 'kimi', 'mammouth', 'manus', 'noah', 'llm-api', 'claude-app', 'claude-code', 'openhands', 'chrome', 'brave', 'freebuff', 'opencode-app', 'opencode', 'clipboard'];
 const hasAnyApi = () => Object.values(SYS.hasApi || {}).some(Boolean);
 const llmChoices = () => (hasAnyApi() ? LLM_CHOICES : LLM_CHOICES.slice(0, -1));
 // LLM par défaut réactif : les Réglages (ou le sélecteur du footer) peuvent le changer à chaud
@@ -495,6 +506,7 @@ APP_PARENT.insertAdjacentHTML('afterbegin', `
     <span style="flex:1"></span>
     <button id="newp" title="${T.newp}" aria-label="${T.newp}">＋</button>
     <button id="langb" title="FR/EN" aria-label="FR/EN">${LANG === 'fr' ? 'FR' : 'EN'}</button>
+    <button id="setb" title="${LANG === 'fr' ? '⚙ Réglages (⌘,)' : '⚙ Settings (⌘,)'}" aria-label="${LANG === 'fr' ? 'Réglages' : 'Settings'}">⚙</button>
   </header>
   <div id="searchrow">
     <span id="lupa" aria-hidden="true">⌕</span>
@@ -588,6 +600,7 @@ APP_PARENT.insertAdjacentHTML('afterbegin', `
       <label class="wchk"><input type="checkbox" id="w-senior" checked> ${T.atelierSenior}</label>
       <div class="wact">
         <button id="w-gen" class="pri">${T.atelierGen}</button>
+        <button id="w-kit" title="${T.kitT}">🧰 ${T.kitBtn}</button>
         <span style="flex:1"></span>
         <button id="w-x">${LANG === 'fr' ? 'Fermer' : 'Close'}</button>
       </div>
@@ -1409,13 +1422,89 @@ $('qclear').onclick = () => {
   $('qclear').hidden = true;
   render(); q.focus();
 };
-// 📌 « Garder le panneau visible » : bascule persistée (préférence keepVisible)
+// ⚙ Réglages depuis le panneau (même chemin que ⌘,)
+$('setb').onclick = () => window.mgp.openSettings();
+// ── Redimensionnement intelligent : poignées invisibles aux 4 coins + presets ──
+// La fenêtre Electron n'est resizable que par sa poignée native (bas-droite) ; ces
+// poignées DOM ajoutent les 3 autres coins + le snapper S/M/L/XL (tailles utiles).
+const RZ = {
+  sizes: [
+    { k: 'S', w: 480, h: 500 },
+    { k: 'M', w: 640, h: 660 },
+    { k: 'L', w: 860, h: 820 },
+    { k: 'XL', w: 1080, h: 960 },
+  ],
+  drag: null, // { corner, startX, startY, startW, startH }
+};
+function rzResize(w, h) {
+  // borne par l'espace de l'écran courant (jamais plus grand que le workArea - marges)
+  const wa = { w: window.screen ? window.screen.availWidth : 1600, h: window.screen ? window.screen.availHeight : 900 };
+  w = Math.max(420, Math.min(Math.round(w), wa.w - 24));
+  h = Math.max(440, Math.min(Math.round(h), wa.h - 24));
+  window.resizeTo(w, h);
+}
+// Les presets S/M/L/XL : cycle depuis la taille courante (le « plus proche vers le haut ») ; le choix est mémorisé
+function rzCyclePreset() {
+  const w = window.innerWidth;
+  const next = RZ.sizes.find((s) => s.w > w + 40) || RZ.sizes[0]; // boucle après XL
+  rzResize(next.w, next.h);
+  try { window.mgp.onSettingsChange && window.mgp.onSettingsChange({ panelSize: next.k }); } catch (e) {}
+  showToast((LANG === 'fr' ? '📐 Taille ' : '📐 Size ') + next.k + ` (${next.w}×${next.h})`, 'ok');
+}
+['nw', 'ne', 'sw', 'se'].forEach((corner) => {
+  const h = document.createElement('div');
+  h.className = 'rz ' + corner;
+  h.title = LANG === 'fr' ? 'Redimensionner (glisser) · ⌥-clic : preset suivant · 🧲 aimanté ¼/½/¾ écran' : 'Resize (drag) · Alt-click: next preset · 🧲 snap ¼/½/¾ screen';
+  h.addEventListener('mousedown', (e) => {
+    if (e.altKey) { e.preventDefault(); rzCyclePreset(); return; }
+    e.preventDefault();
+    RZ.drag = { corner, startX: e.screenX, startY: e.screenY, startW: window.innerWidth, startH: window.innerHeight, dx: corner.includes('w') ? 1 : -1, dy: corner.includes('n') ? 1 : -1 };
+    document.body.classList.add('rz-dragging');
+  });
+  document.body.appendChild(h);
+});
+document.addEventListener('mousemove', (e) => {
+  if (!RZ.drag) return;
+  const d = RZ.drag;
+  const dw = (e.screenX - d.startX) * d.dx;
+  const dh = (e.screenY - d.startY) * d.dy;
+  let w = d.startW + dw * 2, h = d.startH + dh * 2;
+  // 🧲 Snap magnétique : quart / demi / trois-quarts de largeur + demi hauteur d'écran
+  const wa = { w: window.screen ? window.screen.availWidth : 1600, h: window.screen ? window.screen.availHeight : 900 };
+  const SNAP = 32;
+  d.snapW = null; d.snapH = null;
+  for (const f of [0.25, 0.5, 0.75]) {
+    const t = Math.round(wa.w * f);
+    if (Math.abs(w - t) < SNAP) { w = t; d.snapW = f; break; }
+  }
+  const th = Math.round(wa.h * 0.5);
+  if (Math.abs(h - th) < SNAP) { h = th; d.snapH = 0.5; }
+  rzResize(w, h);
+});
+document.addEventListener('mouseup', () => {
+  if (!RZ.drag) return;
+  const d = RZ.drag;
+  RZ.drag = null;
+  document.body.classList.remove('rz-dragging');
+  // 🧲 fin de glisser : mémorise le preset le plus proche si on est près d'une taille canonique
+  const w = window.innerWidth;
+  const near = RZ.sizes.reduce((a, s) => (Math.abs(s.w - w) < Math.abs(a.w - w) ? s : a), RZ.sizes[0]);
+  if (Math.abs(near.w - w) < 40) {
+    try { window.mgp.onSettingsChange && window.mgp.onSettingsChange({ panelSize: near.k }); } catch (e) {}
+  }
+  if (d.snapW || d.snapH) {
+    const pct = d.snapW ? Math.round(d.snapW * 100) + (LANG === 'fr' ? ' % de largeur' : '% width') : (LANG === 'fr' ? 'demi-hauteur' : 'half height');
+    showToast((LANG === 'fr' ? '🧲 Aimanté : ' : '🧲 Snapped: ') + pct, 'ok');
+  }
+});
+// 📌 « Garder le panneau visible » : bascule persistée (préférence keepVisible).
+// UN SEUL canal IPC (set-keep-visible) — l'ancien double envoi (set-keep-visible
+// + settings-changed) pouvait faire se contredire main et Réglages.
 $('pinb').onclick = () => {
   const on = $('pinb').getAttribute('aria-pressed') !== 'true';
   $('pinb').setAttribute('aria-pressed', String(on));
   $('pinb').classList.toggle('pinned', on);
   try { window.mgp.setKeepVisible && window.mgp.setKeepVisible(on); } catch (e) {}
-  try { window.mgp.onSettingsChange && window.mgp.onSettingsChange({ keepVisible: on }); } catch (e) {}
   showToast(on ? T.pinOn : T.pinOff, 'ok');
 };
 // ---------- 📂 Glisser-déposer de fichier → prompt ✍️ ----------
@@ -1491,6 +1580,68 @@ document.addEventListener('drop', (e) => {
     if (txt && txt.trim()) openDropModal({ name: LANG === 'fr' ? 'Texte collé' : 'Pasted text', text: txt });
   }
 });
+
+// ────────────────────────────────────────────────────────────────────────
+//  🧰 Prompts Kit — génère et enregistre la suite d'évaluation d'un prompt :
+//  1) méta-prompt (une IA écrit le prompt final), 2) baseline (la demande brute,
+//  sert de témoin), 3) évaluateur /25 (5 critères, juge croisé recommandé).
+// ────────────────────────────────────────────────────────────────────────
+function kitPrompts(intent) {
+  const need = String(intent || '').trim().slice(0, 300);
+  const fr = LANG !== 'en';
+  const meta = fr
+    ? `Tu es ingénieur de prompts senior. Mon besoin brut : « ${need} ».
+Transforme-le en prompt optimisé : rôle de l'IA, contexte utile, tâche exacte, contraintes, format de sortie précis, et un exemple court de résultat attendu. Pose-moi 3 questions si des informations essentielles manquent, sinon livre directement le prompt final seul, dans un bloc de code.`
+    : `You are a senior prompt engineer. My raw need: “${need}”.
+Turn it into an optimized prompt: the AI's role, useful context, the exact task, constraints, a precise output format, and a short example of the expected result. Ask me 3 questions if essential information is missing, otherwise deliver the final prompt alone, in a code block.`;
+  const baseline = fr
+    ? `« ${need} »`
+    : `“${need}”`;
+  const evalr = fr
+    ? `Évalue la réponse suivante par rapport à la demande donnée. Note chaque critère /5 avec une justification d'une ligne, puis liste les 2 manques principaux :
+- Conformité (fait exactement ce que la demande exige ?)
+- Complétude (aucune partie du besoin oubliée ?)
+- Format (respecte le format de sortie demandé ?)
+- Exactitude (faits vérifiables, pas d'hallucination)
+- Utilité (exploitable tel quel, sans réécriture ?)
+Total /25. Un bon prompt atteint 20+/25 de façon stable sur 3 exécutions.
+Conseil : utilise ce prompt dans un LLM DIFFÉRENT de celui qui a répondu (juge croisé = moins complaisant).
+Demande : « {colle ici la demande} »
+Réponse : « {colle ici la réponse à évaluer} »`
+    : `Evaluate the following answer against the given request. Score each criterion /5 with a one-line justification, then list the 2 main gaps:
+- Compliance (does it do exactly what the request requires?)
+- Completeness (no part of the need forgotten?)
+- Format (respects the requested output format?)
+- Accuracy (verifiable facts, no hallucination)
+- Usefulness (usable as-is, without rewriting?)
+Total /25. A good prompt reaches 20+/25 stably across 3 runs.
+Tip: run this prompt in a DIFFERENT LLM than the one that answered (cross-judging = less lenient).
+Request: “{paste the request here}”
+Answer: “{paste the answer to evaluate here}”`;
+  return [
+    { name: fr ? 'Méta-prompt — écrire un prompt' : 'Meta-prompt — write a prompt', desc: meta, tag: 'prompting' },
+    { name: fr ? 'Baseline — demande brute' : 'Baseline — raw request', desc: baseline, tag: 'prompting' },
+    { name: fr ? 'Évaluateur de prompts /25' : 'Prompt evaluator /25', desc: evalr, tag: 'prompting' },
+  ];
+}
+async function saveKitPrompts() {
+  const intent = wintent.value.trim();
+  if (!intent) { showToast(T.kitNeedIntent, 'err'); return; }
+  const items = kitPrompts(intent);
+  let n = 0;
+  for (const it of items) {
+    let name = it.name;
+    if (CUSTOMS.some((c) => c.name === name)) name = `${name} (kit)`; // jamais d'écrasement silencieux
+    const rec = { name, desc: it.desc, tag: it.tag, locked: false };
+    window.mgp.customSave && window.mgp.customSave(rec);
+    const i = CUSTOMS.findIndex((c) => c.name === name);
+    if (i >= 0) CUSTOMS[i] = rec; else CUSTOMS.push(rec);
+    n++;
+  }
+  rebuildAll();
+  render();
+  showToast(T.kitSaved(n), 'ok');
+}
 
 // 🔒 Filtre « verrouillés seulement » : cumulable avec l'onglet actif et la recherche
 $('lkf').onclick = () => {
@@ -1800,6 +1951,7 @@ let currentRunTeam = '';
 function closeWorkshop() { wmodal.hidden = true; }
 $('atb').onclick = openWorkshop;
 $('w-x').onclick = closeWorkshop;
+$('w-kit').onclick = () => saveKitPrompts(); // 🧰 Prompts Kit → deck ✍️
 $('w-close').onclick = closeWorkshop;
 
 wgen.onclick = async (payload) => {
@@ -2019,6 +2171,8 @@ window.__mgp = {
   // 📌 épinglage · ✕ recherche · 📂 drop · ❔ aide (tests + raccourcis)
   fireSettings: (p) => onPanelSettings(p || {}),
   i18n: (l) => (l === 'en' ? I18N_PANEL.en : T),
+  kitPrompts: (i) => kitPrompts(i),
+  saveKitPrompts: () => saveKitPrompts(),
   pinVisible: () => pinbSet,
   pinToggle: () => $('pinb').onclick(),
   pinState: () => $('pinb').getAttribute('aria-pressed') === 'true',

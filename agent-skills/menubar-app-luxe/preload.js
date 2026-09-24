@@ -30,6 +30,7 @@ contextBridge.exposeInMainWorld('mgp', {
   onRestartTour: (cb) => ipcRenderer.on('restart-tour', () => cb()),
   onSettingsChange: (prefs) => ipcRenderer.send('settings-changed', prefs),
   onSettings: (cb) => ipcRenderer.on('settings-changed', (e, prefs) => cb(prefs)),
+  onGotoShortcut: (cb) => ipcRenderer.on('goto-shortcut', () => cb()),
   getPrefs: () => ipcRenderer.sendSync('get-prefs'),
   addRecent: (name) => ipcRenderer.send('add-recent', name),
   toggleFav: (name) => ipcRenderer.send('toggle-fav', name),
@@ -44,6 +45,9 @@ contextBridge.exposeInMainWorld('mgp', {
   customDelete: (name) => ipcRenderer.send('custom-delete', name),
   // 📌 « Garder le panneau visible » : bascule depuis le bouton 📌 du panneau
   setKeepVisible: (on) => ipcRenderer.send('set-keep-visible', on),
+  // 🎮 MEGA PACK ARENA : ouverture du jeu + choix du dossier
+  arenaOpen: () => ipcRenderer.invoke('arena-open'),
+  arenaDirChoose: () => ipcRenderer.invoke('arena-dir-choose'),
   exportCustoms: () => ipcRenderer.invoke('export-customs'),
   onEditCustom: (cb) => ipcRenderer.on('edit-custom', (e, c) => cb(c)),
   // ── Atelier agents/skills + moteur LLM (API clé) ──

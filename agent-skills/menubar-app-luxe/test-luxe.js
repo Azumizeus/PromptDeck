@@ -815,7 +815,7 @@ check(MGP.pinState() === false, 'panneau non épinglé au départ');
 MGP.pinToggle();
 check(MGP.pinState() === true, 'bouton 📌 → panneau épinglé (aria-pressed)');
 check(keepVisibleStore === true, 'préférence keepVisible persistée via IPC');
-check(settingsEvents.length && settingsEvents[settingsEvents.length - 1].keepVisible === true, 'payload keepVisible envoyé aux Réglages');
+check(settingsEvents.length === 0, '📌 un seul canal IPC : pas de payload settings-changed doublon depuis le panneau');
 MGP.fireSettings({ keepVisible: false });
 check(MGP.pinState() === false, 'Réglages → bouton 📌 resynchronisé (keepVisible=false)');
 sandbox.window.mgp.setKeepVisible(false); // la fenêtre Réglages persiste la pref (comme l'IPC réel)
@@ -873,6 +873,151 @@ const T_fr = MGP.i18n(), T_en = MGP.i18n('en');
   check(typeof T_fr[k] === 'string' && T_fr[k].length > 10, `i18n fr « ${k} »`);
   check(typeof T_en[k] === 'string' && T_en[k].length > 10, `i18n en « ${k} »`);
 });
+
+console.log('');
+console.log('26) ⌨ Sélecteurs LLM : toutes les destinations de l\'écosystème (Manus, Noah, Claude Desktop/Code, OpenHands, Chrome/Brave…) :');
+// a) le sélecteur ⌨ du panneau liste les nouvelles destinations
+const menuHtml = MGP.llmMenu();
+['Manus (agent)', 'Noah', 'Claude (app macOS)', 'Claude Code (web)', 'OpenHands (local)', 'Chrome (onglet)', 'Brave (onglet)', 'Freebuff (app)', 'OpenCode (desktop)'].forEach((l) => {
+  check(menuHtml.includes(l), `sélecteur ⌨ : « ${l} » présent`);
+});
+// b) une nouvelle destination est sélectionnable comme LLM par défaut
+MGP.pickLLM('manus');
+check(MGP.defaultLLM() === 'manus', 'Manus sélectionnable comme LLM par défaut');
+MGP.pickLLM('openhands');
+check(MGP.defaultLLM() === 'openhands', 'OpenHands local sélectionnable comme LLM par défaut');
+MGP.pickLLM('claude'); // nettoyage
+// c) contrat main process : le menu ⚡ embarque les cibles + URLs (lecture statique du source)
+const mainSrc = fs.readFileSync(path.join(__dirname, 'main.js'), 'utf8');
+check(mainSrc.includes("['manus', 'Manus (agent)'") && mainSrc.includes('manus.im/app'), 'menu ⚡ : Manus câblé (manus.im/app?queue=)');
+check(mainSrc.includes("['noah', 'Noah'") && mainSrc.includes('trynoah.ai'), 'menu ⚡ : Noah câblé (trynoah.ai)');
+check(mainSrc.includes("['claude-code', 'Claude Code (web)'") && mainSrc.includes('claude.ai/code'), 'menu ⚡ : Claude Code web câblé');
+check(mainSrc.includes("['openhands', 'OpenHands (local)'") && mainSrc.includes('localhost:8000'), 'menu ⚡ : OpenHands local câblé (Docker :8000)');
+check(mainSrc.includes("['claude-app'") && mainSrc.includes('/Applications/Claude.app'), 'menu ⚡ : Claude Desktop (app macOS) câblé');
+check(mainSrc.includes("['chrome'") && mainSrc.includes("['brave'"), 'menu ⚡ : onglets Chrome/Brave câblés');
+check(mainSrc.includes("['manus', 'Manus (agent)'") && mainSrc.includes("['noah'") && mainSrc.includes("['openhands'"), 'sous-menus « Ouvrir dans » : nouvelles cibles partout');
+
+console.log('');
+console.log('27) 🧰 Prompts Kit : méta-prompt + baseline + évaluateur /25 dans le deck ✍️ :');
+// a) contenu des 3 prompts (FR)
+const kit = MGP.kitPrompts('créer un plan de projet pour un site vitrine');
+check(kit.length === 3, 'kit = 3 prompts');
+check(kit[0].tag === 'prompting' && kit[1].tag === 'prompting' && kit[2].tag === 'prompting', 'tag « prompting » sur les 3');
+check(kit[0].name.startsWith('Méta-prompt') && kit[0].desc.includes('ingénieur de prompts senior') && kit[0].desc.includes('créer un plan de projet'), 'méta-prompt : rôle + besoin intégré');
+check(kit[1].name.startsWith('Baseline') && kit[1].desc.includes('créer un plan de projet'), 'baseline = la demande brute');
+check(kit[2].name.startsWith('Évaluateur') && kit[2].desc.includes('/25') && kit[2].desc.includes('Conformité') && kit[2].desc.includes('Utilité') && kit[2].desc.includes('juge croisé'), 'évaluateur : 5 critères, /25, juge croisé');
+// b) enregistrement dans le deck (customSave → customsStore) sans écrasement
+const before27 = customsStore.length;
+MGP.openWorkshop();
+sandbox.document.getElementById('w-intent').value = 'créer un plan de projet pour un site vitrine';
+await MGP.saveKitPrompts();
+const added = customsStore.slice(before27);
+check(added.length === 3 && added.every((c) => c.tag === 'prompting'), '3 prompts enregistrés dans le deck ✍️');
+check(MGP.counts().customs === before27 + 3, 'compteur ✍️ mis à jour');
+const secondKit = customsStore.filter((c) => c.name.startsWith('Méta-prompt'));
+check(secondKit.length === 1, 'pas de doublon au premier passage');
+sandbox.document.getElementById('w-intent').value = 'un autre besoin';
+await MGP.saveKitPrompts();
+check(customsStore.filter((c) => c.name.startsWith('Méta-prompt')).length === 2 && customsStore.some((c) => c.name.includes('(kit)')), 'deuxième kit : suffixe (kit), aucun écrasement');
+// c) garde : sans intention → refus net
+const nBefore = customsStore.length;
+sandbox.document.getElementById('w-intent').value = '';
+await MGP.saveKitPrompts();
+check(customsStore.length === nBefore, 'sans intention : rien d\'enregistré, message d\'erreur');
+// d) les i18n du kit existent en FR et EN (coffre 5 critères + juge croisé côté main vérifié en 26)
+const Tfr27 = MGP.i18n(), Ten27 = MGP.i18n('en');
+check(typeof Tfr27.kitBtn === 'string' && typeof Ten27.kitBtn === 'string' && Tfr27.kitBtn === Ten27.kitBtn, 'bouton 🧰 libellé FR/EN');
+
+console.log('');
+console.log('28) 🎮 Bus d\'événements ARENA : agent généré → fighter à son nom :');
+const mainSrc28 = fs.readFileSync(path.join(__dirname, 'main.js'), 'utf8');
+check(mainSrc28.includes('function arenaEvent(') && mainSrc28.includes('arena-events.ndjson'), 'bus NDJSON arena-events.ndjson présent dans le main process');
+check(mainSrc28.includes("arenaEvent('agent-created'") && mainSrc28.includes("arenaEvent('skill-created'") && mainSrc28.includes("arenaEvent('team-created'"), 'hooks création agent/skill/équipe');
+check(mainSrc28.includes("arenaEvent('prompt-sent'") && mainSrc28.includes("arenaEvent('item-locked'") && mainSrc28.includes("'custom-created' : 'custom-edited'") && mainSrc28.includes("arenaEvent('item-deleted'"), 'hooks prompt-sent / lock / custom / suppression');
+check(/arenaEvent\('agent-created'[^;]*name: copy\.name/.test(mainSrc28), 'agent-created porte bien le NOM de l\'agent (fighter à son nom)');
+// l'app ARENA existe et consomme le flux
+const arenaDir = path.join(__dirname, '..', 'arena-app');
+check(fs.existsSync(path.join(arenaDir, 'main.js')) && fs.existsSync(path.join(arenaDir, 'renderer.js')), 'app arena-app/ présente (main + renderer)');
+const arenaSrc = fs.readFileSync(path.join(arenaDir, 'renderer.js'), 'utf8');
+check(arenaSrc.includes("case 'agent-created'") && arenaSrc.includes('spawnFighter(ev.name'), 'ARENA : agent-created → spawnFighter(ev.name)');
+check(arenaSrc.includes("arena-events") === false && fs.readFileSync(path.join(arenaDir, 'main.js'), 'utf8').includes('arena-events.ndjson'), 'ARENA lit le même arena-events.ndjson');
+check(arenaSrc.includes("case 'prompt-sent'") && arenaSrc.includes("case 'team-created'"), 'ARENA mappe prompt-sent et team-created');
+
+console.log('');
+console.log("29) 🎮 Integration ARENA : bouton menu ⚡, toggle bus Réglages, scène course :");
+// a) gate du bus + défaut ON + bouton menu
+check(/arenaBus: true/.test(mainSrc28) && mainSrc28.includes('if (PREFS.arenaBus === false) return'), 'bus ARENA : ON par défaut + coupable depuis Réglages');
+check(mainSrc28.includes("Ouvrir l'arène") && mainSrc28.includes("ipcMain.handle('arena-open'"), 'menu ⚡ : entrée 🎮 + IPC arena-open');
+check(mainSrc28.includes("ipcMain.handle('arena-dir-choose'"), 'Réglages : choix du dossier ARENA');
+check(fs.readFileSync(path.join(__dirname, 'preload.js'), 'utf8').includes('arenaOpen'), 'preload : pont arenaOpen');
+const setSrc28 = fs.readFileSync(path.join(__dirname, 'settings.js'), 'utf8');
+check(setSrc28.includes("getElementById('arenabus')") && setSrc28.includes('arenaBus: arenaBusCb'), 'Réglages : checkbox bus câblée au payload');
+check(fs.readFileSync(path.join(__dirname, 'settings.html'), 'utf8').includes('id="arenabus"'), 'Réglages : case « Bus d\'événements ARENA » présente');
+// b) scène course + alternance selon la veille
+const arenaMain28 = fs.readFileSync(path.join(arenaDir, 'main.js'), 'utf8');
+check(arenaMain28.includes('function chooseMode()') && arenaMain28.includes('yesterdayActivity() >= 10'), 'ARENA : mode choisi selon l\'activité de la veille (≥10 → combat)');
+check(arenaMain28.includes("--shot") && arenaMain28.includes("--check"), 'ARENA : modes capture et vérif CLI');
+check(arenaSrc.includes('function drawRace()') && arenaSrc.includes('TRACK_SAMPLES') && arenaSrc.includes('function tickRace()'), 'ARENA : circuit Bézier + progression + chrono');
+check(arenaSrc.includes('🏁 COURSE') && arenaSrc.includes('spawnRacer'), 'ARENA : course affichée, agents pilotes');
+
+console.log('');
+console.log('30) 📌 Pin robuste : fenêtre jamais perdue hors écran, blur sans race, IPC unique :');
+// a) clamp des bounds hors écran (écran externe débranché)
+check(mainSrc28.includes('function clampToScreen(') && mainSrc28.includes('getAllDisplays()'), 'main : clampToScreen vérifie tous les écrans');
+check(mainSrc28.includes('const r = clampToScreen(saved);'), 'main : bounds persistés clampés à la création');
+check(mainSrc28.includes('const vis = clampToScreen(b);') && mainSrc28.includes('win.setBounds(vis)'), 'main : réapparition re-clampe les bounds existants');
+check(mainSrc28.includes("display-metrics-changed"), 'main : re-clamp auto quand la config écran change');
+// b) blur avec délai anti-race (le clic 📌 ne doit plus cacher la fenêtre)
+const blurBlock = mainSrc28.slice(mainSrc28.indexOf("win.on('blur'"), mainSrc28.indexOf("win.on('blur'") + 500);
+check(blurBlock.includes('setTimeout(') && blurBlock.includes('PREFS.keepVisible'), 'main : blur différé (pas de hide pendant le clic 📌)');
+check(mainSrc28.includes('!win.isVisible()) win.show()') || mainSrc28.includes('!win.isVisible()) win.show();'), 'main : épingler une fenêtre cachée la remontre');
+// c) renderer : un seul canal IPC pour le pin (plus de double envoi contradictoire)
+const rSrc30 = fs.readFileSync(path.join(__dirname, 'renderer.js'), 'utf8');
+const pinBlock = rSrc30.slice(rSrc30.indexOf("$('pinb').onclick"), rSrc30.indexOf('$(\'pinb\').onclick') + 600);
+check(pinBlock.includes('setKeepVisible') && !pinBlock.includes('onSettingsChange'), 'renderer : 📌 = un seul canal IPC (set-keep-visible)');
+// d) le settings-changed continue de synchroniser le bouton (Réglages ↔ panneau)
+check(rSrc30.includes('typeof keepVisible === \'boolean\''), 'renderer : echo Réglages → bouton 📌 conservé');
+
+console.log('');
+console.log('31) ⌥P global · ⚙ dans le header · resize 4 coins intelligent · audit prefs :');
+// a) raccourci global ⌥P : bascule keepVisible + echo aux fenêtres
+check(mainSrc28.includes("globalShortcut.register('Alt+P'") && mainSrc28.includes('function toggleKeepVisible('), 'main : ⌥P bascule keepVisible globalement (via toggleKeepVisible)');
+check(/function toggleKeepVisible\([\s\S]{0,1200}settings-changed/.test(mainSrc28), '⌥P : echo aux fenêtres (panneau + Réglages)');
+check(mainSrc28.includes('Panel pinned') || mainSrc28.includes('Panneau épinglé'), '⌥P : notification de confirmation');
+check(/function toggleKeepVisible\([\s\S]{0,300}createPanel\(\)/.test(mainSrc28), '⌥P ON sans fenêtre → createPanel (le raccourci fait apparaître le panneau)');
+// b) bouton ⚙ dans le header du panneau
+check(rSrc30.includes('id="setb"') && rSrc30.includes("$('setb').onclick = () => window.mgp.openSettings()"), 'renderer : bouton ⚙ header → openSettings');
+// c) resize 4 coins + presets bornés
+check(rSrc30.includes("['nw', 'ne', 'sw', 'se']") && rSrc30.includes('function rzResize('), 'renderer : poignées 4 coins + resize');
+check(rSrc30.includes("RZ.sizes.find") && rSrc30.includes('rzCyclePreset'), 'renderer : presets S/M/L/XL (⌥-clic)');check(rSrc30.includes('wa.w - 24'), 'resize borné par le workArea de l\'écran');
+check(fs.readFileSync(path.join(__dirname, 'theme.js'), 'utf8').includes('.rz.nw'), 'CSS : poignées positionnées (nw/ne/sw/se)');
+// d) audit prefs : promptDir/arenaDir périmés purgés, bounds clampées re-persistées
+check(/PREFS\.promptDir = ''; savePrefs\(\);/.test(mainSrc28), 'audit : promptDir supprimé sur disque → fallback défaut');
+check(/PREFS\.arenaDir = ''; savePrefs\(\);/.test(mainSrc28), 'audit : arenaDir périmé purgé');
+check(/PREFS\.bounds = vis; savePrefs\(\);/.test(mainSrc28), 'audit : bounds clampées re-persistées après changement d\'écran');
+
+// ── 32. Snap magnétique, menu tray, pin unifié, preset mémorisé (2.12.0) ──────────
+console.log('\n── 32. Snap magnétique + menu tray + pin unifié (2.12.0)');
+const mainSrc32 = fs.readFileSync(path.join(__dirname, 'main.js'), 'utf8');
+const rSrc32 = fs.readFileSync(path.join(__dirname, 'renderer.js'), 'utf8');
+const setSrc32 = fs.readFileSync(path.join(__dirname, 'settings.js'), 'utf8');
+// a) pin : chemin unique partagé ⌥P + tray
+check(/function toggleKeepVisible\(/.test(mainSrc32), 'main : toggleKeepVisible() partagé (⌥P + tray, pas de double canal)');
+check(/globalShortcut\.register\('Alt\+P', \(\) => toggleKeepVisible\(\)\)/.test(mainSrc32), '⌥P délégué à toggleKeepVisible');
+check(/type: 'checkbox'/ .test(mainSrc32) && /checked: !!PREFS\.keepVisible/.test(mainSrc32), 'menu tray : Épingler avec coche d\'état réelle');
+// b) menu tray complet
+check(mainSrc32.includes("'⌨️ Changer le raccourci…'") || mainSrc32.includes('⌨️ Change shortcut…'), 'menu tray : Changer le raccourci…');
+check(mainSrc32.includes('goto-shortcut'), 'menu tray → Réglages : focus sur le select raccourci');
+check((mainSrc32.match(/T\(\)\.arena/g) || []).length >= 2, 'menu tray + menu ⚡ : action Ouvrir l\'arène');
+check(setSrc32.includes('onGotoShortcut'), 'settings.js : écoute goto-shortcut (scroll + focus)');
+// c) snap magnétique + mémorisation preset
+check(/0\.25, 0\.5, 0\.75/.test(rSrc32), 'renderer : snap ¼/½/¾ de largeur');
+check(/wa\.h \* 0\.5/.test(rSrc32), 'renderer : snap demi-hauteur');
+check(/panelSize: next\.k/.test(rSrc32), 'renderer : preset ⌥-clic mémorisé (panelSize)');
+check(/panelSize: near\.k/.test(rSrc32), 'renderer : fin de glisser → preset canonique mémorisé');
+check(mainSrc32.includes("panelSize: PREFS.panelSize || 'M'"), 'get-prefs : panelSize exposé');
+check(/\['S', 'M', 'L', 'XL'\]\.includes\(panelSize\)/.test(mainSrc32), 'settings-changed : panelSize validé et persisté');
+check(mainSrc32.includes("panelSize: 'M'"), 'PREFS : défaut panelSize M');
 
 console.log('');
 if (fail) { console.log(`❌ ${fail} test(s) en échec`); process.exit(1); }
