@@ -6,7 +6,6 @@
   "license": "MIT",
   "scripts": {
     "catalogue:agents": "node scripts/generate-agents-catalogue.js",
-    "catalogue:agents:check": "node scripts/generate-agents-catalogue.js --check",
-    "test:openhands-fix": "node --test scripts/fix-openhands-fork-apikey-test.js"
+    "catalogue:agents:check": "node scripts/generate-agents-catalogue.js --check"
   }
 }
