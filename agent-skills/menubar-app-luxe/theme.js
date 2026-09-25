@@ -298,6 +298,13 @@ body{font:13.5px/1.45 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-se
 #chatmodel{font-size:10.5px;font-weight:600;color:var(--txt2);margin-left:6px}
 #chatlog{flex:1;min-height:220px;max-height:46vh;overflow-y:auto;display:flex;flex-direction:column;gap:8px;padding:4px 2px}
 .chatmsg{max-width:88%;padding:8px 11px;border-radius:11px;font-size:12.5px;line-height:1.5;white-space:pre-wrap;word-break:break-word}
+.chatprov{display:block;font-size:10px;font-weight:700;letter-spacing:.03em;color:var(--acc);margin-top:4px;opacity:.9}
+.chatprov-ko{color:#ff8a8a}
+/* 🎈 popup flottant : actions sous la description */
+.pactions{display:flex;gap:6px;margin-top:7px}
+.pactions .pact{flex:1;border:1px solid var(--line);background:var(--card2);color:var(--txt);border-radius:8px;padding:5px 8px;font-size:11px;font-weight:600;cursor:pointer;transition:border-color .12s,transform .1s}
+.pactions .pact:hover{border-color:var(--vio);transform:translateY(-1px)}
+.pactions .pact.run{background:var(--grad);border-color:transparent;color:#0b0c10}
 .chat-u{align-self:flex-end;background:var(--grad);color:#0b0c10;font-weight:600}
 .chat-a{align-self:flex-start;background:var(--card2);border:1px solid var(--line);color:var(--txt)}
 .chat-hint{align-self:center;background:none;border:1px dashed var(--line);color:var(--txt2);font-size:11.5px;text-align:center}

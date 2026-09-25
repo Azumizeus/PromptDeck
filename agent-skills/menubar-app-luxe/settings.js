@@ -23,6 +23,7 @@ const dllmSel = document.getElementById('dllm');
 const autostartCb = document.getElementById('autostart');
 const favShortcutsCb = document.getElementById('favshortcuts');
 const keepVisibleCb = document.getElementById('keepvisible');
+const hoverPopupCb = document.getElementById('hoverpopup');
 const arenaBusCb = document.getElementById('arenabus');
 const arenaOpenBtn = document.getElementById('arenaOpen');
 const arenaChooseBtn = document.getElementById('arenaChoose');
@@ -106,6 +107,7 @@ try {
   autostartCb.checked = !!P.autostart;
   if (typeof P.favShortcuts === 'boolean') favShortcutsCb.checked = P.favShortcuts;
   if (keepVisibleCb) keepVisibleCb.checked = !!P.keepVisible; // 📌 « garder le panneau visible »
+  if (hoverPopupCb) hoverPopupCb.checked = P.hoverPopup !== false; // 🎈 popup flottant
   if (arenaBusCb) arenaBusCb.checked = P.arenaBus !== false; // 🎮 bus d'événements ARENA (ON par défaut)
 } catch (e) { /* défauts */ }
 renderTargets();
@@ -154,6 +156,7 @@ function persist() {
     autostart: autostartCb.checked,
     favShortcuts: favShortcutsCb.checked,
     keepVisible: keepVisibleCb.checked,
+    hoverPopup: hoverPopupCb ? hoverPopupCb.checked : true,
     arenaBus: arenaBusCb ? arenaBusCb.checked : true,
   });
   saved.classList.add('show');
@@ -297,6 +300,7 @@ if (window.mgp && window.mgp.onSettings) {
   window.mgp.onSettings(({ theme, lang, keepVisible }) => {
     themeSel.value = theme; langSel.value = lang;
     if (typeof keepVisible === 'boolean' && keepVisibleCb) keepVisibleCb.checked = keepVisible; // bouton 📌 du panneau ↔ réglages
+    if (typeof hoverPopup === 'boolean' && hoverPopupCb) hoverPopupCb.checked = hoverPopup;
     if (typeof keepVisible === 'boolean' && arenaBusCb) { /* resync bus via import de config */ }
     LANG = lang; applyLang();
     document.body.className = theme === 'light' ? 'light' : '';

@@ -801,6 +801,29 @@ function buildMenuTemplate() {
       click: () => toggleKeepVisible(),
     },
     {
+      // 🩺 Santé API centralisée : état ✓/✗ de chaque provider (même sonde que les Réglages) ;
+      // « 🔄 Re-sonder » relance la sonde sans cache puis rouvre le menu à jour.
+      label: LANG === 'fr' ? '🩺 Santé API' : '🩺 API Health',
+      submenu: (Object.keys(PROVIDERS)
+        .filter((p) => p !== 'custom')
+        .map((p) => {
+          const rec = probeCacheGet(p);
+          const has = !!apiKeyFor(p);
+          const mark = rec ? (rec.ok ? '✓' : '✗') : '·';
+          const extra = rec && rec.ok && rec.latency ? ' (' + rec.latency + ' ms)' : rec && !rec.ok && rec.status ? ' (HTTP ' + rec.status + ')' : has ? '' : (LANG === 'fr' ? ' — sans clé' : ' — no key');
+          return { label: mark + ' ' + ((PROVIDERS[p] && PROVIDERS[p].label) || p) + extra, enabled: false };
+        })
+        .concat([{
+          label: LANG === 'fr' ? '🔄 Re-sonder tous' : '🔄 Re-probe all',
+          click: () => {
+            (async () => {
+              for (const p of Object.keys(PROVIDERS)) if (p !== 'custom') await probeProvider(p);
+              try { tray.popUpContextMenu(trayMenu); } catch (e2) { /* le menu se rouvre à jour */ }
+            })();
+          },
+        }])),
+    },
+    {
       label: LANG === 'fr' ? '💬 Mini-chat IA' : '💬 Mini AI chat',
       click: () => {
         createPanel();
@@ -1372,6 +1395,8 @@ ipcMain.handle('chat-send-stream', async (e, { messages, provider, model } = {})
       const key = apiKeyFor(prov);
       const local = /ollama|127\.0\.0\.1|localhost/.test(PROVIDERS[prov].base || '');
       if (!key && !local) continue;
+      // 🩺 Cascade en direct : le renderer affiche qui est interrogé (badge bulle vivante)
+      try { if (win && !win.isDestroyed()) win.webContents.send('chat-meta', { provider: prov, label: (PROVIDERS[prov] && PROVIDERS[prov].label) || prov }); } catch (e2) {}
       const { text, model: usedModel, latency, provider: usedProvider } = await llmChatStream({
         provider: prov,
         model: String(model || '').trim() || (PREFS.apiModels && PREFS.apiModels[prov]) || (prov === 'groq' ? 'openai/gpt-oss-120b' : ''),
@@ -1381,6 +1406,7 @@ ipcMain.handle('chat-send-stream', async (e, { messages, provider, model } = {})
       return { ok: true, text, model: usedModel, latency, provider: usedProvider };
     } catch (err) {
       errors.push(prov + ': ' + ((err && err.message) || String(err)));
+      try { if (win && !win.isDestroyed()) win.webContents.send('chat-meta', { provider: prov, failed: true }); } catch (e2) {}
     }
   }
   return { ok: false, error: errors.join(' · ') || (LANG === 'en' ? 'No provider with API key — add one in Settings' : 'Aucun provider avec clé API — ajoute-en un dans Réglages') };
@@ -1396,7 +1422,7 @@ ipcMain.on('restart-tour', () => {
     win.webContents.send('restart-tour');
   }
 });
-ipcMain.on('settings-changed', (e, { theme, lang, defaultLLM, sendTargets, autostart, favShortcuts, shortcut, keepVisible, arenaBus, panelSize } = {}) => {
+ipcMain.on('settings-changed', (e, { theme, lang, defaultLLM, sendTargets, autostart, favShortcuts, shortcut, keepVisible, arenaBus, panelSize, hoverPopup } = {}) => {
   LANG = lang === 'en' ? 'en' : 'fr';
   PREFS.lang = LANG;
   // 🐛 fix 2.9.6 : le thème choisi dans les Réglages n'était JAMAIS persisté — le panneau
@@ -1410,6 +1436,7 @@ ipcMain.on('settings-changed', (e, { theme, lang, defaultLLM, sendTargets, autos
   if (typeof keepVisible === 'boolean') PREFS.keepVisible = keepVisible;
   if (typeof arenaBus === 'boolean') PREFS.arenaBus = arenaBus; // 🎮 bus d'événements ARENA
   if (typeof panelSize === 'string' && ['S', 'M', 'L', 'XL'].includes(panelSize)) PREFS.panelSize = panelSize; // preset resize mémorisé
+  if (typeof hoverPopup === 'boolean') PREFS.hoverPopup = hoverPopup; // 🎈 popup flottant au survol
   savePrefs();
   applyShortcut();
   applyAutostart();
@@ -1427,7 +1454,7 @@ ipcMain.on('set-keep-visible', (e, on) => {
   if (settings && !settings.isDestroyed()) settings.webContents.send('settings-changed', { theme: PREFS.theme, lang: LANG, keepVisible: PREFS.keepVisible });
 });
 ipcMain.on('get-prefs', (e) => {
-  e.returnValue = { theme: PREFS.theme === 'light' ? 'light' : 'dark', keepVisible: !!PREFS.keepVisible, dropMaxChars: PREFS.dropMaxChars || 100000, arenaBus: PREFS.arenaBus !== false, panelSize: PREFS.panelSize || 'M', defaultLLM: PREFS.defaultLLM, sendTargets: PREFS.sendTargets || [], shortcut: PREFS.shortcut, autostart: !!PREFS.autostart, favShortcuts: PREFS.favShortcuts !== false, favorites: PREFS.favorites, recents: PREFS.recents, customs: PREFS.customs, hasApi: Object.fromEntries(Object.keys(PROVIDERS).map((k) => [k, !!apiKeyFor(k)])), apiDefaultModel: PREFS.apiDefaultModel || '', workshopLocks: { agent: [...lockedNames('agent')], skill: [...lockedNames('skill')], team: [...lockedNames('team')], custom: [...(PREFS.customs || []).filter((c) => c && c.locked).map((c) => c.name)] } };
+  e.returnValue = { theme: PREFS.theme === 'light' ? 'light' : 'dark', keepVisible: !!PREFS.keepVisible, dropMaxChars: PREFS.dropMaxChars || 100000, arenaBus: PREFS.arenaBus !== false, panelSize: PREFS.panelSize || 'M', hoverPopup: PREFS.hoverPopup !== false, defaultLLM: PREFS.defaultLLM, sendTargets: PREFS.sendTargets || [], shortcut: PREFS.shortcut, autostart: !!PREFS.autostart, favShortcuts: PREFS.favShortcuts !== false, favorites: PREFS.favorites, recents: PREFS.recents, customs: PREFS.customs, hasApi: Object.fromEntries(Object.keys(PROVIDERS).map((k) => [k, !!apiKeyFor(k)])), apiDefaultModel: PREFS.apiDefaultModel || '', workshopLocks: { agent: [...lockedNames('agent')], skill: [...lockedNames('skill')], team: [...lockedNames('team')], custom: [...(PREFS.customs || []).filter((c) => c && c.locked).map((c) => c.name)] } };
 });
 // Sélecteur du LLM dans la barre du bas : changement instantané, persisté, propagé
 ipcMain.on('set-default-llm', (e, llm) => {

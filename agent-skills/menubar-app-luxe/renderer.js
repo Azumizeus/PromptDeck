@@ -773,6 +773,44 @@ list.addEventListener('mouseout', (e) => {
 });
 tip.addEventListener('mouseenter', hideTip); // le tooltip ne gêne jamais le clic
 
+// 🎈 Popup flottant au survol : la tooltip devient interactive (boutons favoris/lancer).
+// Option Réglages « Popup flottant au survol » (hoverPopup, défaut : activé) — off = tooltip
+// simple non cliquable (comportement historique).
+function hoverPopupEnabled() {
+  try { return (window.mgp.getPrefs() || {}).hoverPopup !== false; } catch (e) { return true; }
+}
+let popFor = null;
+function popupHtml(it) {
+  return tipHtml(it) +
+    `<span class="pactions"><button class="pact fav" data-n="${esc(it.x.name)}">★ ${isFav(it.x.name) ? (LANG === 'fr' ? 'Retirer des favoris' : 'Unfavorite') : (LANG === 'fr' ? 'Ajouter aux favoris' : 'Add to favorites')}</button>` +
+    `<button class="pact run" data-n="${esc(it.x.name)}">⚡ ${LANG === 'fr' ? 'Lancer' : 'Launch'}</button></span>`;
+}
+list.addEventListener('mouseenter', (e) => {
+  if (!hoverPopupEnabled()) return;
+  const el = e.target.closest && e.target.closest('.it');
+  if (!el) return;
+  const it = results[+el.dataset.i];
+  if (!it) return;
+  clearTimeout(tipTimer);
+  tipTimer = setTimeout(() => { showTip(el, it); popFor = it.x.name; }, 420); // délai : survol volontaire
+}, true);
+tip.addEventListener('mouseleave', () => { setTimeout(() => { if (!tip.matches(':hover')) { hideTip(); popFor = null; } }, 150); });
+function popupHtmlRefresh(btn, it) { // après toggle favori : rafraîchit le libellé sans fermer le popup
+  btn.textContent = isFav(it.x.name)
+    ? '★ ' + (LANG === 'fr' ? 'Retirer des favoris' : 'Unfavorite')
+    : '★ ' + (LANG === 'fr' ? 'Ajouter aux favoris' : 'Add to favorites');
+}
+tip.addEventListener('click', (e) => {
+  const b = e.target.closest && e.target.closest('.pact');
+  if (!b) return;
+  e.preventDefault(); e.stopPropagation();
+  const name = b.getAttribute('data-n');
+  const it = results.find((r) => r.x.name === name);
+  if (!it) return;
+  if (b.classList.contains('fav')) { toggleFav(name); popupHtmlRefresh(b, it); }
+  else { hideTip(); popFor = null; window.mgp.openLLM(DEFAULT_LLM || 'claude', promptOf(it.x, it.k)); }
+});
+
 // ❔ Aide intégrée : survol d'un bouton « ? » → popup flottant avec description claire
 const help = $('help');
 function showHelp(el) {
@@ -1078,6 +1116,13 @@ function chatBubble(m) {
   const d = document.createElement('div');
   d.className = 'chatmsg ' + (m.role === 'assistant' ? 'chat-a' : 'chat-u');
   d.textContent = m.content;
+  // 🩺 Badge provider : nom + latence du provider réellement utilisé par la cascade
+  if (m.role === 'assistant' && (m.provider || m.latency)) {
+    const b = document.createElement('span');
+    b.className = 'chatprov';
+    b.textContent = '🩺 ' + (m.provider || '?') + (m.latency ? ' · ' + m.latency + ' ms' : '');
+    d.appendChild(b);
+  }
   return d;
 }
 function chatRender() {
@@ -1138,6 +1183,25 @@ async function chatSubmit() {
   live.className = 'chatmsg chat-a chat-live';
   live.textContent = '…';
   if (log) { log.appendChild(live); log.scrollTop = log.scrollHeight; }
+  // 🩺 Cascade en direct : chaque tentative du main pousse {provider} (essai) ou {failed}
+  // — le badge de la bulle vivante montre qui est interrogé / qui a échoué.
+  try {
+    window.mgp.onChatMeta && window.mgp.onChatMeta((m) => {
+      if (!m || !m.provider) return;
+      let b = live.querySelector('.chatprov');
+      if (!b) { b = document.createElement('span'); b.className = 'chatprov'; live.appendChild(b); }
+      if (m.failed) {
+        b.classList.add('chatprov-ko');
+        b.textContent = '✗ ' + m.provider;
+        const next = document.createElement('span');
+        next.className = 'chatprov';
+        next.textContent = '… ' + (m.next || '');
+        live.appendChild(next);
+      } else {
+        b.textContent = '🩺 ' + m.provider;
+      }
+    });
+  } catch (e2) { /* best effort */ }
   let acc = '';
   let streamOn = false;
   try {
@@ -1145,9 +1209,10 @@ async function chatSubmit() {
     acc = (res && res.text) || '';
     streamOn = !!(res && res.ok);
     if (res && res.ok) {
-      CHAT.history.push({ role: 'assistant', content: acc });
+      // 🩺 provider réellement utilisé (la cascade peut avoir basculé) : gardé avec le message
+      CHAT.history.push({ role: 'assistant', content: acc, provider: res.provider, latency: res.latency, model: res.model });
       const cm = document.getElementById('chatmodel');
-      if (cm) cm.textContent = res.model ? `· ${res.model}${res.latency ? ` · ${res.latency} ms` : ''}` : '';
+      if (cm) cm.textContent = `· ${res.provider || '?'}${res.model ? ' · ' + res.model : ''}${res.latency ? ` · ${res.latency} ms` : ''}`;
     } else {
       CHAT.history.push({ role: 'assistant', content: (LANG === 'fr' ? '⚠️ Erreur : ' : '⚠️ Error: ') + ((res && res.error) || 'unknown') });
     }
@@ -1631,7 +1696,9 @@ function rzCyclePreset() {
   h.addEventListener('mousedown', (e) => {
     if (e.altKey) { e.preventDefault(); rzCyclePreset(); return; }
     e.preventDefault();
-    RZ.drag = { corner, startX: e.screenX, startY: e.screenY, startW: window.innerWidth, startH: window.innerHeight, dx: corner.includes('w') ? 1 : -1, dy: corner.includes('n') ? 1 : -1 };
+    // 🐛 Fix resize inversé (1/2) : les facteurs étaient à l'envers — tirer le coin
+    // GAUCHE vers la droite doit RÉTRÉCIR (dx=-1), pas agrandir. Idem pour le haut (dy=-1).
+    RZ.drag = { corner, startX: e.screenX, startY: e.screenY, startW: window.innerWidth, startH: window.innerHeight, dx: corner.includes('w') ? -1 : 1, dy: corner.includes('n') ? -1 : 1 };
     document.body.classList.add('rz-dragging');
   });
   document.body.appendChild(h);
@@ -1641,7 +1708,9 @@ document.addEventListener('mousemove', (e) => {
   const d = RZ.drag;
   const dw = (e.screenX - d.startX) * d.dx;
   const dh = (e.screenY - d.startY) * d.dy;
-  let w = d.startW + dw * 2, h = d.startH + dh * 2;
+  // 🐛 Fix resize inversé (2/2) : 1 px de souris = 1 px de fenêtre (l'ancien facteur ×2
+  // doublait l'inversion et faisait « fuir » la fenêtre sous le curseur).
+  let w = d.startW + dw, h = d.startH + dh;
   // 🧲 Snap magnétique : quart / demi / trois-quarts de largeur + demi hauteur d'écran
   const wa = { w: window.screen ? window.screen.availWidth : 1600, h: window.screen ? window.screen.availHeight : 900 };
   const SNAP = 32;
@@ -1652,6 +1721,14 @@ document.addEventListener('mousemove', (e) => {
   }
   const th = Math.round(wa.h * 0.5);
   if (Math.abs(h - th) < SNAP) { h = th; d.snapH = 0.5; }
+  // Le coin opposé ne bouge pas : on repositionne la fenêtre pour ancrer les bords fixes
+  // (bord droit ancré quand on saisit un coin gauche, bord bas quand on saisit le haut).
+  let left = null, top = null;
+  if (d.corner.includes('w')) left = d.startX + d.startW - w;
+  if (d.corner.includes('n')) top = d.startY + d.startH - h;
+  if (left !== null || top !== null) {
+    try { window.moveTo(left !== null ? left : window.screenX, top !== null ? top : window.screenY); } catch (e2) { /* certains WM limitent moveTo */ }
+  }
   rzResize(w, h);
 });
 document.addEventListener('mouseup', () => {

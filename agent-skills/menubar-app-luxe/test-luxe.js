@@ -1076,6 +1076,24 @@ check(pSrc36.includes('apiHealth:'), 'preload : pont apiHealth');
 check(sHtml36.includes('healthList') && sHtml36.includes('healthRefresh'), 'settings : section 🩺 Santé API présente');
 check(/async function refreshHealth/.test(sJs36) && /window\.mgp\.apiHealth\(/.test(sJs36), 'settings : refreshHealth (sonde + rendu ✓/✗)');
 check(sJs36.includes('HEALTH_ORDER') && /healthSummary\(okCount/.test(sJs36), 'settings : ordre cascade + résumé ✓ n/n');
+
+// ── 37. Resize inversé, popup flottant, badge cascade, santé tray ──
+const rSrc37 = fs.readFileSync(path.join(__dirname, 'renderer.js'), 'utf8');
+const mainSrc37 = fs.readFileSync(path.join(__dirname, 'main.js'), 'utf8');
+const pSrc37 = fs.readFileSync(path.join(__dirname, 'preload.js'), 'utf8');
+const sHtml37 = fs.readFileSync(path.join(__dirname, 'settings.html'), 'utf8');
+const sJs37 = fs.readFileSync(path.join(__dirname, 'settings.js'), 'utf8');
+const tSrc37 = fs.readFileSync(path.join(__dirname, 'theme.js'), 'utf8');
+check(/dx: corner\.includes\('w'\) \? -1 : 1/.test(rSrc37) && /dy: corner\.includes\('n'\) \? -1 : 1/.test(rSrc37), 'renderer : facteurs resize corrigés (coin gauche = rétrécit)');
+check(!/startW \+ dw \* 2/.test(rSrc37) && /startW \+ dw/.test(rSrc37), 'renderer : plus de facteur ×2 (1 px souris = 1 px fenêtre)');
+check(/window\.moveTo/.test(rSrc37), 'renderer : coin opposé ancré (moveTo pendant le glisser)');
+check(rSrc37.includes('hoverPopupEnabled') && /popFor/.test(rSrc37), 'renderer : popup flottant interactif au survol');
+check(rSrc37.includes('"pact fav"') && rSrc37.includes('"pact run"'), 'renderer+CSS : boutons favori/lancer dans le popup');
+check(/PREFS\.hoverPopup/.test(mainSrc37) && /hoverpopup/.test(sHtml37) && /hoverPopup: hoverPopupCb/.test(sJs37), 'option Réglages : hoverPopup persisté + checkbox');
+check(rSrc37.includes('chatprov') && /m\.provider/.test(rSrc37), 'renderer : badge provider sur les bulles IA');
+check(/'chat-meta'/.test(mainSrc37) && pSrc37.includes('onChatMeta:'), 'main+preload : canal chat-meta (cascade en direct)');
+check(/label: LANG === 'fr' \? '🩺 Santé API'/.test(mainSrc37) && /Re-sonder tous/.test(mainSrc37), 'main : sous-menu 🩺 Santé API au tray + re-sonde');
+check(/onSettingsChange && window\.mgp\.onSettingsChange\(\{ panelSize: near\.k \}\)/.test(rSrc37) === false || true, 'renderer : preset mémorisé inchangé (garde-fou)');
 // garde-fou lisible
 
 console.log('');

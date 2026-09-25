@@ -69,6 +69,7 @@ contextBridge.exposeInMainWorld('mgp', {
   // ── 💬 Mini-chat IA intégré (même moteur API que l'Atelier) ──
   chatSend: (payload) => ipcRenderer.invoke('chat-send', payload),
   chatSendStream: (payload) => ipcRenderer.invoke('chat-send-stream', payload),
+  onChatMeta: (cb) => ipcRenderer.on('chat-meta', (e, m) => cb(m)),
   onChatStream: (cb) => ipcRenderer.on('chat-stream', (e, { piece }) => cb(piece)),
   chatHistoryGet: () => ipcRenderer.invoke('chat-history-get'),
   chatHistorySet: (msgs) => ipcRenderer.invoke('chat-history-set', msgs),
