@@ -773,6 +773,13 @@ function buildMenuTemplate() {
       checked: !!PREFS.keepVisible,
       click: () => toggleKeepVisible(),
     },
+    {
+      label: LANG === 'fr' ? '💬 Mini-chat IA' : '💬 Mini AI chat',
+      click: () => {
+        createPanel();
+        setTimeout(() => { try { if (win && !win.isDestroyed()) win.webContents.send('open-chat'); } catch (e) {} }, 450);
+      },
+    },
     { label: T().settings, accelerator: 'Cmd+,', click: createSettings },
     {
       label: LANG === 'fr' ? '⌨️ Changer le raccourci…' : '⌨️ Change shortcut…',
@@ -1258,6 +1265,79 @@ ipcMain.handle('chat-history-set', (e, msgs) => {
   return true;
 });
 ipcMain.handle('chat-history-clear', () => { PREFS.chat = []; savePrefs(); return true; });
+// 💬 Streaming token par token : même cascade que chat-send, mais en SSE — chaque fragment
+// est poussé au renderer via l'event 'chat-stream' (canal WebContents de la fenêtre panneau).
+async function llmChatStream({ provider, model = '', apiKey = '', messages, maxTokens = 2048, temperature = 0.7, onChunk }) {
+  const prov = PROVIDERS[provider] || PROVIDERS.groq;
+  const key = apiKey || apiKeyFor(provider);
+  const target = prov.style === 'anthropic' ? 'https://api.anthropic.com/v1/messages' : (prov.base || 'https://api.groq.com/openai/v1/chat/completions');
+  if (prov.style !== 'anthropic' && !/ollama|127\.0\.0\.1|localhost/.test(target) && !key) throw new Error((LANG === 'en' ? 'No API key for ' : 'Pas de clé API pour ') + prov.label);
+  const started = Date.now();
+  const body = prov.style === 'anthropic'
+    ? { model, max_tokens: maxTokens, temperature, messages, stream: true }
+    : { model, messages, max_tokens: maxTokens, temperature, stream: true };
+  const res = await fetch(target, {
+    method: 'POST',
+    headers: prov.style === 'anthropic'
+      ? { 'content-type': 'application/json', 'x-api-key': key, 'anthropic-version': '2023-06-01' }
+      : { 'content-type': 'application/json', ...(key ? { authorization: 'Bearer ' + key } : {}) },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok || !res.body) {
+    let detail = '';
+    try { const j = await res.json(); detail = (j.error && (j.error.message || j.error)) || ''; } catch (e2) { /* non JSON */ }
+    throw new Error((LANG === 'en' ? 'Provider ' : 'Provider ') + prov.label + ' HTTP ' + res.status + (detail ? ' — ' + String(detail).slice(0, 160) : ''));
+  }
+  const reader = res.body.getReader();
+  const dec = new TextDecoder();
+  let buf = '';
+  let full = '';
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buf += dec.decode(value, { stream: true });
+    const lines = buf.split('\n');
+    buf = lines.pop() || '';
+    for (const line of lines) {
+      const t = line.trim();
+      if (!t.startsWith('data:')) continue;
+      const data = t.slice(5).trim();
+      if (data === '[DONE]') continue;
+      try {
+        const j = JSON.parse(data);
+        const d = j.choices && j.choices[0] && (j.choices[0].delta || {});
+        const piece = (d && (d.content || '')) || (j.delta && j.delta.text) || '';
+        if (piece) { full += piece; onChunk && onChunk(piece); }
+      } catch (e3) { /* fragment incomplet : ignoré */ }
+    }
+  }
+  if (!full.trim()) throw new Error((LANG === 'en' ? 'Empty stream from ' : 'Flux vide depuis ') + prov.label);
+  return { text: full, model, latency: Date.now() - started, provider };
+}
+ipcMain.handle('chat-send-stream', async (e, { messages, provider, model } = {}) => {
+  const wanted = [];
+  if (PROVIDERS[provider]) wanted.push(provider);
+  if (PREFS.apiProvider && PROVIDERS[PREFS.apiProvider]) wanted.push(PREFS.apiProvider);
+  for (const p of (PROBE_PRIORITY || [])) if (PROVIDERS[p]) wanted.push(p);
+  const errors = [];
+  for (const prov of [...new Set(wanted)].slice(0, 5)) {
+    try {
+      const key = apiKeyFor(prov);
+      const local = /ollama|127\.0\.0\.1|localhost/.test(PROVIDERS[prov].base || '');
+      if (!key && !local) continue;
+      const { text, model: usedModel, latency, provider: usedProvider } = await llmChatStream({
+        provider: prov,
+        model: String(model || '').trim() || (PREFS.apiModels && PREFS.apiModels[prov]) || (prov === 'groq' ? 'openai/gpt-oss-120b' : ''),
+        messages: (messages || []).slice(-24).map((m) => ({ role: m && m.role === 'assistant' ? 'assistant' : 'user', content: String((m && m.content) || '').slice(0, 24000) })),
+        onChunk: (piece) => { try { if (win && !win.isDestroyed()) win.webContents.send('chat-stream', { piece }); } catch (e2) {} },
+      });
+      return { ok: true, text, model: usedModel, latency, provider: usedProvider };
+    } catch (err) {
+      errors.push(prov + ': ' + ((err && err.message) || String(err)));
+    }
+  }
+  return { ok: false, error: errors.join(' · ') || (LANG === 'en' ? 'No provider with API key — add one in Settings' : 'Aucun provider avec clé API — ajoute-en un dans Réglages') };
+});
 ipcMain.on('open-llm', (e, { target, prompt }) => {
   win && !win.isDestroyed() && win.hide();
   openLLM(target, prompt);

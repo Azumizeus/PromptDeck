@@ -235,4 +235,18 @@ node scripts/generate-agents-catalogue.js --extract # exporte les rôles EN à t
 
 ---
 
+## 💬 Le mini-chat IA de l'app (2.14.0) + 🗜 Headroom + ⌥P
+
+L'app macOS **MEGA PACK** (2.14.0) embarque désormais :
+
+| Fonction | Accès | Usage |
+|---|---|---|
+| **💬 Mini-chat IA** | bouton 💬 du panneau, ou menu tray → « 💬 Mini-chat IA » | Chat **streaming token par token** avec cascade de providers automatique (groq → gemini → mistral… — le premier qui a une clé et répond gagne). Historique local (200 msgs). **Clic sur les bulles** = sélection multiple → **✍️ Transformer en prompt**, **📦 Exporter** la conversation (→ ✍️ tag « chat »), **🗜 Via Headroom** |
+| **🗜 Headroom** | menu ⌨ / clic droit / Réglages / chat | « 🗜 Claude Code + Headroom » / « 🗜 OpenCode + Headroom » : Terminal + `headroom wrap <agent> --no-proxy --no-serena`, prompt au presse-papiers. Économies 60–95 % sur logs/JSON (skill `headroom-compression`) |
+| **📌 ⌥P** | raccourci global | Bascule l'épinglage du panneau depuis n'importe quelle app. ON = reste visible ; OFF = se masque au blur. Si le panneau est caché, ⌥P ON le révèle |
+
+**Test rapide du chat** : ouvre le panneau → 💬 → tape « Réponds juste OK » → ⏎. La bulle IA se remplit en streaming ; le modèle utilisé s'affiche dans le titre (`· modèle · latence`). Si erreur 403 : la cascade a déjà essayé les autres providers — vérifie une clé dans Réglages → API.
+
+---
+
 *Testé le 23 septembre 2026 — OpenCode 1.17.18, OpenHands/Freebuff user-scope `~/.agents/skills/`, Claude Code plugins scope user. Voir [MY-SETUP.md](MY-SETUP.md) pour l'état exact de ta machine.*

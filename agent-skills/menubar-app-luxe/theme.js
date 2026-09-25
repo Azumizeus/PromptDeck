@@ -310,6 +310,10 @@ body{font:13.5px/1.45 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-se
 #chatrow2 button{border:1px solid var(--line);background:none;color:var(--txt2);cursor:pointer;
   font:inherit;font-size:11.5px;font-weight:600;padding:6px 10px;border-radius:8px;transition:border-color .15s,color .15s}
 #chatrow2 button:hover{border-color:var(--line2);color:var(--txt)}
+.chat-sel{outline:2px solid var(--vio);outline-offset:1px}
+.chat-sel.chat-u{filter:brightness(1.08)}
+.chat-live::after{content:'▍';animation:chatblink 1s steps(2) infinite;color:var(--vio)}
+@keyframes chatblink{50%{opacity:0}}
 #erow .pri:hover{filter:brightness(1.08);color:#0b0c10}
 /* 📋 Modèles d'équipes + 🕘 Historique */
 #w-tpl{display:flex;flex-direction:column;gap:4px;margin-top:2px}

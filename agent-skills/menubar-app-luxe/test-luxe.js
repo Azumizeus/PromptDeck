@@ -1032,7 +1032,7 @@ check(/PREFS\.chat = Array\.isArray\(msgs\) \? msgs.*\.slice\(-200\)/.test(mainS
 check(pSrc33.includes('chatSend:') && pSrc33.includes('chatHistoryGet:'), 'preload : ponts chatSend/chatHistory exposés');
 check(rSrc33.includes('id="chatmodal"') && rSrc33.includes('id="chatlog"') && rSrc33.includes('id="chatin"'), 'renderer : modale chat complète (log + input)');
 check(rSrc33.includes("'chat2prompt'") && /openModal\(null\)/.test(rSrc33), 'renderer : ✍️ Transformer en prompt → modale pré-remplie');
-check(rSrc33.includes('chatSend({ messages: CHAT.history })'), 'renderer : envoi du fil complet à chaque tour');
+check(rSrc33.includes('chatSendStream({ messages: CHAT.history })'), 'renderer : envoi du fil complet à chaque tour (streaming)');
 check(tSrc33.includes('#chatmodal') && tSrc33.includes('.chat-u') && tSrc33.includes('.chat-a'), 'CSS : bulles chat stylées (utilisateur/IA)');
 // b) Headroom
 check(/function openHeadroom\(agent, prompt\)/.test(mainSrc33), 'main : openHeadroom (Terminal + headroom wrap)');
@@ -1041,7 +1041,23 @@ check(mainSrc33.includes("'headroom-claude'") && mainSrc33.includes("'headroom-o
 check(rSrc33.includes("'headroom-claude': '🗜 Claude Code + Headroom'"), 'renderer : libellés 🗜 dans le menu LLM');
 check(/LLM_CHOICES = \[[^\]]*headroom-claude/.test(rSrc33), 'renderer : headroom dans LLM_CHOICES (menu ⌨, clic droit, Réglages)');
 check(rSrc33.includes("'chatheadroom'") && /openLLM\('headroom-claude'/.test(rSrc33), 'renderer : bouton 🗜 Via Headroom dans le chat');
-check(rSrc33.includes("'⌨️ Changer le raccourci…'") === false || true, 'noop'); // garde-fou lisible
+
+// ── 34. Streaming, sélection multiple, export conversation (2.14.0) ─────────────
+console.log('\n── 34. Streaming + sélection multiple + export (2.14.0)');
+const mainSrc34 = fs.readFileSync(path.join(__dirname, 'main.js'), 'utf8');
+const rSrc34 = fs.readFileSync(path.join(__dirname, 'renderer.js'), 'utf8');
+const pSrc34 = fs.readFileSync(path.join(__dirname, 'preload.js'), 'utf8');
+const tSrc34 = fs.readFileSync(path.join(__dirname, 'theme.js'), 'utf8');
+check(/async function llmChatStream\(/.test(mainSrc34), 'main : llmChatStream (SSE, deltas OpenAI/Anthropic)');
+check(/chat-send-stream/.test(mainSrc34) && /chat-stream', \{ piece \}/.test(mainSrc34), 'main : IPC chat-send-stream + event chat-stream par fragment');
+check(/for \(const prov of \[...new Set\(wanted\)\]/.test(mainSrc34) && /llmChatStream\(/.test(mainSrc34), 'main : cascade de providers aussi en streaming');
+check(pSrc34.includes('chatSendStream:') && pSrc34.includes('onChatStream:'), 'preload : ponts chatSendStream/onChatStream');
+check(rSrc34.includes('chat-live') && /onChatStream && window\.mgp\.onChatStream/.test(rSrc34), 'renderer : bulle live mise à jour par fragments');
+check(rSrc34.includes('sel: new Set()') && /CHAT\.sel\.add\(i\)/.test(rSrc34), 'renderer : sélection multiple par clic bulle (Set d\'index)');
+check(rSrc34.includes('chatSelectedMsgs'), 'renderer : chatSelectedMsgs (sélection ou dernière IA)');
+check(rSrc34.includes("'chatexport'") && /tag « chat »/.test(rSrc34), 'renderer : 📦 Exporter conversation → ✍️ tag « chat »');
+check(tSrc34.includes('.chat-sel') && tSrc34.includes('.chat-live'), 'CSS : états bulle sélectionnée + live (curseur clignotant)');
+// garde-fou lisible
 
 console.log('');
 if (fail) { console.log(`❌ ${fail} test(s) en échec`); process.exit(1); }

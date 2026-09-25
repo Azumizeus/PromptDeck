@@ -679,6 +679,7 @@ APP_PARENT.insertAdjacentHTML('afterbegin', `
       </div>
       <div id="chatrow2">
         <button id="chat2prompt">✍️ ${LANG === 'fr' ? 'Transformer en prompt' : 'Turn into prompt'}</button>
+        <button id="chatexport">📦 ${LANG === 'fr' ? 'Exporter' : 'Export'}</button>
         <button id="chatheadroom">🗜 ${LANG === 'fr' ? 'Via Headroom' : 'Via Headroom'}</button>
         <span style="flex:1"></span>
         <button id="chatclear">${LANG === 'fr' ? 'Effacer' : 'Clear'}</button>
@@ -985,7 +986,9 @@ function compute() {
 
 // ---------- Rendu ----------
 const itEmoji = (k) => k === 'agent' ? '👤' : k === 'custom' ? '✍️' : k === 'team' ? '🕸' : '🛠';
+let CHAT_OPEN = false; // 💬 fige le DOM du panneau pendant que la modale chat est ouverte
 function render() {
+  if (CHAT_OPEN) return; // modale chat : le DOM du chat est maître, render() ne reconstruit pas la liste
   compute();
   if (!results.length) {
     const voidMsg = (filter === 'teams' && !query && !TEAMS.length) ? T.noTeams : T.empty;
@@ -1070,7 +1073,7 @@ document.addEventListener('click', (e) => { if (!llmmenu.hidden && !e.target.clo
 //  💬 Mini-chat IA intégré — moteur API (même que l'Atelier), historique local,
 //  « Transformer en prompt ✍️ » et routage 🗜 Headroom (sessions compressées).
 // ────────────────────────────────────────────────────────────────────────────
-const CHAT = { history: [], busy: false };
+const CHAT = { history: [], busy: false, sel: new Set(), loaded: false, streaming: false };
 function chatBubble(m) {
   const d = document.createElement('div');
   d.className = 'chatmsg ' + (m.role === 'assistant' ? 'chat-a' : 'chat-u');
@@ -1084,22 +1087,38 @@ function chatRender() {
   if (!CHAT.history.length) {
     const p = document.createElement('div');
     p.className = 'chatmsg chat-hint';
-    p.textContent = LANG === 'fr' ? 'Pose ta question — l\'IA répond avec la clé API des Réglages. Sélectionne une réponse puis « ✍️ Transformer en prompt ».' : 'Ask anything — the AI answers with the Settings API key. Select an answer then "✍️ Turn into prompt".';
+    p.textContent = LANG === 'fr' ? 'Pose ta question — l\'IA répond en streaming. Clique des bulles pour les sélectionner (multi), puis « ✍️ Transformer en prompt » ou « 📦 Exporter ».' : 'Ask anything — the AI streams its answer. Click bubbles to select them (multi), then "✍️ Turn into prompt" or "📦 Export".';
     log.appendChild(p);
   }
-  for (const m of CHAT.history) log.appendChild(chatBubble(m));
+  CHAT.history.forEach((m, i) => {
+    const b = chatBubble(m);
+    b.dataset.i = String(i);
+    if (CHAT.sel.has(i)) b.classList.add('chat-sel');
+    b.onclick = () => { // sélection multiple : clic = toggle, la dernière sélection gagne pour ✍️
+      if (CHAT.sel.has(i)) CHAT.sel.delete(i); else CHAT.sel.add(i);
+      b.classList.toggle('chat-sel', CHAT.sel.has(i));
+    };
+    log.appendChild(b);
+  });
   log.scrollTop = log.scrollHeight;
 }
+// Bulles sélectionnées (index triés) — sinon la dernière réponse de l'assistant
+function chatSelectedMsgs() {
+  if (CHAT.sel.size) return [...CHAT.sel].sort((a, b) => a - b).map((i) => CHAT.history[i]).filter(Boolean);
+  for (let i = CHAT.history.length - 1; i >= 0; i--) if (CHAT.history[i].role === 'assistant') return [CHAT.history[i]];
+  return [];
+}
 function openChat() {
+  CHAT_OPEN = true;
   document.getElementById('chatmodal').hidden = false;
   if (!CHAT.loaded) {
     CHAT.loaded = true;
     Promise.resolve(window.mgp.chatHistoryGet && window.mgp.chatHistoryGet()).then((h) => { CHAT.history = Array.isArray(h) ? h : []; chatRender(); });
   }
   chatRender();
-  document.getElementById('chatin').focus();
+  setTimeout(() => { const ci = document.getElementById('chatin'); ci && ci.focus(); }, 60); // focus APRÈS le paint (sinon q reprend le focus)
 }
-function closeChat() { document.getElementById('chatmodal').hidden = true; }
+function closeChat() { CHAT_OPEN = false; document.getElementById('chatmodal').hidden = true; render(); }
 async function chatSubmit() {
   if (CHAT.busy) return;
   const inp = document.getElementById('chatin');
@@ -1107,15 +1126,26 @@ async function chatSubmit() {
   if (!text) return;
   inp.value = '';
   CHAT.history.push({ role: 'user', content: text });
+  CHAT.sel.clear(); // nouvelle question : on repart d'une sélection propre
   chatRender();
   CHAT.busy = true;
   const send = document.getElementById('chatsend');
   const oldLabel = send.textContent;
-  send.textContent = '…';
+  send.textContent = '■'; // streaming en cours
+  // Bulle assistant vivante : les fragments du stream s'y accumulent en direct
+  const log = document.getElementById('chatlog');
+  const live = document.createElement('div');
+  live.className = 'chatmsg chat-a chat-live';
+  live.textContent = '…';
+  if (log) { log.appendChild(live); log.scrollTop = log.scrollHeight; }
+  let acc = '';
+  let streamOn = false;
   try {
-    const res = await Promise.resolve(window.mgp.chatSend({ messages: CHAT.history }));
+    const res = await Promise.resolve(window.mgp.chatSendStream({ messages: CHAT.history }));
+    acc = (res && res.text) || '';
+    streamOn = !!(res && res.ok);
     if (res && res.ok) {
-      CHAT.history.push({ role: 'assistant', content: res.text });
+      CHAT.history.push({ role: 'assistant', content: acc });
       const cm = document.getElementById('chatmodel');
       if (cm) cm.textContent = res.model ? `· ${res.model}${res.latency ? ` · ${res.latency} ms` : ''}` : '';
     } else {
@@ -1129,36 +1159,59 @@ async function chatSubmit() {
   chatRender();
   Promise.resolve(window.mgp.chatHistorySet && window.mgp.chatHistorySet(CHAT.history));
 }
+// Fragments poussés par le main pendant le stream (event 'chat-stream')
+try {
+  window.mgp.onChatStream && window.mgp.onChatStream((piece) => {
+    const live = document.querySelector('.chat-live');
+    if (!live) return;
+    if (live.textContent === '…') live.textContent = '';
+    live.textContent += piece;
+    const log = document.getElementById('chatlog');
+    if (log) log.scrollTop = log.scrollHeight;
+  });
+} catch (e) { /* best effort */ }
+// Texte brut d'une sélection : bulles cliquées, sinon dernière réponse IA
 function chatSelection() {
-  const log = document.getElementById('chatlog');
-  const s = String(log.getSelection ? log.getSelection() : window.getSelection());
-  if (s && s.trim()) return s.trim();
-  // Sans sélection : la dernière réponse de l'assistant
-  for (let i = CHAT.history.length - 1; i >= 0; i--) if (CHAT.history[i].role === 'assistant') return CHAT.history[i].content;
-  return '';
+  const msgs = chatSelectedMsgs();
+  return msgs.map((m) => m.content).join('\n\n');
 }
 $('chatb').onclick = openChat;
+// Menu tray → « 💬 Mini-chat IA » (et tout autre chemin main→renderer)
+try { window.mgp.onOpenChat && window.mgp.onOpenChat(() => { openChat(); }); } catch (e) {}
 $('hchat').onclick = (e) => { e.stopPropagation(); showHelp(e.currentTarget); };
 $('chatsend').onclick = chatSubmit;
 document.getElementById('chatin').addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); chatSubmit(); } });
 $('chatx').onclick = closeChat;
 $('chatclear').onclick = () => { CHAT.history = []; chatRender(); Promise.resolve(window.mgp.chatHistoryClear && window.mgp.chatHistoryClear()); };
-// ✍️ Transformer en prompt : ouvre la modale ✍️ pré-remplie avec la réponse choisie
+// ✍️ Transformer en prompt : sélection (multi-clics) ou dernière réponse → modale ✍️ pré-remplie
 $('chat2prompt').onclick = () => {
-  const txt = chatSelection();
-  if (!txt) { showToast(LANG === 'fr' ? 'Sélectionne une réponse d\'abord' : 'Select an answer first', 'err'); return; }
+  const msgs = chatSelectedMsgs();
+  if (!msgs.length) { showToast(LANG === 'fr' ? 'Sélectionne une réponse d\'abord (clic sur la bulle)' : 'Select an answer first (click the bubble)', 'err'); return; }
   closeChat();
   openModal(null);
   const nameI = document.getElementById('e-name');
   const txtI = document.getElementById('e-txt');
   if (nameI && !nameI.value) nameI.value = (LANG === 'fr' ? 'Chat ' : 'Chat ') + new Date().toLocaleDateString('fr-FR');
-  if (txtI) { txtI.value = txt; txtI.focus(); }
+  if (txtI) txtI.value = msgs.map((m) => m.content).join('\n\n');
+  if (txtI) txtI.focus();
 };
-// 🗜 Via Headroom : le fil complet part vers Claude Code / OpenCode compressés (proxy 8787)
+// 📦 Exporter la conversation : les bulles choisies (ou tout le fil) → ✍️ tag « chat »
+$('chatexport').onclick = () => {
+  const msgs = (CHAT.sel.size ? chatSelectedMsgs() : CHAT.history).filter((m) => m.role !== 'assistant' || !m.content.startsWith('⚠️'));
+  if (!msgs.length) { showToast(LANG === 'fr' ? 'Rien à exporter' : 'Nothing to export', 'err'); return; }
+  closeChat();
+  openModal(null);
+  const nameI = document.getElementById('e-name');
+  const txtI = document.getElementById('e-txt');
+  if (nameI) nameI.value = (LANG === 'fr' ? 'Conversation ' : 'Conversation ') + new Date().toLocaleDateString('fr-FR');
+  if (txtI) txtI.value = msgs.map((m) => (m.role === 'user' ? (LANG === 'fr' ? '## Toi' : '## You') : (LANG === 'fr' ? '## IA' : '## AI')) + '\n' + m.content).join('\n\n');
+  showToast(LANG === 'fr' ? '📦 Conversation → ✍️ (enregistre avec le tag « chat »)' : '📦 Conversation → ✍️ (save with the "chat" tag)', 'ok');
+};
+// 🗜 Via Headroom : la sélection (ou tout le fil) part vers Claude Code / OpenCode compressés (proxy 8787)
 $('chatheadroom').onclick = () => {
-  const txt = chatSelection();
-  const thread = CHAT.history.map((m) => (m.role === 'user' ? '## Toi' : '## IA') + '\n' + m.content).join('\n\n');
-  const payload = (thread && CHAT.history.length ? thread : txt) || '';
+  const msgs = (CHAT.sel.size ? chatSelectedMsgs() : CHAT.history);
+  const payload = msgs.map((m) => (m.role === 'user' ? '## Toi' : '## IA') + '\n' + m.content).join('\n\n');
+  if (!payload.trim()) { showToast(LANG === 'fr' ? 'Rien à envoyer' : 'Nothing to send', 'err'); return; }
   window.mgp.openLLM && window.mgp.openLLM('headroom-claude', payload);
   showToast(LANG === 'fr' ? '🗜 Session Claude Code compressée lancée — colle le prompt' : '🗜 Compressed Claude Code session launched — paste the prompt', 'ok');
 };
@@ -1780,6 +1833,10 @@ composeBtn.onclick = () => openSelection(DEFAULT_LLM || 'claude');
 // ---------- Clavier ----------
 document.addEventListener('keydown', (e) => {
   if (!$('tour').hidden) return; // 🎓 la visite guidée capte le clavier (pas d'action du panneau en arrière-plan)
+  if (!$('chatmodal').hidden) {
+    if (e.key === 'Escape') { closeChat(); return; }
+    return; // 💬 le chat capte le clavier (saisie dans #chatin, ⏎ géré localement)
+  }
   if (!$('modal').hidden) {
     if (e.key === 'Escape') { closeModal(); return; }
     return;
@@ -1822,7 +1879,10 @@ document.addEventListener('keydown', (e) => {
     if (q.value) { q.value = ''; query = ''; render(); }
     else window.mgp.hide();
   } else if (!e.metaKey && !e.ctrlKey && !e.altKey && e.key.length === 1 && document.activeElement !== q) {
-    q.focus(); // l'utilisateur tape : la recherche capte tout
+    const am = document.activeElement;
+    const inChat = am && am.id === 'chatin';
+    const inModal = am && /^(e-|we-|dm-|chatin)/.test(am.id || '');
+    if (!inChat && !inModal) q.focus(); // l'utilisateur tape : la recherche capte tout (sauf champs de modales, chat inclus)
   }
 });
 

@@ -31,6 +31,7 @@ contextBridge.exposeInMainWorld('mgp', {
   onSettingsChange: (prefs) => ipcRenderer.send('settings-changed', prefs),
   onSettings: (cb) => ipcRenderer.on('settings-changed', (e, prefs) => cb(prefs)),
   onGotoShortcut: (cb) => ipcRenderer.on('goto-shortcut', () => cb()),
+  onOpenChat: (cb) => ipcRenderer.on('open-chat', () => cb()),
   getPrefs: () => ipcRenderer.sendSync('get-prefs'),
   addRecent: (name) => ipcRenderer.send('add-recent', name),
   toggleFav: (name) => ipcRenderer.send('toggle-fav', name),
@@ -65,6 +66,8 @@ contextBridge.exposeInMainWorld('mgp', {
   apiSet: (payload) => ipcRenderer.invoke('api-set', payload),
   // ── 💬 Mini-chat IA intégré (même moteur API que l'Atelier) ──
   chatSend: (payload) => ipcRenderer.invoke('chat-send', payload),
+  chatSendStream: (payload) => ipcRenderer.invoke('chat-send-stream', payload),
+  onChatStream: (cb) => ipcRenderer.on('chat-stream', (e, { piece }) => cb(piece)),
   chatHistoryGet: () => ipcRenderer.invoke('chat-history-get'),
   chatHistorySet: (msgs) => ipcRenderer.invoke('chat-history-set', msgs),
   chatHistoryClear: () => ipcRenderer.invoke('chat-history-clear'),
