@@ -41,6 +41,13 @@ input[type=checkbox]{accent-color:var(--vio)}
 #apiStatus{font-size:11.5px;font-weight:600}
 #apiStatus.ok{color:var(--grn)}
 #apiStatus.err{color:#ff8a8a}
+.healthline{display:flex;align-items:center;gap:8px;font-size:12px;padding:5px 10px;border:1px solid var(--border);border-radius:8px;margin-bottom:4px;background:var(--card2)}
+.healthline .mark{font-weight:700;width:14px}
+.healthline.ok .mark{color:var(--grn)}
+.healthline.ko .mark{color:#ff8a8a}
+.healthline .pname{flex:1;font-weight:600}
+.healthline .pinfo{color:var(--mut);font-size:11px}
+#healthSummary{font-size:11.5px;font-weight:600;color:var(--txt2)}
 @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head>
@@ -85,6 +92,13 @@ input[type=checkbox]{accent-color:var(--vio)}
     <span id="apiStatus"></span>
   </div>
   <span class="d" id="apiModels" data-i18n="apiModels"></span></div>
+<div class="row col" id="healthRow"><b><span data-i18n="health">🩺 Santé API — état live des fournisseurs</span><span class="d" data-i18n="healthD">Sonde chaque endpoint /models (même mécanisme que la cascade du mini-chat 💬) — état gardé 10 min en cache</span></b>
+  <div class="apirow2">
+    <button id="healthRefresh" class="btn">🔄 <span data-i18n="healthBtn">Re-sonder</span></button>
+    <span id="healthSummary"></span>
+  </div>
+  <div id="healthList"></div>
+  <span class="d" data-i18n="healthHint">✓ = l'endpoint répond avec ta clé · sans clé, le provider est tenté quand même (locaux) ou signalé</span></div>
 <div class="row"><b><span data-i18n="auto">Lancement au démarrage</span><span class="d" data-i18n="autoD">Ouvre MEGA PACK à l'ouverture de session</span></b>
   <input type="checkbox" id="autostart" style="width:18px;height:18px;accent-color:var(--acc)"></div>
 <div class="row"><b><span data-i18n="fsc">Raccourcis favoris</span><span class="d" data-i18n="fscD">⌘1 à ⌘9 lancent les 9 premiers favoris (menu du ⚡ ouvert)</span></b>

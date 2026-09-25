@@ -247,6 +247,25 @@ L'app macOS **MEGA PACK** (2.14.0) embarque désormais :
 
 **Test rapide du chat** : ouvre le panneau → 💬 → tape « Réponds juste OK » → ⏎. La bulle IA se remplit en streaming ; le modèle utilisé s'affiche dans le titre (`· modèle · latence`). Si erreur 403 : la cascade a déjà essayé les autres providers — vérifie une clé dans Réglages → API.
 
+## 🔁 La cascade de providers — skill, prompt et sonde (2.15.0)
+
+La cascade du mini-chat est **déclinée en 3 outils réutilisables** :
+
+| Outil | Emplacement | Usage |
+|---|---|---|
+| **Skill `llm-provider-cascade`** | `skills/llm-provider-cascade/` | `SKILL.md` (quand/comment router en cascade) + `scripts/llm-cascade.py` : résout les clés (env, `MGP_API_KEY_<P>`, `~/.local/share/opencode/auth.json`), cache santé 10 min, bascule automatique |
+| **Prompt ✍️ « Cascade Auto Providers »** | deck ✍️ de l'app (tag `cascade`), semé automatiquement au boot | À copier dans n'importe quel LLM/agent : il route en cascade et trace provider utilisé + bascules |
+| **🩺 Santé API** | Réglages de l'app | État **live** de chaque provider (sonde `/models`, même mécanisme que la cascade) : ✓/✗, latence, 🔑 clé détectée. Bouton **🔄 Re-sonder** |
+
+```bash
+# Le script du skill, en conditions réelles :
+python3 skills/llm-provider-cascade/scripts/llm-cascade.py --check       # sonde tous les providers
+python3 skills/llm-provider-cascade/scripts/llm-cascade.py "Réponds juste : OK"
+# → "OK." + trace : provider=cohere latency=0.6s (cascade : 6 échecs traversés automatiquement)
+```
+
+**Ordre de la cascade** : omniroute → freellm (locaux) → groq → cerebras → mistral → cohere → gemini → openrouter → anthropic. Une seule clé vivante suffit — validé le 25/09/2026 (Groq 403, Gemini 503, Cerebras 403, Mistral 401 → Cohere répond en 0,6 s).
+
 ---
 
 *Testé le 23 septembre 2026 — OpenCode 1.17.18, OpenHands/Freebuff user-scope `~/.agents/skills/`, Claude Code plugins scope user. Voir [MY-SETUP.md](MY-SETUP.md) pour l'état exact de ta machine.*

@@ -1064,6 +1064,18 @@ check(/trayMenu = Menu\.buildFromTemplate/.test(mainSrc35) && /popUpContextMenu\
 check(!/popUpContextMenu\(Menu\.buildFromTemplate/.test(mainSrc35), 'main : plus aucun Menu.buildFromTemplate passé en anonyme à popUpContextMenu');
 check(/function seedCascadePrompt/.test(mainSrc35) && /try \{ seedCascadePrompt\(\); \} catch/.test(mainSrc35), 'main : seedCascadePrompt appelé au boot (try/catch)');
 check(/Cascade Auto Providers/.test(mainSrc35) && /tag: 'cascade'/.test(mainSrc35), 'main : prompt « Cascade Auto Providers » semé dans PREFS.customs (tag cascade)');
+
+// ── 36. 🩺 Santé API dans les Réglages (sonde cascade, état live) ──
+const mainSrc36 = fs.readFileSync(path.join(__dirname, 'main.js'), 'utf8');
+const sHtml36 = fs.readFileSync(path.join(__dirname, 'settings.html'), 'utf8');
+const sJs36 = fs.readFileSync(path.join(__dirname, 'settings.js'), 'utf8');
+const pSrc36 = fs.readFileSync(path.join(__dirname, 'preload.js'), 'utf8');
+check(/ipcMain\.handle\('api-health'/.test(mainSrc36), 'main : IPC api-health (sonde tous les providers)');
+check(/latency: Date\.now\(\) - t0/.test(mainSrc36), 'main : probeProvider mesure la latence');
+check(pSrc36.includes('apiHealth:'), 'preload : pont apiHealth');
+check(sHtml36.includes('healthList') && sHtml36.includes('healthRefresh'), 'settings : section 🩺 Santé API présente');
+check(/async function refreshHealth/.test(sJs36) && /window\.mgp\.apiHealth\(/.test(sJs36), 'settings : refreshHealth (sonde + rendu ✓/✗)');
+check(sJs36.includes('HEALTH_ORDER') && /healthSummary\(okCount/.test(sJs36), 'settings : ordre cascade + résumé ✓ n/n');
 // garde-fou lisible
 
 console.log('');

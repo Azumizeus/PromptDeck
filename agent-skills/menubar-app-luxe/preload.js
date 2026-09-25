@@ -33,6 +33,8 @@ contextBridge.exposeInMainWorld('mgp', {
   onGotoShortcut: (cb) => ipcRenderer.on('goto-shortcut', () => cb()),
   onOpenChat: (cb) => ipcRenderer.on('open-chat', () => cb()),
   getPrefs: () => ipcRenderer.sendSync('get-prefs'),
+  // 🩺 Santé API : état live de tous les providers (sonde /models par provider)
+  apiHealth: (force) => ipcRenderer.invoke('api-health', { force: !!force }),
   addRecent: (name) => ipcRenderer.send('add-recent', name),
   toggleFav: (name) => ipcRenderer.send('toggle-fav', name),
   exportConfig: () => ipcRenderer.invoke('export-config'),

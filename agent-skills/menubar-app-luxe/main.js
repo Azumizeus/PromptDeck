@@ -210,8 +210,9 @@ async function probeProvider(provider) {
       const ctl = new AbortController();
       const timer = setTimeout(() => ctl.abort(), PROBE_TIMEOUT_MS);
       try {
+        const t0 = Date.now();
         const res = await fetch(prov.base.replace(/\/chat\/completions$/, '') + '/models', { headers, signal: ctl.signal });
-        rec = { ok: res.ok, status: res.status, at: Date.now() };
+        rec = { ok: res.ok, status: res.status, at: Date.now(), latency: Date.now() - t0 };
       } finally { clearTimeout(timer); }
     } catch (e) { rec = { ok: false, status: 0, at: Date.now() }; }
   }
@@ -236,6 +237,18 @@ ipcMain.handle('providers-test', async (e, { force } = {}) => {
     }
   }
   return { ok: false, checked };
+});
+// 🩺 Santé API : sonde TOUS les fournisseurs (cascade complète) et renvoie l'état de
+// chacun — utilisé par l'onglet « Santé API » des Réglages. Force=true ignore le cache.
+ipcMain.handle('api-health', async (e, { force } = {}) => {
+  if (force) probeCache.clear();
+  const results = {};
+  for (const p of Object.keys(PROVIDERS)) {
+    if (p === 'custom') continue;
+    const rec = await probeProvider(p);
+    results[p] = { ok: rec.ok, status: rec.status, latency: rec.latency || 0, hasKey: !!apiKeyFor(p) };
+  }
+  return { at: Date.now(), results };
 });
 // Une clé réenregistrée (ou retirée) invalide le résultat du test correspondant.
 ipcMain.handle('models-list', async (e, provider) => {
@@ -855,7 +868,14 @@ function clampToScreen(b) {
   return { x: r.x, y: r.y, width: b.width, height: b.height }; // taille gardée, position sûre
 }
 
+// Trace async : toute promesse rejetée non gérée est écrite dans le fichier de trace
+// (diagnostic boot : lance l'app avec MGP_TRACE=1 pour activer, sinon silencieux)
+const TRACE_FILE = '/tmp/mgp-boot-trace.log';
+function traceBoot(msg) { if (process.env.MGP_TRACE) { try { fs.appendFileSync(TRACE_FILE, msg + '\n'); } catch (e) {} } }
+process.on('unhandledRejection', (r) => { traceBoot('unhandledRejection: ' + ((r && r.stack) || r)); });
+process.on('uncaughtException', (r) => { traceBoot('uncaughtException: ' + ((r && r.stack) || r)); });
 function createPanel() {
+  traceBoot('createPanel: entree');
   if (win && !win.isDestroyed()) {
     // 📌 Réapparition sûre : la fenêtre peut exister mais être hors écran (écran externe retiré)
     const b = win.getBounds();
@@ -1168,8 +1188,10 @@ function captureShots() {
 }
 
 function createTray() {
+  traceBoot('createTray: entree');
   let trayMenu = null; // Menu conservé tant que le menu natif est affiché (voir commentaire ci-dessus)
   tray = new Tray(iconImage());
+  traceBoot('createTray: Tray construit, ecrans=' + (function () { try { return screen.getAllDisplays().length; } catch (e) { return '?'; } })());
   tray.setToolTip('MEGA PACK — Skills & Agents');
   tray.setIgnoreDoubleClickEvents(true);
   tray.on('click', togglePanel);
@@ -1212,8 +1234,11 @@ if (!CAPTURE_MODE && !app.requestSingleInstanceLock()) {
     if (process.argv.includes('--capture-panel') || process.argv.includes('--capture-menu') || process.argv.includes('--capture-settings')) {
       captureShots(); // pas de tray ni de panneau visible pendant une capture
     } else {
+      traceBoot('whenReady: avant createTray');
       createTray();
+      traceBoot('whenReady: avant createPanel');
       createPanel();
+      traceBoot('whenReady: apres createPanel');
     }
   });
 
