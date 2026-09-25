@@ -1057,6 +1057,13 @@ check(rSrc34.includes('sel: new Set()') && /CHAT\.sel\.add\(i\)/.test(rSrc34), '
 check(rSrc34.includes('chatSelectedMsgs'), 'renderer : chatSelectedMsgs (sélection ou dernière IA)');
 check(rSrc34.includes("'chatexport'") && /tag « chat »/.test(rSrc34), 'renderer : 📦 Exporter conversation → ✍️ tag « chat »');
 check(tSrc34.includes('.chat-sel') && tSrc34.includes('.chat-live'), 'CSS : états bulle sélectionnée + live (curseur clignotant)');
+
+// ── 35. Sécurité menu tray + seed prompt Cascade (fix SIGSEGV 25/09 04:58) ──
+const mainSrc35 = fs.readFileSync(path.join(__dirname, 'main.js'), 'utf8');
+check(/trayMenu = Menu\.buildFromTemplate/.test(mainSrc35) && /popUpContextMenu\(trayMenu\)/.test(mainSrc35), 'main : Menu tray construit avec référence JS conservée (anti-GC/SIGSEGV)');
+check(!/popUpContextMenu\(Menu\.buildFromTemplate/.test(mainSrc35), 'main : plus aucun Menu.buildFromTemplate passé en anonyme à popUpContextMenu');
+check(/function seedCascadePrompt/.test(mainSrc35) && /try \{ seedCascadePrompt\(\); \} catch/.test(mainSrc35), 'main : seedCascadePrompt appelé au boot (try/catch)');
+check(/Cascade Auto Providers/.test(mainSrc35) && /tag: 'cascade'/.test(mainSrc35), 'main : prompt « Cascade Auto Providers » semé dans PREFS.customs (tag cascade)');
 // garde-fou lisible
 
 console.log('');

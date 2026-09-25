@@ -510,6 +510,20 @@ function seedCustoms() {
   PREFS.seeded = true;
   savePrefs();
 }
+
+// 💠 Prompt « Cascade Auto Providers » : ajouté une seule fois au deck ✍️ (idem seedCustoms,
+// mais fonctionne même quand les customs existent déjà — garde par nom).
+function seedCascadePrompt() {
+  const name = 'Cascade Auto Providers';
+  if ((PREFS.customs || []).some((x) => x.name === name)) return;
+  PREFS.customs = PREFS.customs || [];
+  PREFS.customs.push({
+    name,
+    desc: "Tu es un routeur intelligent de providers LLM. Objectif : garantir une réponse même quand un provider échoue (403, quota, réseau). Contexte : mon set dispose de plusieurs clés API (Groq, Mistral, Cerebras, Cohere, Gemini, OpenRouter, Anthropic...). Méthode :\n1) Liste les providers disponibles avec une clé (variable d'environnement, config OpenCode, stockage chiffré de l'app).\n2) Pour chaque requête : essaie le provider prioritaire ; en cas d'échec (HTTP >= 400, timeout, quota), passe automatiquement au suivant dans l'ordre : omniroute (local) -> freellm (local) -> groq -> cerebras -> mistral -> cohere -> gemini -> openrouter -> anthropic.\n3) Termine chaque réponse par : provider réellement utilisé, latence, et éventuelles bascules effectuées.\n4) Si tout échoue : diagnostic par provider (code HTTP + cause probable) et remédiation suggérée.\nRègles : jamais de clé en clair dans la sortie ; timeout 15 s par tentative ; état de santé des providers gardé 10 min ; un seul provider par requête finale.",
+    tag: 'cascade',
+  });
+  savePrefs();
+}
 // Raccourci global réparable (⌘Espace est confisqué par Spotlight sur la plupart des Mac)
 const SHORTCUTS = { 'Alt+Space': '⌥Espace', 'CommandOrControl+Space': '⌘Espace', 'Control+Space': '⌃Espace' };
 function applyShortcut() {
@@ -1154,12 +1168,19 @@ function captureShots() {
 }
 
 function createTray() {
+  let trayMenu = null; // Menu conservé tant que le menu natif est affiché (voir commentaire ci-dessus)
   tray = new Tray(iconImage());
   tray.setToolTip('MEGA PACK — Skills & Agents');
   tray.setIgnoreDoubleClickEvents(true);
   tray.on('click', togglePanel);
   tray.on('right-click', () => {
-    tray.popUpContextMenu(Menu.buildFromTemplate(buildMenuTemplate()));
+    // ⚠️ Référence conservée : un Menu.buildFromTemplate() sans référence JS est collecté par le
+    // GC pendant que le menu natif est ouvert (run loop modal) → SIGSEGV (crash 25/09 04:58,
+    // v8::Value::BooleanValue dans CrBrowserMain). On garde le Menu et on le reconstruit à chaque
+    // ouverture (toujours à jour) en relâchant le précédent.
+    try { trayMenu.destroy(); } catch (e) { /* première ouverture */ }
+    trayMenu = Menu.buildFromTemplate(buildMenuTemplate());
+    tray.popUpContextMenu(trayMenu);
   });
 }
 
@@ -1174,6 +1195,7 @@ if (!CAPTURE_MODE && !app.requestSingleInstanceLock()) {
   app.whenReady().then(() => {
     loadPrefs();
     seedCustoms(); // exemples ✍️ au premier lancement (une seule fois)
+    try { seedCascadePrompt(); } catch (e) { /* jamais bloquant au démarrage */ }
     setTimeout(() => { try { maybeAutoBackup(); } catch (e) { /* silencieux : jamais de crash au démarrage */ } }, 8000); // 💾 auto-backup hebdo, hors chemin critique
 
     // Icône ⚡ visible dans le Dock (l'app devient aussi retrouvable via ⌘Tab)
