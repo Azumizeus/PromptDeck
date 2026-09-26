@@ -90,6 +90,7 @@ const sandbox = {
   localStorage: { getItem: () => null, setItem() {} },
   sessionStorage: { getItem: () => null, setItem() {} },
   setTimeout: (fn) => { fn(); return 0; }, clearTimeout() {},
+  setInterval: () => 0, clearInterval() {}, // harnais : timers récurrents no-op (badge incidents)
   devicePixelRatio: 1,
 };
 sandbox.window = sandbox;
@@ -176,7 +177,7 @@ sandbox.window.mgp = {
   promptDirOpen: async () => true,
   promptMdCreate: async (it) => mdStore.push(it) && { ok: true, path: `/virtuel/MEGA PROMPT/${it.k}/${it.x.name}.md` },
   sourceReveal: async (p) => revealed.push(p) && { ok: true, path: p },
-  promptTreeSync: async () => ({ ok: true, count: 321 }),
+  promptTreeSync: async () => ({ ok: true, count: 326 }),
   workshopMdCreate: async () => ({ ok: true, path: '/virtuel/x.md' }),
   // Sélecteur LLM du footer (harnais : la pref change, comme le main process réel)
   setDefaultLLM: (t) => { defaultLLMStore = t; },
@@ -953,6 +954,11 @@ check(fs.readFileSync(path.join(__dirname, 'preload.js'), 'utf8').includes('aren
 const setSrc28 = fs.readFileSync(path.join(__dirname, 'settings.js'), 'utf8');
 check(setSrc28.includes("getElementById('arenabus')") && setSrc28.includes('arenaBus: arenaBusCb'), 'Réglages : checkbox bus câblée au payload');
 check(fs.readFileSync(path.join(__dirname, 'settings.html'), 'utf8').includes('id="arenabus"'), 'Réglages : case « Bus d\'événements ARENA » présente');
+// 🎈 fix 0.7.4 : le toggle « Popup flottant au survol » ne persistait JAMAIS — aucune
+// liaison onchange (contrairement à keepVisible/arenaBus) : la case revenait à son état
+// initial à chaque réouverture des Réglages.
+check(setSrc28.includes('hoverPopupCb.onchange = persist'), 'Réglages : case « 🎈 Popup flottant » câblée au persist (fix 0.7.4)');
+check(fs.readFileSync(path.join(__dirname, 'settings.html'), 'utf8').includes('id="hoverpopup"'), 'Réglages : case « Popup flottant au survol » présente');
 // b) scène course + alternance selon la veille
 const arenaMain28 = fs.readFileSync(path.join(arenaDir, 'main.js'), 'utf8');
 check(arenaMain28.includes('function chooseMode()') && arenaMain28.includes('yesterdayActivity() >= 10'), 'ARENA : mode choisi selon l\'activité de la veille (≥10 → combat)');
@@ -1050,7 +1056,7 @@ const pSrc34 = fs.readFileSync(path.join(__dirname, 'preload.js'), 'utf8');
 const tSrc34 = fs.readFileSync(path.join(__dirname, 'theme.js'), 'utf8');
 check(/async function llmChatStream\(/.test(mainSrc34), 'main : llmChatStream (SSE, deltas OpenAI/Anthropic)');
 check(/chat-send-stream/.test(mainSrc34) && /chat-stream', \{ piece \}/.test(mainSrc34), 'main : IPC chat-send-stream + event chat-stream par fragment');
-check(/for \(const prov of \[...new Set\(wanted\)\]/.test(mainSrc34) && /llmChatStream\(/.test(mainSrc34), 'main : cascade de providers aussi en streaming');
+check(/function chatCascadeOrder\(/.test(mainSrc34) && /llmChatStream\(/.test(mainSrc34), 'main : cascade de providers aussi en streaming (ordre intelligent chatCascadeOrder)');
 check(pSrc34.includes('chatSendStream:') && pSrc34.includes('onChatStream:'), 'preload : ponts chatSendStream/onChatStream');
 check(rSrc34.includes('chat-live') && /onChatStream && window\.mgp\.onChatStream/.test(rSrc34), 'renderer : bulle live mise à jour par fragments');
 check(rSrc34.includes('sel: new Set()') && /CHAT\.sel\.add\(i\)/.test(rSrc34), 'renderer : sélection multiple par clic bulle (Set d\'index)');
@@ -1096,6 +1102,104 @@ check(/label: LANG === 'fr' \? '🩺 Santé API'/.test(mainSrc37) && /Re-sonder 
 check(/onSettingsChange && window\.mgp\.onSettingsChange\(\{ panelSize: near\.k \}\)/.test(rSrc37) === false || true, 'renderer : preset mémorisé inchangé (garde-fou)');
 // garde-fou lisible
 
+// ── 38. Cascade complète + fallback modèle par provider (fix HTTP 400 Missing model, 2.16.1) ──
+console.log('\n── 38. Cascade complète + fallback modèle par provider (2.16.1)');
+const mainSrc38 = fs.readFileSync(path.join(__dirname, 'main.js'), 'utf8');
+// a) plus de limitation à 5 providers : Cohere (8e de PROBE_PRIORITY) doit être atteignable
+check(!/\[\.\.\.new Set\(wanted\)\]\.slice\(0, 5\)/.test(mainSrc38), 'main : plus de slice(0, 5) — cascade complète (Cohere atteignable)');
+check((mainSrc38.match(/for \(const prov of chatCascadeOrder\(/g) || []).length === 2, 'main : chat-send + chat-send-stream parcourent TOUTE la cascade (chatCascadeOrder ×2)');
+// a2) 🧠 2.16.2 : ordre intelligent — vivants en tête + amorçage du cache au succès
+check(/PROBE_PRIORITY\.filter\(\(p\) => \{ const c = probeCacheGet\(p\); return c && c\.ok/.test(mainSrc38), 'main : chatCascadeOrder met les providers VIVANTS (cache Santé API) en tête');
+check((mainSrc38.match(/seedProbeOk\(/g) || []).length >= 2, 'main : seedProbeOk au succès (cache amorcé pour Santé API + prochaine cascade)');
+// b) fallback modèle par provider (1er modèle du catalogue, ex. gemini → gemini-3.6-flash)
+check(/const fallbackModelFor = \(p\)/.test(mainSrc38), 'main : fallbackModelFor défini (1er modèle du catalogue par provider)');
+check((mainSrc38.match(/\|\| fallbackModelFor\(prov\)/g) || []).length === 2, 'main : fallback appliqué dans chat-send ET chat-send-stream');
+check(/fallbackModel = fallbackModelFor\(p\)/.test(mainSrc38), 'main : providers-test utilise aussi fallbackModelFor (cohérence Atelier)');
+// c) le fallback nettoie les entrées descriptives (« auto (route le catalogue…) » → « auto »)
+check(/first\.split\('\('\)\[0\]\.trim\(\)/.test(mainSrc38), 'main : fallback nettoie les entrées descriptives (freellm « auto (…) »)');
+check(/clean === '—' \? '' : clean/.test(mainSrc38), 'main : fallback ignore « — » (provider custom, pas un modèle)');
+// e) exécution réelle de fallbackModelFor avec la vraie table PROVIDERS (évaluation contrôlée)
+{
+  const provSrc38 = mainSrc38.substring(mainSrc38.indexOf('const PROVIDERS = {'), mainSrc38.indexOf('};', mainSrc38.indexOf('const PROVIDERS = {')) + 2);
+  const fnSrc38 = mainSrc38.substring(mainSrc38.indexOf('const fallbackModelFor = (p)'), mainSrc38.indexOf("ipcMain.handle('providers-test'"));
+  const mod38 = new Function(provSrc38 + '\n' + fnSrc38 + '\n;return { gemini: fallbackModelFor("gemini"), freellm: fallbackModelFor("freellm"), omniroute: fallbackModelFor("omniroute"), cohere: fallbackModelFor("cohere"), custom: fallbackModelFor("custom") };')();
+  check(mod38.gemini === 'gemini-3.6-flash', 'fallback gemini = gemini-3.6-flash (obtenu : ' + mod38.gemini + ')');
+  check(mod38.freellm === 'auto', 'fallback freellm = auto (entrées descriptives nettoyées)');
+  check(mod38.omniroute === 'auto/best-coding', 'fallback omniroute = auto/best-coding');
+  check(mod38.cohere === 'command-a-03-2025', 'fallback cohere = command-a-03-2025');
+  check(mod38.custom === '', 'fallback custom = vide (pas de base)');
+}
+// f) la clé morte groq 401 doit être SAUTÉE, pas bloquer la cascade — l'erreur finale agrège tout
+check(/errors\.push\(prov \+ ': '/.test(mainSrc38), 'main : erreurs agrégées provider par provider (diagnostic complet)');
+check((mainSrc38.match(/errors\.join\(' · '\)/g) || []).length === 2, 'main : message final = liste des échecs (2 cascades)');
+
+// ── 40. 🛡 Anti-crash + 🧠 cascade intelligente (2.16.2) ──────────────────────────
+console.log('\n── 40. Anti-crash (journal persistant, auto-récupération) + cascade intelligente (2.16.2)');
+const mainSrc40 = fs.readFileSync(path.join(__dirname, 'main.js'), 'utf8');
+check(/function journal\(/.test(mainSrc40) && /mgp-journal\.log/.test(mainSrc40), 'main : journal persistant userData/mgp-journal.log (survit au reboot)');
+check(/plafonné/.test(mainSrc40) || /slice\(-120\)/.test(mainSrc40), 'main : journal plafonné (~120 lignes)');
+check(/uncaughtException/, 'main : uncaughtException journalisé');
+check(/unhandledRejection/, 'main : unhandledRejection journalisé');
+check(/child-process-gone/.test(mainSrc40), 'main : morts des process auxiliaires journalisées (child-process-gone)');
+check(/render-process-gone/.test(mainSrc40) && /panneau reconstruit apres crash renderer/.test(mainSrc40), 'main : renderer mort → journalisé + panneau auto-reconstruit');
+check(/did-fail-load/.test(mainSrc40), 'main : échecs de chargement journalisés (did-fail-load)');
+check(/function chatCascadeOrder\(/.test(mainSrc40), 'main : chatCascadeOrder (demandé → Réglages → vivants → priorité)');
+check(/seedProbeOk\(prov, latency\)/.test(mainSrc40), 'main : succès cascade → cache Santé API amorcé (seedProbeOk)');
+check(/traceBoot\(msg\) \{ journal\(msg\); \}/.test(mainSrc40), 'main : traceBoot délégué au journal (MGP_TRACE garde /tmp)');
+
+// ── 41. 🛡 Journal dans les Réglages + badge tray ⚠️ + 🚫 quarantaine cascade (2.17.0) ──
+console.log('\n── 41. Journal Réglages + badge tray + quarantaine cascade (2.17.0)');
+const mainSrc41 = fs.readFileSync(path.join(__dirname, 'main.js'), 'utf8');
+const pSrc41 = fs.readFileSync(path.join(__dirname, 'preload.js'), 'utf8');
+const sHtml41 = fs.readFileSync(path.join(__dirname, 'settings.html'), 'utf8');
+const sJs41 = fs.readFileSync(path.join(__dirname, 'settings.js'), 'utf8');
+// a) IPC journal + badge tray
+check(/ipcMain\.handle\('journal-get'/.test(mainSrc41) && /ipcMain\.handle\('journal-clear'/.test(mainSrc41), 'main : IPC journal-get + journal-clear');
+check(/function recentIncidents\(/.test(mainSrc41) && /JOURNAL_BADGE_MS/.test(mainSrc41), 'main : recentIncidents (critique < 30 min) pour le badge');
+check(/function updateTrayIcon\(/.test(mainSrc41) && /JOURNAL_CRITICAL\.test\(msg\)\) \{ updateTrayIcon\(\); maybeNotifyFirstIncident/.test(mainSrc41), 'main : tray mis à jour + notif dès qu\'un incident critique est journalisé');
+check(/'🛡 Journal' \+ \(n \? ' ⚠️ ' \+ n : ''\)/.test(mainSrc41), 'main : item tray 🛡 Journal avec badge ⚠️ n');
+check(/'📋 Copier le journal'/.test(mainSrc41) && /'🧹 Purger le journal'/.test(mainSrc41), 'main : sous-menu tray copier/purger');
+// b) Réglages : section 🛡 + copier
+check(sHtml41.includes('journalView') && sHtml41.includes('journalCopy') && sHtml41.includes('journalClear'), 'settings : section 🛡 Journal (vue + copier + purger)');
+check(pSrc41.includes('journalGet:') && pSrc41.includes('journalClear:'), 'preload : ponts journalGet/journalClear');
+check(/async function refreshJournal/.test(sJs41) && /window\.mgp\.journalGet\(/.test(sJs41), 'settings : refreshJournal (rendu incidents)');
+check(/jrBadge: \(n\)/.test(sJs41), 'settings : i18n jr* (fr+en) pour le journal');
+// c) Quarantaine cascade
+check(/const QUARANTINE_MS = 10 \* 60 \* 1000/.test(mainSrc41) && /QUARANTINE_AFTER = 3/.test(mainSrc41), 'main : quarantaine 3 échecs → 10 min');
+check(/function quarantined\(provider\)/.test(mainSrc41) && /function markFail\(provider\)/.test(mainSrc41), 'main : quarantined/markFail (streak par provider)');
+check((mainSrc41.match(/markFail\(prov\)/g) || []).length === 2, 'main : échecs comptés dans chat-send ET chat-send-stream');
+check(/concat\(inQ\)/.test(mainSrc41), 'main : quarantainés relégués en FIN de cascade (dernier recours)');
+check(/failStreak\.delete\(provider\)/.test(mainSrc41), 'main : un succès lève la quarantaine immédiatement');
+// d) smoke in-app
+check(fs.existsSync(path.join(__dirname, 'chat-inapp-probe.py')) && fs.existsSync(path.join(__dirname, 'smoke-test.sh')), 'outillage : smoke-test.sh + chat-inapp-probe.py présents');
+
+// ── 42. 🚫 Quarantaine visible Santé API + ⚠️ badge header + 🔔 notif (2.18.0) ──
+console.log('\n── 42. Quarantaine Santé API + badge header + notification 1er incident (2.18.0)');
+const mainSrc42 = fs.readFileSync(path.join(__dirname, 'main.js'), 'utf8');
+const pSrc42 = fs.readFileSync(path.join(__dirname, 'preload.js'), 'utf8');
+const sHtml42 = fs.readFileSync(path.join(__dirname, 'settings.html'), 'utf8');
+const sJs42 = fs.readFileSync(path.join(__dirname, 'settings.js'), 'utf8');
+const rSrc42 = fs.readFileSync(path.join(__dirname, 'renderer.js'), 'utf8');
+const tSrc42 = fs.readFileSync(path.join(__dirname, 'theme.js'), 'utf8');
+// a) API quarantaine exposée
+check(/ipcMain\.handle\('quarantine-state'/.test(mainSrc42) && /ipcMain\.handle\('quarantine-lift'/.test(mainSrc42), 'main : IPC quarantine-state + quarantine-lift (levée manuelle)');
+check(/function quarantineState\(/.test(mainSrc42) && /remainingMs/.test(mainSrc42), 'main : quarantineState avec remainingMs (min restantes affichables)');
+check(pSrc42.includes('quarantineState:') && pSrc42.includes('quarantineLift:'), 'preload : ponts quarantineState/quarantineLift');
+check(/seedProbeOk\(provider, 0\); \/\/ levée/.test(mainSrc42), 'main : levée → repasse vivant en tête (seedProbeOk)');
+// b) Santé API : lignes 🚫 + bouton Lever
+check(/'🚫'/.test(sJs42) && /en quarantaine — encore/.test(sJs42), 'settings : ligne 🚫 « en quarantaine — encore n min » à la place du ✗');
+check(/class="btn qlift"/.test(sJs42) && /quarantineLift\(b\.dataset\.p\)/.test(sJs42), 'settings : bouton « Lever » par ligne + action quarantineLift');
+check(/healthQ: \(ok, total, q\)/.test(sJs42), 'settings : résumé « 🚫 n en quarantaine » (i18n)');
+check(/\.healthline\.q/.test(sHtml42) || /healthline\.q/.test(tSrc42), 'CSS : style ligne quarantaine (.q doré)');
+// c) badge header panneau
+check(rSrc42.includes("id=\"incb\"") && /refreshIncidentBadge/.test(rSrc42), 'renderer : bouton ⚠️ header + refreshIncidentBadge (30 s)');
+check(/incidentsState/.test(pSrc42) && /ipcMain\.handle\('incidents-state'/.test(mainSrc42), 'main+preload : IPC incidents-state pour le header');
+check(/incb\.onclick = \(\) => window\.mgp\.openSettings\(\)/.test(rSrc42), 'renderer : clic ⚠️ → ouvre Réglages (Journal)');
+// d) notification 1er incident + quarantaine
+check(/function maybeNotifyFirstIncident/.test(mainSrc42) && /anti-spam 5 min|lastIncidentNotified/.test(mainSrc42), 'main : notification macOS 1er incident (anti-spam 5 min)');
+check(/function onFirstQuarantine/.test(mainSrc42) && /en quarantaine 10 min \(3 échecs\)/.test(mainSrc42), 'main : notification à l\'entrée en quarantaine (une fois par entrée)');
+check(/markFail\(provider\) \{[\s\S]{0,200}onFirstQuarantine/.test(mainSrc42), 'main : onFirstQuarantine déclenché au 3e échec consécutif');
+
 // ── 43. Garde-fou décomptes : les docs doivent annoncer le catalogue RÉEL (drift 131→133 en 0.7.3) ──
 console.log('\n── 43. Garde-fou décomptes docs ↔ catalogue (anti-drift)');
 const catalogSrc43 = fs.readFileSync(path.join(__dirname, '..', 'interface', 'catalog-full.js'), 'utf8');
@@ -1117,7 +1221,16 @@ for (const doc of DOC_FILES43) {
 }
 const testAppSrc43 = fs.readFileSync(path.join(__dirname, 'test-app.sh'), 'utf8');
 check(testAppSrc43.includes('c.skills.length === ' + realSkills43), 'test-app.sh : check catalogue aligné sur le décompte réel (' + realSkills43 + ')');
-check(fs.readFileSync(path.join(__dirname, 'settings.js'), 'utf8').includes('hoverPopupCb.onchange = persist'), 'Réglages : case « 🎈 Popup flottant » câblée au persist (fix 0.7.4)');
+
+// ── 39. Test RÉEL de la cascade réseau (clés auth.json, requêtes HTTP authentiques) ──
+console.log('\n── 39. Cascade RÉELLE : requêtes réseau authentiques vers les providers');
+if (process.env.MGP_LIVE !== '1') {
+  console.log('   (réseau non testé ici — lancer MGP_LIVE=1 node test-live-cascade.js)');
+} else {
+  const out = require('child_process').execFileSync('node', [path.join(__dirname, 'test-live-cascade.js')], { encoding: 'utf8', timeout: 120000 });
+  console.log(out.trim());
+  check(/CASCADE LIVE: PASS/.test(out), 'cascade live : au moins un provider répond réellement');
+}
 
 console.log('');
 if (fail) { console.log(`❌ ${fail} test(s) en échec`); process.exit(1); }

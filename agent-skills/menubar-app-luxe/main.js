@@ -222,6 +222,16 @@ async function probeProvider(provider) {
 // Le rend final : premier fournisseur dont la clé répond OK. Ordre de priorité :
 // les routeurs locaux d'abord (pas de quota), puis les clés cloud par ordre du catalogue.
 const PROBE_PRIORITY = ['omniroute', 'freellm', 'ollama', 'groq', 'gemini', 'mistral', 'cerebras', 'cohere', 'openai', 'anthropic', 'openrouter'];
+// Modèle de repli par provider : 1er modèle du catalogue. Sans lui, les providers
+// stricts (Gemini, OmniRoute…) rejettent la requête en HTTP 400 « Missing model » quand
+// l'utilisateur n'a pas choisi de modèle — bug 2.16.0 : seul groq avait un repli.
+// NB : les entrées descriptives (« auto (route le catalogue…) ») sont nettoyées → « auto ».
+const fallbackModelFor = (p) => {
+  if (p === 'custom') return '';
+  const first = String((PROVIDERS[p] && PROVIDERS[p].models) || '').split(',')[0] || '';
+  const clean = first.split('(')[0].trim() || '';
+  return clean === '—' ? '' : clean; // « — » = entrée descriptive, pas un modèle
+};
 ipcMain.handle('providers-test', async (e, { force } = {}) => {
   if (force) probeCache.clear();
   const order = PROBE_PRIORITY.filter((p) => PROVIDERS[p] && apiKeyFor(p));
@@ -231,7 +241,7 @@ ipcMain.handle('providers-test', async (e, { force } = {}) => {
     checked.push({ provider: p, ok: rec.ok, status: rec.status });
     if (rec.ok) {
       const prov = PROVIDERS[p];
-      const fallbackModel = (PROVIDERS[p].models || '').split(',')[0].trim();
+      const fallbackModel = fallbackModelFor(p);
       const model = (PREFS.apiModels && PREFS.apiModels[p]) || fallbackModel || '';
       return { ok: true, provider: p, model, label: prov.label || p, checked };
     }
@@ -801,6 +811,22 @@ function buildMenuTemplate() {
       click: () => toggleKeepVisible(),
     },
     {
+      // 🛡 Journal anti-crash : incidents horodatés (30 derniers jours glissants du buffer)
+      // + badge ⚠️ n quand des incidents critiques ont moins de 30 min. « Copier » met tout
+      // le journal dans le presse-papiers (rapport de bug prêt à coller).
+      label: (function () { const n = recentIncidents(); return LANG === 'fr' ? '🛡 Journal' + (n ? ' ⚠️ ' + n : '') : '🛡 Journal' + (n ? ' ⚠️ ' + n : ''); })(),
+      submenu: [
+        { label: LANG === 'fr' ? '📋 Copier le journal' : '📋 Copy journal', click: () => {
+          try { clipboard.writeText(fs.readFileSync(journalPath(), 'utf8')); } catch (e) { /* rien à copier */ }
+        } },
+        { label: LANG === 'fr' ? '🧹 Purger le journal' : '🧹 Clear journal', click: () => {
+          try { fs.writeFileSync(journalPath(), ''); updateTrayIcon(); } catch (e) { /* best effort */ }
+        } },
+        { type: 'separator' },
+        { label: journalPath(), enabled: false },
+      ],
+    },
+    {
       // 🩺 Santé API centralisée : état ✓/✗ de chaque provider (même sonde que les Réglages) ;
       // « 🔄 Re-sonder » relance la sonde sans cache puis rouvre le menu à jour.
       label: LANG === 'fr' ? '🩺 Santé API' : '🩺 API Health',
@@ -894,9 +920,62 @@ function clampToScreen(b) {
 // Trace async : toute promesse rejetée non gérée est écrite dans le fichier de trace
 // (diagnostic boot : lance l'app avec MGP_TRACE=1 pour activer, sinon silencieux)
 const TRACE_FILE = '/tmp/mgp-boot-trace.log';
-function traceBoot(msg) { if (process.env.MGP_TRACE) { try { fs.appendFileSync(TRACE_FILE, msg + '\n'); } catch (e) {} } }
-process.on('unhandledRejection', (r) => { traceBoot('unhandledRejection: ' + ((r && r.stack) || r)); });
-process.on('uncaughtException', (r) => { traceBoot('uncaughtException: ' + ((r && r.stack) || r)); });
+// 🛡 Journal persistant (userData/mgp-journal.log) : /tmp est vidé au reboot et
+// MGP_TRACE est optionnel — chaque incident doit laisser une trace sur disque, même
+// quand l'app n'est pas lancée en mode debug. Journal plafonné (~120 lignes).
+const journalPath = () => { try { return path.join(app.getPath('userData'), 'mgp-journal.log'); } catch (e) { return '/tmp/mgp-journal.log'; } };
+// 🛡 Heuristique « incident récent » pour le badge tray : entrée critique de moins de 30 min.
+const JOURNAL_BADGE_MS = 30 * 60 * 1000;
+const JOURNAL_CRITICAL = /uncaughtException|unhandledRejection|render-process-gone|child-process-gone/;
+let lastIncidentNotified = 0; // 🔔 notification macOS : une seule par salve d'incidents
+function maybeNotifyFirstIncident(msg) {
+  try {
+    if (!JOURNAL_CRITICAL.test(msg)) return;
+    if (Date.now() - lastIncidentNotified < 5 * 60 * 1000) return; // anti-spam 5 min
+    lastIncidentNotified = Date.now();
+    new Notification({
+      title: 'MEGA PACK — ⚠️ Incident',
+      body: String(msg).slice(0, 140) + (LANG === 'fr' ? ' — détail dans 🛡 Journal' : ' — see 🛡 Journal'),
+      silent: true,
+    }).show();
+  } catch (e) { /* jamais bloquant */ }
+}
+function recentIncidents() {
+  try {
+    const src = fs.readFileSync(journalPath(), 'utf8');
+    return src.split('\n').filter((l) => {
+      if (!JOURNAL_CRITICAL.test(l)) return false;
+      const m = /^\[([^\]]+)\]/.exec(l);
+      return m && Date.now() - new Date(m[1]).getTime() < JOURNAL_BADGE_MS;
+    }).length;
+  } catch (e) { return 0; }
+}
+function updateTrayIcon() {
+  // Badge ⚠️ : l'icône template macOS ne supporte pas l'overlay natif sans canvas — le
+  // signalement passe par le tooltip (survol immédiat) et l'item 🛡 du menu devient « ⚠️ n ».
+  if (!tray || tray.isDestroyed()) return;
+  try {
+    const n = recentIncidents();
+    tray.setToolTip(n > 0
+      ? 'MEGA PACK — Skills & Agents · ⚠️ ' + n + ' incident(s) récent(s) — voir 🛡 Journal'
+      : 'MEGA PACK — Skills & Agents');
+  } catch (e) { /* jamais bloquant */ }
+}
+function journal(msg) {
+  const line = '[' + new Date().toISOString() + '] ' + msg + '\n';
+  try {
+    let prev = '';
+    try { prev = fs.readFileSync(journalPath(), 'utf8'); } catch (e2) { /* premier incident */ }
+    const lines = (prev + line).split('\n').filter((l) => l !== '');
+    fs.writeFileSync(journalPath(), lines.slice(-120).join('\n') + '\n');
+  } catch (e) { /* best effort : jamais faire tomber l'app pour un log */ }
+  if (JOURNAL_CRITICAL.test(msg)) { updateTrayIcon(); maybeNotifyFirstIncident(msg); } // badge ⚠️ + notif 1er incident
+  if (process.env.MGP_TRACE) { try { fs.appendFileSync(TRACE_FILE, msg + '\n'); } catch (e) {} }
+}
+function traceBoot(msg) { journal(msg); }
+process.on('unhandledRejection', (r) => { journal('unhandledRejection: ' + ((r && r.stack) || r)); });
+process.on('uncaughtException', (r) => { journal('uncaughtException: ' + ((r && r.stack) || r)); });
+app.on('child-process-gone', (e, details) => { journal('child-process-gone: ' + JSON.stringify(details || {})); });
 function createPanel() {
   traceBoot('createPanel: entree');
   if (win && !win.isDestroyed()) {
@@ -943,6 +1022,15 @@ function createPanel() {
   win.on('move', saveBounds);
   win.on('resize', saveBounds);
   win.loadFile('index.html');
+  // 🛡 Auto-récupération : si le process renderer meurt (OOM, GPU…), on journalise et on
+  // reconstruit le panneau tout seul — plus d'app « vivante mais inerte » sans fenêtre.
+  win.webContents.on('render-process-gone', (e, details) => {
+    journal('render-process-gone: ' + JSON.stringify(details || {}));
+    try { if (win && !win.isDestroyed()) win.destroy(); } catch (e2) { /* déjà mort */ }
+    win = null;
+    setTimeout(() => { try { createPanel(); journal('panneau reconstruit apres crash renderer'); } catch (e3) { journal('reconstruction panneau impossible: ' + e3.message); } }, 600);
+  });
+  win.webContents.on('did-fail-load', (e, code, desc, url) => { journal('did-fail-load: ' + code + ' ' + desc + ' ' + url); });
   win.once('ready-to-show', () => win.show());
   win.on('blur', () => {
     // 📌 « Garder le panneau visible » (Réglages / bouton 📌) : ne pas masquer au clic ailleurs.
@@ -1107,7 +1195,9 @@ function captureShots() {
       if (saved) return;
       try {
         w.showInactive();
-        await new Promise((r2) => setTimeout(r2, 1200));
+        // 1,2 s était trop court : le renderer n'a pas fini de peindre la liste →
+        // capture blanche (audit 25/09). 3,5 s laisse le catalogue se dessiner.
+        await new Promise((r2) => setTimeout(r2, 3500));
         const img = await w.webContents.capturePage();
         if (img && !img.isEmpty()) {
           fs.writeFileSync(path.join(shotsDir, 'panneau.png'), img.toPNG());
@@ -1147,7 +1237,9 @@ function captureShots() {
           + '</div>')
       .join('\n');
     const w = new BrowserWindow({
-      width: 460, height: 640, show: false, frame: false, resizable: false,
+      // hauteur généreuse : le menu complet (136 skills + 190 agents) fait ~2600 px —
+      // la fenêtre doit couvrir tout le document pour capturer la queue (🛡 Journal, 🩺).
+      width: 460, height: 2800, show: false, frame: false, resizable: false,
       webPreferences: { offscreen: true },
     });
     const html = `<!doctype html><html><head><meta charset="utf-8"><style>
@@ -1167,6 +1259,15 @@ function captureShots() {
           const img = await w.webContents.capturePage({ x: 0, y: 0, width: 460, height: 640 });
           fs.writeFileSync(path.join(shotsDir, 'menu-clic-droit.png'), img.toPNG());
           console.log('✓ menu-clic-droit.png écrit dans', shotsDir);
+          // 🛡 la fin du menu (🛡 Journal, 🩺 Santé API, Quitter) est sous les ~400 lignes
+          // de skills/agents : deuxième capture ciblée sur la queue du document.
+          try {
+            const sh = await w.webContents.executeJavaScript('document.body.scrollHeight');
+            const y = Math.max(0, sh - 700);
+            const tail = await w.webContents.capturePage({ x: 0, y, width: 460, height: 700 });
+            fs.writeFileSync(path.join(shotsDir, 'menu-queue.png'), tail.toPNG());
+            console.log('✓ menu-queue.png écrit (scrollHeight=' + sh + ', y=' + y + ')');
+          } catch (e3) { console.error('✗ capture queue menu :', e3.message); }
         } catch (err) { console.error('✗ capture menu :', err.message); }
         w.destroy();
         resolve();
@@ -1177,7 +1278,9 @@ function captureShots() {
   // Réglages : fenêtre non-redimensionnable, rendue en repli visible (capturePage fiable ici)
   const captureSettings = () => new Promise((resolve) => {
     const w = new BrowserWindow({
-      width: 500, height: 1030, show: false, resizable: false, minimizable: false,
+      // hauteur large : la section 🩺 Santé API est en bas d'un long document —
+      // capturePage rend ici tout le document, il faut la fenêtre à la hauteur du contenu.
+      width: 500, height: 2000, show: false, resizable: false, minimizable: false,
       fullscreenable: false, title: T().settingsTitle,
       icon: nativeImage.createFromPath(APPICON),
       webPreferences: {
@@ -1189,8 +1292,19 @@ function captureShots() {
       setTimeout(async () => {
         try {
           w.showInactive(); // settings.html n'a pas d'effet de flou dépendant de l'offscreen
-          await new Promise((r2) => setTimeout(r2, 1200));
-          const img = await w.webContents.capturePage();
+          // 🩺 la section Santé API sonde TOUS les providers au chargement (cascade complète,
+          // ~12-15 s avec les routeurs locaux morts) — attendre la fin du sondage pour ne pas
+          // capturer la section au stade « Sondage… ». MGP_CAPTURE_WAIT pour raccourcir.
+          const probeWait = parseInt(process.env.MGP_CAPTURE_WAIT || '', 10) || 17000;
+          await new Promise((r2) => setTimeout(r2, probeWait));
+          // 🩺 la section Santé API est en bas d'un long document → scroll + capture viewport
+          let img;
+          try {
+            const info = await w.webContents.executeJavaScript("(function(){const el=document.getElementById('healthList');if(el&&el.scrollIntoView)el.scrollIntoView({block:'center'});else window.scrollTo(0,document.body.scrollHeight);return {y:window.scrollY,h:document.body.scrollHeight};})");
+            console.log('✓ scroll santé →', JSON.stringify(info));
+          } catch (e3) { console.error('scroll santé :', e3.message); }
+          await new Promise((r2) => setTimeout(r2, 900));
+          img = await w.webContents.capturePage();
           if (img && !img.isEmpty()) {
             fs.writeFileSync(path.join(shotsDir, 'reglages.png'), img.toPNG());
             console.log('✓ reglages.png écrit dans', shotsDir);
@@ -1303,27 +1417,111 @@ ipcMain.on('hide', () => { if (win && !win.isDestroyed()) win.hide(); });
 // Cascade de providers : demandé → apiProvider (Réglages) → tous ceux avec une clé.
 // Si le premier échoue (403, quota, réseau…), le suivant prend le relais — le chat marche
 // dès qu'UN SEUL provider configuré fonctionne.
-ipcMain.handle('chat-send', async (e, { messages, provider, model } = {}) => {
+// 🧠 Ordre de cascade du chat : demandé → Réglages → providers connus VIVANTS (cache
+// Santé API) → reste de la priorité. Fini le re-test systématique des routeurs locaux
+// morts à chaque message (omniroute seul coûtait ~10 s en HTTP 502).
+// 🛡 Journal : lecture + purge (Réglages → bouton 🛡 Journal)
+ipcMain.handle('journal-get', () => {
+  try { return { ok: true, text: fs.readFileSync(journalPath(), 'utf8'), recent: recentIncidents() }; }
+  catch (e) { return { ok: true, text: '', recent: 0 }; }
+});
+ipcMain.handle('journal-clear', () => {
+  try { fs.writeFileSync(journalPath(), ''); updateTrayIcon(); return true; } catch (e) { return false; }
+});
+// 🚫 Quarantaine : état (Santé API) + levée manuelle (bouton « Lever »)
+ipcMain.handle('quarantine-state', () => quarantineState());
+ipcMain.handle('quarantine-lift', (e, provider) => {
+  if (typeof provider !== 'string' || !failStreak.has(provider)) return false;
+  failStreak.delete(provider);
+  seedProbeOk(provider, 0); // levée → le provider repasse en tête « vivant » au prochain tour
+  return true;
+});
+// 🛡 État incidents récents pour le badge du header panneau (compteur + via onSettings)
+ipcMain.handle('incidents-state', () => ({ recent: recentIncidents(), path: journalPath() }));
+// 🚫 Quarantaine cascade : un provider qui échoue 3× de suite est sauté pendant 10 min —
+// plus de re-test à chaque message d'un endpoint mort (omniroute coûtait ~10 s par chat).
+const QUARANTINE_MS = 10 * 60 * 1000;
+const QUARANTINE_AFTER = 3;
+const failStreak = new Map(); // provider → { n, at }
+function quarantined(provider) {
+  const f = failStreak.get(provider);
+  if (!f) return false;
+  if (f.n >= QUARANTINE_AFTER && Date.now() - f.at < QUARANTINE_MS) return true;
+  if (Date.now() - f.at >= QUARANTINE_MS) failStreak.delete(provider); // purge expirée
+  return false;
+}
+function markFail(provider) {
+  const f = failStreak.get(provider) || { n: 0, at: 0 };
+  failStreak.set(provider, { n: f.n + 1, at: Date.now() });
+}
+function markFail(provider) {
+  const f = failStreak.get(provider) || { n: 0, at: 0 };
+  const before = !quarantined(provider);
+  failStreak.set(provider, { n: f.n + 1, at: Date.now() });
+  if (before && quarantined(provider)) onFirstQuarantine(provider); // 🔔 3e échec consécutif
+}
+// 🔔 notification discrète au moment où un provider entre en quarantaine (une seule fois
+// par entrée — pas de spam à chaque message). Notification.ts utilisée : bannière native.
+let quarantineNotifiedAt = new Map();
+function onFirstQuarantine(provider) {
+  try {
+    const last = quarantineNotifiedAt.get(provider) || 0;
+    if (Date.now() - last < QUARANTINE_MS) return; // déjà notifié pour cette entrée
+    quarantineNotifiedAt.set(provider, Date.now());
+    const prov = PROVIDERS[provider] || {};
+    new Notification({
+      title: 'MEGA PACK — Cascade',
+      body: (LANG === 'fr' ? '🚫 ' : '🚫 ') + (prov.label || provider) + (LANG === 'fr' ? ' en quarantaine 10 min (3 échecs) — la cascade continue sans lui' : ' quarantined 10 min (3 failures) — cascade continues without it'),
+      silent: true,
+    }).show();
+  } catch (e) { /* notification optionnelle */ }
+}
+// 🛡 État quarantaine exposé à la Santé API : { provider: { until, remainingMs, fails } }
+function quarantineState() {
+  const out = {};
+  for (const [p, f] of failStreak) {
+    if (quarantined(p)) out[p] = { until: f.at + QUARANTINE_MS, remainingMs: f.at + QUARANTINE_MS - Date.now(), fails: f.n };
+  }
+  return out;
+}
+function chatCascadeOrder(requested, prefProvider) {
   const wanted = [];
-  if (PROVIDERS[provider]) wanted.push(provider);
-  if (PREFS.apiProvider && PROVIDERS[PREFS.apiProvider]) wanted.push(PREFS.apiProvider);
-  for (const p of (PROBE_PRIORITY || [])) if (PROVIDERS[p]) wanted.push(p);
+  if (PROVIDERS[requested]) wanted.push(requested);
+  if (prefProvider && PROVIDERS[prefProvider]) wanted.push(prefProvider);
+  const alive = PROBE_PRIORITY.filter((p) => { const c = probeCacheGet(p); return c && c.ok && Date.now() - c.at < PROBE_CACHE_MS; });
+  for (const p of [...alive, ...PROBE_PRIORITY]) if (PROVIDERS[p]) wanted.push(p);
+  // 🚫 les quarantainés vont en fin de liste (tentés en dernier recours, pas en premier)
+  const inQ = wanted.filter((p) => quarantined(p));
+  return [...new Set(wanted.filter((p) => !quarantined(p)).concat(inQ))];
+}
+// Amorçage du cache au succès : Santé API, tray, Atelier et la prochaine cascade savent
+// immédiatement que ce provider fonctionne — plus aucun délai de découverte.
+function seedProbeOk(provider, latency) {
+  probeCache.set(provider, { ok: true, status: 200, at: Date.now(), latency: latency || 0 });
+  failStreak.delete(provider); // un succès lève la quarantaine immédiatement
+}
+ipcMain.handle('chat-send', async (e, { messages, provider, model } = {}) => {
   const errors = [];
-  for (const prov of [...new Set(wanted)].slice(0, 5)) {
+  // 🐛 fix 2.16.1 : plus de slice(0, 5) — cascade COMPLÈTE. 🧠 2.16.2 : ordre intelligent,
+  // les providers vivants passent en tête ; chaque provider part avec un modèle de repli
+  // (fallbackModelFor) au lieu d'une chaîne vide (fini le HTTP 400 « Missing model »).
+  for (const prov of chatCascadeOrder(provider, PREFS.apiProvider)) {
     try {
       const key = apiKeyFor(prov);
       const local = /ollama|127\.0\.0\.1|localhost/.test(PROVIDERS[prov].base || '');
       if (!key && !local) continue; // pas de clé : provider suivant
       const { text, model: usedModel, latency } = await llmChat({
         provider: prov,
-        model: String(model || '').trim() || (PREFS.apiModels && PREFS.apiModels[prov]) || (prov === 'groq' ? 'openai/gpt-oss-120b' : ''),
+        model: String(model || '').trim() || (PREFS.apiModels && PREFS.apiModels[prov]) || fallbackModelFor(prov),
         maxTokens: 2048,
         temperature: 0.7,
         messages: (messages || []).slice(-24).map((m) => ({ role: m && m.role === 'assistant' ? 'assistant' : 'user', content: String((m && m.content) || '').slice(0, 24000) })),
       });
+      seedProbeOk(prov, latency); // 🧠 le succès nourrit le cache Santé API/cascade
       return { ok: true, text, model: usedModel, latency, provider: prov };
     } catch (err) {
       errors.push(prov + ': ' + ((err && err.message) || String(err)));
+      markFail(prov); // 🚫 3 échecs consécutifs → 10 min de quarantaine
     }
   }
   return { ok: false, error: errors.join(' · ') || (LANG === 'en' ? 'No provider with API key — add one in Settings' : 'Aucun provider avec clé API — ajoute-en un dans Réglages') };
@@ -1385,12 +1583,10 @@ async function llmChatStream({ provider, model = '', apiKey = '', messages, maxT
   return { text: full, model, latency: Date.now() - started, provider };
 }
 ipcMain.handle('chat-send-stream', async (e, { messages, provider, model } = {}) => {
-  const wanted = [];
-  if (PROVIDERS[provider]) wanted.push(provider);
-  if (PREFS.apiProvider && PROVIDERS[PREFS.apiProvider]) wanted.push(PREFS.apiProvider);
-  for (const p of (PROBE_PRIORITY || [])) if (PROVIDERS[p]) wanted.push(p);
   const errors = [];
-  for (const prov of [...new Set(wanted)].slice(0, 5)) {
+  // 🐛 2.16.1 cascade complète + modèle de repli · 🧠 2.16.2 ordre intelligent (vivants
+  // en tête) — même correctif que chat-send, en version streaming.
+  for (const prov of chatCascadeOrder(provider, PREFS.apiProvider)) {
     try {
       const key = apiKeyFor(prov);
       const local = /ollama|127\.0\.0\.1|localhost/.test(PROVIDERS[prov].base || '');
@@ -1399,13 +1595,15 @@ ipcMain.handle('chat-send-stream', async (e, { messages, provider, model } = {})
       try { if (win && !win.isDestroyed()) win.webContents.send('chat-meta', { provider: prov, label: (PROVIDERS[prov] && PROVIDERS[prov].label) || prov }); } catch (e2) {}
       const { text, model: usedModel, latency, provider: usedProvider } = await llmChatStream({
         provider: prov,
-        model: String(model || '').trim() || (PREFS.apiModels && PREFS.apiModels[prov]) || (prov === 'groq' ? 'openai/gpt-oss-120b' : ''),
+        model: String(model || '').trim() || (PREFS.apiModels && PREFS.apiModels[prov]) || fallbackModelFor(prov),
         messages: (messages || []).slice(-24).map((m) => ({ role: m && m.role === 'assistant' ? 'assistant' : 'user', content: String((m && m.content) || '').slice(0, 24000) })),
         onChunk: (piece) => { try { if (win && !win.isDestroyed()) win.webContents.send('chat-stream', { piece }); } catch (e2) {} },
       });
+      seedProbeOk(usedProvider || prov, latency); // 🧠 succès → cache Santé API/cascade
       return { ok: true, text, model: usedModel, latency, provider: usedProvider };
     } catch (err) {
       errors.push(prov + ': ' + ((err && err.message) || String(err)));
+      markFail(prov); // 🚫 quarantaine aussi en streaming
       try { if (win && !win.isDestroyed()) win.webContents.send('chat-meta', { provider: prov, failed: true }); } catch (e2) {}
     }
   }

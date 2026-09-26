@@ -507,6 +507,7 @@ APP_PARENT.insertAdjacentHTML('afterbegin', `
   <header id="top">
     <span id="brand">⚡ <b>MEGA&nbsp;PACK</b></span>
     <span id="counts">${S.length} skills · ${A.length} agents</span>
+    <button id="incb" title="${LANG === 'fr' ? 'Incidents récents — ouvrir le 🛡 Journal des Réglages' : 'Recent incidents — open Settings 🛡 Journal'}" aria-label="incidents" hidden style="border:none;background:transparent;font-size:14px;cursor:pointer;padding:0 4px">⚠️</button>
     <span style="flex:1"></span>
     <button id="newp" title="${T.newp}" aria-label="${T.newp}">＋</button>
     <button id="langb" title="FR/EN" aria-label="FR/EN">${LANG === 'fr' ? 'FR' : 'EN'}</button>
@@ -1662,6 +1663,22 @@ $('qclear').onclick = () => {
 };
 // ⚙ Réglages depuis le panneau (même chemin que ⌘,)
 $('setb').onclick = () => window.mgp.openSettings();
+// 🛡 Badge incidents : ⚠️ n visible dans le header si des incidents critiques ont < 30 min —
+// clic → ouvre les Réglages (section Journal visible immédiatement). Rafraîchi périodiquement.
+const incb = $('incb');
+async function refreshIncidentBadge() {
+  try {
+    const st = await window.mgp.incidentsState();
+    if (!incb) return;
+    incb.hidden = !(st && st.recent > 0);
+    incb.textContent = '⚠️ ' + st.recent;
+  } catch (e) { /* pont absent : badge silencieux */ }
+}
+if (incb) {
+  incb.onclick = () => window.mgp.openSettings();
+  refreshIncidentBadge();
+  setInterval(refreshIncidentBadge, 30000); // discret : 2 vérifications/minute
+}
 // ── Redimensionnement intelligent : poignées invisibles aux 4 coins + presets ──
 // La fenêtre Electron n'est resizable que par sa poignée native (bas-droite) ; ces
 // poignées DOM ajoutent les 3 autres coins + le snapper S/M/L/XL (tailles utiles).
@@ -2286,7 +2303,7 @@ loadTeams();
 function tourSteps() {
   const fr = LANG === 'fr';
   return [
-    { title: fr ? '⚡ Bienvenue !' : '⚡ Welcome!', desc: fr ? '321 experts prêts à l\'emploi : 131 skills 🛠 (procédures d\'expertise) et 190 agents 👤 (personas experts). Tape quelques lettres : la liste filtre instantanément.' : '321 ready-to-use experts: 131 skills 🛠 (expertise procedures) and 190 agents 👤 (expert personas). Type a few letters: the list filters instantly.', help: fr ? '💡 Astuce : ↑↓ naviguent, ⏎ copie le prompt. Tu es au bon endroit pour essayer !' : '💡 Tip: ↑↓ navigate, ⏎ copies the prompt. Try it right here!', target: null },
+    { title: fr ? '⚡ Bienvenue !' : '⚡ Welcome!', desc: fr ? '326 experts prêts à l\'emploi : 136 skills 🛠 (procédures d\'expertise) et 190 agents 👤 (personas experts). Tape quelques lettres : la liste filtre instantanément.' : '326 ready-to-use experts: 136 skills 🛠 (expertise procedures) and 190 agents 👤 (expert personas). Type a few letters: the list filters instantly.', help: fr ? '💡 Astuce : ↑↓ naviguent, ⏎ copie le prompt. Tu es au bon endroit pour essayer !' : '💡 Tip: ↑↓ navigate, ⏎ copies the prompt. Try it right here!', target: null },
     { title: fr ? '⌨ Le LLM par défaut' : '⌨ The default LLM', desc: fr ? 'Dans la barre du bas, le bouton « ⌨ LLM » choisit le modèle par défaut : Claude, ChatGPT, Perplexity, Copilot, DeepSeek, Z.ai, Kimi, Mammouth… ou 🔑 API si une clé est enregistrée.' : 'In the bottom bar, the « ⌨ LLM » button picks the default model: Claude, ChatGPT, Perplexity, Copilot, DeepSeek, Z.ai, Kimi, Mammouth… or 🔑 API with a saved key.', help: fr ? '💡 ⌘⏎ sur un expert l\'ouvre dans ce LLM · ⇧⏎ force ChatGPT.' : '💡 ⌘⏎ on an expert opens it in that LLM · ⇧⏎ forces ChatGPT.', target: 'llmbtn' },
     { title: fr ? '🖱 Le clic droit, ton couteau suisse' : '🖱 Right-click, your Swiss knife', desc: fr ? 'Clic droit sur n\'importe quel expert : l\'envoyer vers plusieurs LLM, créer son fichier .md, naviguer dans l\'arborescence MEGA PROMPT (un clic ouvre le dossier ou le fichier), copier, mettre en favori.' : 'Right-click any expert: send it to several LLMs, create its .md file, browse the MEGA PROMPT tree (one click opens the folder or file), copy, favorite.', help: fr ? '💡 Les destinations du clic droit se règlent dans Réglages (⌘,).' : '💡 Right-click destinations are configured in Settings (⌘,).', target: 'q' },
     { title: fr ? '🛠 L\'Atelier : crée tes experts' : '🛠 The Workshop: build your experts', desc: fr ? 'Décris un besoin, l\'IA génère un agent 👤, un skill 🛠 — ou une équipe 🕸 : un super-orchestrateur + 2 à 5 agents + un workflow complet.' : 'Describe a need, the AI generates an agent 👤, a skill 🛠 — or a team 🕸: a super-orchestrator + 2-5 agents + a full workflow.', help: fr ? '💡 Choisis le fournisseur (Groq, OpenAI, Anthropic…) et ta clé API dans Réglages → Intelligence.' : '💡 Pick the provider (Groq, OpenAI, Anthropic…) and your API key in Settings → Intelligence.', target: 'atb' },

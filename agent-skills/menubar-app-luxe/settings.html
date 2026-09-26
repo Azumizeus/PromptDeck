@@ -45,6 +45,9 @@ input[type=checkbox]{accent-color:var(--vio)}
 .healthline .mark{font-weight:700;width:14px}
 .healthline.ok .mark{color:var(--grn)}
 .healthline.ko .mark{color:#ff8a8a}
+.healthline.q{border-color:#b8860b;background:rgba(184,134,11,.08)}
+.healthline.q .mark{color:#ffc24b}
+.healthline .qlift{font-size:11px;padding:2px 8px;min-height:0;height:auto;border-radius:6px}
 .healthline .pname{flex:1;font-weight:600}
 .healthline .pinfo{color:var(--mut);font-size:11px}
 #healthSummary{font-size:11.5px;font-weight:600;color:var(--txt2)}
@@ -99,6 +102,13 @@ input[type=checkbox]{accent-color:var(--vio)}
   </div>
   <div id="healthList"></div>
   <span class="d" data-i18n="healthHint">✓ = l'endpoint répond avec ta clé · sans clé, le provider est tenté quand même (locaux) ou signalé</span></div>
+<div class="row col" id="journalRow"><b><span data-i18n="jr">🛡 Journal — incidents &amp; diagnostic</span><span class="d" data-i18n="jrD">Exceptions, morts de process, échecs de chargement — horodatés, plafonnés 120 lignes. Le tray affiche ⚠️ quand un incident critique a moins de 30 min</span></b>
+  <div class="apirow2">
+    <button id="journalCopy" class="btn">📋 <span data-i18n="jrCopy">Copier</span></button>
+    <button id="journalClear" class="btn">🧹 <span data-i18n="jrClear">Purger</span></button>
+    <span id="journalStatus"></span>
+  </div>
+  <pre id="journalView" style="max-height:180px;overflow:auto;background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:11px;white-space:pre-wrap;color:var(--mut);display:none"></pre></div>
 <div class="row"><b><span data-i18n="hpop">🎈 Popup flottant au survol</span><span class="d" data-i18n="hpopD">Au survol d'un skill/agent/✍️ : popup interactif avec boutons favori et lancer (désactivé = tooltip simple)</span></b>
   <input type="checkbox" id="hoverpopup" style="width:18px;height:18px;accent-color:var(--acc)"></div>
 <div class="row"><b><span data-i18n="auto">Lancement au démarrage</span><span class="d" data-i18n="autoD">Ouvre MEGA PACK à l'ouverture de session</span></b>

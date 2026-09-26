@@ -35,6 +35,14 @@ contextBridge.exposeInMainWorld('mgp', {
   getPrefs: () => ipcRenderer.sendSync('get-prefs'),
   // 🩺 Santé API : état live de tous les providers (sonde /models par provider)
   apiHealth: (force) => ipcRenderer.invoke('api-health', { force: !!force }),
+  // 🛡 Journal anti-crash : lecture + purge (Réglages)
+  journalGet: () => ipcRenderer.invoke('journal-get'),
+  journalClear: () => ipcRenderer.invoke('journal-clear'),
+  // 🚫 Quarantaine cascade : état pour la Santé API + levée manuelle
+  quarantineState: () => ipcRenderer.invoke('quarantine-state'),
+  quarantineLift: (provider) => ipcRenderer.invoke('quarantine-lift', provider),
+  // 🛡 Badge incidents du header panneau
+  incidentsState: () => ipcRenderer.invoke('incidents-state'),
   addRecent: (name) => ipcRenderer.send('add-recent', name),
   toggleFav: (name) => ipcRenderer.send('toggle-fav', name),
   exportConfig: () => ipcRenderer.invoke('export-config'),

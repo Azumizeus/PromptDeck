@@ -2,8 +2,8 @@
 
 // i18n de la fenêtre Réglages (langue partagée avec le panneau via mgp.lang)
 const I18N = {
-  fr: { title: 'MEGA PACK — Réglages', h2: '⚡ MEGA PACK — Réglages', cat: 'Catalogue :', genFrom: '· généré depuis', theme: 'Thème', themeD: 'Appliqué au panneau et à cette fenêtre', dark: '🌙 Sombre', light: '☀️ Clair', lang: 'Langue', langD: 'Interface du panneau', gs: 'Recherche globale', gsD: 'Raccourci système (⌘Espace est réservé par Spotlight)', set: 'Réglages', setD: 'Ouvrir cette fenêtre', dllm: 'LLM par défaut', dllmD: '⌘⏎ dans le panneau ouvre ce chat', tgt: 'Destinations du clic droit', tgtD: 'Menu flottant sur un agent/skill : envoi en un clic vers plusieurs LLM (le premier est prioritaire)', tgtHint: 'Clique pour ajouter/retirer — ordre = priorité', auto: 'Lancement au démarrage', autoD: "Ouvre MEGA PACK à l'ouverture de session", fsc: 'Raccourcis favoris', fscD: '⌘1 à ⌘9 lancent les 9 premiers favoris (menu du ⚡ ouvert)', keep: '📌 Garder le panneau visible', keepD: 'Le panneau ne se masque plus quand tu cliques dans une autre fenêtre (aussi via le bouton 📌 du panneau)', arenaBus: '🎮 Bus d\'événements ARENA', arenaBusD: "Écrit en local l'activité (agents générés, prompts copiés…) pour le jeu MEGA PACK ARENA — rien ne quitte ta machine", arenaDir: '🎮 Dossier MEGA PACK ARENA', arenaDirD: 'Où se trouve le jeu (arena-app) — détection automatique sinon', arenaOpen: "Ouvrir l'arène", arenaChosen: '✓ Dossier ARENA enregistré', arenaBad: '✗ Dossier invalide (main.js introuvable)', arenaOpenErr: "✗ Arène introuvable — choisnis son dossier d'abord", pdir: '📁 Dossier MEGA PROMPT (.md)', pdirD: "Bibliothèque locale : skills/, agents/, perso/ — chaque prompt de l'app en fichier .md, avec le prompt d'activation prêt à coller", pdirChoose: 'Choisir', pdirOpen: 'Ouvrir', pdirSync: 'Générer tous les .md (catalogue + perso)', pdirSynced: (n, p) => `✓ ${n} fichiers .md générés — ${p}`, pdirTree: 'Arborescence : skills/<catégorie>/ · agents/<catégorie>/ · perso/<tag>/ + LISEZMOI.md', cfg: 'Configuration', cfgD: 'Favoris, récents et préférences en JSON', xp: 'Mes prompts ✍️', xpD: 'Télécharge tous tes prompts en Markdown', osel: 'Ouvrir la sélection', oselD: 'Dans le panneau : ⏎ copie · ⌘⏎ LLM par défaut · ⇧⏎ ChatGPT', tour: '🎓 Mode d\'emploi interactif', tourD: 'Revoit la visite guidée en 7 étapes : recherche, LLM, clic droit, Atelier, équipes…', tourBtn: 'Relancer la visite', saved: '✓ Enregistré', noCat: 'catalogue introuvable', intel: '🧠 Intelligence — génération IA (Atelier)', intelD: "Clé API pour générer agents & skills. Chiffrée par macOS — refusée si le chiffrement OS est indisponible (jamais stockée en clair) ; ou variable d'environnement (GROQ_API_KEY, OPENAI_API_KEY…)", apiSave: 'Enregistrer la clé', apiTest: 'Tester', apiModels: 'Modèles conseillés', apiSaved: '✓ Clé enregistrée', apiDeleted: 'Clé effacée', apiTesting: 'Test en cours…', apiOk: (m, l) => `✓ Connecté — ${m} (${l} ms)`, apiFail: '✗ Échec', health: '🩺 Santé API — état live des fournisseurs', healthD: 'Sonde chaque endpoint /models (même mécanisme que la cascade du mini-chat 💬) — état gardé 10 min en cache', healthBtn: 'Re-sonder', healthHint: '✓ = l\'endpoint répond avec ta clé · les routeurs locaux sont tentés même sans clé', healthSummary: (ok, total) => `✓ ${ok}/${total} fournisseurs opérationnels`, healthProbe: 'Sondage…', healthNoKey: 'sans clé' },
-  en: { title: 'MEGA PACK — Settings', h2: '⚡ MEGA PACK — Settings', cat: 'Catalog:', genFrom: '· generated from', theme: 'Theme', themeD: 'Applied to the panel and this window', dark: '🌙 Dark', light: '☀️ Light', lang: 'Language', langD: 'Panel interface', gs: 'Global search', gsD: 'System shortcut (⌘Space is reserved by Spotlight)', set: 'Settings', setD: 'Open this window', dllm: 'Default LLM', dllmD: '⌘⏎ in the panel opens this chat', tgt: 'Right-click destinations', tgtD: 'Floating menu on an agent/skill: one-click send to several LLMs (first one wins priority)', tgtHint: 'Click to add/remove — order = priority', auto: 'Launch at startup', autoD: 'Open MEGA PACK at login', fsc: 'Favorite shortcuts', fscD: '⌘1 to ⌘9 launch the first 9 favorites (open ⚡ menu)', keep: '📌 Keep the panel visible', keepD: 'The panel no longer hides when you click another window (also via the panel 📌 button)', arenaBus: '🎮 ARENA event bus', arenaBusD: 'Writes your activity locally (agents generated, prompts copied…) for the MEGA PACK ARENA game — nothing leaves your machine', arenaDir: '🎮 MEGA PACK ARENA folder', arenaDirD: 'Where the game (arena-app) lives — auto-detected otherwise', arenaOpen: 'Open the Arena', arenaChosen: '✓ ARENA folder saved', arenaBad: '✗ Invalid folder (main.js not found)', arenaOpenErr: '✗ Arena not found — choose its folder first', pdir: '📁 MEGA PROMPT folder (.md)', pdirD: "Local library: skills/, agents/, perso/ — every prompt of the app as a .md file, with the activation prompt ready to paste", pdirChoose: 'Choose', pdirOpen: 'Open', pdirSync: 'Generate all .md files (catalog + custom)', pdirSynced: (n, p) => `✓ ${n} .md files generated — ${p}`, pdirTree: 'Tree: skills/<category>/ · agents/<category>/ · perso/<tag>/ + LISEZMOI.md', cfg: 'Configuration', cfgD: 'Favorites, recents and preferences as JSON', xp: 'My prompts ✍️', xpD: 'Download all your prompts as Markdown', osel: 'Open selection', oselD: 'In the panel: ⏎ copy · ⌘⏎ default LLM · ⇧⏎ ChatGPT', tour: '🎓 Interactive guide', tourD: 'Replays the 7-step guided tour: search, LLM, right-click, Workshop, teams…', tourBtn: 'Replay the tour', saved: '✓ Saved', noCat: 'catalog not found', intel: '🧠 Intelligence — AI generation (Workshop)', intelD: 'API key used to generate agents & skills. Encrypted by macOS — refused when OS encryption is unavailable (never stored in clear text); or use env variables (GROQ_API_KEY, OPENAI_API_KEY…)', apiSave: 'Save key', apiTest: 'Test', apiModels: 'Suggested models', apiSaved: '✓ Key saved', apiDeleted: 'Key cleared', apiTesting: 'Testing…', apiOk: (m, l) => `✓ Connected — ${m} (${l} ms)`, apiFail: '✗ Failed', health: '🩺 API Health — live provider status', healthD: 'Probes every /models endpoint (same mechanism as the 💬 mini-chat cascade) — state cached for 10 min', healthBtn: 'Re-probe', healthHint: '✓ = endpoint answers with your key · local routers are tried even without a key', healthSummary: (ok, total) => `✓ ${ok}/${total} providers operational`, healthProbe: 'Probing…', healthNoKey: 'no key' },
+  fr: { title: 'MEGA PACK — Réglages', h2: '⚡ MEGA PACK — Réglages', cat: 'Catalogue :', genFrom: '· généré depuis', theme: 'Thème', themeD: 'Appliqué au panneau et à cette fenêtre', dark: '🌙 Sombre', light: '☀️ Clair', lang: 'Langue', langD: 'Interface du panneau', gs: 'Recherche globale', gsD: 'Raccourci système (⌘Espace est réservé par Spotlight)', set: 'Réglages', setD: 'Ouvrir cette fenêtre', dllm: 'LLM par défaut', dllmD: '⌘⏎ dans le panneau ouvre ce chat', tgt: 'Destinations du clic droit', tgtD: 'Menu flottant sur un agent/skill : envoi en un clic vers plusieurs LLM (le premier est prioritaire)', tgtHint: 'Clique pour ajouter/retirer — ordre = priorité', auto: 'Lancement au démarrage', autoD: "Ouvre MEGA PACK à l'ouverture de session", fsc: 'Raccourcis favoris', fscD: '⌘1 à ⌘9 lancent les 9 premiers favoris (menu du ⚡ ouvert)', keep: '📌 Garder le panneau visible', keepD: 'Le panneau ne se masque plus quand tu cliques dans une autre fenêtre (aussi via le bouton 📌 du panneau)', arenaBus: '🎮 Bus d\'événements ARENA', arenaBusD: "Écrit en local l'activité (agents générés, prompts copiés…) pour le jeu MEGA PACK ARENA — rien ne quitte ta machine", arenaDir: '🎮 Dossier MEGA PACK ARENA', arenaDirD: 'Où se trouve le jeu (arena-app) — détection automatique sinon', arenaOpen: "Ouvrir l'arène", arenaChosen: '✓ Dossier ARENA enregistré', arenaBad: '✗ Dossier invalide (main.js introuvable)', arenaOpenErr: "✗ Arène introuvable — choisnis son dossier d'abord", pdir: '📁 Dossier MEGA PROMPT (.md)', pdirD: "Bibliothèque locale : skills/, agents/, perso/ — chaque prompt de l'app en fichier .md, avec le prompt d'activation prêt à coller", pdirChoose: 'Choisir', pdirOpen: 'Ouvrir', pdirSync: 'Générer tous les .md (catalogue + perso)', pdirSynced: (n, p) => `✓ ${n} fichiers .md générés — ${p}`, pdirTree: 'Arborescence : skills/<catégorie>/ · agents/<catégorie>/ · perso/<tag>/ + LISEZMOI.md', cfg: 'Configuration', cfgD: 'Favoris, récents et préférences en JSON', xp: 'Mes prompts ✍️', xpD: 'Télécharge tous tes prompts en Markdown', osel: 'Ouvrir la sélection', oselD: 'Dans le panneau : ⏎ copie · ⌘⏎ LLM par défaut · ⇧⏎ ChatGPT', tour: '🎓 Mode d\'emploi interactif', tourD: 'Revoit la visite guidée en 7 étapes : recherche, LLM, clic droit, Atelier, équipes…', tourBtn: 'Relancer la visite', saved: '✓ Enregistré', noCat: 'catalogue introuvable', intel: '🧠 Intelligence — génération IA (Atelier)', intelD: "Clé API pour générer agents & skills. Chiffrée par macOS — refusée si le chiffrement OS est indisponible (jamais stockée en clair) ; ou variable d'environnement (GROQ_API_KEY, OPENAI_API_KEY…)", apiSave: 'Enregistrer la clé', apiTest: 'Tester', apiModels: 'Modèles conseillés', apiSaved: '✓ Clé enregistrée', apiDeleted: 'Clé effacée', apiTesting: 'Test en cours…', apiOk: (m, l) => `✓ Connecté — ${m} (${l} ms)`, apiFail: '✗ Échec', health: '🩺 Santé API — état live des fournisseurs', healthD: 'Sonde chaque endpoint /models (même mécanisme que la cascade du mini-chat 💬) — état gardé 10 min en cache', healthBtn: 'Re-sonder', healthHint: '✓ = l\'endpoint répond avec ta clé · les routeurs locaux sont tentés même sans clé', healthSummary: (ok, total) => `✓ ${ok}/${total} fournisseurs opérationnels`, healthQ: (ok, total, q) => `✓ ${ok}/${total} opérationnels · 🚫 ${q} en quarantaine`, healthProbe: 'Sondage…', healthNoKey: 'sans clé', jr: '🛡 Journal — incidents & diagnostic', jrD: 'Exceptions, morts de process, échecs de chargement — horodatés, plafonnés 120 lignes. Le tray affiche ⚠️ quand un incident critique a moins de 30 min', jrCopy: 'Copier', jrClear: 'Purger', jrNone: 'Aucun incident enregistré — tout va bien ✓', jrCleared: '✓ Journal purgé', jrCopied: '✓ Journal copié', jrBadge: (n) => `⚠️ ${n} incident(s) récent(s) (< 30 min)` },
+  en: { title: 'MEGA PACK — Settings', h2: '⚡ MEGA PACK — Settings', cat: 'Catalog:', genFrom: '· generated from', theme: 'Theme', themeD: 'Applied to the panel and this window', dark: '🌙 Dark', light: '☀️ Light', lang: 'Language', langD: 'Panel interface', gs: 'Global search', gsD: 'System shortcut (⌘Space is reserved by Spotlight)', set: 'Settings', setD: 'Open this window', dllm: 'Default LLM', dllmD: '⌘⏎ in the panel opens this chat', tgt: 'Right-click destinations', tgtD: 'Floating menu on an agent/skill: one-click send to several LLMs (first one wins priority)', tgtHint: 'Click to add/remove — order = priority', auto: 'Launch at startup', autoD: 'Open MEGA PACK at login', fsc: 'Favorite shortcuts', fscD: '⌘1 to ⌘9 launch the first 9 favorites (open ⚡ menu)', keep: '📌 Keep the panel visible', keepD: 'The panel no longer hides when you click another window (also via the panel 📌 button)', arenaBus: '🎮 ARENA event bus', arenaBusD: 'Writes your activity locally (agents generated, prompts copied…) for the MEGA PACK ARENA game — nothing leaves your machine', arenaDir: '🎮 MEGA PACK ARENA folder', arenaDirD: 'Where the game (arena-app) lives — auto-detected otherwise', arenaOpen: 'Open the Arena', arenaChosen: '✓ ARENA folder saved', arenaBad: '✗ Invalid folder (main.js not found)', arenaOpenErr: '✗ Arena not found — choose its folder first', pdir: '📁 MEGA PROMPT folder (.md)', pdirD: "Local library: skills/, agents/, perso/ — every prompt of the app as a .md file, with the activation prompt ready to paste", pdirChoose: 'Choose', pdirOpen: 'Open', pdirSync: 'Generate all .md files (catalog + custom)', pdirSynced: (n, p) => `✓ ${n} .md files generated — ${p}`, pdirTree: 'Tree: skills/<category>/ · agents/<category>/ · perso/<tag>/ + LISEZMOI.md', cfg: 'Configuration', cfgD: 'Favorites, recents and preferences as JSON', xp: 'My prompts ✍️', xpD: 'Download all your prompts as Markdown', osel: 'Open selection', oselD: 'In the panel: ⏎ copy · ⌘⏎ default LLM · ⇧⏎ ChatGPT', tour: '🎓 Interactive guide', tourD: 'Replays the 7-step guided tour: search, LLM, right-click, Workshop, teams…', tourBtn: 'Replay the tour', saved: '✓ Saved', noCat: 'catalog not found', intel: '🧠 Intelligence — AI generation (Workshop)', intelD: 'API key used to generate agents & skills. Encrypted by macOS — refused when OS encryption is unavailable (never stored in clear text); or use env variables (GROQ_API_KEY, OPENAI_API_KEY…)', apiSave: 'Save key', apiTest: 'Test', apiModels: 'Suggested models', apiSaved: '✓ Key saved', apiDeleted: 'Key cleared', apiTesting: 'Testing…', apiOk: (m, l) => `✓ Connected — ${m} (${l} ms)`, apiFail: '✗ Failed', health: '🩺 API Health — live provider status', healthD: 'Probes every /models endpoint (same mechanism as the 💬 mini-chat cascade) — state cached for 10 min', healthBtn: 'Re-probe', healthHint: '✓ = endpoint answers with your key · local routers are tried even without a key', healthSummary: (ok, total) => `✓ ${ok}/${total} providers operational`, healthQ: (ok, total, q) => `✓ ${ok}/${total} operational · 🚫 ${q} quarantined`, healthProbe: 'Probing…', healthNoKey: 'no key', jr: '🛡 Journal — incidents & diagnostics', jrD: 'Exceptions, dead processes, load failures — timestamped, capped at 120 lines. The tray shows ⚠️ when a critical incident is under 30 min old', jrCopy: 'Copy', jrClear: 'Clear', jrNone: 'No incident recorded — all clear ✓', jrCleared: '✓ Journal cleared', jrCopied: '✓ Journal copied', jrBadge: (n) => `⚠️ ${n} recent incident(s) (< 30 min)` },
 };
 let LANG = 'fr';
 try { LANG = localStorage.getItem('mgp.lang') || 'fr'; } catch (e) {}
@@ -236,29 +236,82 @@ async function refreshHealth(force) {
   if (!window.mgp.apiHealth || !healthList) return;
   const T = I18N[LANG] || I18N.fr;
   healthSummary.textContent = T.healthProbe;
+  // 🚫 état de quarantaine en parallèle de la sonde (lève le bouton « Lever » si besoin)
+  let quarantine = {};
+  try { quarantine = (await window.mgp.quarantineState()) || {}; } catch (e) { /* pont absent */ }
   const r = await window.mgp.apiHealth(force);
   const res = (r && r.results) || {};
   const entries = HEALTH_ORDER.filter((p) => res[p]);
   const okCount = entries.filter((p) => res[p].ok).length;
-  healthSummary.textContent = T.healthSummary(okCount, entries.length);
+  const qCount = Object.keys(quarantine).length;
+  healthSummary.textContent = qCount ? (T.healthQ ? T.healthQ(okCount, entries.length, qCount) : T.healthSummary(okCount, entries.length)) : T.healthSummary(okCount, entries.length);
   healthList.innerHTML = '';
   entries.forEach((p) => {
     const it = res[p];
+    const q = quarantine[p];
     const line = document.createElement('div');
-    line.className = 'healthline ' + (it.ok ? 'ok' : 'ko');
-    const detail = it.ok
-      ? (it.latency ? it.latency + ' ms' : '')
-      : (it.hasKey ? 'HTTP ' + (it.status || 'réseau') : (LANG === 'en' ? T.healthNoKey : T.healthNoKey));
-    line.innerHTML = '<span class="mark">' + (it.ok ? '✓' : '✗') + '</span><span class="pname">' + (HEALTH_LABEL[p] || p) +
-      '</span><span class="pinfo">' + detail + '</span><span class="pkey">' + (it.hasKey ? '🔑' : '·') + '</span>';
-    line.title = it.hasKey
-      ? (LANG === 'en' ? 'Key configured (env / OpenCode auth.json / keychain)' : 'Clé configurée (env / auth.json OpenCode / trousseau)')
-      : (LANG === 'en' ? 'No key found — the cascade still tries local routers' : 'Aucune clé trouvée — la cascade tente quand même les routeurs locaux');
+    line.className = 'healthline ' + (it.ok ? 'ok' : 'ko') + (q ? ' q' : '');
+    let detail, mark;
+    if (q) {
+      // 🚫 en quarantaine : minutes restantes au lieu du simple ✗
+      mark = '🚫';
+      const min = Math.max(1, Math.round(q.remainingMs / 60000));
+      detail = (LANG === 'en' ? 'quarantined — ' : 'en quarantaine — encore ') + min + ' min (' + q.fails + (LANG === 'en' ? ' failures' : ' échecs') + ')';
+    } else {
+      mark = it.ok ? '✓' : '✗';
+      detail = it.ok
+        ? (it.latency ? it.latency + ' ms' : '')
+        : (it.hasKey ? 'HTTP ' + (it.status || 'réseau') : (LANG === 'en' ? T.healthNoKey : T.healthNoKey));
+    }
+    line.innerHTML = '<span class="mark">' + mark + '</span><span class="pname">' + (HEALTH_LABEL[p] || p) +
+      '</span><span class="pinfo">' + detail + '</span><span class="pkey">' + (it.hasKey ? '🔑' : '·') + '</span>' +
+      (q ? '<button class="btn qlift" data-p="' + p + '">↩ ' + (LANG === 'en' ? 'Lift' : 'Lever') + '</button>' : '');
+    line.title = q
+      ? (LANG === 'en' ? '3 consecutive failures — the cascade tries this provider last for 10 min' : '3 échecs consécutifs — la cascade ne le tente qu\'en dernier recours pendant 10 min')
+      : it.hasKey
+        ? (LANG === 'en' ? 'Key configured (env / OpenCode auth.json / keychain)' : 'Clé configurée (env / auth.json OpenCode / trousseau)')
+        : (LANG === 'en' ? 'No key found — the cascade still tries local routers' : 'Aucune clé trouvée — la cascade tente quand même les routeurs locaux');
     healthList.appendChild(line);
+  });
+  // boutons « Lever » : lève la quarantaine puis rafraîchit
+  healthList.querySelectorAll('.qlift').forEach((b) => {
+    b.onclick = async () => {
+      try { await window.mgp.quarantineLift(b.dataset.p); } catch (e) { /* pont absent */ }
+      refreshHealth(false);
+    };
   });
 }
 if (healthRefresh) healthRefresh.onclick = () => refreshHealth(true);
 refreshHealth(false);
+
+// 🛡 Journal : affichage repliable + copier + purger (même fichier que le main process)
+const journalView = document.getElementById('journalView');
+const journalStatus = document.getElementById('journalStatus');
+async function refreshJournal(open) {
+  if (!journalView || !window.mgp.journalGet) return;
+  const r = await window.mgp.journalGet();
+  const T2 = I18N[LANG] || I18N.fr;
+  const lines = String(r.text || '').split('\n').filter((l) => l !== '');
+  journalView.textContent = lines.length ? lines.slice(-40).join('\n') : (T2.jrNone || '');
+  if (open) journalView.style.display = journalView.style.display === 'none' ? 'block' : (lines.length ? 'block' : 'none');
+  else journalView.style.display = lines.length ? 'block' : 'none';
+  if (journalStatus) journalStatus.textContent = r.recent > 0 ? (T2.jrBadge ? T2.jrBadge(r.recent) : '⚠️ ' + r.recent) : '';
+}
+const journalCopyBtn = document.getElementById('journalCopy');
+const journalClearBtn = document.getElementById('journalClear');
+if (journalCopyBtn) journalCopyBtn.onclick = async () => {
+  const r = await window.mgp.journalGet();
+  window.mgp.copy(r.text || '');
+  const T2 = I18N[LANG] || I18N.fr;
+  if (journalStatus) { journalStatus.textContent = T2.jrCopied; setTimeout(() => refreshJournal(false), 1200); }
+};
+if (journalClearBtn) journalClearBtn.onclick = async () => {
+  await window.mgp.journalClear();
+  const T2 = I18N[LANG] || I18N.fr;
+  if (journalStatus) journalStatus.textContent = T2.jrCleared;
+  refreshJournal(false);
+};
+refreshJournal(false);
 
 // 🎓 Relance de la visite guidée (via le panneau)
 if (tourBtn) {
