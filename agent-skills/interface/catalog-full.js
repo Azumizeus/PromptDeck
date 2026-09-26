@@ -1,10 +1,10 @@
-// Catalogue complet MEGA PACK v0.7.3 — généré par build-interface.py
-// Skills: 133 | Agents: 190
+// Catalogue complet MEGA PACK v0.7.4 — généré par build-interface.py
+// Skills: 136 | Agents: 190
 const MEGA_CATALOG = {
  "meta": {
-  "generated": "2026-09-23",
-  "version": "0.7.3",
-  "skills": 133,
+  "generated": "2026-09-26",
+  "version": "0.7.4",
+  "skills": 136,
   "agents": 190
  },
  "skills": [
@@ -55,6 +55,12 @@ const MEGA_CATALOG = {
    "path": "skills/code-simplification/",
    "name_fr": "Simplification de code",
    "desc_fr": "Simplifie le code pour plus de clarté, sans changer le comportement. À utiliser quand le code fonctionne mais est plus difficile à lire, maintenir ou étendre qu'il ne devrait l'être."
+  },
+  {
+   "name": "cognee-memory",
+   "desc": "Interroge la mémoire partagée persistante des agents (serveur MCP cognee, local sur cette machine, datasets hub_architecture / hub_chatdeck / hub_agents). Use when the question porte sur l'historique, les décisions, les conventions ou la configuration du hub Mikael (projets, ports, stacks, providers",
+   "category": "cognee-memory",
+   "path": "skills/cognee-memory/"
   },
   {
    "name": "constraint-driven-development",
@@ -175,6 +181,12 @@ const MEGA_CATALOG = {
    "path": "skills/git-workflow-and-versioning/",
    "name_fr": "Workflow Git et versioning",
    "desc_fr": "Structure les pratiques Git : commits atomiques, branches, résolution de conflits, découpe d'un arbre sale en commits propres, PR et push distant."
+  },
+  {
+   "name": "headroom-compression",
+   "desc": "Compress tool outputs, logs, JSON, code and files before they reach the LLM via the Headroom proxy running locally on port 8787. Use when token costs are high, context is bloated with repetitive tool output (grep results, build logs, large JSON), or when the user mentions headroom, compression, toke",
+   "category": "headroom-compression",
+   "path": "skills/headroom-compression/"
   },
   {
    "name": "idea-refine",
@@ -313,6 +325,12 @@ const MEGA_CATALOG = {
    "desc_fr": "Pour les programmes ZK Solana sur mesure et les applications préservant la vie privée afin d'empêcher la double dépense. Guide d'intégration de PDAs nullifier rent-free pour la prévention de double-dépense."
   },
   {
+   "name": "llm-provider-cascade",
+   "desc": "Route LLM requests through a fallback cascade of API providers (omniroute → freellm → groq → cerebras → mistral → cohere → gemini → openrouter → anthropic) so a chat, script or agent keeps working when one provider fails with 403, quota or network errors. Use when the user mentions provider cascade,",
+   "category": "llm-provider-cascade",
+   "path": "skills/llm-provider-cascade/"
+  },
+  {
    "name": "metaplex",
    "desc": "Metaplex development on Solana — NFTs, tokens, compressed NFTs, candy machines, token launches, autonomous agents. Use when working with Token Metadata, Core, Bubblegum, Candy Machine, Genesis, Agent Registry, or the mplx CLI.",
    "category": "metaplex-skill",
@@ -377,12 +395,10 @@ const MEGA_CATALOG = {
    "desc_fr": "Pour tout travail sur du logiciel Solana : code client TypeScript, bibliothèques Rust Solana, programmes Anchor, fichiers de programme Rust, tests TypeScript et configuration Anchor.toml. Conçu pour créer du code minimal et réutilisable."
   },
   {
-   "name": "solana-dev",
+   "name": "solana-dev-skill",
    "desc": "Use when user asks to \"build a Solana dapp\", \"write an Anchor program\", \"create a token\", \"debug Solana errors\", \"set up wallet connection\", \"test my Solana program\", \"deploy to devnet\", or \"explain Solana concepts\" (rent, accounts, PDAs, CPIs, etc.). End-to-end Solana development playbook covering ",
    "category": "solana-dev-skill",
-   "path": "skills/solana-dev-skill/",
-   "name_fr": "Développement Solana (playbook)",
-   "desc_fr": "Pour toute demande « construire une dapp Solana », « écrire un programme Anchor », « créer un token », « déboguer Solana », « connecter un wallet » ou « expliquer Solana » (rent, accounts, PDAs, CPIs…). Playbook de développement Solana de bout en bout."
+   "path": "skills/solana-dev-skill/"
   },
   {
    "name": "audio-quality-check",
@@ -657,12 +673,10 @@ const MEGA_CATALOG = {
    "desc_fr": "Construis avec ZK Compression sur Solana via Light Protocol : tokens compressés, PDAs compressés ou intégration de ZK compression dans des programmes Solana. Modèle de comptes compressés, state trees, preuves de validité et intégration client Helius/Photon RPC."
   },
   {
-   "name": "solana-game",
+   "name": "solana-game-skill",
    "desc": "Use when building a game on Solana — Unity, React Native, or web titles where gameplay loops, player progression, or in-game economies must integrate with the blockchain. Gaming-specific patterns this skill covers that core Solana development does not: Solana.Unity-SDK for Unity, Mobile Wallet Adapt",
    "category": "solana-game-skill",
-   "path": "skills/solana-game-skill/",
-   "name_fr": "Jeux Solana",
-   "desc_fr": "Développement de jeux Solana avec Unity, React Native et web. Étend solana-dev-skill avec des patterns gaming : Solana.Unity-SDK, Mobile Wallet Adapter, PlaySolana/PSG1, intégration wallet, systèmes NFT, construction de transactions et architecture de jeu."
+   "path": "skills/solana-game-skill/"
   },
   {
    "name": "arcium",

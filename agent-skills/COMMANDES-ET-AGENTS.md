@@ -1,13 +1,13 @@
 # 📚 Guide Complet des Commandes, Agents et Skills
 
 > **Dernière mise à jour :** 19 septembre 2026
-> **Total :** 131 skills et 190 agents disponibles (mega pack)
+> **Total :** 136 skills et 190 agents disponibles (mega pack)
 
 ---
 
 ## 📋 Table des matières
 
-1. [Skills OpenCode (131)](#skills-opencode)
+1. [Skills OpenCode (136)](#skills-opencode)
 2. [Agent Personas Claude Desktop (190)](#agent-personas)
 3. [Slash Commands (9)](#slash-commands)
 4. [Mapping Intention → Skill](#mapping-intention)

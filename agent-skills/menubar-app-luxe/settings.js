@@ -170,6 +170,10 @@ autostartCb.onchange = persist;
 favShortcutsCb.onchange = persist;
 if (keepVisibleCb) keepVisibleCb.onchange = persist;
 if (arenaBusCb) arenaBusCb.onchange = persist;
+// 🎈 fix 0.7.4 : le toggle « Popup flottant au survol » ne persistait JAMAIS —
+// aucune liaison onchange (contrairement à keepVisible/arenaBus) : PREFS.hoverPopup
+// restait bloqué et la case revenait à son état initial à chaque réouverture.
+if (hoverPopupCb) hoverPopupCb.onchange = persist;
 if (arenaOpenBtn) arenaOpenBtn.onclick = async () => {
   const r = await window.mgp.arenaOpen();
   if (!r || !r.ok) { saved.textContent = '✗ ' + (I18N[LANG] || I18N.fr).arenaOpenErr; saved.classList.add('show'); setTimeout(() => saved.classList.remove('show'), 1500); }

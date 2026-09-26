@@ -27,8 +27,8 @@ header = header.replace(
     "// @name         MEGA PACK Panel — Skills & Agents pour tout LLM",
     "// @name         MEGA PACK Panel FULL — catalogue embarqué",
 ).replace(
-    "// @description  Panneau flottant activable par bouton : 131 skills + 190 agents injectables comme prompts dans n'importe quelle conversation LLM (Claude, ChatGPT, Gemini, Perplexity, Mistral, OpenCode Web…)",
-    "// @description  Panneau flottant avec catalogue complet embarqué : 131 skills + 190 agents injectables dans n'importe quelle conversation LLM — aucun fichier externe requis.",
+    "// @description  Panneau flottant activable par bouton : 136 skills + 190 agents injectables comme prompts dans n'importe quelle conversation LLM (Claude, ChatGPT, Gemini, Perplexity, Mistral, OpenCode Web…)",
+    "// @description  Panneau flottant avec catalogue complet embarqué : 136 skills + 190 agents injectables dans n'importe quelle conversation LLM — aucun fichier externe requis.",
 )
 
 full = (

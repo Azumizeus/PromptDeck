@@ -1,6 +1,6 @@
 # 🖱️ Interface MEGA PACK — Skills & Agents activables par bouton
 
-> **Version :** 1.2.0 · 133 skills · 190 agents · compatible **tout LLM**
+> **Version :** 1.2.0 · 136 skills · 190 agents · compatible **tout LLM**
 >
 > 🇬🇧 Version anglaise : [`README-EN.md`](README-EN.md)
 
@@ -100,7 +100,7 @@ Le catalogue est aussi un simple fichier JS :
 
 ```js
 // interface/catalog-full.js
-const MEGA_CATALOG = { meta: {...}, skills: [...131], agents: [...190] };
+const MEGA_CATALOG = { meta: {...}, skills: [...133], agents: [...190] };
 ```
 
 - **Claude Desktop** : ajoutez le dossier `agent-skills/` comme *projet* → demandez

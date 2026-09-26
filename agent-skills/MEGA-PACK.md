@@ -2,7 +2,7 @@
 
 > **Version :** 1.3.0 (23 septembre 2026)
 > **Base :** addyosmani/agent-skills v0.6.9 → v0.7.0 (méga pack) → v0.7.1 (+ Cloudflare security-audit) → v0.7.2 (synchronisation amont 0.6.10) → **v0.7.3 (correctifs d'audit de sécurité)** + intégration Seeker Team + Skill Game Dev
-> **Total :** 132 skills · 190 agents · 10 slash commands
+> **Total :** 136 skills · 190 agents · 10 slash commands
 
 ## Ce qui a été intégré au dossier maître `agent-skills/`
 
@@ -63,7 +63,7 @@ Les 25 skills lifecycle du maître sont alignés sur la release amont [Agent Ski
   gemini-cli-setup (10 commands), CONTRIBUTING (règle « Write the Procedure, Not the
   Workaround »).
 - **Non intégré volontairement** : les sections Project Structure / tableaux portables du
-  README amont (le README méga-pack décrit 132 skills + 190 agents) et la suppression du
+  README amont (le README méga-pack décrit 136 skills + 190 agents) et la suppression du
   dossier `evals/` amont (le maître garde ses evals et scripts opérationnels).
 
 ### 1. Skills de protocoles Solana → `skills/solana-protocols/` (46 skills)
@@ -113,7 +113,7 @@ renommé `seeker-strike-mobile` (nom de skill valide : minuscules et tirets uniq
 - `solana-development/solana-compression` : `solana-compression` → `zk-compression-light`
   (collision avec `lightprotocol-skills/solana-compression`).
 
-Vérification finale : 0 collision de `name:` sur les 132 skills installés
+Vérification finale : 0 collision de `name:` sur les skills installés à l'époque (133)
 (`name: CI` apparaît 2× dans des fichiers de référence internes — uv-reference et
 python-dev — mais aucun SKILL.md racine n'est en collision).
 
@@ -126,7 +126,7 @@ python-dev — mais aucun SKILL.md racine n'est en collision).
 
 ## 🖱️ Interface d'activation (boutons) — `interface/`
 
-Catalogue interactif des 132 skills + 190 agents, activables par bouton dans **tout LLM** :
+Catalogue interactif des 136 skills + 190 agents, activables par bouton dans **tout LLM** :
 
 - **`interface/mega-pack-launcher.html`** — launcheur autonome (double-clic) : recherche,
   filtres 36 catégories, bouton ⚡ Activer (copie le prompt d'activation), composeur
@@ -142,7 +142,7 @@ Catalogue interactif des 132 skills + 190 agents, activables par bouton dans **t
 
 ## 🧭 App menu-bar macOS — `menubar-app/`
 
-Application Electron résidente dans la barre de menus : recherche globale des 132 skills +
+Application Electron résidente dans la barre de menus : recherche globale des 136 skills +
 190 agents, activation en 1 clic, ouverture directe dans Claude/ChatGPT.
 
 ```bash
@@ -158,7 +158,7 @@ Raccourcis : **⌘Espace** panneau · **↑↓/⏎** copier · **⌘⏎** Claude
 ### Option A — global (tous les projets), recommandé
 
 ```bash
-# Skills (132)
+# Skills (136)
 mkdir -p ~/.claude/skills
 cp -R "/Users/mickaeldunoyer/Desktop/Skill Install/agent-skills/skills/"* ~/.claude/skills/
 
@@ -177,7 +177,7 @@ cp -R "/Users/mickaeldunoyer/Desktop/Skill Install/agent-skills/agents/"* ~/.cla
 ## Installation OpenCode
 
 ```bash
-# Skills (132) — global
+# Skills (136) — global
 mkdir -p ~/.config/opencode/skills
 cp -R "/Users/mickaeldunoyer/Desktop/Skill Install/agent-skills/skills/"* ~/.config/opencode/skills/
 
@@ -191,7 +191,7 @@ OpenCode découvre aussi les chemins `~/.claude/skills/` et `~/.agents/skills/`.
 
 | Ensemble | Attendu |
 |----------|---------|
-| SKILL.md dans `skills/` | 132 |
+| SKILL.md dans `skills/` | 136 |
 | Agents `.md` dans `agents/` | 190 |
 | Slash commands (`.claude/commands/` + `commands/`) | 10 + 10 |
 | Fichiers `interface/` | 4 (launcher, userscript, bookmarklet, catalogue) |

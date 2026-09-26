@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         MEGA PACK Panel Luxe — Skills, Agents & Équipes pour tout LLM
 // @namespace    mega-pack
-// @version      2.10.1
-// @description  Panneau flottant Édition Luxe dans une fenêtre macOS : 131 skills + 190 agents + 🕸 équipes + ✍️ prompts perso + ★ favoris, recherche instantanée, tooltip expert, clic droit multi-LLM, sélecteur de LLM par défaut, composeur ⌘-clic — injectable dans n'importe quelle conversation LLM (Claude, ChatGPT, Gemini, Perplexity, Mistral, OpenCode Web…)
+// @version      2.10.2
+// @description  Panneau flottant Édition Luxe dans une fenêtre macOS : 136 skills + 190 agents + 🕸 équipes + ✍️ prompts perso + ★ favoris, recherche instantanée, tooltip expert, clic droit multi-LLM, sélecteur de LLM par défaut, composeur ⌘-clic — injectable dans n'importe quelle conversation LLM (Claude, ChatGPT, Gemini, Perplexity, Mistral, OpenCode Web…)
 // @author       MEGA PACK
 // @match        *://*/*
 // @grant        GM_xmlhttpRequest
@@ -22,13 +22,13 @@
 // ==/UserScript==
 
 // ── Catalogue complet embarqué (généré par build-userscript.py) ───────────
-// Catalogue complet MEGA PACK v0.7.3 — généré par build-interface.py
-// Skills: 133 | Agents: 190
+// Catalogue complet MEGA PACK v0.7.4 — généré par build-interface.py
+// Skills: 136 | Agents: 190
 const MEGA_CATALOG = {
  "meta": {
-  "generated": "2026-09-23",
-  "version": "0.7.3",
-  "skills": 133,
+  "generated": "2026-09-26",
+  "version": "0.7.4",
+  "skills": 136,
   "agents": 190
  },
  "skills": [
@@ -79,6 +79,12 @@ const MEGA_CATALOG = {
    "path": "skills/code-simplification/",
    "name_fr": "Simplification de code",
    "desc_fr": "Simplifie le code pour plus de clarté, sans changer le comportement. À utiliser quand le code fonctionne mais est plus difficile à lire, maintenir ou étendre qu'il ne devrait l'être."
+  },
+  {
+   "name": "cognee-memory",
+   "desc": "Interroge la mémoire partagée persistante des agents (serveur MCP cognee, local sur cette machine, datasets hub_architecture / hub_chatdeck / hub_agents). Use when the question porte sur l'historique, les décisions, les conventions ou la configuration du hub Mikael (projets, ports, stacks, providers",
+   "category": "cognee-memory",
+   "path": "skills/cognee-memory/"
   },
   {
    "name": "constraint-driven-development",
@@ -199,6 +205,12 @@ const MEGA_CATALOG = {
    "path": "skills/git-workflow-and-versioning/",
    "name_fr": "Workflow Git et versioning",
    "desc_fr": "Structure les pratiques Git : commits atomiques, branches, résolution de conflits, découpe d'un arbre sale en commits propres, PR et push distant."
+  },
+  {
+   "name": "headroom-compression",
+   "desc": "Compress tool outputs, logs, JSON, code and files before they reach the LLM via the Headroom proxy running locally on port 8787. Use when token costs are high, context is bloated with repetitive tool output (grep results, build logs, large JSON), or when the user mentions headroom, compression, toke",
+   "category": "headroom-compression",
+   "path": "skills/headroom-compression/"
   },
   {
    "name": "idea-refine",
@@ -337,6 +349,12 @@ const MEGA_CATALOG = {
    "desc_fr": "Pour les programmes ZK Solana sur mesure et les applications préservant la vie privée afin d'empêcher la double dépense. Guide d'intégration de PDAs nullifier rent-free pour la prévention de double-dépense."
   },
   {
+   "name": "llm-provider-cascade",
+   "desc": "Route LLM requests through a fallback cascade of API providers (omniroute → freellm → groq → cerebras → mistral → cohere → gemini → openrouter → anthropic) so a chat, script or agent keeps working when one provider fails with 403, quota or network errors. Use when the user mentions provider cascade,",
+   "category": "llm-provider-cascade",
+   "path": "skills/llm-provider-cascade/"
+  },
+  {
    "name": "metaplex",
    "desc": "Metaplex development on Solana — NFTs, tokens, compressed NFTs, candy machines, token launches, autonomous agents. Use when working with Token Metadata, Core, Bubblegum, Candy Machine, Genesis, Agent Registry, or the mplx CLI.",
    "category": "metaplex-skill",
@@ -401,12 +419,10 @@ const MEGA_CATALOG = {
    "desc_fr": "Pour tout travail sur du logiciel Solana : code client TypeScript, bibliothèques Rust Solana, programmes Anchor, fichiers de programme Rust, tests TypeScript et configuration Anchor.toml. Conçu pour créer du code minimal et réutilisable."
   },
   {
-   "name": "solana-dev",
+   "name": "solana-dev-skill",
    "desc": "Use when user asks to \"build a Solana dapp\", \"write an Anchor program\", \"create a token\", \"debug Solana errors\", \"set up wallet connection\", \"test my Solana program\", \"deploy to devnet\", or \"explain Solana concepts\" (rent, accounts, PDAs, CPIs, etc.). End-to-end Solana development playbook covering ",
    "category": "solana-dev-skill",
-   "path": "skills/solana-dev-skill/",
-   "name_fr": "Développement Solana (playbook)",
-   "desc_fr": "Pour toute demande « construire une dapp Solana », « écrire un programme Anchor », « créer un token », « déboguer Solana », « connecter un wallet » ou « expliquer Solana » (rent, accounts, PDAs, CPIs…). Playbook de développement Solana de bout en bout."
+   "path": "skills/solana-dev-skill/"
   },
   {
    "name": "audio-quality-check",
@@ -681,12 +697,10 @@ const MEGA_CATALOG = {
    "desc_fr": "Construis avec ZK Compression sur Solana via Light Protocol : tokens compressés, PDAs compressés ou intégration de ZK compression dans des programmes Solana. Modèle de comptes compressés, state trees, preuves de validité et intégration client Helius/Photon RPC."
   },
   {
-   "name": "solana-game",
+   "name": "solana-game-skill",
    "desc": "Use when building a game on Solana — Unity, React Native, or web titles where gameplay loops, player progression, or in-game economies must integrate with the blockchain. Gaming-specific patterns this skill covers that core Solana development does not: Solana.Unity-SDK for Unity, Mobile Wallet Adapt",
    "category": "solana-game-skill",
-   "path": "skills/solana-game-skill/",
-   "name_fr": "Jeux Solana",
-   "desc_fr": "Développement de jeux Solana avec Unity, React Native et web. Étend solana-dev-skill avec des patterns gaming : Solana.Unity-SDK, Mobile Wallet Adapter, PlaySolana/PSG1, intégration wallet, systèmes NFT, construction de transactions et architecture de jeu."
+   "path": "skills/solana-game-skill/"
   },
   {
    "name": "arcium",
@@ -3001,52 +3015,6 @@ const MEGA_CATALOG = {
 window.MEGA_CATALOG = MEGA_CATALOG; // une const globale n'existe pas sur window
 
 
-// ==UserScript==
-// @name         MEGA PACK Panel Luxe — Skills, Agents & Équipes pour tout LLM
-// @namespace    mega-pack
-// @version      2.10.1
-// @description  Panneau flottant Édition Luxe dans une fenêtre macOS : 131 skills + 190 agents + 🕸 équipes + ✍️ prompts perso + ★ favoris, recherche instantanée, tooltip expert, clic droit multi-LLM, sélecteur de LLM par défaut, composeur ⌘-clic — injectable dans n'importe quelle conversation LLM (Claude, ChatGPT, Gemini, Perplexity, Mistral, OpenCode Web…)
-// @author       MEGA PACK
-// @match        *://*/*
-// @grant        GM_xmlhttpRequest
-// @grant        GM_setValue
-// @grant        GM_getValue
-// @grant        GM_deleteValue
-// @connect      api.groq.com
-// @connect      api.openai.com
-// @connect      api.anthropic.com
-// @connect      openrouter.ai
-// @connect      api.mistral.ai
-// @connect      api.cerebras.ai
-// @connect      api.cohere.com
-// @connect      generativelanguage.googleapis.com
-// @run-at       document-idle
-// @noframes
-// ==/UserScript==
-
-// ==UserScript==
-// @name         MEGA PACK Panel Luxe — Skills, Agents & Équipes pour tout LLM
-// @namespace    mega-pack
-// @version      2.10.1
-// @description  Panneau flottant Édition Luxe dans une fenêtre macOS : 131 skills + 190 agents + 🕸 équipes + ✍️ prompts perso + ★ favoris, recherche instantanée, tooltip expert, clic droit multi-LLM, sélecteur de LLM par défaut, composeur ⌘-clic — injectable dans n'importe quelle conversation LLM (Claude, ChatGPT, Gemini, Perplexity, Mistral, OpenCode Web…)
-// @author       MEGA PACK
-// @match        *://*/*
-// @grant        GM_xmlhttpRequest
-// @grant        GM_setValue
-// @grant        GM_getValue
-// @grant        GM_deleteValue
-// @connect      api.groq.com
-// @connect      api.openai.com
-// @connect      api.anthropic.com
-// @connect      openrouter.ai
-// @connect      api.mistral.ai
-// @connect      api.cerebras.ai
-// @connect      api.cohere.com
-// @connect      generativelanguage.googleapis.com
-// @run-at       document-idle
-// @noframes
-// ==/UserScript==
-
 // ── Team combos multi-agents (injecté par scripts/build-openhands-panel.js) ──
 const MG_TEAMS = [{"agents":["Anthropologist","code-reviewer"],"prompt":"Adopte simultanément les personas suivants et fais-les collaborer : Anthropologist, code-reviewer (academic-anthropologist + code-reviewer).\n\n## Personas\n- **Anthropologist** : Expert in cultural systems, rituals, kinship, belief systems, and ethnographic method — builds culturally coherent societies that feel lived-in rather than invented\n- **code-reviewer** : Senior code reviewer that evaluates changes across five dimensions — correctness, readability, architecture, security, and performance. Use for thorough code review before merge.\n\n## Instructions\n1. Incarne l'ensemble de ces expertises comme une équipe unique.\n2. Chaque persona apporte son angle d'analyse ; signale les désaccords entre personas.\n3. Réponds toujours en français."},{"agents":["Anthropologist","Brand Guardian"],"prompt":"Adopte simultanément les personas suivants et fais-les collaborer : Anthropologist, Brand Guardian (academic-anthropologist + design-brand-guardian).\n\n## Personas\n- **Anthropologist** : Expert in cultural systems, rituals, kinship, belief systems, and ethnographic method — builds culturally coherent societies that feel lived-in rather than invented\n- **Brand Guardian** : Expert brand strategist and guardian specializing in brand identity development, consistency maintenance, and strategic brand positioning\n\n## Instructions\n1. Incarne l'ensemble de ces expertises comme une équipe unique.\n2. Chaque persona apporte son angle d'analyse ; signale les désaccords entre personas.\n3. Réponds toujours en français."},{"agents":["Anthropologist","Image Prompt Engineer"],"prompt":"Adopte simultanément les personas suivants et fais-les collaborer : Anthropologist, Image Prompt Engineer (academic-anthropologist + design-image-prompt-engineer).\n\n## Personas\n- **Anthropologist** : Expert in cultural systems, rituals, kinship, belief systems, and ethnographic method — builds culturally coherent societies that feel lived-in rather than invented\n- **Image Prompt Engineer** : Expert photography prompt engineer specializing in crafting detailed, evocative prompts for AI image generation. Masters the art of translating visual concepts into precise language that produces stunning, professional-quality photography through generative AI tools.\n\n## Instructions\n1. Incarne l'ensemble de ces expertises comme une équipe unique.\n2. Chaque persona apporte son angle d'analyse ; signale les désaccords entre personas.\n3. Réponds toujours en français."},{"agents":["Anthropologist","Inclusive Visuals Specialist"],"prompt":"Adopte simultanément les personas suivants et fais-les collaborer : Anthropologist, Inclusive Visuals Specialist (academic-anthropologist + design-inclusive-visuals-specialist).\n\n## Personas\n- **Anthropologist** : Expert in cultural systems, rituals, kinship, belief systems, and ethnographic method — builds culturally coherent societies that feel lived-in rather than invented\n- **Inclusive Visuals Specialist** : Representation expert who defeats systemic AI biases to generate culturally accurate, affirming, and non-stereotypical images and video.\n\n## Instructions\n1. Incarne l'ensemble de ces expertises comme une équipe unique.\n2. Chaque persona apporte son angle d'analyse ; signale les désaccords entre personas.\n3. Réponds toujours en français."},{"agents":["Anthropologist","UI Designer"],"prompt":"Adopte simultanément les personas suivants et fais-les collaborer : Anthropologist, UI Designer (academic-anthropologist + design-ui-designer).\n\n## Personas\n- **Anthropologist** : Expert in cultural systems, rituals, kinship, belief systems, and ethnographic method — builds culturally coherent societies that feel lived-in rather than invented\n- **UI Designer** : Expert UI designer specializing in visual design systems, component libraries, and pixel-perfect interface creation. Creates beautiful, consistent, accessible user interfaces that enhance UX and reflect brand identity\n\n## Instructions\n1. Incarne l'ensemble de ces expertises comme une équipe unique.\n2. Chaque persona apporte son angle d'analyse ; signale les désaccords entre personas.\n3. Réponds toujours en français."},{"agents":["Anthropologist","UX Architect"],"prompt":"Adopte simultanément les personas suivants et fais-les collaborer : Anthropologist, UX Architect (academic-anthropologist + design-ux-architect).\n\n## Personas\n- **Anthropologist** : Expert in cultural systems, rituals, kinship, belief systems, and ethnographic method — builds culturally coherent societies that feel lived-in rather than invented\n- **UX Architect** : Technical architecture and UX specialist who provides developers with solid foundations, CSS systems, and clear implementation guidance\n\n## Instructions\n1. Incarne l'ensemble de ces expertises comme une équipe unique.\n2. Chaque persona apporte son angle d'analyse ; signale les désaccords entre personas.\n3. Réponds toujours en français."},{"agents":["Anthropologist","UX Researcher"],"prompt":"Adopte simultanément les personas suivants et fais-les collaborer : Anthropologist, UX Researcher (academic-anthropologist + design-ux-researcher).\n\n## Personas\n- **Anthropologist** : Expert in cultural systems, rituals, kinship, belief systems, and ethnographic method — builds culturally coherent societies that feel lived-in rather than invented\n- **UX Researcher** : Expert user experience researcher specializing in user behavior analysis, usability testing, and data-driven design insights. Provides actionable research findings that improve product usability and user satisfaction\n\n## Instructions\n1. Incarne l'ensemble de ces expertises comme une équipe unique.\n2. Chaque persona apporte son angle d'analyse ; signale les désaccords entre personas.\n3. Réponds toujours en français."},{"agents":["Anthropologist","Visual Storyteller"],"prompt":"Adopte simultanément les personas suivants et fais-les collaborer : Anthropologist, Visual Storyteller (academic-anthropologist + design-visual-storyteller).\n\n## Personas\n- **Anthropologist** : Expert in cultural systems, rituals, kinship, belief systems, and ethnographic method — builds culturally coherent societies that feel lived-in rather than invented\n- **Visual Storyteller** : Expert visual communication specialist focused on creating compelling visual narratives, multimedia content, and brand storytelling through design. Specializes in transforming complex information into engaging visual stories that connect with audiences and drive emotional engagement.\n\n## Instructions\n1. Incarne l'ensemble de ces expertises comme une équipe unique.\n2. Chaque persona apporte son angle d'analyse ; signale les désaccords entre personas.\n3. Réponds toujours en français."},{"agents":["Anthropologist","Whimsy Injector"],"prompt":"Adopte simultanément les personas suivants et fais-les collaborer : Anthropologist, Whimsy Injector (academic-anthropologist + design-whimsy-injector).\n\n## Personas\n- **Anthropologist** : Expert in cultural systems, rituals, kinship, belief systems, and ethnographic method — builds culturally coherent societies that feel lived-in rather than invented\n- **Whimsy Injector** : Expert creative specialist focused on adding personality, delight, and playful elements to brand experiences. Creates memorable, joyful interactions that differentiate brands through unexpected moments of whimsy\n\n## Instructions\n1. Incarne l'ensemble de ces expertises comme une équipe unique.\n2. Chaque persona apporte son angle d'analyse ; signale les désaccords entre personas.\n3. Réponds toujours en français."},{"agents":["Anthropologist","AI Data Remediation Engineer"],"prompt":"Adopte simultanément les personas suivants et fais-les collaborer : Anthropologist, AI Data Remediation Engineer (academic-anthropologist + engineering-ai-data-remediation-engineer).\n\n## Personas\n- **Anthropologist** : Expert in cultural systems, rituals, kinship, belief systems, and ethnographic method — builds culturally coherent societies that feel lived-in rather than invented\n- **AI Data Remediation Engineer** : Specialist in self-healing data pipelines — uses air-gapped local SLMs and semantic clustering to automatically detect, classify, and fix data anomalies at scale. Focuses exclusively on the remediation layer: intercepting bad data, generating deterministic fix logic via Ollama, and guaranteeing zero\n\n## Instructions\n1. Incarne l'ensemble de ces expertises comme une équipe unique.\n2. Chaque persona apporte son angle d'analyse ; signale les désaccords entre personas.\n3. Réponds toujours en français."}];
 window.MG_TEAMS = MG_TEAMS; // combos de personas réutilisables (⚡ panel)
@@ -4163,7 +4131,7 @@ window.MG_OPENHANDS = MG_OPENHANDS; // une const globale n'existe pas sur window
   function tourSteps() {
     const fr = LANG === 'fr';
     return [
-      { title: fr ? '⚡ Bienvenue !' : '⚡ Welcome!', desc: fr ? '321 experts prêts à l\'emploi : 131 skills 🛠 et 190 agents 👤. Tape quelques lettres : la liste filtre instantanément.' : '321 ready-to-use experts: 131 skills 🛠 and 190 agents 👤. Type a few letters: the list filters instantly.', help: fr ? '💡 ↑↓ naviguent, ⏎ injecte dans la conversation.' : '💡 ↑↓ navigate, ⏎ injects into the conversation.', target: null },
+      { title: fr ? '⚡ Bienvenue !' : '⚡ Welcome!', desc: fr ? '326 experts prêts à l\'emploi : 136 skills 🛠 et 190 agents 👤. Tape quelques lettres : la liste filtre instantanément.' : '323 ready-to-use experts: 136 skills 🛠 and 190 agents 👤. Type a few letters: the list filters instantly.', help: fr ? '💡 ↑↓ naviguent, ⏎ injecte dans la conversation.' : '💡 ↑↓ navigate, ⏎ injects into the conversation.', target: null },
       { title: fr ? '🗂 Les onglets' : '🗂 Tabs', desc: fr ? 'Tout, Skills, Agents, 🕸 Équipes, ✍️ Perso, ★ Favoris : chaque clic filtre le catalogue.' : 'All, Skills, Agents, 🕸 Teams, ✍️ Custom, ★ Favorites: each click filters the catalog.', help: fr ? '💡 ⌘-clic sélectionne plusieurs experts pour les composer ensemble (⌥⏎).' : '💡 ⌘-click selects several experts to compose them together (⌥⏎).', target: 'mgp-tabs' },
       { title: fr ? '⌨ Le LLM par défaut' : '⌨ The default LLM', desc: fr ? 'En bas, le bouton « ⌨ LLM » choisit la destination par défaut : Claude, ChatGPT, Perplexity… (règlable aussi dans ⚙).' : 'At the bottom, the « ⌨ LLM » button picks the default destination: Claude, ChatGPT, Perplexity… (also in ⚙).', help: fr ? '💡 ⌘⏎ envoie vers ce LLM · ⇧⏎ force ChatGPT.' : '💡 ⌘⏎ sends there · ⇧⏎ forces ChatGPT.', target: 'mgp-foot' },
       { title: fr ? '🖱 Le clic droit' : '🖱 Right-click', desc: fr ? 'Clic droit sur un expert : Envoyer à (tes destinations ⚙), ⧉ copier, ★ favori, presse-papiers.' : 'Right-click an expert: Send to (your ⚙ destinations), ⧉ copy, ★ favorite, clipboard.', help: fr ? '💡 Les destinations se choisissent dans ⚙ Réglages.' : '💡 Pick destinations in ⚙ Settings.', target: 'mgp-list' },

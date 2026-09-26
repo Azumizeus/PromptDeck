@@ -1096,6 +1096,29 @@ check(/label: LANG === 'fr' \? '🩺 Santé API'/.test(mainSrc37) && /Re-sonder 
 check(/onSettingsChange && window\.mgp\.onSettingsChange\(\{ panelSize: near\.k \}\)/.test(rSrc37) === false || true, 'renderer : preset mémorisé inchangé (garde-fou)');
 // garde-fou lisible
 
+// ── 43. Garde-fou décomptes : les docs doivent annoncer le catalogue RÉEL (drift 131→133 en 0.7.3) ──
+console.log('\n── 43. Garde-fou décomptes docs ↔ catalogue (anti-drift)');
+const catalogSrc43 = fs.readFileSync(path.join(__dirname, '..', 'interface', 'catalog-full.js'), 'utf8');
+const catalog43 = new Function(catalogSrc43 + ';return MEGA_CATALOG;')();
+const realSkills43 = catalog43.skills.length, realAgents43 = catalog43.agents.length;
+check(realSkills43 === 136 && realAgents43 === 190, `catalogue réel : ${realSkills43} skills + ${realAgents43} agents attendus`);
+check(catalog43.meta && catalog43.meta.version === '0.7.4', 'catalogue régénéré avec meta.version = 0.7.4');
+const DOC_FILES43 = [
+  path.join(__dirname, '..', 'README.md'),
+  path.join(__dirname, '..', 'MEGA-PACK.md'),
+  path.join(__dirname, '..', 'INSTALL.txt'),
+  path.join(__dirname, '..', 'COMMANDES-ET-AGENTS.md'),
+  path.join(__dirname, 'README.md'),
+];
+for (const doc of DOC_FILES43) {
+  const txt = fs.readFileSync(doc, 'utf8');
+  const stale = [String(realSkills43 - 2), String(realSkills43 - 1), String(realSkills43 + 1)].filter((n) => txt.includes(n + ' skills'));
+  check(stale.length === 0, `docs ↔ catalogue : ${path.basename(doc)} ne mentionne pas d'ancien décompte (${stale.join(', ') || 'ok'})`);
+}
+const testAppSrc43 = fs.readFileSync(path.join(__dirname, 'test-app.sh'), 'utf8');
+check(testAppSrc43.includes('c.skills.length === ' + realSkills43), 'test-app.sh : check catalogue aligné sur le décompte réel (' + realSkills43 + ')');
+check(fs.readFileSync(path.join(__dirname, 'settings.js'), 'utf8').includes('hoverPopupCb.onchange = persist'), 'Réglages : case « 🎈 Popup flottant » câblée au persist (fix 0.7.4)');
+
 console.log('');
 if (fail) { console.log(`❌ ${fail} test(s) en échec`); process.exit(1); }
 console.log('✅ TOUS LES TESTS PASSENT');

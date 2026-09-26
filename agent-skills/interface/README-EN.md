@@ -1,6 +1,6 @@
 # 🖱️ MEGA PACK Interface — One-click Skills & Agents
 
-> **Version :** 1.2.0 · 133 skills · 190 agents · works with **any LLM**
+> **Version :** 1.2.0 · 136 skills · 190 agents · works with **any LLM**
 >
 > 🇫🇷 Version française : [`LISEZMOI-INTERFACE.md`](LISEZMOI-INTERFACE.md)
 
@@ -106,7 +106,7 @@ The catalog is also a plain JS file:
 
 ```js
 // interface/catalog-full.js
-const MEGA_CATALOG = { meta: {...}, skills: [...131], agents: [...190] };
+const MEGA_CATALOG = { meta: {...}, skills: [...133], agents: [...190] };
 ```
 
 - **Claude Desktop**: add the `agent-skills/` folder as a *project* → ask
