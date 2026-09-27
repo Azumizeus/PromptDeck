@@ -3092,7 +3092,7 @@ window.MG_OPENHANDS = MG_OPENHANDS; // une const globale n'existe pas sur window
     fr: {
       btnTitle: 'MEGA PACK — Skills & Agents',
       search: 'Rechercher un skill, un agent, un prompt…',
-      tabs: { all: 'Tout', skills: 'Skills', agents: 'Agents', teams: '🕸 Équipes', custom: '✍️ Perso', favs: '★ Favoris', openhands: '🤖 OpenHands' },
+      tabs: { all: 'Tout', skills: 'Skills', agents: 'Agents', teams: '🕸 Équipes', custom: '✍️ Perso', favs: '★ Favoris' },
       ohAlways: 'toujours chargé',
       ohTriggers: 'déclencheurs',
       ohRoutes: 'route vers',
@@ -3166,7 +3166,7 @@ window.MG_OPENHANDS = MG_OPENHANDS; // une const globale n'existe pas sur window
     en: {
       btnTitle: 'MEGA PACK — Skills & Agents',
       search: 'Search a skill, an agent, a prompt…',
-      tabs: { all: 'All', skills: 'Skills', agents: 'Agents', teams: '🕸 Teams', custom: '✍️ Custom', favs: '★ Favorites', openhands: '🤖 OpenHands' },
+      tabs: { all: 'All', skills: 'Skills', agents: 'Agents', teams: '🕸 Teams', custom: '✍️ Custom', favs: '★ Favorites' },
       ohAlways: 'always loaded',
       ohTriggers: 'triggers',
       ohRoutes: 'routes to',
@@ -3336,8 +3336,8 @@ window.MG_OPENHANDS = MG_OPENHANDS; // une const globale n'existe pas sur window
 
   // ── LLM par défaut (sélecteur, persisté) + destinations ───────────────────
   // Toutes les destinations (web + apps locales + onglets) — aligné sur l'app Electron 2.10
-  const LLMS = ['claude', 'chatgpt', 'perplexity', 'copilot', 'deepseek', 'zai', 'kimi', 'mammouth', 'manus', 'noah', 'claude-code', 'openhands', 'chrome', 'brave'];
-  const LLM_LABEL = { claude: 'Claude', chatgpt: 'ChatGPT', perplexity: 'Perplexity', copilot: 'Copilot', deepseek: 'DeepSeek', zai: 'Z.ai', kimi: 'Kimi', mammouth: 'Mammouth', manus: 'Manus (agent)', noah: 'Noah', 'claude-code': 'Claude Code (web)', openhands: 'OpenHands (local)', chrome: 'Chrome (onglet)', brave: 'Brave (onglet)' };
+  const LLMS = ['claude', 'chatgpt', 'perplexity', 'copilot', 'deepseek', 'zai', 'kimi', 'mammouth', 'manus', 'noah', 'claude-code', 'chrome', 'brave'];
+  const LLM_LABEL = { claude: 'Claude', chatgpt: 'ChatGPT', perplexity: 'Perplexity', copilot: 'Copilot', deepseek: 'DeepSeek', zai: 'Z.ai', kimi: 'Kimi', mammouth: 'Mammouth', manus: 'Manus (agent)', noah: 'Noah', 'claude-code': 'Claude Code (web)', chrome: 'Chrome (onglet)', brave: 'Brave (onglet)' };
   // Libellé localisé : les « onglet » deviennent « tab » en anglais (le reste est identique FR/EN)
   function llmLabel(t) { const l = LLM_LABEL[t] || t; return LANG === 'en' ? l.replace('(onglet)', '(tab)') : l; }
   function defaultLLM() { return store.get('defaultLLM', 'claude'); }
@@ -3385,7 +3385,7 @@ window.MG_OPENHANDS = MG_OPENHANDS; // une const globale n'existe pas sur window
     perplexity: 'https://www.perplexity.ai/search?q=', copilot: 'https://copilot.microsoft.com/?q=',
     deepseek: 'https://chat.deepseek.com/?q=', zai: 'https://chat.z.ai/?q=', kimi: 'https://www.kimi.com/?q=', mammouth: 'https://mammouth.ai/',
     manus: 'https://manus.im/app?queue=', noah: 'https://trynoah.ai/',
-    'claude-code': 'https://claude.ai/code', openhands: 'http://localhost:8000',
+    'claude-code': 'https://claude.ai/code',
   };
   function openLLM(kind, txt) {
     copy(txt); // le prompt est toujours copié, quelle que soit la destination
@@ -3779,7 +3779,7 @@ window.MG_OPENHANDS = MG_OPENHANDS; // une const globale n'existe pas sur window
 
   function renderTabs() {
     const tb = panel.querySelector('#mgp-tabs');
-    const tabs = ['all', 'skills', 'agents', 'teams', 'custom', 'favs', 'openhands'];
+    const tabs = ['all', 'skills', 'agents', 'teams', 'custom', 'favs'];
     tb.innerHTML = tabs.map(function (t) {
       return '<button class="mgp-tab' + (tab === t ? ' on' : '') + '" data-t="' + t + '">' + T().tabs[t] + '</button>';
     }).join('');

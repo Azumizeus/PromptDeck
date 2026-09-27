@@ -1019,12 +1019,10 @@ const MEGA_CATALOG = {
    "path": "skills/solana-protocols/inco/"
   },
   {
-   "name": "jupiter-api",
+   "name": "jupiter",
    "desc": "Comprehensive guidance for integrating Jupiter APIs (Ultra Swap, Lend, Perps, Trigger, Recurring, Tokens, Price, Portfolio, Prediction Markets, Send, Studio, Lock, Routing). Use for endpoint selection, integration flows, error handling, and production hardening.",
    "category": "solana-protocols",
-   "path": "skills/solana-protocols/jupiter/",
-   "name_fr": "Jupiter (APIs)",
-   "desc_fr": "Guide complet d'intégration des APIs Jupiter (Ultra Swap, Lend, Perps, Trigger, Recurring, Tokens, Price, Portfolio, Prediction Markets, Send, Studio, Lock, Routing) : choix d'endpoints, flux d'intégration, gestion d'erreurs et durcissement production."
+   "path": "skills/solana-protocols/jupiter/"
   },
   {
    "name": "kamino",

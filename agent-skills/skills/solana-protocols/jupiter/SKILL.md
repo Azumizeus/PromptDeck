@@ -1,5 +1,5 @@
 ---
-name: jupiter-api
+name: jupiter
 description: Comprehensive guidance for integrating Jupiter APIs (Ultra Swap, Lend, Perps, Trigger, Recurring, Tokens, Price, Portfolio, Prediction Markets, Send, Studio, Lock, Routing). Use for endpoint selection, integration flows, error handling, and production hardening.
 license: MIT
 metadata:
