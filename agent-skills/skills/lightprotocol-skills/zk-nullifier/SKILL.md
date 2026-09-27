@@ -1,6 +1,6 @@
 ---
 name: zk-nullifier
-description: "For custom ZK Solana programs and privacy-preserving applications to prevent double spending. Guide to integrate rent-free nullifier PDAs for double-spend prevention."
+description: For custom ZK Solana programs and privacy-preserving applications to prevent double spending. Guide to integrate rent-free nullifier PDAs for double-spend prevention. Use when the assignment involves zk nullifier.
 metadata:
   source: https://github.com/Lightprotocol/skills
   documentation: https://www.zkcompression.com

@@ -1,5 +1,5 @@
 ---
-name: Motion & Animation System
+name: motion-design-system
 description: Generic framework for specifying performant, useful, and accessible UI motion; use for transitions, feedback, and orchestration in any digital product.
 ---
 

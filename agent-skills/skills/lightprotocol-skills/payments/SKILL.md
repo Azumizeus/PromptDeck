@@ -1,6 +1,6 @@
 ---
 name: payments
-description: "Skill for payment flows using Light Token APIs for sponsored rent-exemption."
+description: Skill for payment flows using Light Token APIs for sponsored rent-exemption. Use when the assignment involves payments.
 metadata:
   source: https://github.com/Lightprotocol/skills
   documentation: https://www.zkcompression.com

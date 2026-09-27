@@ -1,12 +1,8 @@
 ---
-name: solana-rent-free-dev
+name: agent-dev-orchestrator
 description: >
-  Skill for Solana development using rent-free primitives from Light Protocol.
-  Covers client development (TypeScript, Rust) and program development (Rust)
-  across Anchor, native Rust, and Pinocchio. Focus areas include DeFi and
-  Payments (Light Token, Light-PDA). Other use cases include airdrops and token
-  distribution (Compressed Token), and user/app state plus nullifiers for
-  payments and ZK applications (Compressed PDA).
+  > Skill for Solana development using rent-free primitives from Light Protocol. Covers client development (TypeScript, Rust) and program development (Rust) across Anchor, native Rust, and Pinocchio. Focus areas include DeFi and Payments (Light Token, Light-PDA). Other use cases include airdrops and token distribution (Compressed Token), and user/app state plus nullifiers for payments and ZK applications (Compressed PDA).
+  Use when the assignment involves agent dev orchestrator.
 compatibility: |
   Requires ZK Compression CLI, Solana CLI, Anchor CLI, and Node.js.
 metadata:

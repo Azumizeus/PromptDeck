@@ -1,5 +1,5 @@
 ---
-name: Visual Rendering & Game Feel
+name: visual-rendering-game-feel
 description: Diagnoses and improves 2D rendering through bloom, pixel density, lighting, outlines, and impact feedback. Use when the game looks flat or inconsistent.
 ---
 

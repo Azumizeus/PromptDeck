@@ -1,7 +1,8 @@
 ---
 name: switchboard
 creator: raunit-dev
-description: Complete Switchboard Oracle Protocol SDK for Solana - the permissionless oracle solution for price feeds, on-demand data, VRF randomness, and real-time streaming via Surge. Covers TypeScript SDK, Rust integration, Oracle Quotes, and all Switchboard tools.
+description: Complete Switchboard Oracle Protocol SDK for Solana - the permissionless oracle solution for price feeds, on-demand data, VRF randomness, and real-time streaming via Surge. Covers TypeScript SDK, Rust integration, Oracle Quotes, and all Switchboard tools. Use when the assignment involves switchboard.
+
 ---
 
 # Switchboard Oracle Protocol - Complete Integration Guide

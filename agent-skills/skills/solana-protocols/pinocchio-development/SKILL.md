@@ -1,6 +1,7 @@
 ---
 name: pinocchio-development
-description: Comprehensive guide for building high-performance Solana programs using Pinocchio - the zero-dependency, zero-copy framework. Covers account validation, CPI patterns, optimization techniques, and migration from Anchor.
+description: Comprehensive guide for building high-performance Solana programs using Pinocchio - the zero-dependency, zero-copy framework. Covers account validation, CPI patterns, optimization techniques, and migration from Anchor. Use when the assignment involves pinocchio development.
+
 ---
 
 # Pinocchio Development Guide

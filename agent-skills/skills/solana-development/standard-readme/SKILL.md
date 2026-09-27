@@ -1,12 +1,8 @@
 ---
 name: standard-readme
 description: >
-  Write or audit README files following the Standard Readme specification
-  (github.com/RichardLitt/standard-readme). Use this skill whenever the user asks
-  to create, write, rewrite, improve, audit, or fix a README - even if they don't
-  mention "standard readme" explicitly. Also trigger when the user says "add a
-  README", "write docs for this repo", "check my README", or anything about README
-  quality or structure.
+  > Write or audit README files following the Standard Readme specification (github.com/RichardLitt/standard-readme). Use this skill whenever the user asks to create, write, rewrite, improve, audit, or fix a README - even if they don't mention "standard readme" explicitly. Also trigger when the user says "add a README", "write docs for this repo", "check my README", or anything about README quality or structure.
+  Use when the assignment involves standard readme.
 metadata:
   version: "0.1.1"
 ---

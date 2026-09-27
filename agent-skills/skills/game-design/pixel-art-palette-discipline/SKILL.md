@@ -1,6 +1,7 @@
 ---
-name: Pixel Art Palette Discipline
-description: Enforces consistent palette, grid, contrast, and scaling for pixel art assets. Use to generate, audit, or integrate sprites.
+name: pixel-art-palette-discipline
+description: Enforces consistent palette, grid, contrast, and scaling for pixel art assets. Use to generate, audit, or integrate sprites. Use when the assignment involves pixel art palette discipline.
+
 ---
 
 # Pixel Art Palette Discipline

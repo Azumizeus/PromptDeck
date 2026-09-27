@@ -1,6 +1,7 @@
 ---
-name: Seeker Strike Mobile
-description: "Applies Seeker Strike's mobile/Solana conventions; use to maintain its Canvas 2D shoot'em up, its WebView wrapper, its SKR/GC economy, and its audit fixes."
+name: seeker-strike-mobile
+description: Applies Seeker Strike's mobile/Solana conventions; use to maintain its Canvas 2D shoot'em up, its WebView wrapper, its SKR/GC economy, and its audit fixes. Use when the assignment involves seeker strike mobile.
+
 ---
 
 # Seeker Strike Mobile

@@ -1,6 +1,7 @@
 ---
 name: solana-kit
-description: Complete guide for @solana/kit - the modern, tree-shakeable, zero-dependency JavaScript SDK from Anza. Covers RPC connections, signers, transaction building with pipe, signing, sending, and account fetching with full TypeScript support.
+description: Complete guide for @solana/kit - the modern, tree-shakeable, zero-dependency JavaScript SDK from Anza. Covers RPC connections, signers, transaction building with pipe, signing, sending, and account fetching with full TypeScript support. Use when the assignment involves solana kit.
+
 ---
 
 # Solana Kit Development Guide

@@ -1,6 +1,6 @@
 ---
 name: data-streaming
-description: "For data pipelines, aggregators, or indexers, real-time account state streaming on Solana with light account hot/cold lifecycle tracking. Stream Light token accounts, mint accounts, and PDAs via Laserstream gRPC."
+description: For data pipelines, aggregators, or indexers, real-time account state streaming on Solana with light account hot/cold lifecycle tracking. Stream Light token accounts, mint accounts, and PDAs via Laserstream gRPC. Use when the assignment involves data streaming.
 metadata:
   source: https://github.com/Lightprotocol/skills
   documentation: https://www.zkcompression.com

@@ -1,6 +1,7 @@
 ---
-name: inco-svm
-description: Build confidential dApps on Solana using Inco Lightning encryption — encrypted balances, private transfers, and attested decryption
+name: inco
+description: Build confidential dApps on Solana using Inco Lightning encryption — encrypted balances, private transfers, and attested decryption Use when the assignment involves inco.
+
 ---
 
 # Inco SVM — Confidential Computing on Solana

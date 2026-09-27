@@ -1,6 +1,6 @@
 ---
 name: light-token-client
-description: "For client development with tokens on Solana, Light Token is 200x cheaper than SPL and has minimal changes. Skill includes guides for create mints, associated token accounts, transfer, approve, burn, wrap, and more. @lightprotocol/compressed-token (TypeScript) and light_token_client (Rust)."
+description: For client development with tokens on Solana, Light Token is 200x cheaper than SPL and has minimal changes. Skill includes guides for create mints, associated token accounts, transfer, approve, burn, wrap, and more. @lightprotocol/compressed-token (TypeScript) and light_token_client (Rust). Use when the assignment involves light token client.
 metadata:
   source: https://github.com/Lightprotocol/skills
   documentation: https://www.zkcompression.com

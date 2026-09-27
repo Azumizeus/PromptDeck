@@ -1,10 +1,8 @@
 ---
 name: ct-alpha
 description: >
-  Crypto Twitter intelligence and alpha research. Search X/Twitter for real-time crypto narratives,
-  trending tokens, yield strategies, smart money signals, and protocol research. Features TweetRank
-  (PageRank-inspired credibility scoring), multi-signal token detection, coordinated raid detection,
-  and dynamic tool discovery for execution suggestions. Solana-first but covers all major chains.
+  > Crypto Twitter intelligence and alpha research. Search X/Twitter for real-time crypto narratives, trending tokens, yield strategies, smart money signals, and protocol research. Features TweetRank (PageRank-inspired credibility scoring), multi-signal token detection, coordinated raid detection, and dynamic tool discovery for execution suggestions. Solana-first but covers all major chains.
+  Use when the assignment involves ct alpha.
 creator: yashhsm
 version: "1.0.0"
 tags: [crypto-twitter, alpha, research, trending, tweetrank, solana, defi, sentiment, x-api, trading]

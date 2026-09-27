@@ -1,6 +1,7 @@
 ---
 name: solana-kit-migration
-description: Helps developers understand when to use @solana/kit vs @solana/web3.js (v1), provides migration guidance, API mappings, and handles edge cases for Solana JavaScript SDK transitions
+description: Helps developers understand when to use @solana/kit vs @solana/web3.js (v1), provides migration guidance, API mappings, and handles edge cases for Solana JavaScript SDK transitions Use when the assignment involves solana kit migration.
+
 ---
 
 # Solana Kit Migration Assistant

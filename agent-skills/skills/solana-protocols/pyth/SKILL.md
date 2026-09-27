@@ -1,7 +1,8 @@
 ---
 name: pyth
 creator: raunit-dev
-description: Complete guide for Pyth Network - decentralized oracle providing real-time price feeds for DeFi. Covers price feed integration, confidence intervals, EMA prices, on-chain CPI, off-chain fetching, and streaming updates for Solana applications.
+description: Complete guide for Pyth Network - decentralized oracle providing real-time price feeds for DeFi. Covers price feed integration, confidence intervals, EMA prices, on-chain CPI, off-chain fetching, and streaming updates for Solana applications. Use when the assignment involves pyth.
+
 ---
 
 # Pyth Network Development Guide

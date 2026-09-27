@@ -1,6 +1,7 @@
 ---
 name: solana-agent-kit
-description: Comprehensive guide for building AI agents that interact with Solana blockchain using SendAI's Solana Agent Kit. Covers 60+ actions, LangChain/Vercel AI integration, MCP server setup, and autonomous agent patterns.
+description: Comprehensive guide for building AI agents that interact with Solana blockchain using SendAI's Solana Agent Kit. Covers 60+ actions, LangChain/Vercel AI integration, MCP server setup, and autonomous agent patterns. Use when the assignment involves solana agent kit.
+
 ---
 
 # Solana Agent Kit Development Guide

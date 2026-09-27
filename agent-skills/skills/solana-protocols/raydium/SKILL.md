@@ -1,7 +1,8 @@
 ---
 name: raydium
 creator: raunit-dev
-description: Complete Raydium Protocol SDK - the single source of truth for integrating Raydium on Solana. Covers SDK, Trade API, CLMM, CPMM, AMM pools, LaunchLab token launches, farming, CPI integration, and all Raydium tools.
+description: Complete Raydium Protocol SDK - the single source of truth for integrating Raydium on Solana. Covers SDK, Trade API, CLMM, CPMM, AMM pools, LaunchLab token launches, farming, CPI integration, and all Raydium tools. Use when the assignment involves raydium.
+
 ---
 
 # Raydium Protocol - Complete Integration Guide

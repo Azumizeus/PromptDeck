@@ -1,6 +1,6 @@
 ---
 name: testing
-description: "For testing with Light Protocol programs and clients on localnet, devnet, and mainnet validation."
+description: For testing with Light Protocol programs and clients on localnet, devnet, and mainnet validation. Use when the assignment involves testing.
 metadata:
   source: https://github.com/Lightprotocol/skills
   documentation: https://www.zkcompression.com

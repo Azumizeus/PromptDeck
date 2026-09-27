@@ -1,7 +1,8 @@
 ---
 name: orca
 creator: raunit-dev
-description: Complete guide for Orca - Solana's leading concentrated liquidity AMM (CLMM). Covers Whirlpools SDK for swaps, liquidity provision, pool creation, position management, and fee harvesting on Solana and Eclipse networks.
+description: Complete guide for Orca - Solana's leading concentrated liquidity AMM (CLMM). Covers Whirlpools SDK for swaps, liquidity provision, pool creation, position management, and fee harvesting on Solana and Eclipse networks. Use when the assignment involves orca.
+
 ---
 
 # Orca Whirlpools Development Guide

@@ -1,5 +1,5 @@
 ---
-name: Premium Visual Design System
+name: visual-design-premium
 description: Generic framework for designing, auditing, and evolving an accessible premium interface; use for any web, mobile, desktop, or in-game UI.
 ---
 

@@ -1,7 +1,7 @@
 ---
-name: metengine-data-agent
+name: metengine
 version: "1.0.0"
-description: "Real-time smart money analytics API for Polymarket prediction markets, Hyperliquid perpetual futures, and Meteora Solana LP/AMM pools. 63 endpoints. Pay-per-request via x402 on Solana Mainnet USDC. No API keys."
+description: Real-time smart money analytics API for Polymarket prediction markets, Hyperliquid perpetual futures, and Meteora Solana LP/AMM pools. 63 endpoints. Pay-per-request via x402 on Solana Mainnet USDC. No API keys. Use when the assignment involves metengine.
 base_url: "https://agent.metengine.xyz"
 payment_protocol: "x402"
 payment_network: "solana-mainnet"

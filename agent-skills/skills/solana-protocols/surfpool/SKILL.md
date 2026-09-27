@@ -1,7 +1,8 @@
 ---
 name: surfpool
 creator: raunit-dev
-description: Complete Surfpool development environment for Solana - drop-in replacement for solana-test-validator with mainnet forking, cheatcodes, Infrastructure as Code, and Surfpool Studio. The fastest way to develop and test Solana programs.
+description: Complete Surfpool development environment for Solana - drop-in replacement for solana-test-validator with mainnet forking, cheatcodes, Infrastructure as Code, and Surfpool Studio. The fastest way to develop and test Solana programs. Use when the assignment involves surfpool.
+
 ---
 
 # Surfpool - Solana Development Environment

@@ -1,6 +1,7 @@
 ---
 name: phantom-wallet-mcp
-description: Execute wallet operations through the Phantom MCP server — get addresses, sign transactions, transfer tokens, buy tokens, and sign messages across Solana, Ethereum, Bitcoin, and Sui
+description: Execute wallet operations through the Phantom MCP server — get addresses, sign transactions, transfer tokens, buy tokens, and sign messages across Solana, Ethereum, Bitcoin, and Sui Use when the assignment involves phantom wallet mcp.
+
 ---
 
 # Phantom Wallet MCP

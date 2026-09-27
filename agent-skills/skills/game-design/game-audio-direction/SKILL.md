@@ -1,6 +1,7 @@
 ---
-name: Game Audio Direction
-description: Defines a coherent musical identity, loops, mixing, and audio prompts. Use to compose, generate, or integrate a game's music.
+name: game-audio-direction
+description: Defines a coherent musical identity, loops, mixing, and audio prompts. Use to compose, generate, or integrate a game's music. Use when the assignment involves game audio direction.
+
 ---
 
 # Game Audio Direction

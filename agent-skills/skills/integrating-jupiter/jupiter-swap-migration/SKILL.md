@@ -57,7 +57,7 @@ Each path has a dedicated example with before/after code, parameter mappings, an
 ## Post-Migration Checklist
 
 1. **URL audit**: Search codebase for `ultra-api.jup.ag`, `/ultra/v1/`, `/swap/v1/quote`, `/swap/v1/swap-instructions` — all should be replaced
-2. **Parameter rename**: `userPublicKey` → `taker` (for `/build` path)
+2. **Parameter rename**: `userPublicKey` → taker (for `/build` path)
 3. **`swapMode` removal**: V2 only supports `ExactIn`. If using `ExactOut`, redesign the flow — this mode is no longer available
 4. **`slippageBps` default**: `/build` defaults to 50 bps if omitted. For `/order`, verify the default if your integration relies on a specific value
 5. **Response field names**: Verify your code uses `inputAmountResult`/`outputAmountResult` for the `/execute` response (the canonical v2 field names)

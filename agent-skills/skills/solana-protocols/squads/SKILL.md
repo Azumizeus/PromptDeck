@@ -1,7 +1,8 @@
 ---
 name: squads
 creator: raunit-dev
-description: Complete guide for Squads Protocol - Solana's leading smart account and multisig infrastructure. Covers Squads V4 Multisig for team treasury management, Smart Account Program for account abstraction and programmable wallets, and Grid for stablecoin rails and fintech infrastructure.
+description: Complete guide for Squads Protocol - Solana's leading smart account and multisig infrastructure. Covers Squads V4 Multisig for team treasury management, Smart Account Program for account abstraction and programmable wallets, and Grid for stablecoin rails and fintech infrastructure. Use when the assignment involves squads.
+
 ---
 
 # Squads Protocol Development Guide

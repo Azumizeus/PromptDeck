@@ -1,7 +1,8 @@
 ---
 name: manifest
 creator: bonasa-tech
-description: Build and integrate Manifest DEX on Solana using the Manifest SDK. Covers market reads, order placement, wrapper and global account setup, reverse and global order types, and frontend integration patterns.
+description: Build and integrate Manifest DEX on Solana using the Manifest SDK. Covers market reads, order placement, wrapper and global account setup, reverse and global order types, and frontend integration patterns. Use when the assignment involves manifest.
+
 ---
 
 # Manifest DEX Integration Guide

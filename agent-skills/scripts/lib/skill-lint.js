@@ -149,6 +149,9 @@ function parseFrontmatter(content) {
   const result = {};
   let blockKey = null;
   for (const line of match[1].split(/\r?\n/)) {
+    // Clés imbriquées (metadata:, openclaw: …) : ignorées — elles ne doivent
+    // jamais écraser name/description de premier niveau.
+    if (blockKey === null && /^[ \t]+\S/.test(line)) continue;
     // YAML block scalar (description: > ou |) : la valeur vit sur les lignes
     // suivantes, plus indentées — on les concatène au lieu de traiter « > »
     // comme la valeur (ou pire, de sauter la description entière).

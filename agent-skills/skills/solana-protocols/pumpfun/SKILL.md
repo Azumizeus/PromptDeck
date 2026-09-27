@@ -1,7 +1,8 @@
 ---
 name: pumpfun
 creator: raunit-dev
-description: Complete PumpFun Protocol guide for building token launches, bonding curves, and AMM integrations on Solana. Covers Pump Program (token creation, buy/sell on bonding curves), PumpSwap AMM (liquidity pools, swaps), fee structures, creator fees, and SDK integration.
+description: Complete PumpFun Protocol guide for building token launches, bonding curves, and AMM integrations on Solana. Covers Pump Program (token creation, buy/sell on bonding curves), PumpSwap AMM (liquidity pools, swaps), fee structures, creator fees, and SDK integration. Use when the assignment involves pumpfun.
+
 ---
 
 # PumpFun Protocol Integration Guide

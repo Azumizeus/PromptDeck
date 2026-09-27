@@ -26,7 +26,7 @@ const MEGA_CATALOG = {
   },
   {
    "name": "anthropics-skills",
-   "desc": "Curated index of Anthropic's official example skills (documents, artifacts, web tooling). Use when looking for a canonical implementation before writing a new skill.",
+   "desc": "Curated index of Anthropic's official example skills (documents, artifacts, web tooling). Use when looking for a canonical example before writing a new skill.",
    "category": "anthropics-skills",
    "path": "skills/anthropics-skills/",
    "name_fr": "Skills officiels Anthropic",
@@ -42,7 +42,7 @@ const MEGA_CATALOG = {
   },
   {
    "name": "archon",
-   "desc": "Build repeatable coding workflows from templates: scaffold, refine, verify. Use when turning an ad-hoc process into a reusable pipeline.",
+   "desc": "Assemble repeatable coding workflows from templates: scaffold, refine, verify. Use when turning an ad-hoc process into a reusable pipeline.",
    "category": "archon",
    "path": "skills/archon/",
    "name_fr": "Archon",
@@ -58,7 +58,7 @@ const MEGA_CATALOG = {
   },
   {
    "name": "awesome-mcp-servers",
-   "desc": "Curated directory of MCP servers with categories and quality notes. Use when looking for a connector before building one.",
+   "desc": "Curated directory of MCP servers with categories and quality notes. Use when looking for a connector before creating one.",
    "category": "awesome-mcp-servers",
    "path": "skills/awesome-mcp-servers/",
    "name_fr": "Annuaire de serveurs MCP",
@@ -146,7 +146,7 @@ const MEGA_CATALOG = {
   },
   {
    "name": "claude-plugins",
-   "desc": "Catalog of official and community Claude Code plugins with install instructions. Use when extending Claude Code before building from scratch.",
+   "desc": "Catalog of official and community Claude Code plugins with install instructions. Use when extending Claude Code before creating one from scratch.",
    "category": "claude-plugins",
    "path": "skills/claude-plugins/",
    "name_fr": "Plugins Claude",
@@ -271,60 +271,46 @@ const MEGA_CATALOG = {
    "desc_fr": "Construit des interfaces production, accessibles et responsives : composants, layouts, exigences WCAG, gestion d'état — un rendu de qualité production, pas « généré par IA »."
   },
   {
-   "name": "Game Audio Direction",
-   "desc": "Defines a coherent musical identity, loops, mixing, and audio prompts. Use to compose, generate, or integrate a game's music.",
+   "name": "game-audio-direction",
+   "desc": "Defines a coherent musical identity, loops, mixing, and audio prompts. Use to compose, generate, or integrate a game's music. Use when the assignment involves game audio direction.",
    "category": "game-design",
-   "path": "skills/game-design/game-audio-direction/",
-   "name_fr": "Direction audio de jeu",
-   "desc_fr": "Définit une identité musicale cohérente, les boucles, le mixage et les prompts audio. À utiliser pour composer, générer ou intégrer la musique d’un jeu."
+   "path": "skills/game-design/game-audio-direction/"
   },
   {
-   "name": "Motion & Animation System",
+   "name": "motion-design-system",
    "desc": "Generic framework for specifying performant, useful, and accessible UI motion; use for transitions, feedback, and orchestration in any digital product.",
    "category": "game-design",
-   "path": "skills/game-design/motion-design-system/",
-   "name_fr": "Motion & Animation System",
-   "desc_fr": "Cadre générique pour spécifier une motion UI performante, utile et accessible ; à utiliser pour transitions, feedbacks et orchestration dans tout produit numérique."
+   "path": "skills/game-design/motion-design-system/"
   },
   {
-   "name": "Pixel Art & Audio Direction",
-   "desc": "Generic framework for directing pixel art, sprites, animation, and game audio with coherence, readability, and measurable constraints; use in pre-production and production.",
+   "name": "pixel-art-audio-direction",
+   "desc": "Generic framework for directing pixel art, sprites, animation, and game audio with coherence, readability, and measurable constraints; use in pre-production and production. Use when the assignment involves pixel art audio direction.",
    "category": "game-design",
-   "path": "skills/game-design/pixel-art-audio-direction/",
-   "name_fr": "Pixel Art & Audio Direction",
-   "desc_fr": "Cadre générique pour diriger pixel art, sprites, animation et audio de jeu avec cohérence, lisibilité et contraintes mesurables ; à utiliser en préproduction et production."
+   "path": "skills/game-design/pixel-art-audio-direction/"
   },
   {
-   "name": "Pixel Art Palette Discipline",
-   "desc": "Enforces consistent palette, grid, contrast, and scaling for pixel art assets. Use to generate, audit, or integrate sprites.",
+   "name": "pixel-art-palette-discipline",
+   "desc": "Enforces consistent palette, grid, contrast, and scaling for pixel art assets. Use to generate, audit, or integrate sprites. Use when the assignment involves pixel art palette discipline.",
    "category": "game-design",
-   "path": "skills/game-design/pixel-art-palette-discipline/",
-   "name_fr": "Discipline de palette pixel art",
-   "desc_fr": "Impose palette, grille, contraste et mise à l’échelle cohérents pour les assets pixel art. À utiliser pour générer, auditer ou intégrer des sprites."
+   "path": "skills/game-design/pixel-art-palette-discipline/"
   },
   {
-   "name": "Seeker Strike Mobile",
-   "desc": "Applies Seeker Strike's mobile/Solana conventions; use to maintain its Canvas 2D shoot'em up, its WebView wrapper, its SKR/GC economy, and its audit fixes.",
+   "name": "seeker-strike-mobile",
+   "desc": "Applies Seeker Strike's mobile/Solana conventions; use to maintain its Canvas 2D shoot'em up, its WebView wrapper, its SKR/GC economy, and its audit fixes. Use when the assignment involves seeker strike mobile.",
    "category": "game-design",
-   "path": "skills/game-design/seeker-strike-mobile/",
-   "name_fr": "Seeker Strike Mobile",
-   "desc_fr": "Applique les conventions mobiles/Solana de Seeker Strike et s’utilise pour maintenir son shoot’em up Canvas 2D, son wrapper WebView, son économie SKR/GC et ses corrections d’audit."
+   "path": "skills/game-design/seeker-strike-mobile/"
   },
   {
-   "name": "Premium Visual Design System",
+   "name": "visual-design-premium",
    "desc": "Generic framework for designing, auditing, and evolving an accessible premium interface; use for any web, mobile, desktop, or in-game UI.",
    "category": "game-design",
-   "path": "skills/game-design/visual-design-premium/",
-   "name_fr": "Premium Visual Design System",
-   "desc_fr": "Cadre générique pour concevoir, auditer et faire évoluer une interface premium accessible ; à utiliser pour toute UI web, mobile, desktop ou in-game."
+   "path": "skills/game-design/visual-design-premium/"
   },
   {
-   "name": "Visual Rendering & Game Feel",
+   "name": "visual-rendering-game-feel",
    "desc": "Diagnoses and improves 2D rendering through bloom, pixel density, lighting, outlines, and impact feedback. Use when the game looks flat or inconsistent.",
    "category": "game-design",
-   "path": "skills/game-design/visual-rendering-game-feel/",
-   "name_fr": "Rendu visuel et game feel",
-   "desc_fr": "Diagnostique et améliore le rendu 2D par bloom, densité de pixels, lumière, contours et feedback d’impact. À utiliser quand le jeu paraît plat ou incohérent."
+   "path": "skills/game-design/visual-rendering-game-feel/"
   },
   {
    "name": "git-workflow-and-versioning",
@@ -388,7 +374,7 @@ const MEGA_CATALOG = {
   },
   {
    "name": "jupiter-lend",
-   "desc": "Interact with Jupiter Lend Protocol. Read-only SDK (@jup-ag/lend-read) for querying liquidity pools, lending markets (jlTokens), and vaults. Write SDK (@jup-ag/lend) for lending (deposit/withdraw) and vault operations (deposit collateral, borrow, repay, manage positions).",
+   "desc": "Interact with Jupiter Lend Protocol. Read-only SDK (@jup-ag/lend-read) for querying liquidity pools, lending markets (jlTokens), and vaults. Write SDK (@jup-ag/lend) for lending (deposit/withdraw) and vault operations (deposit collateral, borrow, repay, manage positions). Use when the assignment inv",
    "category": "integrating-jupiter",
    "path": "skills/integrating-jupiter/jupiter-lend/",
    "name_fr": "Jupiter Lend",
@@ -428,23 +414,21 @@ const MEGA_CATALOG = {
   },
   {
    "name": "learn-claude-code",
-   "desc": "Learning resource explaining how Claude Code agents work: subagents, hooks, skills and MCP. Use when learning or teaching the agent model before building custom workflows.",
+   "desc": "Learning resource explaining how Claude Code agents work: subagents, hooks, skills and MCP. Use when learning or teaching the agent model before designing custom workflows.",
    "category": "learn-claude-code",
    "path": "skills/learn-claude-code/",
    "name_fr": "Apprendre Claude Code",
    "desc_fr": "Ressource d'apprentissage : comment fonctionnent les agents Claude Code (subagents, hooks, skills, MCP). À utiliser pour comprendre le modèle d'agents avant d'en construire."
   },
   {
-   "name": "solana-rent-free-dev",
-   "desc": "Skill for Solana development using rent-free primitives from Light Protocol. Covers client development (TypeScript, Rust) and program development (Rust) across Anchor, native Rust, and Pinocchio. Focus areas include DeFi and Payments (Light Token, Light-PDA). Other use cases include airdrops and tok",
+   "name": "agent-dev-orchestrator",
+   "desc": "> Skill for Solana development using rent-free primitives from Light Protocol. Covers client development (TypeScript, Rust) and program development (Rust) across Anchor, native Rust, and Pinocchio. Focus areas include DeFi and Payments (Light Token, Light-PDA). Other use cases include airdrops and t",
    "category": "lightprotocol-skills",
-   "path": "skills/lightprotocol-skills/agent-dev-orchestrator/",
-   "name_fr": "Solana rent-free (Light)",
-   "desc_fr": "Skill de développement Solana avec les primitives rent-free de Light Protocol : développement client (TypeScript, Rust) et programme (Rust) avec Anchor, Rust natif et Pinocchio. Focus DeFi et paiements (Light Token, Light-PDA)."
+   "path": "skills/lightprotocol-skills/agent-dev-orchestrator/"
   },
   {
    "name": "ask-mcp",
-   "desc": "For questions about Light Protocol's SDK, smart contracts and Solana development, Claude Code features, or agent skills. AI-powered answers grounded in repository context via DeepWiki MCP.",
+   "desc": "For questions about Light Protocol's SDK, smart contracts and Solana development, Claude Code features, or agent skills. AI-powered answers grounded in repository context via DeepWiki MCP. Use when the assignment involves ask mcp.",
    "category": "lightprotocol-skills",
    "path": "skills/lightprotocol-skills/ask-mcp/",
    "name_fr": "ask-mcp (questions Light Protocol)",
@@ -452,7 +436,7 @@ const MEGA_CATALOG = {
   },
   {
    "name": "data-streaming",
-   "desc": "For data pipelines, aggregators, or indexers, real-time account state streaming on Solana with light account hot/cold lifecycle tracking. Stream Light token accounts, mint accounts, and PDAs via Laserstream gRPC.",
+   "desc": "For data pipelines, aggregators, or indexers, real-time account state streaming on Solana with light account hot/cold lifecycle tracking. Stream Light token accounts, mint accounts, and PDAs via Laserstream gRPC. Use when the assignment involves data streaming.",
    "category": "lightprotocol-skills",
    "path": "skills/lightprotocol-skills/data-streaming/",
    "name_fr": "data-streaming (Light Protocol)",
@@ -468,7 +452,7 @@ const MEGA_CATALOG = {
   },
   {
    "name": "light-token-client",
-   "desc": "For client development with tokens on Solana, Light Token is 200x cheaper than SPL and has minimal changes. Skill includes guides for create mints, associated token accounts, transfer, approve, burn, wrap, and more. @lightprotocol/compressed-token (TypeScript) and light_token_client (Rust).",
+   "desc": "For client development with tokens on Solana, Light Token is 200x cheaper than SPL and has minimal changes. Skill includes guides for create mints, associated token accounts, transfer, approve, burn, wrap, and more. @lightprotocol/compressed-token (TypeScript) and light_token_client (Rust). Use when",
    "category": "lightprotocol-skills",
    "path": "skills/lightprotocol-skills/light-token-client/",
    "name_fr": "Light Token (client)",
@@ -476,7 +460,7 @@ const MEGA_CATALOG = {
   },
   {
    "name": "payments",
-   "desc": "Skill for payment flows using Light Token APIs for sponsored rent-exemption.",
+   "desc": "Skill for payment flows using Light Token APIs for sponsored rent-exemption. Use when the assignment involves payments.",
    "category": "lightprotocol-skills",
    "path": "skills/lightprotocol-skills/payments/",
    "name_fr": "Payments (Light Token)",
@@ -484,7 +468,7 @@ const MEGA_CATALOG = {
   },
   {
    "name": "solana-compression",
-   "desc": "For client and program development on Solana ~160x cheaper and without rent-exemption for per-user state, DePIN registrations, or custom compressed accounts. Create, update, close, burn, and reinitialize compressed accounts.",
+   "desc": "For client and program development on Solana ~160x cheaper and without rent-exemption for per-user state, DePIN registrations, or custom compressed accounts. Create, update, close, burn, and reinitialize compressed accounts. Use when the assignment involves solana compression.",
    "category": "lightprotocol-skills",
    "path": "skills/lightprotocol-skills/solana-compression/",
    "name_fr": "Solana Compression",
@@ -492,7 +476,7 @@ const MEGA_CATALOG = {
   },
   {
    "name": "testing",
-   "desc": "For testing with Light Protocol programs and clients on localnet, devnet, and mainnet validation.",
+   "desc": "For testing with Light Protocol programs and clients on localnet, devnet, and mainnet validation. Use when the assignment involves testing.",
    "category": "lightprotocol-skills",
    "path": "skills/lightprotocol-skills/testing/",
    "name_fr": "Tests (Light Protocol)",
@@ -500,7 +484,7 @@ const MEGA_CATALOG = {
   },
   {
    "name": "token-distribution",
-   "desc": "For token distribution on Solana 5000x cheaper than SPL (rewards, airdrops, depins, ...). @lightprotocol/compressed-token (TypeScript). Reference examples for custom claim support.",
+   "desc": "For token distribution on Solana 5000x cheaper than SPL (rewards, airdrops, depins, ...). @lightprotocol/compressed-token (TypeScript). Reference examples for custom claim support. Use when the assignment involves token distribution.",
    "category": "lightprotocol-skills",
    "path": "skills/lightprotocol-skills/token-distribution/",
    "name_fr": "Distribution de tokens (Light)",
@@ -508,7 +492,7 @@ const MEGA_CATALOG = {
   },
   {
    "name": "zk-nullifier",
-   "desc": "For custom ZK Solana programs and privacy-preserving applications to prevent double spending. Guide to integrate rent-free nullifier PDAs for double-spend prevention.",
+   "desc": "For custom ZK Solana programs and privacy-preserving applications to prevent double spending. Guide to integrate rent-free nullifier PDAs for double-spend prevention. Use when the assignment involves zk nullifier.",
    "category": "lightprotocol-skills",
    "path": "skills/lightprotocol-skills/zk-nullifier/",
    "name_fr": "zk-nullifier (anti double-spend)",
@@ -586,7 +570,7 @@ const MEGA_CATALOG = {
   },
   {
    "name": "playwright-mcp",
-   "desc": "MCP server letting Claude drive a real browser via Playwright. Use when testing or inspecting web apps end to end.",
+   "desc": "MCP server letting Claude drive a real browser via Playwright. Use when driving or inspecting web apps end to end.",
    "category": "playwright-mcp",
    "path": "skills/playwright-mcp/",
    "name_fr": "Playwright MCP",
@@ -880,7 +864,7 @@ const MEGA_CATALOG = {
   },
   {
    "name": "standard-readme",
-   "desc": "Write or audit README files following the Standard Readme specification (github.com/RichardLitt/standard-readme). Use this skill whenever the user asks to create, write, rewrite, improve, audit, or fix a README - even if they don't mention \"standard readme\" explicitly. Also trigger when the user say",
+   "desc": "> Write or audit README files following the Standard Readme specification (github.com/RichardLitt/standard-readme). Use this skill whenever the user asks to create, write, rewrite, improve, audit, or fix a README - even if they don't mention \"standard readme\" explicitly. Also trigger when the user s",
    "category": "solana-development",
    "path": "skills/solana-development/standard-readme/",
    "name_fr": "README standard",
@@ -974,7 +958,7 @@ const MEGA_CATALOG = {
   },
   {
    "name": "ct-alpha",
-   "desc": "Crypto Twitter intelligence and alpha research. Search X/Twitter for real-time crypto narratives, trending tokens, yield strategies, smart money signals, and protocol research. Features TweetRank (PageRank-inspired credibility scoring), multi-signal token detection, coordinated raid detection, and d",
+   "desc": "> Crypto Twitter intelligence and alpha research. Search X/Twitter for real-time crypto narratives, trending tokens, yield strategies, smart money signals, and protocol research. Features TweetRank (PageRank-inspired credibility scoring), multi-signal token detection, coordinated raid detection, and",
    "category": "solana-protocols",
    "path": "skills/solana-protocols/ct-alpha/",
    "name_fr": "ct-alpha (intelligence CT)",
@@ -990,7 +974,7 @@ const MEGA_CATALOG = {
   },
   {
    "name": "dflow",
-   "desc": "Complete DFlow trading protocol SDK - the single source of truth for integrating DFlow on Solana. Covers spot trading, prediction markets, Swap API, Metadata API, WebSocket streaming, and all DFlow tools.",
+   "desc": "Complete DFlow trading protocol SDK - the single source of truth for integrating DFlow on Solana. Covers spot trading, prediction markets, Swap API, Metadata API, WebSocket streaming, and all DFlow tools. Use when the assignment involves dflow.",
    "category": "solana-protocols",
    "path": "skills/solana-protocols/dflow/",
    "name_fr": "DFlow (trading Solana)",
@@ -1014,7 +998,7 @@ const MEGA_CATALOG = {
   },
   {
    "name": "helius-phantom",
-   "desc": "Build frontend Solana applications with Phantom Connect SDK and Helius infrastructure. Covers React, React Native, and browser SDK integration, transaction signing via Helius Sender, API key proxying, token gating, NFT minting, crypto payments, real-time updates, and secure frontend architecture.",
+   "desc": "Build frontend Solana applications with Phantom Connect SDK and Helius infrastructure. Covers React, React Native, and browser SDK integration, transaction signing via Helius Sender, API key proxying, token gating, NFT minting, crypto payments, real-time updates, and secure frontend architecture. Us",
    "category": "solana-protocols",
    "path": "skills/solana-protocols/helius-phantom/",
    "name_fr": "Helius + Phantom (frontend)",
@@ -1022,19 +1006,17 @@ const MEGA_CATALOG = {
   },
   {
    "name": "helius",
-   "desc": "Build Solana applications with Helius infrastructure. Covers transaction sending (Sender), asset/NFT queries (DAS API), real-time streaming (WebSockets, Laserstream), event pipelines (webhooks), priority fees, wallet analysis, and agent onboarding.",
+   "desc": "Build Solana applications with Helius infrastructure. Covers transaction sending (Sender), asset/NFT queries (DAS API), real-time streaming (WebSockets, Laserstream), event pipelines (webhooks), priority fees, wallet analysis, and agent onboarding. Use when the assignment involves helius.",
    "category": "solana-protocols",
    "path": "skills/solana-protocols/helius/",
    "name_fr": "Helius (infra Solana)",
    "desc_fr": "Construis des applications Solana avec l'infrastructure Helius : envoi de transactions (Sender), requêtes assets/NFT (DAS API), streaming temps réel (WebSockets, Laserstream), pipelines d'événements (webhooks), priority fees et analyse de wallets."
   },
   {
-   "name": "inco-svm",
-   "desc": "Build confidential dApps on Solana using Inco Lightning encryption — encrypted balances, private transfers, and attested decryption",
+   "name": "inco",
+   "desc": "Build confidential dApps on Solana using Inco Lightning encryption — encrypted balances, private transfers, and attested decryption Use when the assignment involves inco.",
    "category": "solana-protocols",
-   "path": "skills/solana-protocols/inco/",
-   "name_fr": "Inco (dApps confidentielles)",
-   "desc_fr": "Construis des dApps Solana confidentielles avec le chiffrement Inco Lightning : soldes chiffrés, transferts privés et déchiffrement attesté."
+   "path": "skills/solana-protocols/inco/"
   },
   {
    "name": "jupiter-api",
@@ -1078,7 +1060,7 @@ const MEGA_CATALOG = {
   },
   {
    "name": "lulo",
-   "desc": "Complete guide for Lulo - Solana's premier lending aggregator. Covers API integration for deposits, withdrawals, balance queries, Protected/Boosted deposits, Custom deposits, and automated yield optimization across Kamino, Drift, MarginFi, and Jupiter.",
+   "desc": "Complete guide for Lulo - Solana's premier lending aggregator. Covers API integration for deposits, withdrawals, balance queries, Protected/Boosted deposits, Custom deposits, and automated yield optimization across Kamino, Drift, MarginFi, and Jupiter. Use when the assignment involves lulo.",
    "category": "solana-protocols",
    "path": "skills/solana-protocols/lulo/",
    "name_fr": "Lulo (agrégateur de lending)",
@@ -1094,7 +1076,7 @@ const MEGA_CATALOG = {
   },
   {
    "name": "manifest",
-   "desc": "Build and integrate Manifest DEX on Solana using the Manifest SDK. Covers market reads, order placement, wrapper and global account setup, reverse and global order types, and frontend integration patterns.",
+   "desc": "Build and integrate Manifest DEX on Solana using the Manifest SDK. Covers market reads, order placement, wrapper and global account setup, reverse and global order types, and frontend integration patterns. Use when the assignment involves manifest.",
    "category": "solana-protocols",
    "path": "skills/solana-protocols/manifest/",
    "name_fr": "Manifest DEX",
@@ -1102,7 +1084,7 @@ const MEGA_CATALOG = {
   },
   {
    "name": "marginfi",
-   "desc": "Complete guide for Marginfi - Solana's decentralized lending protocol for lending, borrowing, leveraged positions(looping) and flash loans. Covers account creation, deposits, borrows, repayments, withdrawals, flash loans, and leveraged positions using the @mrgnlabs/marginfi-client-v2 SDK.",
+   "desc": "Complete guide for Marginfi - Solana's decentralized lending protocol for lending, borrowing, leveraged positions(looping) and flash loans. Covers account creation, deposits, borrows, repayments, withdrawals, flash loans, and leveraged positions using the @mrgnlabs/marginfi-client-v2 SDK. Use when t",
    "category": "solana-protocols",
    "path": "skills/solana-protocols/marginfi/",
    "name_fr": "Marginfi (lending Solana)",
@@ -1110,19 +1092,17 @@ const MEGA_CATALOG = {
   },
   {
    "name": "metaplex-protocol",
-   "desc": "Complete Metaplex Protocol guide for Solana NFTs and digital assets. Covers Core (next-gen NFTs), Token Metadata, Bubblegum (compressed NFTs), Candy Machine, Genesis (token launches), MPL-Hybrid, Inscriptions, DAS API, and the Umi framework. The single source of truth for all Metaplex integrations.",
+   "desc": "Complete Metaplex Protocol guide for Solana NFTs and digital assets. Covers Core (next-gen NFTs), Token Metadata, Bubblegum (compressed NFTs), Candy Machine, Genesis (token launches), MPL-Hybrid, Inscriptions, DAS API, and the Umi framework. The single source of truth for all Metaplex integrations. ",
    "category": "solana-protocols",
    "path": "skills/solana-protocols/metaplex-protocol/",
    "name_fr": "Metaplex Protocol (guide)",
    "desc_fr": "Guide complet du protocole Metaplex pour NFTs et assets digitaux Solana : Core (NFTs nouvelle génération), Token Metadata, Bubblegum (NFTs compressés), Candy Machine et distribution."
   },
   {
-   "name": "metengine-data-agent",
-   "desc": "Real-time smart money analytics API for Polymarket prediction markets, Hyperliquid perpetual futures, and Meteora Solana LP/AMM pools. 63 endpoints. Pay-per-request via x402 on Solana Mainnet USDC. No API keys.",
+   "name": "metengine",
+   "desc": "Real-time smart money analytics API for Polymarket prediction markets, Hyperliquid perpetual futures, and Meteora Solana LP/AMM pools. 63 endpoints. Pay-per-request via x402 on Solana Mainnet USDC. No API keys. Use when the assignment involves metengine.",
    "category": "solana-protocols",
-   "path": "skills/solana-protocols/metengine/",
-   "name_fr": "metengine (smart money data)",
-   "desc_fr": "API d'analytics smart money en temps réel pour les marchés de prédiction Polymarket, les perpetuals Hyperliquid et les pools LP/AMM Meteora sur Solana. 63 endpoints."
+   "path": "skills/solana-protocols/metengine/"
   },
   {
    "name": "meteora",
@@ -1134,7 +1114,7 @@ const MEGA_CATALOG = {
   },
   {
    "name": "orca",
-   "desc": "Complete guide for Orca - Solana's leading concentrated liquidity AMM (CLMM). Covers Whirlpools SDK for swaps, liquidity provision, pool creation, position management, and fee harvesting on Solana and Eclipse networks.",
+   "desc": "Complete guide for Orca - Solana's leading concentrated liquidity AMM (CLMM). Covers Whirlpools SDK for swaps, liquidity provision, pool creation, position management, and fee harvesting on Solana and Eclipse networks. Use when the assignment involves orca.",
    "category": "solana-protocols",
    "path": "skills/solana-protocols/orca/",
    "name_fr": "Orca (AMM Solana)",
@@ -1150,7 +1130,7 @@ const MEGA_CATALOG = {
   },
   {
    "name": "phantom-wallet-mcp",
-   "desc": "Execute wallet operations through the Phantom MCP server — get addresses, sign transactions, transfer tokens, buy tokens, and sign messages across Solana, Ethereum, Bitcoin, and Sui",
+   "desc": "Execute wallet operations through the Phantom MCP server — get addresses, sign transactions, transfer tokens, buy tokens, and sign messages across Solana, Ethereum, Bitcoin, and Sui Use when the assignment involves phantom wallet mcp.",
    "category": "solana-protocols",
    "path": "skills/solana-protocols/phantom-wallet-mcp/",
    "name_fr": "Phantom Wallet MCP",
@@ -1166,7 +1146,7 @@ const MEGA_CATALOG = {
   },
   {
    "name": "pinocchio-development",
-   "desc": "Comprehensive guide for building high-performance Solana programs using Pinocchio - the zero-dependency, zero-copy framework. Covers account validation, CPI patterns, optimization techniques, and migration from Anchor.",
+   "desc": "Comprehensive guide for building high-performance Solana programs using Pinocchio - the zero-dependency, zero-copy framework. Covers account validation, CPI patterns, optimization techniques, and migration from Anchor. Use when the assignment involves pinocchio development.",
    "category": "solana-protocols",
    "path": "skills/solana-protocols/pinocchio-development/",
    "name_fr": "Pinocchio (programmes Solana)",
@@ -1174,7 +1154,7 @@ const MEGA_CATALOG = {
   },
   {
    "name": "pumpfun",
-   "desc": "Complete PumpFun Protocol guide for building token launches, bonding curves, and AMM integrations on Solana. Covers Pump Program (token creation, buy/sell on bonding curves), PumpSwap AMM (liquidity pools, swaps), fee structures, creator fees, and SDK integration.",
+   "desc": "Complete PumpFun Protocol guide for building token launches, bonding curves, and AMM integrations on Solana. Covers Pump Program (token creation, buy/sell on bonding curves), PumpSwap AMM (liquidity pools, swaps), fee structures, creator fees, and SDK integration. Use when the assignment involves pu",
    "category": "solana-protocols",
    "path": "skills/solana-protocols/pumpfun/",
    "name_fr": "PumpFun (lancements de tokens)",
@@ -1182,7 +1162,7 @@ const MEGA_CATALOG = {
   },
   {
    "name": "pyth",
-   "desc": "Complete guide for Pyth Network - decentralized oracle providing real-time price feeds for DeFi. Covers price feed integration, confidence intervals, EMA prices, on-chain CPI, off-chain fetching, and streaming updates for Solana applications.",
+   "desc": "Complete guide for Pyth Network - decentralized oracle providing real-time price feeds for DeFi. Covers price feed integration, confidence intervals, EMA prices, on-chain CPI, off-chain fetching, and streaming updates for Solana applications. Use when the assignment involves pyth.",
    "category": "solana-protocols",
    "path": "skills/solana-protocols/pyth/",
    "name_fr": "Pyth Network (oracles)",
@@ -1206,7 +1186,7 @@ const MEGA_CATALOG = {
   },
   {
    "name": "raydium",
-   "desc": "Complete Raydium Protocol SDK - the single source of truth for integrating Raydium on Solana. Covers SDK, Trade API, CLMM, CPMM, AMM pools, LaunchLab token launches, farming, CPI integration, and all Raydium tools.",
+   "desc": "Complete Raydium Protocol SDK - the single source of truth for integrating Raydium on Solana. Covers SDK, Trade API, CLMM, CPMM, AMM pools, LaunchLab token launches, farming, CPI integration, and all Raydium tools. Use when the assignment involves raydium.",
    "category": "solana-protocols",
    "path": "skills/solana-protocols/raydium/",
    "name_fr": "Raydium (AMM Solana)",
@@ -1222,7 +1202,7 @@ const MEGA_CATALOG = {
   },
   {
    "name": "sol-incinerator",
-   "desc": "SOL Incinerator SDK for burning tokens, NFTs, and closing accounts",
+   "desc": "SOL Incinerator SDK for burning tokens, NFTs, and closing accounts Use when the assignment involves sol incinerator.",
    "category": "solana-protocols",
    "path": "skills/solana-protocols/sol-incinerator/",
    "name_fr": "SOL Incinerator (burn)",
@@ -1230,7 +1210,7 @@ const MEGA_CATALOG = {
   },
   {
    "name": "solana-agent-kit",
-   "desc": "Comprehensive guide for building AI agents that interact with Solana blockchain using SendAI's Solana Agent Kit. Covers 60+ actions, LangChain/Vercel AI integration, MCP server setup, and autonomous agent patterns.",
+   "desc": "Comprehensive guide for building AI agents that interact with Solana blockchain using SendAI's Solana Agent Kit. Covers 60+ actions, LangChain/Vercel AI integration, MCP server setup, and autonomous agent patterns. Use when the assignment involves solana agent kit.",
    "category": "solana-protocols",
    "path": "skills/solana-protocols/solana-agent-kit/",
    "name_fr": "Solana Agent Kit (SendAI)",
@@ -1238,7 +1218,7 @@ const MEGA_CATALOG = {
   },
   {
    "name": "solana-kit-migration",
-   "desc": "Helps developers understand when to use @solana/kit vs @solana/web3.js (v1), provides migration guidance, API mappings, and handles edge cases for Solana JavaScript SDK transitions",
+   "desc": "Helps developers understand when to use @solana/kit vs @solana/web3.js (v1), provides migration guidance, API mappings, and handles edge cases for Solana JavaScript SDK transitions Use when the assignment involves solana kit migration.",
    "category": "solana-protocols",
    "path": "skills/solana-protocols/solana-kit-migration/",
    "name_fr": "Migration @solana/kit",
@@ -1246,7 +1226,7 @@ const MEGA_CATALOG = {
   },
   {
    "name": "solana-kit",
-   "desc": "Complete guide for @solana/kit - the modern, tree-shakeable, zero-dependency JavaScript SDK from Anza. Covers RPC connections, signers, transaction building with pipe, signing, sending, and account fetching with full TypeScript support.",
+   "desc": "Complete guide for @solana/kit - the modern, tree-shakeable, zero-dependency JavaScript SDK from Anza. Covers RPC connections, signers, transaction building with pipe, signing, sending, and account fetching with full TypeScript support. Use when the assignment involves solana kit.",
    "category": "solana-protocols",
    "path": "skills/solana-protocols/solana-kit/",
    "name_fr": "@solana/kit (SDK moderne)",
@@ -1254,7 +1234,7 @@ const MEGA_CATALOG = {
   },
   {
    "name": "squads",
-   "desc": "Complete guide for Squads Protocol - Solana's leading smart account and multisig infrastructure. Covers Squads V4 Multisig for team treasury management, Smart Account Program for account abstraction and programmable wallets, and Grid for stablecoin rails and fintech infrastructure.",
+   "desc": "Complete guide for Squads Protocol - Solana's leading smart account and multisig infrastructure. Covers Squads V4 Multisig for team treasury management, Smart Account Program for account abstraction and programmable wallets, and Grid for stablecoin rails and fintech infrastructure. Use when the assi",
    "category": "solana-protocols",
    "path": "skills/solana-protocols/squads/",
    "name_fr": "Squads (multisig Solana)",
@@ -1262,7 +1242,7 @@ const MEGA_CATALOG = {
   },
   {
    "name": "surfpool",
-   "desc": "Complete Surfpool development environment for Solana - drop-in replacement for solana-test-validator with mainnet forking, cheatcodes, Infrastructure as Code, and Surfpool Studio. The fastest way to develop and test Solana programs.",
+   "desc": "Complete Surfpool development environment for Solana - drop-in replacement for solana-test-validator with mainnet forking, cheatcodes, Infrastructure as Code, and Surfpool Studio. The fastest way to develop and test Solana programs. Use when the assignment involves surfpool.",
    "category": "solana-protocols",
    "path": "skills/solana-protocols/surfpool/",
    "name_fr": "Surfpool (dev env Solana)",
@@ -1270,7 +1250,7 @@ const MEGA_CATALOG = {
   },
   {
    "name": "svm",
-   "desc": "Explore Solana's architecture and protocol internals. Covers the SVM execution engine, account model, consensus, transactions, validator economics, data layer, development tooling, and token extensions using the Helius blog, SIMDs, and Agave/Firedancer source code.",
+   "desc": "Explore Solana's architecture and protocol internals. Covers the SVM execution engine, account model, consensus, transactions, validator economics, data layer, development tooling, and token extensions using the Helius blog, SIMDs, and Agave/Firedancer source code. Use when the assignment involves s",
    "category": "solana-protocols",
    "path": "skills/solana-protocols/svm/",
    "name_fr": "SVM (architecture Solana)",
@@ -1278,7 +1258,7 @@ const MEGA_CATALOG = {
   },
   {
    "name": "switchboard",
-   "desc": "Complete Switchboard Oracle Protocol SDK for Solana - the permissionless oracle solution for price feeds, on-demand data, VRF randomness, and real-time streaming via Surge. Covers TypeScript SDK, Rust integration, Oracle Quotes, and all Switchboard tools.",
+   "desc": "Complete Switchboard Oracle Protocol SDK for Solana - the permissionless oracle solution for price feeds, on-demand data, VRF randomness, and real-time streaming via Surge. Covers TypeScript SDK, Rust integration, Oracle Quotes, and all Switchboard tools. Use when the assignment involves switchboard",
    "category": "solana-protocols",
    "path": "skills/solana-protocols/switchboard/",
    "name_fr": "Switchboard (oracles Solana)",
@@ -1326,7 +1306,7 @@ const MEGA_CATALOG = {
   },
   {
    "name": "superpowers",
-   "desc": "Plan-build-test workflow framework with brainstorming, planning and TDD enforcement skills. Use when driving a feature from idea to tested implementation.",
+   "desc": "Feature lifecycle framework: brainstorming, planning and a red-green verification discipline. Use when driving a feature from idea to verified delivery.",
    "category": "superpowers",
    "path": "skills/superpowers/",
    "name_fr": "Superpowers",
@@ -1342,7 +1322,7 @@ const MEGA_CATALOG = {
   },
   {
    "name": "taste-skill",
-   "desc": "Design taste rubric for interfaces: hierarchy, spacing, contrast and restraint. Use when reviewing UI aesthetics or before shipping a screen.",
+   "desc": "Design taste rubric for interfaces: hierarchy, spacing, contrast and restraint. Use when reviewing UI aesthetics or before shipping an interface.",
    "category": "taste-skill",
    "path": "skills/taste-skill/",
    "name_fr": "Go design",
@@ -1358,7 +1338,7 @@ const MEGA_CATALOG = {
   },
   {
    "name": "tutor-setup",
-   "desc": "Transforms knowledge sources into an Obsidian StudyVault. Two modes: (1) Document Mode — PDF/text/web sources → study notes with practice questions. (2) Codebase Mode — source code project → onboarding vault for new developers. Mode is auto-detected based on project markers in CWD.",
+   "desc": "Transforms knowledge sources into an Obsidian StudyVault. Two modes: (1) Document Mode — PDF/text/web sources → study notes with practice questions. (2) Codebase Mode — source code project → onboarding vault for new developers. Mode is auto-detected based on project markers in CWD. Use when the user",
    "category": "tutor-setup",
    "path": "skills/tutor-setup/"
   },

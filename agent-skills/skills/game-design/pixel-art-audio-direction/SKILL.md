@@ -1,6 +1,7 @@
 ---
-name: Pixel Art & Audio Direction
-description: Generic framework for directing pixel art, sprites, animation, and game audio with coherence, readability, and measurable constraints; use in pre-production and production.
+name: pixel-art-audio-direction
+description: Generic framework for directing pixel art, sprites, animation, and game audio with coherence, readability, and measurable constraints; use in pre-production and production. Use when the assignment involves pixel art audio direction.
+
 ---
 
 # Pixel Art & Audio Direction

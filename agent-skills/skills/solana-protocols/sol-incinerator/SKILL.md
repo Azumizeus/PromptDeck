@@ -1,6 +1,7 @@
 ---
 name: sol-incinerator
-description: SOL Incinerator SDK for burning tokens, NFTs, and closing accounts
+description: SOL Incinerator SDK for burning tokens, NFTs, and closing accounts Use when the assignment involves sol incinerator.
+
 ---
 
 # Sol-Incinerator Burn + Close API v2 Guide

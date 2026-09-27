@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # ─────────────────────────────────────────────────────────────────────────────
 # install-megapack-skills.sh — Installe les skills du megapack (repo PromptDeck)
-# dans le hub ~/projects (4 emplacements) + global OpenHands ~/.openhands/skills.
+# dans le hub ~/projects (3 emplacements). OpenHands a été retiré.
 #
 # Depuis la fusion de l'ancien layout `skill/` dans `agent-skills/skills/`, la
 # source est unique : tout dossier (plat ou sous une catégorie, ex.
@@ -16,7 +16,6 @@ set -euo pipefail
 REPO="$(cd "$(dirname "$0")/.." && pwd)"
 SRC="$REPO/agent-skills/skills"
 P="$HOME/projects"
-G="$HOME/.openhands/skills"
 STAGE="$(mktemp -d)"
 trap 'rm -rf "$STAGE"' EXIT
 
@@ -50,13 +49,9 @@ N=$(find "$STAGE" -maxdepth 2 -name 'SKILL.md' | wc -l | tr -d ' ')
 say "  → $N skills dédupliquées prêtes"
 
 # 4. Déploiement : hub (4 emplacements, merge sans effacer) + global OpenHands
-for d in ".openhands/skills" ".claude/skills" ".opencode/skills" ".agents/skills"; do
+for d in ".claude/skills" ".opencode/skills" ".agents/skills"; do
   mkdir -p "$P/$d"
   cp -R "$STAGE/"* "$P/$d/" 2>/dev/null || true
   say "  ✓ $P/$d → $(ls "$P/$d" | wc -l | tr -d ' ') skills"
 done
-mkdir -p "$G"
-cp -R "$STAGE/"* "$G/" 2>/dev/null || true
-say "  ✓ $G → $(ls "$G" | wc -l | tr -d ' ') skills"
-
 say "── Terminé ──"

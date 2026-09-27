@@ -1,6 +1,7 @@
 ---
 name: dflow
-description: Complete DFlow trading protocol SDK - the single source of truth for integrating DFlow on Solana. Covers spot trading, prediction markets, Swap API, Metadata API, WebSocket streaming, and all DFlow tools.
+description: Complete DFlow trading protocol SDK - the single source of truth for integrating DFlow on Solana. Covers spot trading, prediction markets, Swap API, Metadata API, WebSocket streaming, and all DFlow tools. Use when the assignment involves dflow.
+
 ---
 
 # DFlow - Complete Integration Guide
