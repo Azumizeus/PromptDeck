@@ -46,11 +46,13 @@ Installation : glissez « MEGA PACK.app » sur « Applications ».
 Premier lancement : clic droit → Ouvrir (app non notarisée par l'App Store).
 
 NOUVEAUTÉS v1.1.0
+· 🧭 Aide contextuelle intégrée : 15 recettes filtrables, accès global ⌘⌥/ configurable
+· Catalogue étendu : 177 skills + 231 agents = 408 experts (fusion de l'ancien layout
+  skill/ + 38 skills du « My Claude resource vault » — apprendre, workflow, mémoire,
+  outils MCP, prompts…), traductions FR complètes, recherche bilingue FR/EN
 · ✍️ Prompts personnalisés : bouton ＋, tags, favoris ⭐, import .md/.txt (glisser-déposer), export .md (Réglages)
 · ⭐ Favoris + raccourcis ⌘1-⌘9 · 🕘 Récents · LLM par défaut (⌘⏎)
 · 12 destinations « Ouvrir dans » : Claude, ChatGPT, Perplexity, Copilot, DeepSeek, Z.ai, Kimi, Mammouth.ia, Freebuff, OpenCode (desktop + terminal), presse-papiers
-· Noms/descriptions en français + recherche bilingue FR/EN (408 items)
-· 🧭 Aide contextuelle intégrée : 15 recettes filtrables, accès global ⌘⌥/ configurable
 · Lancement auto au démarrage · raccourci ⌥Espace (⌘Espace est réservé par Spotlight)
 · Fenêtre déplaçable/redimensionnable (position mémorisée) · export/import de configuration JSON
 
