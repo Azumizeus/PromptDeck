@@ -117,4 +117,9 @@ contextBridge.exposeInMainWorld('mgp', {
   teamFromTemplate: (key) => ipcRenderer.invoke('team-from-template', { key }),
   teamExport: (name) => ipcRenderer.invoke('team-export', name),
   teamMdCreate: (name) => ipcRenderer.invoke('team-md-create', name),
+  // ── 🧾 Journal d'audit NDJSON (copie / injection / équipe / routeur) ──
+  auditGet: (opts) => ipcRenderer.invoke('audit-get', opts || {}),
+  auditClear: () => ipcRenderer.invoke('audit-clear'),
+  // ── 🧭 jev-decision-router : décision typée (skill gagnant + confiance) ──
+  jevRoute: (message, all) => ipcRenderer.invoke('jev-route', { message, all: all !== false }),
 });

@@ -56,20 +56,20 @@ test('sync apply : copie le dossier complet du skill (references incluses)', () 
 
 test('sync apply : les agents sont créés en conversion agent-<nom> (description verbatim), convention hôte respectée', () => {
   const { home } = makeSandbox();
-  // openhands « mixed » : un agent déjà installé → les agents sont éligibles
-  fs.mkdirSync(path.join(home, '.openhands/skills/agent-one'), { recursive: true });
-  fs.writeFileSync(path.join(home, '.openhands/skills/agent-one/SKILL.md'),
+  // agents « mixed » : un agent déjà installé → les agents sont éligibles
+  fs.mkdirSync(path.join(home, '.agents/skills/agent-one'), { recursive: true });
+  fs.writeFileSync(path.join(home, '.agents/skills/agent-one/SKILL.md'),
     '---\nname: agent-one\ndescription: agent un original\ntriggers:\n  - one\n---\n\n# One\n');
-  const out = run(home, '--loc', 'openhands', 'apply');
+  const out = run(home, '--loc', 'agents', 'apply');
   assert.match(out, /1 agent\(s\) à créer/);
   // agent manquant → conversion
-  const two = fs.readFileSync(path.join(home, '.openhands/skills/agent-two/SKILL.md'), 'utf8');
+  const two = fs.readFileSync(path.join(home, '.agents/skills/agent-two/SKILL.md'), 'utf8');
   assert.match(two, /^name: agent-two$/m);
   assert.match(two, /^description: agent deux original$/m, 'description du repo copiée verbatim');
   assert.match(two, /^triggers:\n(  - \w+\n)+/m);
   assert.match(two, /# Two\n/, 'corps du repo conservé');
   // agent existant et à jour → pas réécrit
-  const one = fs.readFileSync(path.join(home, '.openhands/skills/agent-one/SKILL.md'), 'utf8');
+  const one = fs.readFileSync(path.join(home, '.agents/skills/agent-one/SKILL.md'), 'utf8');
   assert.match(one, /^name: agent-one$/m);
   // l'emplacement claude (skills-only, aucun agent installé) n'en reçoit pas
   run(home, '--loc', 'claude', 'apply');

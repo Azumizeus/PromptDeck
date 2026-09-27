@@ -21,12 +21,10 @@ const sha256 = (p) => crypto.createHash('sha256').update(fs.readFileSync(p)).dig
 // mode « skills » : ne contient que des skills (1 SKILL.md par dir)
 // partial: true   : source partielle (ne jamais y « installer » les manquants)
 const LOCS = [
-  { id: 'hub',       label: 'Hub OpenHands (miroirs .claude/.opencode/.agents)', mode: 'mixed',  dir: path.join(HOME, 'projects/.openhands/skills') },
   { id: 'agents',    label: 'Agents globaux (~/.agents/skills)',                 mode: 'mixed',  dir: path.join(HOME, '.agents/skills') },
-  { id: 'openhands', label: 'OpenHands home (~/.openhands/skills)',              mode: 'mixed',  dir: path.join(HOME, '.openhands/skills') },
   { id: 'claude',    label: 'Claude Code (~/.claude/skills)',                    mode: 'skills', dir: path.join(HOME, '.claude/skills') },
   { id: 'opencode',  label: 'OpenCode (~/.config/opencode/skills)',              mode: 'skills', dir: path.join(HOME, '.config/opencode/skills') },
-  { id: 'freebuff',  label: 'Source Freebuff (Skill Install/skill/skills)',      mode: 'skills', dir: path.join(HOME, 'Desktop/Skill Install/skill/skills'), partial: true },
+  { id: 'freebuff',  label: 'Source Freebuff (skill-install/skill/skills)',      mode: 'skills', dir: path.join(HOME, 'projects/skill-install/skill/skills'), partial: true },
 ];
 
 // ── Référentiel repo ────────────────────────────────────────────────────────

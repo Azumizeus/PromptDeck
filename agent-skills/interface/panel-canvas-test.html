@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Test canvas MEGA PACK</title>
+<style>body{margin:0;background:#0b0c10;color:#eef0f6;font:14px -apple-system,sans-serif;padding:20px}</style>
+</head>
+<body>
+<h2>Harnais de test — panel MEGA PACK (canvas 🗺)</h2>
+<p id="out">chargement…</p>
+<!-- Simule une zone d'édition LLM pour l'insertion -->
+<textarea id="prompt-textarea" placeholder="zone LLM simulée" style="width:600px;height:80px"></textarea>
+<script src="mega-pack-panel-full.user.js"></script>
+<script>
+window.addEventListener('load', function () {
+  const out = document.getElementById('out');
+  const lines = [];
+  function ok(name, cond) { lines.push((cond ? '✅' : '❌') + ' ' + name); return cond; }
+  setTimeout(function () {
+    try {
+      ok('catalogue chargé (' + ((window.MEGA_CATALOG||{}).skills||[]).length + ' skills, ' + ((window.MEGA_CATALOG||{}).agents||[]).length + ' agents)', !!window.MEGA_CATALOG);
+      const btn = document.getElementById('mgp-btn');
+      ok('bouton ⚡ présent', !!btn);
+      btn.click();
+      ok('panneau ouvert', document.getElementById('mgp-panel').classList.contains('open'));
+      const cbtn = document.getElementById('mgp-canvas-btn');
+      ok('bouton 🗺 présent dans la barre', !!cbtn);
+      cbtn.click();
+      const cv = document.getElementById('mgp-canvas');
+      ok('canvas ouvert', !!cv && cv.classList.contains('open'));
+      const nodes = cv.querySelectorAll('.mgp-node');
+      ok('nœuds rendus : ' + nodes.length + ' (attendu ≥ 326)', nodes.length >= 326);
+      const first = nodes[0];
+      ok('nœud draggable (position absolue)', first && first.style.left !== '');
+      ok('barre canvas avec compteur', /experts/.test(document.getElementById('mgp-ccnt').textContent));
+      // clic sur un nœud → injection dans la textarea simulée
+      first.click();
+      const ta = document.getElementById('prompt-textarea');
+      ok('clic nœud → prompt injecté', ta.value.length > 20);
+      // drag : simule pointerdown/move/up puis vérifie position modifiée
+      const rect = first.getBoundingClientRect();
+      const before = first.style.left;
+      first.dispatchEvent(new PointerEvent('pointerdown', {bubbles:true, clientX: rect.left+5, clientY: rect.top+5}));
+      first.dispatchEvent(new PointerEvent('pointermove', {bubbles:true, clientX: rect.left+45, clientY: rect.top+25}));
+      first.dispatchEvent(new PointerEvent('pointerup',   {bubbles:true, clientX: rect.left+45, clientY: rect.top+25}));
+      ok('drag déplace le nœud (' + before + ' → ' + first.style.left + ')', first.style.left !== before);
+      // persistance position
+      ok('position persistée en localStorage', !!localStorage.getItem('mgp.canvas.pos'));
+      // fermeture
+      document.getElementById('mgp-c-x').click();
+      ok('fermeture canvas', !cv.classList.contains('open'));
+      out.innerHTML = lines.join('<br>');
+      document.title = lines.some(l => l.startsWith('❌')) ? 'TEST: FAIL' : 'TEST: PASS';
+    } catch (e) {
+      out.textContent = '❌ exception : ' + e.message;
+      document.title = 'TEST: FAIL';
+    }
+  }, 400);
+});
+</script>
+</body>
+</html>

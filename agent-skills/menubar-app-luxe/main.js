@@ -20,7 +20,7 @@ const I18N = {
   fr: { open: 'Ouvrir le panneau', launcher: 'Ouvrir le Launcheur HTML', help: 'Aide (mode d\'emploi)', settings: 'Réglages…', quit: 'Quitter', openIn: 'Ouvrir dans', settingsTitle: 'MEGA PACK — Réglages',
     descClaude: 'Claude (web)', descChatgpt: 'ChatGPT (web)', descPerplexity: 'Perplexity (web)', descCopilot: 'Copilot (web)',
     descDeepseek: 'DeepSeek (web)', descZai: 'Z.ai (web)', descKimi: 'Kimi (web)', descMammouth: 'Mammouth.ia — multi-modèles',
-    descManus: 'Manus — agent autonome (web)', descNoah: 'Noah — trynoah.ai (web)', descOpenhands: 'OpenHands local (Docker :8000)',
+    descManus: 'Manus — agent autonome (web)', descNoah: 'Noah — trynoah.ai (web)',
     arena: "🎮 Ouvrir l'arène (jeu)", descArena: 'MEGA PACK ARENA — chaque agent généré entre dans le jeu à son nom',
     descClaudeApp: 'Claude Desktop (app macOS)', descClaudeCode: 'Claude Code web (claude.ai/code)',
     descChrome: 'Nouvel onglet Chrome — colle le prompt', descBrave: 'Nouvel onglet Brave — colle le prompt',
@@ -29,7 +29,7 @@ const I18N = {
   en: { open: 'Open the panel', launcher: 'Open the HTML Launcher', help: 'Help (user guide)', settings: 'Settings…', quit: 'Quit', openIn: 'Open in', settingsTitle: 'MEGA PACK — Settings',
     descClaude: 'Claude (web)', descChatgpt: 'ChatGPT (web)', descPerplexity: 'Perplexity (web)', descCopilot: 'Copilot (web)',
     descDeepseek: 'DeepSeek (web)', descZai: 'Z.ai (web)', descKimi: 'Kimi (web)', descMammouth: 'Mammouth — multi-model',
-    descManus: 'Manus — autonomous agent (web)', descNoah: 'Noah — trynoah.ai (web)', descOpenhands: 'OpenHands local (Docker :8000)',
+    descManus: 'Manus — autonomous agent (web)', descNoah: 'Noah — trynoah.ai (web)',
     arena: '🎮 Open the Arena (game)', descArena: 'MEGA PACK ARENA — every agent you generate enters the game under its own name',
     descClaudeApp: 'Claude Desktop (macOS app)', descClaudeCode: 'Claude Code web (claude.ai/code)',
     descChrome: 'New Chrome tab — paste the prompt', descBrave: 'New Brave tab — paste the prompt',
@@ -643,7 +643,6 @@ function openInSubmenu(x, isSkill) {
     ['llm-api', LANG === 'en' ? '🔑 API (integrated)' : '🔑 API (intégré)', 'descLlmApi'],
     ['claude-app', LANG === 'en' ? 'Claude (macOS app)' : 'Claude (app macOS)', 'descClaudeApp'],
     ['claude-code', 'Claude Code (web)', 'descClaudeCode'],
-    ['openhands', 'OpenHands (local)', 'descOpenhands'],
     ['chrome', 'Chrome (onglet)', 'descChrome'],
     ['brave', 'Brave (onglet)', 'descBrave'],
     ['freebuff', 'Freebuff (app)', 'descFreebuff'],
@@ -824,6 +823,27 @@ function buildMenuTemplate() {
         } },
         { type: 'separator' },
         { label: journalPath(), enabled: false },
+      ],
+    },
+    {
+      // 🧾 Journal d'audit NDJSON (gateway OpenBot) : dernières actions copiées/injectées/équipes.
+      label: LANG === 'fr' ? '🧾 Journal d\'audit' : '🧾 Audit log',
+      submenu: [
+        { label: LANG === 'fr' ? '📋 Copier les 50 dernières actions' : '📋 Copy last 50 actions', click: () => {
+          try {
+            const raw = fs.readFileSync(AUDIT_FILE(), 'utf8').split('\n').filter((l) => l).slice(-50).join('\n');
+            clipboard.writeText(raw || '(vide)');
+          } catch (e) { try { clipboard.writeText('(vide)'); } catch (e2) { /* */ }
+          }
+        } },
+        { label: LANG === 'fr' ? '📂 Révéler le fichier (Finder)' : '📂 Reveal file (Finder)', click: () => {
+          try { shell.showItemInFolder(AUDIT_FILE()); } catch (e) { /* */ }
+        } },
+        { label: LANG === 'fr' ? '🧹 Purger l\'audit' : '🧹 Clear audit', click: () => {
+          try { fs.writeFileSync(AUDIT_FILE(), ''); } catch (e) { /* */ }
+        } },
+        { type: 'separator' },
+        { label: AUDIT_FILE(), enabled: false },
       ],
     },
     {
@@ -1079,13 +1099,11 @@ function openLLM(target, prompt) {
     mammouth: 'https://mammouth.ai/',
     manus: `https://manus.im/app?queue=${q}`,
     noah: 'https://trynoah.ai/',
-    openhands: 'http://localhost:8000',
     'claude-code': 'https://claude.ai/code',
   };
   if (target === 'claude-app') { shell.openPath('/Applications/Claude.app').catch(() => {}); return; } // Claude Desktop — coller le prompt
   if (target === 'chrome') { shell.openExternal('https://www.google.com', { activate: true }); clipboard.writeText(p); return; } // déjà copié ci-dessus
   if (target === 'brave') { shell.openExternal('https://www.google.com', { activate: true }); return; }
-  if (target === 'openhands') { shell.openExternal('http://localhost:8000', { activate: true }); return; } // Docker local — coller dans le chat
   if (target === 'freebuff') { shell.openExternal('freebuff://'); return; } // app native — coller le prompt dans le chat
   if (target === 'llm-api') { // panneau API (Atelier/Réglages) : le prompt est copié, on ouvre le chat intégré
     try {
@@ -1403,6 +1421,7 @@ if (!CAPTURE_MODE && !app.requestSingleInstanceLock()) {
 const { Notification } = require('electron');
 ipcMain.on('copy', (e, text) => {
   clipboard.writeText(text);
+  auditLog('copy', { chars: String(text || '').length });
   // Retour visuel : le panneau se cache à chaque copie, une notification confirme l'action
   try {
     new Notification({
@@ -1420,6 +1439,56 @@ ipcMain.on('hide', () => { if (win && !win.isDestroyed()) win.hide(); });
 // 🧠 Ordre de cascade du chat : demandé → Réglages → providers connus VIVANTS (cache
 // Santé API) → reste de la priorité. Fini le re-test systématique des routeurs locaux
 // morts à chaque message (omniroute seul coûtait ~10 s en HTTP 502).
+// ── 🧾 Journal d'audit des actions (NDJSON) — inspiré de la gateway OpenBot ──
+// Chaque action observable (copie, injection dans un LLM, équipe lancée, routeur)
+// est appendue en JSON Lines dans userData/mgp-audit.ndjson : consultable localement,
+// tail-able, greppable. Plafonné à 5 000 entrées (rotation par troncature tête).
+const AUDIT_FILE = () => { try { return path.join(app.getPath('userData'), 'mgp-audit.ndjson'); } catch (e) { return '/tmp/mgp-audit.ndjson'; } };
+const AUDIT_MAX = 5000;
+function auditLog(action, details = {}) {
+  try {
+    const rec = { ts: new Date().toISOString(), action, ...details };
+    let prev = '';
+    try { prev = fs.readFileSync(AUDIT_FILE(), 'utf8'); } catch (e2) { /* premier enregistrement */ }
+    const lines = (prev + JSON.stringify(rec) + '\n').split('\n').filter((l) => l);
+    fs.writeFileSync(AUDIT_FILE(), lines.slice(-AUDIT_MAX).join('\n') + '\n');
+  } catch (e) { /* best effort : l'audit ne doit jamais faire tomber l'app */ }
+}
+ipcMain.handle('audit-get', (e, { limit = 200, action } = {}) => {
+  try {
+    let lines = fs.readFileSync(AUDIT_FILE(), 'utf8').split('\n').filter((l) => l);
+    if (action) lines = lines.filter((l) => { try { return JSON.parse(l).action === action; } catch (e2) { return false; } });
+    return { ok: true, path: AUDIT_FILE(), entries: lines.slice(-limit).map((l) => { try { return JSON.parse(l); } catch (e3) { return { raw: l }; } }) };
+  } catch (e) { return { ok: true, path: AUDIT_FILE(), entries: [] };
+  }
+});
+ipcMain.handle('audit-clear', () => { try { fs.writeFileSync(AUDIT_FILE(), ''); return true; } catch (e) { return false; } });
+
+// ── 🧭 jev-decision-router : routage typé local (System One) ────────────────
+// Spawn du skill du dépôt (TF-IDF + triggers, 100 % local, aucune clé) ; fusion
+// skills + personas (--all). Résultat JSON typé affiché dans le panneau.
+ipcMain.handle('jev-route', async (e, { message, all = true } = {}) => {
+  const msg = String(message || '').slice(0, 2000);
+  if (!msg.trim()) return { ok: false, error: 'message vide' };
+  const router = ['/Users/mickaeldunoyer/projects/skill-install/agent-skills/skills/jev-decision-router/scripts/jev-router.mjs',
+    path.join(process.resourcesPath || '', 'app', 'jev-router.mjs')].find((p) => p && fs.existsSync(p));
+  if (!router) return { ok: false, error: 'jev-router.mjs introuvable' };
+  try {
+    const { execFile } = require('child_process');
+    const args = [router, msg];
+    if (all) args.push('--all');
+    const out = await new Promise((resolve, reject) => {
+      execFile(process.execPath, args, { timeout: 15000, maxBuffer: 1024 * 1024, env: { ...process.env, ELECTRON_RUN_AS_NODE: '1' } },
+        (err, stdout) => (err ? reject(err) : resolve(stdout)));
+    });
+    const decision = JSON.parse(out.trim().split('\n').pop());
+    auditLog('jev-route', { decision: decision.decision, kind: decision.kind, confidence: decision.confidence });
+    return { ok: true, decision };
+  } catch (err) {
+    return { ok: false, error: String(err && err.message || err).slice(0, 200) };
+  }
+});
+
 // 🛡 Journal : lecture + purge (Réglages → bouton 🛡 Journal)
 ipcMain.handle('journal-get', () => {
   try { return { ok: true, text: fs.readFileSync(journalPath(), 'utf8'), recent: recentIncidents() }; }
@@ -1611,6 +1680,7 @@ ipcMain.handle('chat-send-stream', async (e, { messages, provider, model } = {})
 });
 ipcMain.on('open-llm', (e, { target, prompt }) => {
   win && !win.isDestroyed() && win.hide();
+  auditLog('open-llm', { target: String(target || ''), chars: String(prompt || '').length });
   openLLM(target, prompt);
 });
 ipcMain.on('open-settings', createSettings);
@@ -2060,6 +2130,7 @@ ipcMain.handle('team-list', () => loadWorkshops('team'));
 ipcMain.handle('team-run', async (e, p) => {
   const payload = p || {};
   const t = payload.team || {};
+  auditLog('team-run', { team: String(t.team || t.name || ''), mission: String(payload.mission || '').slice(0, 140) });
   const lang = payload.lang === 'en' ? 'en' : 'fr';
   const fr = lang !== 'en';
   const mission = String(payload.mission || '').slice(0, 60000) || (fr ? 'Exécute la mission de l\'équipe.' : 'Execute the team mission.');

@@ -160,11 +160,11 @@ Raccourcis : **⌘Espace** panneau · **↑↓/⏎** copier · **⌘⏎** Claude
 ```bash
 # Skills (136)
 mkdir -p ~/.claude/skills
-cp -R "/Users/mickaeldunoyer/Desktop/Skill Install/agent-skills/skills/"* ~/.claude/skills/
+cp -R "/Users/mickaeldunoyer/projects/skill-install/agent-skills/skills/"* ~/.claude/skills/
 
 # Agents (190)
 mkdir -p ~/.claude/agents
-cp -R "/Users/mickaeldunoyer/Desktop/Skill Install/agent-skills/agents/"* ~/.claude/agents/
+cp -R "/Users/mickaeldunoyer/projects/skill-install/agent-skills/agents/"* ~/.claude/agents/
 ```
 
 ### Option B — plugin marketplace locale
@@ -179,7 +179,7 @@ cp -R "/Users/mickaeldunoyer/Desktop/Skill Install/agent-skills/agents/"* ~/.cla
 ```bash
 # Skills (136) — global
 mkdir -p ~/.config/opencode/skills
-cp -R "/Users/mickaeldunoyer/Desktop/Skill Install/agent-skills/skills/"* ~/.config/opencode/skills/
+cp -R "/Users/mickaeldunoyer/projects/skill-install/agent-skills/skills/"* ~/.config/opencode/skills/
 
 # Agent persona + AGENTS.md projet (optionnel)
 mkdir -p ~/.config/opencode/agent

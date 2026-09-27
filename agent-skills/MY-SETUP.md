@@ -7,7 +7,7 @@
 | Hôte | Emplacement | État vérifié le 23/09/2026 |
 |---|---|---|
 | OpenCode 1.17.18 | `~/.config/opencode/agents/` | ✅ 190 fichiers, 0 doublon, `name` = slug du fichier pour tous |
-| OpenHands + Freebuff | `~/.agents/skills/` | ✅ 190 `agent-*` + 15 skills lifecycle = 205 dossiers, `name` = dossier pour tous |
+| Freebuff (user-scope) | `~/.agents/skills/` | ✅ 190 `agent-*` + 15 skills lifecycle = 205 dossiers, `name` = dossier pour tous |
 | Claude Code | `~/.claude/agents/` | ✅ 190 fichiers (copies conformes du dépôt, catégories préservées) |
 
 ## ⚠️ Correction par rapport au mémo initial
@@ -59,7 +59,7 @@ En session OpenCode : `@security-auditor`, `@tokenomics-designer`, etc.
 
 ---
 
-## ✅ Vérifier l'installation OpenHands + Freebuff
+## ✅ Vérifier l'installation Freebuff (user-scope `~/.agents/skills`)
 
 ```bash
 # 1. Nombre de skills agents :
@@ -89,7 +89,7 @@ console.log("dirs:", fs.readdirSync(dir).length,
 
 Côté Freebuff : les 15 skills lifecycle (`spec-driven-development`, `debugging-and-error-recovery`, …) vivaient déjà dans `~/.agents/skills/` — les 190 agents s'ajoutent au même endroit, même mécanisme.
 
-<!-- ✏️ Notes personnelles OpenHands/Freebuff :
+<!-- ✏️ Notes personnelles Freebuff :
      - …
 -->
 
@@ -111,7 +111,7 @@ Les convertisseurs complets sont dans [TUTO.md](TUTO.md) (sections 1 et 2). Ordr
 
 1. Sauvegarder : `cp -r ~/.config/opencode/agents ~/.config/opencode/agents.bak && cp -r ~/.agents/skills ~/.agents/skills.bak`
 2. Purger les agents générés (garder les skills lifecycle !) : `rm -rf ~/.config/opencode/agents && mkdir -p ~/.config/opencode/agents`
-3. Relancer le convertisseur OpenCode (TUTO.md §1), puis le convertisseur OpenHands (TUTO.md §2)
+3. Relancer le convertisseur OpenCode (TUTO.md §1), puis le convertisseur Freebuff (TUTO.md §2)
 4. Re-vérifier avec les blocs ci-dessus
 5. Recopier Claude Code : `cp -r agents/. ~/.claude/agents/`
 
@@ -128,19 +128,20 @@ Le mémo des 190 agents par catégorie (rôle en français) est [`../AGENTS-CATA
 
 ---
 
-## 🔧 Fix appliqué : MCP tool listing timed out (OpenHands)
+## 🔧 Fix appliqué : MCP tool listing timed out (résolu — OpenHands supprimé le 25/09/2026)
 
-**Symptôme** : `MCP tool listing timed out after 30 seconds. MCP servers configured: helius, chrome-devtools` au démarrage de chaque conversation OpenHands.
+**Symptôme (historique)** : `MCP tool listing timed out after 30 seconds. MCP servers configured: helius, chrome-devtools` au démarrage de chaque conversation.
 
-**Cause racine** : `npx` vit dans `~/.nvm/versions/node/v24.16.0/bin` (nvm), qui n'existe que via l'init du shell. L'app OpenHands (GUI) spawn les serveurs MCP avec un PATH minimal (`/usr/bin:/bin:…`) sans nvm → `npx` introuvable → le listing d'outils pend puis timeout. Les serveurs eux-mêmes répondent en ~2 s (vérifié par handshake JSON-RPC manuel).
+**Cause racine** : `npx` vit dans `~/.nvm/versions/node/v24.16.0/bin` (nvm), qui n'existe que via l'init du shell. L'app spawnait les serveurs MCP avec un PATH minimal (`/usr/bin:/bin:…`) sans nvm → `npx` introuvable → le listing d'outils pend puis timeout. Les serveurs eux-mêmes répondent en ~2 s (vérifié par handshake JSON-RPC manuel).
 
-**Fix appliqué le 23/09/2026** :
-1. Wrapper `~/.openhands/mcp-npx-wrapper.sh` qui ajoute le bin nvm au PATH puis `exec npx "$@"`.
-2. `~/.openhands/settings.json` → `agent_settings.mcp_config.{helius,chrome-devtools}.command` pointe vers le wrapper (sauvegarde : `settings.json.bak-mcp-fix`).
+**Fix appliqué le 23/09/2026** (l'app a été désinstallée le 25/09, le wrapper `~/.openhands/mcp-npx-wrapper.sh` n'existe plus) :
+1. Wrapper `~/.openhands/mcp-npx-wrapper.sh` qui ajoute le bin nvm au PATH puis `exec npx "$@"`. *(supprimé avec l'app le 25/09/2026)*
+2. `~/.openhands/settings.json` → `agent_settings.mcp_config.{helius,chrome-devtools}.command` pointe vers le wrapper. *(supprimé avec l'app)*
 3. `launchctl setenv PATH …nvm bin…:…` pour les apps GUI en général.
 
-**Si ça revient après un changement de version node (nvm)** : mettre à jour le chemin dans le wrapper et relancer le `launchctl setenv`. Test rapide :
+**Si le pattern revient avec une autre app GUI** : même cause, même remède — wrapper nvm + `launchctl setenv`. Test générique (l'exemple historique référençait le wrapper OpenHands, désormais supprimé) :
 ```bash
-(echo '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"t","version":"1"}}}'; sleep 1) | env -i HOME="$HOME" ~/.openhands/mcp-npx-wrapper.sh -y helius-mcp@latest | head -c 80
+# Substitute le binaire à tester ; une réponse JSON = le pipeline est sain.
+(echo '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"t","version":"1"}}}'; sleep 1) | env -i HOME="$HOME" npx -y <paquet-mcp> | head -c 80
 # → une réponse JSON = le pipeline est sain ; sinon le problème est ailleurs (réseau/registre npm).
 ```

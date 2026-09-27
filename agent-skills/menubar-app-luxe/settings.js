@@ -68,7 +68,7 @@ const ALL_TARGETS = [
   ['deepseek', 'DeepSeek'], ['zai', 'Z.ai'], ['kimi', 'Kimi'], ['mammouth', 'Mammouth.ia'],
   ['manus', 'Manus (agent)'], ['noah', 'Noah'],
   ['claude-app', 'Claude (app macOS)'], ['claude-code', 'Claude Code (web)'],
-  ['openhands', 'OpenHands (local)'], ['chrome', 'Chrome (onglet)'], ['brave', 'Brave (onglet)'],
+  ['chrome', 'Chrome (onglet)'], ['brave', 'Brave (onglet)'],
   ['freebuff', 'Freebuff (app)'], ['opencode-app', 'OpenCode (desktop)'], ['opencode', 'OpenCode (terminal)'], ['clipboard', '📋 Presse-papiers'],
 ];
 let sendTargets = [];

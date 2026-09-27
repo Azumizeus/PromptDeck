@@ -211,6 +211,7 @@ fr: {
   dropTooBigTitle: 'Fichier trop volumineux',
   // ❔ Aide intégrée (survol des boutons)
   helpSearch: '🔍 Recherche — tape un mot : filtre skills, agents, équipes et prompts ✍️ en direct. ↑↓ navigue, ⏎ copie le prompt, ⌘⏎ ouvre le LLM.',
+  helpRtb: '🧭 Routeur — tape ta demande dans la recherche puis clique 🧭 : le routeur local jev (TF-IDF + triggers, aucune clé) propose le skill ou l\'agent gagnant avec sa confiance. Entrée journalisée dans 🧾 Journal d\'audit.',
   helpTabs: 'Onglets — Tout / Skills / Agents / Équipes / ✍️ Perso / ★ Favoris : filtre la liste par type.',
   helpCompose: '✚ Composer — envoie les prompts sélectionnés (⌘-clic) en un seul message combiné.',
   helpLlm: '⌨ LLM — choisit la destination par défaut : ⏎ copie le prompt, ⌘⏎ ouvre ce chat directement.',
@@ -392,6 +393,7 @@ en: {
   dropDuplicate: (n) => `A prompt “${n}” already exists — renamed to “{new}”`,
   dropTooBigTitle: 'File too large',
   helpSearch: '🔍 Search — type a word: filters skills, agents, teams and ✍️ prompts live. ↑↓ navigate, ⏎ copies the prompt, ⌘⏎ opens the LLM.',
+  helpRtb: '🧭 Router — type your request in the search box then click 🧭: the local jev router (TF-IDF + triggers, no key) suggests the winning skill or agent with its confidence. Logged to the 🧾 Audit log.',
   helpTabs: 'Tabs — All / Skills / Agents / Teams / ✍️ Custom / ★ Favorites: filter the list by type.',
   helpCompose: '✚ Compose — sends the selected prompts (⌘-click) as one combined message.',
   helpLlm: '⌨ LLM — picks the default destination: ⏎ copies the prompt, ⌘⏎ opens that chat directly.',
@@ -446,12 +448,12 @@ const lockOf = (k, name) => !!(LOCKS[k] && LOCKS[k].has(name));
 const itemLocked = (k, rec) => !!(lockOf(k, rec && rec.name) || (rec && rec.locked));
 const setLockLocal = (k, name, on) => { on ? LOCKS[k].add(name) : LOCKS[k].delete(name); };
 const isFav = (n) => FAVS.has(n);
-const LLM_LABEL = { claude: 'Claude', chatgpt: 'ChatGPT', perplexity: 'Perplexity', copilot: 'Copilot', deepseek: 'DeepSeek', zai: 'Z.ai', kimi: 'Kimi', mammouth: 'Mammouth', manus: 'Manus (agent)', noah: 'Noah', 'llm-api': LANG === 'fr' ? '🔑 API' : '🔑 API', 'claude-app': LANG === 'fr' ? 'Claude (app macOS)' : 'Claude (macOS app)', 'claude-code': 'Claude Code (web)', openhands: 'OpenHands (local)', chrome: 'Chrome (onglet)', brave: 'Brave (onglet)', 'headroom-claude': '🗜 Claude Code + Headroom', 'headroom-opencode': '🗜 OpenCode + Headroom' };
+const LLM_LABEL = { claude: 'Claude', chatgpt: 'ChatGPT', perplexity: 'Perplexity', copilot: 'Copilot', deepseek: 'DeepSeek', zai: 'Z.ai', kimi: 'Kimi', mammouth: 'Mammouth', manus: 'Manus (agent)', noah: 'Noah', 'llm-api': LANG === 'fr' ? '🔑 API' : '🔑 API', 'claude-app': LANG === 'fr' ? 'Claude (app macOS)' : 'Claude (macOS app)', 'claude-code': 'Claude Code (web)', chrome: 'Chrome (onglet)', brave: 'Brave (onglet)', 'headroom-claude': '🗜 Claude Code + Headroom', 'headroom-opencode': '🗜 OpenCode + Headroom' };
 const TGT_META = { freebuff: 'Freebuff (app)', 'opencode-app': 'OpenCode (desktop)', opencode: 'OpenCode (terminal)', clipboard: LANG === 'fr' ? 'Presse-papiers' : 'Clipboard' };
 const tgtLabel = (t) => TGT_META[t] || LLM_LABEL[t] || t;
 // Sélecteur de LLM (barre du bas) : les modèles de base de l'app + l'API si clé présente
 // Toutes les destinations (apps locales + services web utilisés) — le sélecteur ⌨ du footer et le clic droit les listent
-const LLM_CHOICES = ['claude', 'chatgpt', 'perplexity', 'copilot', 'deepseek', 'zai', 'kimi', 'mammouth', 'manus', 'noah', 'llm-api', 'claude-app', 'claude-code', 'openhands', 'chrome', 'brave', 'headroom-claude', 'headroom-opencode', 'freebuff', 'opencode-app', 'opencode', 'clipboard'];
+const LLM_CHOICES = ['claude', 'chatgpt', 'perplexity', 'copilot', 'deepseek', 'zai', 'kimi', 'mammouth', 'manus', 'noah', 'llm-api', 'claude-app', 'claude-code', 'chrome', 'brave', 'headroom-claude', 'headroom-opencode', 'freebuff', 'opencode-app', 'opencode', 'clipboard'];
 const hasAnyApi = () => Object.values(SYS.hasApi || {}).some(Boolean);
 const llmChoices = () => (hasAnyApi() ? LLM_CHOICES : LLM_CHOICES.slice(0, -1));
 // LLM par défaut réactif : les Réglages (ou le sélecteur du footer) peuvent le changer à chaud
@@ -514,6 +516,7 @@ APP_PARENT.insertAdjacentHTML('afterbegin', `
     <span id="counts">${S.length} skills · ${A.length} agents</span>
     <button id="incb" title="${LANG === 'fr' ? 'Incidents récents — ouvrir le 🛡 Journal des Réglages' : 'Recent incidents — open Settings 🛡 Journal'}" aria-label="incidents" hidden style="border:none;background:transparent;font-size:14px;cursor:pointer;padding:0 4px">⚠️</button>
     <span style="flex:1"></span>
+    <button id="cvsb" title="${LANG === 'fr' ? '🗺 Canvas des experts' : '🗺 Expert canvas'}" aria-label="🗺">🗺</button>
     <button id="newp" title="${T.newp}" aria-label="${T.newp}">＋</button>
     <button id="langb" title="FR/EN" aria-label="FR/EN">${LANG === 'fr' ? 'FR' : 'EN'}</button>
     <button id="setb" title="${LANG === 'fr' ? '⚙ Réglages (⌘,)' : '⚙ Settings (⌘,)'}" aria-label="${LANG === 'fr' ? 'Réglages' : 'Settings'}">⚙</button>
@@ -554,6 +557,8 @@ APP_PARENT.insertAdjacentHTML('afterbegin', `
     <span class="helpw"><button id="htrb" class="helpb" data-help="helpTrb" aria-label="${T.helpTrb}">?</button></span>
     <button id="pinb" title="${T.pinT}" aria-pressed="false">📌</button>
     <span class="helpw"><button id="hpin" class="helpb" data-help="helpPin" aria-label="${T.helpPin}">?</button></span>
+    <button id="rtb" title="${LANG === 'fr' ? '🧭 Router la demande tapée (jev-decision-router) : propose le skill ou l\'agent gagnant avec sa confiance' : '🧭 Route the typed request (jev-decision-router): suggests the winning skill or agent with its confidence'}">🧭</button>
+    <span class="helpw"><button id="hrt" class="helpb" data-help="helpRtb" aria-label="${LANG === 'fr' ? 'Aide routeur' : 'Router help'}">?</button></span>
     <button id="chatb" title="${T.chatT}" aria-haspopup="dialog">💬</button>
     <span class="helpw"><button id="hchat" class="helpb" data-help="helpChat" aria-label="${T.helpChat}">?</button></span>
     <span id="cnt" role="status" aria-live="polite"></span>
@@ -965,6 +970,7 @@ window.addEventListener('blur', () => { hideCtx(); hideTip(); });
 document.addEventListener('wheel', (e) => {
   if (document.querySelector('.macwin')) return; // launcher : la page défile normalement
   if (e.target.closest('#ctx, #llmmenu, #tip, #wmodal, #tour, #modal')) return; // popups à scroll propre
+  if (document.getElementById('mgp-canvas')?.classList.contains('open')) return; // 🗺 canvas : la molette zoome
   const l = $('list');
   if (!l || l.scrollHeight <= l.clientHeight) return;
   e.preventDefault();
@@ -1675,6 +1681,38 @@ $('setb').onclick = () => window.mgp.openSettings();
   document.querySelector('#top .lm') && (document.querySelector('#top .lm').onclick = doHide);
   document.querySelector('#top .lx2') && (document.querySelector('#top .lx2').onclick = () => rzCyclePreset());
 })();
+// 🧭 Routeur jev (decision typée locale) : route la demande tapée dans la recherche.
+// La décision (skill/agent gagnant + confiance + alternatives) est journalisée côté main
+// (🧾 audit NDJSON) ; côté panneau on propose de filtrer sur le gagnant.
+let JEV_BUSY = false;
+async function jevRouteCurrent() {
+  if (JEV_BUSY) return;
+  const msg = q.value.trim();
+  if (!msg) { showToast(LANG === 'fr' ? '🧭 Tape d\'abord ta demande dans la recherche' : '🧭 Type your request in the search box first', 'err'); return; }
+  JEV_BUSY = true;
+  const rtb = $('rtb');
+  const old = rtb.textContent;
+  rtb.textContent = '⏳';
+  try {
+    const r = await window.mgp.jevRoute(msg, true);
+    if (!r || !r.ok) { showToast((LANG === 'fr' ? '🧭 Routeur : ' : '🧭 Router: ') + ((r && r.error) || 'erreur'), 'err'); return; }
+    const d = r.decision || {};
+    const kindLabel = d.kind === 'persona' ? (LANG === 'fr' ? 'agent' : 'agent') : (LANG === 'fr' ? 'skill' : 'skill');
+    const pct = Math.round((d.confidence || 0) * 100);
+    showToast(`🧭 ${kindLabel} : ${d.decision || '—'} · ${pct}%${(d.matchedTriggers || []).length ? ' · ' + d.matchedTriggers.slice(0, 3).join(', ') : ''}`, 'ok');
+    // Filtrer la liste sur le gagnant pour permettre ⏎ immédiatement
+    if (d.decision) {
+      const hit = results.find((x) => x.x.name === d.decision);
+      if (hit) { idx = results.indexOf(hit); render(); }
+    }
+  } catch (e) {
+    showToast(LANG === 'fr' ? '🧭 Routeur indisponible' : '🧭 Router unavailable', 'err');
+  } finally {
+    JEV_BUSY = false;
+    rtb.textContent = old;
+  }
+}
+$('rtb').onclick = jevRouteCurrent;
 // 🛡 Badge incidents : ⚠️ n visible dans le header si des incidents critiques ont < 30 min —
 // clic → ouvre les Réglages (section Journal visible immédiatement). Rafraîchi périodiquement.
 const incb = $('incb');
@@ -2392,6 +2430,205 @@ try { window.mgp.onRestartTour && window.mgp.onRestartTour(() => { try { localSt
 
 render();
 const pinbSet = ($('pinb').getAttribute('aria-pressed') === 'true'); // état initial (préférence persistée)
+
+// ────────────────────────────────────────────────────────────────────────────
+//  🗺 Canvas infini des experts (inspiré nodeterm) — nœuds draggables, zoom
+//  molette, pan au glisser, liens équipes→agents, statut live (copie < 24 h).
+//  Réutilise ALL/promptOf/activate : tout expert ajouté (Atelier, équipe) y
+//  apparaît automatiquement. Positions + vue persistées en localStorage.
+// ────────────────────────────────────────────────────────────────────────────
+const CW = 12000, CH = 8000; // dimensions du monde
+let canvasItems = [];
+function markUsed(n) { try { const u = JSON.parse(localStorage.getItem('mgp.used.at') || '{}'); u[n] = Date.now(); localStorage.setItem('mgp.used.at', JSON.stringify(u)); } catch (e) {} }
+function lastUsed(n) { try { const u = JSON.parse(localStorage.getItem('mgp.used.at') || '{}'); return (u[n] || 0) > Date.now() - 86400000; } catch (e) { return false; } }
+// activate() originale : copie + récent — on marque l'usage pour le canvas
+const _activate = activate;
+activate = function (it, el) { _activate(it, el); markUsed(it.x.name); };
+
+function canvasDefaultView() {
+  const scale = Math.min(0.28, Math.max(0.12, Math.min(window.innerWidth / CW, window.innerHeight / CH) * 1.1));
+  return { scale: scale, tx: window.innerWidth / 2 - scale * (CW / 2), ty: window.innerHeight / 2 - scale * (CH / 2) };
+}
+function autoPos(i, n) {
+  const cx = CW / 2, cy = CH / 2;
+  const ring = Math.floor(i / 18);
+  const a = (i % 18) / 18 * Math.PI * 2 + ring * 0.35;
+  const r = 130 + ring * 210;
+  return { x: Math.round(cx + Math.cos(a) * r * 1.5), y: Math.round(cy + Math.sin(a) * r) };
+}
+function canvasClose() { try { localStorage.setItem('mgp.canvas.open', '0'); } catch (e) {} const c = document.getElementById('mgp-canvas'); if (c) c.classList.remove('open'); }
+function canvasOpen() {
+  try { localStorage.setItem('mgp.canvas.open', '1'); } catch (e) {}
+  let root = document.getElementById('mgp-canvas');
+  if (!root) {
+    root = document.createElement('div');
+    root.id = 'mgp-canvas';
+    root.innerHTML =
+      '<div id="mgp-cbar"><b>🗺 ' + (LANG === 'fr' ? 'Canvas des experts' : 'Expert canvas') + '</b><span class="cnt" id="mgp-ccnt"></span>' +
+      '<button id="mgp-c-auto">✧ Auto</button><button id="mgp-c-reset">⟲ ' + (LANG === 'fr' ? 'Réinitialiser' : 'Reset') + '</button><button id="mgp-c-x">✕</button></div>' +
+      '<div id="mgp-world"><svg id="mgp-edges"></svg></div>' +
+      '<div id="mgp-chint">' + (LANG === 'fr'
+        ? 'Molette = zoom · fond = déplacer · clic = copier le prompt · ⌘-clic = sélection · clic droit = envoyer à'
+        : 'Wheel = zoom · drag background = pan · click = copy prompt · ⌘-click = select · right-click = send to') + '</div>';
+    document.body.appendChild(root);
+    root.querySelector('#mgp-c-x').onclick = canvasClose;
+    root.querySelector('#mgp-c-reset').onclick = function () {
+      try { localStorage.removeItem('mgp.canvas.pos'); localStorage.removeItem('mgp.canvas.zoom'); localStorage.removeItem('mgp.canvas.tx'); localStorage.removeItem('mgp.canvas.ty'); } catch (e) {}
+      root.classList.remove('open'); setTimeout(canvasOpen, 0);
+    };
+    root.querySelector('#mgp-c-auto').onclick = function () {
+      const world = root.querySelector('#mgp-world');
+      const saved = (() => { try { return JSON.parse(localStorage.getItem('mgp.canvas.pos') || '{}'); } catch (e) { return {}; } })();
+      const nodes = Array.prototype.slice.call(world.querySelectorAll('.mgp-node'));
+      canvasItems.forEach(function (it, i) {
+        const p = autoPos(i, canvasItems.length); saved[it.x.name] = p;
+        const el = nodes.find(function (n2) { return n2.dataset.n === it.x.name; });
+        if (el) { el.style.left = p.x + 'px'; el.style.top = p.y + 'px'; }
+      });
+      try { localStorage.setItem('mgp.canvas.pos', JSON.stringify(saved)); } catch (e) {}
+      canvasEdges(root);
+    };
+    canvasPanZoom(root);
+  }
+  canvasItems = ALL.slice();
+  canvasNodes(root, canvasItems);
+  root.classList.add('open');
+  canvasRestoreView(root);
+  const live = canvasItems.filter(function (it) { return lastUsed(it.x.name); }).length;
+  root.querySelector('#mgp-ccnt').textContent = canvasItems.length + ' experts · ' + live + ' ' + (LANG === 'fr' ? 'actifs 24 h' : 'active 24h');
+}
+function canvasNodes(root, items) {
+  const world = root.querySelector('#mgp-world');
+  let saved = {}; try { saved = JSON.parse(localStorage.getItem('mgp.canvas.pos') || '{}'); } catch (e) {}
+  world.querySelectorAll('.mgp-node').forEach(function (n) { n.remove(); });
+  items.forEach(function (it, i) {
+    const x = it.x;
+    const p = saved[x.name] || autoPos(i, items.length);
+    const el = document.createElement('div');
+    el.className = 'mgp-node k-' + it.k + (isFav(x.name) ? ' fav' : '') + (sel.has(x.name) ? ' selc' : '') + (lastUsed(x.name) ? ' used' : '');
+    el.dataset.n = x.name;
+    el.style.left = p.x + 'px'; el.style.top = p.y + 'px';
+    el.innerHTML = '<span class="dot"></span><span class="nt">' + esc(itEmoji(it.k) + ' ' + lname(x)) + '</span><span class="nd">' + esc((ldesc(x) || '').slice(0, 60)) + '</span>';
+    el.title = lname(x) + ' — ' + (ldesc(x) || '').slice(0, 160);
+    el.onclick = function (ev) {
+      ev.stopPropagation();
+      if (el._moved) { el._moved = false; return; } // drag ≠ clic
+      if (ev.metaKey || ev.ctrlKey) { sel.has(x.name) ? sel.delete(x.name) : sel.add(x.name); el.classList.toggle('selc'); return; }
+      activate(it, el);
+      el.classList.add('flash');
+      setTimeout(function () { el.classList.remove('flash'); el.classList.add('used'); }, 950);
+    };
+    el.oncontextmenu = function (ev) { ev.preventDefault(); openCtx(el, it, ev.clientX, ev.clientY); };
+    canvasDrag(root, el, x.name);
+    world.appendChild(el);
+  });
+  canvasEdges(root);
+}
+function canvasEdges(root) {
+  const svg = root.querySelector('#mgp-edges');
+  if (!svg) return;
+  let saved = {}; try { saved = JSON.parse(localStorage.getItem('mgp.canvas.pos') || '{}'); } catch (e) {}
+  const posOf = {};
+  canvasItems.forEach(function (it, i) { posOf[it.x.name] = saved[it.x.name] || autoPos(i, canvasItems.length); });
+  const byName = {};
+  canvasItems.forEach(function (it) { byName[it.x.name] = it; });
+  const edges = [];
+  canvasItems.forEach(function (it) {
+    const t = it.x._t; if (!t) return;
+    (t.agents || []).forEach(function (a) { if (byName[a.name || a]) edges.push([it.x.name, a.name || a, true]); });
+    if (t.orchestrator && byName[t.orchestrator.name]) edges.push([it.x.name, t.orchestrator.name, true]);
+  });
+  svg.setAttribute('width', String(CW)); svg.setAttribute('height', String(CH));
+  svg.innerHTML = edges.map(function (e) {
+    const a = posOf[e[0]], b = posOf[e[1]];
+    if (!a || !b) return '';
+    return '<line' + (e[2] ? ' class="t"' : '') + ' x1="' + (a.x + 88) + '" y1="' + (a.y + 30) + '" x2="' + (b.x + 88) + '" y2="' + (b.y + 30) + '"></line>';
+  }).join('');
+  const world = root.querySelector('#mgp-world');
+  world.style.minWidth = CW + 'px'; world.style.minHeight = CH + 'px';
+}
+function canvasDrag(root, el, name) {
+  let sx = 0, sy = 0, ox = 0, oy = 0, on = false;
+  el.addEventListener('pointerdown', function (e) {
+    if (e.button !== 0) return;
+    on = true; sx = e.clientX; sy = e.clientY;
+    ox = parseFloat(el.style.left) || 0; oy = parseFloat(el.style.top) || 0;
+    try { el.setPointerCapture(e.pointerId); } catch (e2) {}
+    e.stopPropagation();
+  });
+  el.addEventListener('pointermove', function (e) {
+    if (!on) return;
+    el.style.left = (ox + e.clientX - sx) + 'px';
+    el.style.top = (oy + e.clientY - sy) + 'px';
+    if (Math.abs(e.clientX - sx) + Math.abs(e.clientY - sy) > 4) el._moved = true;
+  });
+  el.addEventListener('pointerup', function (e) {
+    if (!on) return; on = false;
+    let saved = {}; try { saved = JSON.parse(localStorage.getItem('mgp.canvas.pos') || '{}'); } catch (e2) {}
+    saved[name] = { x: parseFloat(el.style.left) || 0, y: parseFloat(el.style.top) || 0 };
+    try { localStorage.setItem('mgp.canvas.pos', JSON.stringify(saved)); } catch (e2) {}
+    canvasEdges(root);
+    e.stopPropagation();
+  });
+}
+function canvasPanZoom(root) {
+  let saved = {}; try { saved = JSON.parse(localStorage.getItem('mgp.canvas.zoom') || 'null'); } catch (e) {}
+  const dv = canvasDefaultView();
+  let scale = (saved && saved.scale) || dv.scale;
+  let tx = (saved && saved.tx) || dv.tx, ty = (saved && saved.ty) || dv.ty;
+  const world = root.querySelector('#mgp-world');
+  function apply() {
+    world.style.transform = 'translate(' + tx + 'px,' + ty + 'px) scale(' + scale + ')';
+    try { localStorage.setItem('mgp.canvas.zoom', JSON.stringify({ scale: scale, tx: tx, ty: ty })); } catch (e) {}
+  }
+  apply();
+  root.addEventListener('wheel', function (e) {
+    e.preventDefault();
+    const r = root.getBoundingClientRect();
+    const mx = e.clientX - r.left, my = e.clientY - r.top;
+    const f = e.deltaY < 0 ? 1.12 : 1 / 1.12;
+    const ns = Math.max(0.12, Math.min(2.4, scale * f));
+    tx = mx - (mx - tx) * (ns / scale);
+    ty = my - (my - ty) * (ns / scale);
+    scale = ns;
+    apply();
+  }, { passive: false });
+  let panning = false, px = 0, py = 0;
+  root.addEventListener('pointerdown', function (e) {
+    if (e.target.closest('.mgp-node') || e.target.closest('#mgp-cbar')) return;
+    panning = true; px = e.clientX; py = e.clientY;
+  });
+  window.addEventListener('pointermove', function (e) {
+    if (!panning) return;
+    tx += e.clientX - px; ty += e.clientY - py; px = e.clientX; py = e.clientY; apply();
+  });
+  window.addEventListener('pointerup', function () { panning = false; });
+}
+function canvasRestoreView(root) {
+  let saved = {}; try { saved = JSON.parse(localStorage.getItem('mgp.canvas.zoom') || 'null'); } catch (e) {}
+  const dv = canvasDefaultView();
+  const scale = (saved && saved.scale) || dv.scale, tx = (saved && saved.tx) || dv.tx, ty = (saved && saved.ty) || dv.ty;
+  root.querySelector('#mgp-world').style.transform = 'translate(' + tx + 'px,' + ty + 'px) scale(' + scale + ')';
+}
+$('cvsb').onclick = function () {
+  const existing = document.getElementById('mgp-canvas');
+  if (existing && existing.classList.contains('open')) canvasClose();
+  else canvasOpen();
+};
+// 🔁 Un expert ajouté à chaud (Atelier, équipe, custom) rejoint le canvas s'il est ouvert
+const _addTeamCanvas = addTeam;
+try { loadTeams(); } catch (e) {} // recharge ALL avec équipes avant première ouverture canvas
+(function canvasAutoRefresh() {
+  setInterval(function () {
+    const c = document.getElementById('mgp-canvas');
+    if (c && c.classList.contains('open') && ALL.length !== canvasItems.length) {
+      canvasItems = ALL.slice();
+      canvasNodes(c, canvasItems);
+      c.querySelector('#mgp-ccnt').textContent = canvasItems.length + ' experts';
+    }
+  }, 4000);
+})();
+try { if (localStorage.getItem('mgp.canvas.open') === '1') setTimeout(canvasOpen, 300); } catch (e) {}
 window.__mgp = {
   list: () => results,
   filters: () => filter,

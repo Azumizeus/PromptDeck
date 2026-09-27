@@ -35,12 +35,16 @@ done
 log() { echo "▸ $*" >&2; }  # stderr : certaines sorties sont capturées par $( )
 die() { echo "✗ $*" >&2; exit 1; }
 
-# LISEZMOI embarqué dans chaque DMG (résumé des nouveautés + installation)
-write_lisezmoi() { # $1 = dossier cible · $2 = "universal" pour la variante bilingue
+# LISEZMOI embarqué dans chaque DMG — bilingue FR/EN (résumé des nouveautés + installation)
+write_lisezmoi() { # $1 = dossier cible · $2 = "universal" pour la ligne variante universelle
   {
-    printf 'MEGA PACK v%s — Skills & Agents\n' "$APP_VERSION"
-    if [[ "${2:-}" == "universal" ]]; then printf '\nVersion universelle : Intel + Apple Silicon.\n'; fi
+    printf 'MEGA PACK v%s — Skills & Agents / Skills & Agents (408 experts)\n' "$APP_VERSION"
+    if [[ "${2:-}" == "universal" ]]; then
+      printf '\nVersion universelle : Intel + Apple Silicon.\nUniversal build: Intel + Apple Silicon.\n'
+    fi
     cat <<'EOF'
+
+═══════════════ FRANÇAIS ═══════════════
 
 Installation : glissez « MEGA PACK.app » sur « Applications ».
 Premier lancement : clic droit → Ouvrir (app non notarisée par l'App Store).
@@ -55,12 +59,42 @@ NOUVEAUTÉS v1.1.0
 · 12 destinations « Ouvrir dans » : Claude, ChatGPT, Perplexity, Copilot, DeepSeek, Z.ai, Kimi, Mammouth.ia, Freebuff, OpenCode (desktop + terminal), presse-papiers
 · Lancement auto au démarrage · raccourci ⌥Espace (⌘Espace est réservé par Spotlight)
 · Fenêtre déplaçable/redimensionnable (position mémorisée) · export/import de configuration JSON
-· 🛠 Correctifs 2.19.x (app Luxe) : resize des poignées réparé au pixel (IPC panelGeometry),
-  bouton 📌 épingler de nouveau persistant, 3 feux macOS dans l en-tête, sélecteur LLM scrollable
+
+🛠 Correctifs 2.19.x (app Luxe)
+· Resize des poignées réparé au pixel (IPC panelGeometry, 4 coins, presets S/M/L/XL mémorisés)
+· Bouton 📌 épingler de nouveau persistant (⌥Espace ne referme plus le panneau épinglé)
+· 3 feux macOS dessinés dans l'en-tête : 🔴/🟡 masquent le panneau, 🟢 cycle de taille S/M/L/XL
+· Sélecteur LLM scrollable (23 fournisseurs tenaient plus dans la fenêtre)
 
 USAGE
 · ⚡ dans la barre de menus : clic gauche = panneau de recherche · clic droit = tout le catalogue
 · ⌥Espace : recherche globale · ⌘⇧Espace : Réglages
+
+═══════════════ ENGLISH ═══════════════
+
+Install: drag "MEGA PACK.app" onto "Applications".
+First launch: right-click → Open (app is not App Store notarized).
+
+WHAT'S NEW v1.1.0
+· 🧭 Built-in contextual help: 15 filterable recipes, configurable global ⌘⌥/ shortcut
+· Extended catalogue: 177 skills + 231 agents = 408 experts (merged from the old skill/
+  layout + 38 skills from the "My Claude resource vault" — learning, workflow, memory,
+  MCP tools, prompts…), full FR translations, bilingual FR/EN search
+· ✍️ Custom prompts: ＋ button, tags, ⭐ favorites, .md/.txt import (drag & drop), .md export (Settings)
+· ⭐ Favorites + ⌘1-⌘9 shortcuts · 🕘 Recents · Default LLM (⌘⏎)
+· 12 "Open in" destinations: Claude, ChatGPT, Perplexity, Copilot, DeepSeek, Z.ai, Kimi, Mammouth.ia, Freebuff, OpenCode (desktop + terminal), clipboard
+· Launch at startup · ⌥Space shortcut (⌘Space is reserved by Spotlight)
+· Movable/resizable window (position remembered) · JSON settings export/import
+
+🛠 2.19.x fixes (Luxe app)
+· Corner handles resize fixed to the pixel (panelGeometry IPC, 4 corners, remembered S/M/L/XL presets)
+· 📌 Pin button persistent again (⌥Space no longer closes a pinned panel)
+· 3 drawn macOS lights in the header: 🔴/🟡 hide the panel, 🟢 cycles size S/M/L/XL
+· Scrollable LLM picker (23 providers now fit in the window)
+
+USAGE
+· ⚡ in the menu bar: left click = search panel · right click = full catalogue
+· ⌥Space: global search · ⌘⇧Space: Settings
 EOF
   } > "$1/LISEZMOI.txt"
 }

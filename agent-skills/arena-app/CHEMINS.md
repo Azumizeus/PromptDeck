@@ -59,7 +59,7 @@ s'en sert automatiquement via `npx electron .`)
 ```bash
 # 1. Quitter le jeu (⌘Q) et MEGA PACK (menu ⚡ → Quitter)
 # 2. Déplacer le dossier :
-mv "/Users/mickaeldunoyer/Desktop/Skill Install/agent-skills/arena-app" "/Applications/MEGA PACK ARENA"
+mv "/Users/mickaeldunoyer/projects/skill-install/agent-skills/arena-app" "/Applications/MEGA PACK ARENA"
 # 3. Éditer LANCER-ARENA.command → ELECTRON="/chemin/absolu/.../Electron.app"
 # 4. Relancer : double-clic sur LANCER-ARENA.command
 # Vérification : le journal affiche « Connecté au bus » et le roster des agents.

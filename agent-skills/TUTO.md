@@ -8,7 +8,7 @@
 | Hôte | Emplacement | Format | Nombre | Invocation |
 |---|---|---|---|---|
 | **OpenCode** | `~/.config/opencode/agents/` | subagent markdown (`mode: subagent`) | 190 | `@nom-de-l-agent` en session |
-| **OpenHands + Freebuff** | `~/.agents/skills/agent-<nom>/SKILL.md` | Agent Skills (standard commun) | 190 | déclencheurs mots-clés + description |
+| **Freebuff (user-scope)** | `~/.agents/skills/agent-<nom>/SKILL.md` | Agent Skills (standard commun) | 190 | déclencheurs mots-clés + description |
 | **Claude Code** | `~/.claude/agents/` | subagent natif (`name`, `description`) | 190 | Task tool, `subagent_type: nom` |
 
 Les 190 fichiers source vivent dans [`agents/`](agents/) de ce dépôt (15 catégories : Core 4, Academic 5, Design 8, Engineering 29, Finance 5, Game Development 21, Marketing 30, Paid Media 7, Product 5, Project Management 6, Sales 8, Spatial Computing 6, Specialized 42, Support 6, Testing 8).
@@ -106,9 +106,9 @@ Le test d'intégrité complet (frontmatter `name`+`mode`+`description`, unicité
 
 ---
 
-## 2. OpenHands + Freebuff — `~/.agents/skills/agent-<nom>/SKILL.md` (190 skills)
+## 2. Freebuff (user-scope) — `~/.agents/skills/agent-<nom>/SKILL.md` (190 skills)
 
-OpenHands et Freebuff lisent tous deux le répertoire user-scope `~/.agents/skills/` au format **Agent Skills** (le même standard que les skills de ce dépôt). Chaque agent devient un dossier `agent-<nom>/` contenant un `SKILL.md`.
+Freebuff lit le répertoire user-scope `~/.agents/skills/` au format **Agent Skills** (le même standard que les skills de ce dépôt). Chaque agent devient un dossier `agent-<nom>/` contenant un `SKILL.md`.
 
 ### Format cible
 
@@ -124,7 +124,7 @@ triggers:
 (corps du fichier source inchangé)
 ```
 
-Règles : `name` = `agent-` + nom du dossier (règle OpenHands : `name` = dossier) ; `triggers` = mots distinctifs du nom, pour l'activation rapide sans attendre le routage par description.
+Règles : `name` = `agent-` + nom du dossier (`name` = dossier) ; `triggers` = mots distinctifs du nom, pour l'activation rapide sans attendre le routage par description.
 
 ### Conversion en une commande
 
@@ -166,11 +166,11 @@ ls ~/.agents/skills/ | grep -c "^agent-"     # → 190
 # intégrité : chaque dossier a un SKILL.md dont name = nom du dossier
 ```
 
-Le script d'intégrité complet est dans [MY-SETUP.md](MY-SETUP.md#vérifier-linstallation-openhands--freebuff) — sur l'installation actuelle : `dirs: 205 | missing SKILL.md: 0 | unparsable: 0 | name!=dir: none` (205 = 190 agents + 15 skills lifecycle du dépôt).
+Le script d'intégrité complet est dans [MY-SETUP.md](MY-SETUP.md#vérifier-linstallation-freebuff-user-scope-agentskills) — sur l'installation actuelle : `dirs: 205 | missing SKILL.md: 0 | unparsable: 0 | name!=dir: none` (205 = 190 agents + 15 skills lifecycle du dépôt).
 
 ### Utilisation
 
-Rien à invoquer manuellement : OpenHands charge les skills quand ta demande correspond aux `triggers` ou à la `description`. « Audite la sécurité de ce contrat » activera `agent-security-auditor` ; « conçois la tokenomics de mon jeu » activera `agent-tokenomics-designer`.
+Rien à invoquer manuellement : Freebuff charge les skills quand ta demande correspond aux `triggers` ou à la `description`. « Audite la sécurité de ce contrat » activera `agent-security-auditor` ; « conçois la tokenomics de mon jeu » activera `agent-tokenomics-designer`.
 
 ---
 
@@ -192,7 +192,7 @@ Les sous-dossiers de catégorie (`academic/`, `engineering/`, …) sont préserv
 
 ## Le piège du conflit de nom
 
-OpenCode et OpenHands résolvent les collisions de `name` **par précédence, sans fusion ni avertissement** : un agent écrase silencieusement l'autre.
+OpenCode résout les collisions de `name` **par précédence, sans fusion ni avertissement** : un agent écrase silencieusement l'autre.
 
 Cas réel rencontré : `agents/engineering/engineering-code-reviewer.md` déclarait `name: Code Reviewer` — en slugifiant, il devenait `code-reviewer` et **écrasait le core `code-reviewer.md`**. Symptôme : le core disparaissait de `opencode agent list`.
 
@@ -229,7 +229,7 @@ node scripts/generate-agents-catalogue.js --extract # exporte les rôles EN à t
 |---|---|---|
 | Un agent n'apparaît pas dans `opencode agent list` | Troncature TUI (normale) | Compter sur disque + test d'intégrité structurelle |
 | Un agent core a disparu | Doublon de `name` | `grep -h "^name:" …/agents/*.md \| sort \| uniq -d` |
-| L'agent OpenHands ne s'active pas | `triggers` absents ou description vague | Ajouter des `triggers` distinctifs ; soigner la 1ʳᵉ phrase |
+| L'agent ne s'active pas dans Freebuff | `triggers` absents ou description vague | Ajouter des `triggers` distinctifs ; soigner la 1ʳᵉ phrase |
 | Freebuff ne voit pas une skill | Dossier sans `SKILL.md`, ou `name` ≠ nom du dossier | Renommer le dossier d'après le `name` |
 | Champs Claude rejetés par OpenCode | `color`/`emoji`/`vibe`/`tools`/`model` invalides | Retirer ces champs du frontmatter |
 
@@ -268,4 +268,4 @@ python3 skills/llm-provider-cascade/scripts/llm-cascade.py "Réponds juste : OK"
 
 ---
 
-*Testé le 23 septembre 2026 — OpenCode 1.17.18, OpenHands/Freebuff user-scope `~/.agents/skills/`, Claude Code plugins scope user. Voir [MY-SETUP.md](MY-SETUP.md) pour l'état exact de ta machine.*
+*Testé le 23 septembre 2026 — OpenCode 1.17.18, Freebuff user-scope `~/.agents/skills/`, Claude Code plugins scope user. Voir [MY-SETUP.md](MY-SETUP.md) pour l'état exact de ta machine.*

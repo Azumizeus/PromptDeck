@@ -18,7 +18,7 @@ if [ -d "$ELECTRON" ]; then
   exec open -a "$(cd "$(dirname "$ELECTRON")" && pwd)/$(basename "$ELECTRON")" --args "$(pwd)" --opened-from-launcher
 fi
 # 3) Dernier recours : chemin absolu à adapter (voir CHEMINS.md)
-ELECTRON="/Users/mickaeldunoyer/Desktop/Skill Install/agent-skills/menubar-app-luxe/node_modules/electron/dist/Electron.app"
+ELECTRON="/Users/mickaeldunoyer/projects/skill-install/agent-skills/menubar-app-luxe/node_modules/electron/dist/Electron.app"
 if [ -d "$ELECTRON" ]; then
   exec open -a "$ELECTRON" --args "$(pwd)" --opened-from-launcher
 fi

@@ -52,8 +52,8 @@ test('audit : agents convertis (même description) ne sont pas en drift', () => 
   const { j } = runInSandbox({
     'agent-one/SKILL.md': '---\nname: agent-one\ntriggers:\n  - one\ndescription: agent un original\n---\n\n# One (converti)\n', // conversion attendue → OK
     'agent-two/SKILL.md': '---\nname: agent-two\ndescription: agent deux MODIFIÉ\n---\n\n# Two\n',                              // description ≠ repo → drift
-  }, '.openhands/skills'); // emplacement « mixed » : les dirs agent-* sont classés agents
-  const loc = j.locations.find((l) => l.id === 'openhands');
+  }, '.agents/skills'); // emplacement « mixed » : les dirs agent-* sont classés agents
+  const loc = j.locations.find((l) => l.id === 'agents');
   assert.equal(loc.agents.present, 2);
   assert.deepEqual(loc.agents.drift, ['two']);
   assert.deepEqual(loc.agents.missing, []);        // one + two vus
@@ -63,8 +63,8 @@ test('audit : agents convertis (même description) ne sont pas en drift', () => 
 test('audit : préfixe agent- sans correspondance repo → hors repo', () => {
   const { j } = runInSandbox({
     'agent-inconnu/SKILL.md': '---\nname: agent-inconnu\ndescription: mystère\n---\n',
-  }, '.openhands/skills');
-  const loc = j.locations.find((l) => l.id === 'openhands');
+  }, '.agents/skills');
+  const loc = j.locations.find((l) => l.id === 'agents');
   assert.deepEqual(loc.extras, ['agent-inconnu']);
   assert.equal(loc.agents.present, 0);
 });

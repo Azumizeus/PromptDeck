@@ -6,7 +6,7 @@
 > Graphify…). Chaque action dans l'écosystème = événement dans le jeu.
 >
 > Usage : copie le bloc ci-dessous dans n'importe quel agent de code (Claude Code,
-> OpenCode, OpenHands, Freebuff…) — ou dans l'Atelier MEGA PACK (🛠 → personnalise).
+> OpenCode, Freebuff…) — ou dans l'Atelier MEGA PACK (🛠 → personnalise).
 > Pour les assets, les sous-prompts du §4 sont à donner à un générateur d'images.
 
 ---
@@ -36,7 +36,7 @@ de l'action visible dans le jeu, en temps réel.
   2. Obsidian : `chokidar` sur le vault (chemin configurable) → note créée/modifiée
      = ramassage d'un « fragment de savoir » sur la carte.
   3. Graphify : surveillance du dossier d'export → chaque graphe généré = un « boost ».
-  4. OpenHands / OpenCode / Freebuff : hooks log ou schémas URL (best effort, off par défaut).
+  4. OpenCode / Freebuff : hooks log ou schémas URL (best effort, off par défaut).
 - Aucune donnée ne quitte la machine. Tout est local.
 
 ## 2. MAPPING ACTIVITÉ → JEU (le cœur du système)

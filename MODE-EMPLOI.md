@@ -1,7 +1,7 @@
 # 🛠️ MODE D'EMPLOI — quoi utiliser, pour faire quoi, et comment
 
 > Guide pratique du set d'agents. Pour **les règles de décision**, voir [`PROTOCOL-UTILISATION.md`](./PROTOCOL-UTILISATION.md). Pour **la liste des 231 agents**, voir [`AGENTS-CATALOGUE.md`](./AGENTS-CATALOGUE.md).
-> Toutes les commandes ci-dessous sont réelles et testées sur cette machine. Mis à jour : 25 septembre 2026.
+> Toutes les commandes ci-dessous sont réelles et testées sur cette machine. Mis à jour : 27 septembre 2026.
 
 ---
 
@@ -15,6 +15,14 @@
 | Mémoriser / retrouver | **cognee** | outils MCP après `bash scripts/cognee-mcp-toggle.sh on` |
 | Lancer les agents du pack | **PromptDeck** | ⌥Espace depuis la barre de menus |
 | Ouvrir le mode d’emploi du pack | **PromptDeck** | ⌘⌥/ par défaut, configurable dans Réglages |
+
+### Panneau PromptDeck — mémo fenêtre (correctifs 2.19.x)
+
+- **Déplacer** : glisser la barre titre · **Redimensionner** : poignées invisibles aux **4 coins** (🟢 ou ⌥-clic = presets **S/M/L/XL** mémorisés, resize réparé au pixel via IPC `panelGeometry`).
+- **Feux macOS dessinés** dans l’en-tête : 🔴/🟡 masquent le panneau (⌥Espace ou ⚡ pour rouvrir), 🟢 cycle de taille S/M/L/XL.
+- **📌 Épingler** : persiste — ⌥Espace ne referme plus un panneau épinglé.
+- **Sélecteur LLM** (barre du bas) : scrollable, les 23 fournisseurs tiennent dans la fenêtre.
+- Le même comportement existe dans le **userscript Chrome** et le **panel inline** (`interface/`, v2.10.3) : mêmes feux, mêmes presets.
 
 ---
 

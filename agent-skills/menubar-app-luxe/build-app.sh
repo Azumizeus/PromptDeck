@@ -1,22 +1,46 @@
 #!/usr/bin/env bash
 # Construit dist/MEGA PACK.app à partir de l'app Luxe + Electron déjà téléchargé.
-# Usage : bash build-app.sh
+# Usage : bash build-app.sh [--runtime local|arm64] [--out dist/<nom>.app]
+#   --runtime local : runtime Electron de node_modules (arch de cette machine ; x64 ici)
+#   --runtime arm64 : runtime officiel arm64 mis en cache (~/.cache/megapack, voir menubar-app/build-app.sh)
+#   --out           : dossier/nom de sortie (défaut dist/MEGA PACK.app)
 set -euo pipefail
 cd "$(dirname "$0")"
 
 APP_NAME="MEGA PACK"
+RUNTIME="local"
 OUT="dist/$APP_NAME.app"
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --runtime) RUNTIME="${2:?local|arm64}"; shift 2 ;;
+    --out) OUT="${2:?dist/<nom>.app}"; shift 2 ;;
+    *) echo "Usage : bash build-app.sh [--runtime local|arm64] [--out dist/<nom>.app]" >&2; exit 1 ;;
+  esac
+done
+case "$RUNTIME" in
+  local) ELECTRON_APP="node_modules/electron/dist/Electron.app" ;;
+  arm64)
+    EV=$(node -p "require('./node_modules/electron/package.json').version")
+    ELECTRON_APP="$HOME/.cache/megapack/electron-v${EV}-darwin-arm64/Electron.app"
+    if [[ ! -d "$ELECTRON_APP" ]]; then
+      # repli : n'importe quel runtime arm64 déjà en cache (l'app Luxe tourne en 31 comme en 33)
+      CACHED=$(ls -d "$HOME"/.cache/megapack/electron-*-darwin-arm64 2>/dev/null | tail -1 || true)
+      [[ -n "${CACHED:-}" ]] && ELECTRON_APP="$CACHED/Electron.app"
+    fi
+    ;;
+  *) echo "runtime inconnu : $RUNTIME (local|arm64)" >&2; exit 1 ;;
+esac
+[[ -d "$ELECTRON_APP" ]] || { echo "runtime absent : $ELECTRON_APP" >&2; exit 1; }
 CONTENTS="$OUT/Contents"
 
 # 1. Squelette
 rm -rf "$OUT"
 mkdir -p "$CONTENTS/MacOS" "$CONTENTS/Resources" "$CONTENTS/Frameworks"
 
-# 2. Copie du shell Electron (node_modules/electron/dist/Electron.app)
-ELECTRON_APP="node_modules/electron/dist/Electron.app"
+# 2. Copie du shell Electron ($ELECTRON_APP)
 ELECTRON_CONT="$ELECTRON_APP/Contents"
 if [ ! -d "$ELECTRON_CONT" ]; then
-  echo "Electron absent — lance d'abord : node node_modules/electron/install.js" >&2
+  echo "Electron absent ($ELECTRON_CONT) — lance d'abord : node node_modules/electron/install.js" >&2
   exit 1
 fi
 echo "• Copie du shell Electron…"
@@ -43,6 +67,18 @@ done
 # car launcher.html référence « ../interface/catalog-full.js ».
 mkdir -p "$CONTENTS/Resources/interface"
 cp "../interface/catalog-full.js" "$CONTENTS/Resources/interface/catalog-full.js"
+# Guide ⌘⌥/ embarqué (source unique : MODE-EMPLOI.md à la racine du pack) — vérifié par test-all.sh
+if [ -f "../../MODE-EMPLOI.md" ]; then
+  cp "../../MODE-EMPLOI.md" "$CONTENTS/Resources/MODE-EMPLOI.md"
+else
+  echo "⚠️  MODE-EMPLOI.md introuvable — aide contextuelle indisponible" >&2
+fi
+# Skill jev-decision-router embarqué (bouton 🧭 du panneau — routage typé local)
+if [ -f "../skills/jev-decision-router/scripts/jev-router.mjs" ]; then
+  cp "../skills/jev-decision-router/scripts/jev-router.mjs" "$APP_DIR/"
+else
+  echo "⚠️  jev-router.mjs introuvable — bouton 🧭 inopérant" >&2
+fi
 
 # Garde-fou : chaque .js/.css local référencé par les .html embarqués DOIT exister
 # dans le bundle (sinon CSP 'self' → 404 silencieux → page sans style/inerte).

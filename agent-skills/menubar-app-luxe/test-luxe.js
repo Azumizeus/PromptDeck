@@ -876,27 +876,25 @@ const T_fr = MGP.i18n(), T_en = MGP.i18n('en');
 });
 
 console.log('');
-console.log('26) ⌨ Sélecteurs LLM : toutes les destinations de l\'écosystème (Manus, Noah, Claude Desktop/Code, OpenHands, Chrome/Brave…) :');
+console.log('26) ⌨ Sélecteurs LLM : toutes les destinations de l\'écosystème (Manus, Noah, Claude Desktop/Code, Chrome/Brave…) :');
 // a) le sélecteur ⌨ du panneau liste les nouvelles destinations
 const menuHtml = MGP.llmMenu();
-['Manus (agent)', 'Noah', 'Claude (app macOS)', 'Claude Code (web)', 'OpenHands (local)', 'Chrome (onglet)', 'Brave (onglet)', 'Freebuff (app)', 'OpenCode (desktop)'].forEach((l) => {
+['Manus (agent)', 'Noah', 'Claude (app macOS)', 'Claude Code (web)', 'Chrome (onglet)', 'Brave (onglet)', 'Freebuff (app)', 'OpenCode (desktop)'].forEach((l) => {
   check(menuHtml.includes(l), `sélecteur ⌨ : « ${l} » présent`);
 });
 // b) une nouvelle destination est sélectionnable comme LLM par défaut
 MGP.pickLLM('manus');
 check(MGP.defaultLLM() === 'manus', 'Manus sélectionnable comme LLM par défaut');
-MGP.pickLLM('openhands');
-check(MGP.defaultLLM() === 'openhands', 'OpenHands local sélectionnable comme LLM par défaut');
 MGP.pickLLM('claude'); // nettoyage
 // c) contrat main process : le menu ⚡ embarque les cibles + URLs (lecture statique du source)
 const mainSrc = fs.readFileSync(path.join(__dirname, 'main.js'), 'utf8');
 check(mainSrc.includes("['manus', 'Manus (agent)'") && mainSrc.includes('manus.im/app'), 'menu ⚡ : Manus câblé (manus.im/app?queue=)');
 check(mainSrc.includes("['noah', 'Noah'") && mainSrc.includes('trynoah.ai'), 'menu ⚡ : Noah câblé (trynoah.ai)');
 check(mainSrc.includes("['claude-code', 'Claude Code (web)'") && mainSrc.includes('claude.ai/code'), 'menu ⚡ : Claude Code web câblé');
-check(mainSrc.includes("['openhands', 'OpenHands (local)'") && mainSrc.includes('localhost:8000'), 'menu ⚡ : OpenHands local câblé (Docker :8000)');
 check(mainSrc.includes("['claude-app'") && mainSrc.includes('/Applications/Claude.app'), 'menu ⚡ : Claude Desktop (app macOS) câblé');
 check(mainSrc.includes("['chrome'") && mainSrc.includes("['brave'"), 'menu ⚡ : onglets Chrome/Brave câblés');
-check(mainSrc.includes("['manus', 'Manus (agent)'") && mainSrc.includes("['noah'") && mainSrc.includes("['openhands'"), 'sous-menus « Ouvrir dans » : nouvelles cibles partout');
+check(mainSrc.includes("['manus', 'Manus (agent)'") && mainSrc.includes("['noah'"), 'sous-menus « Ouvrir dans » : nouvelles cibles partout');
+check(!mainSrc.includes("'openhands'"), 'menu ⚡ : destination OpenHands retirée (app supprimée)');
 
 console.log('');
 console.log('27) 🧰 Prompts Kit : méta-prompt + baseline + évaluateur /25 dans le deck ✍️ :');

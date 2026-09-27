@@ -658,7 +658,7 @@ function main(args = process.argv.slice(2)) {
 if (require.main === module) main();
 
 // The TF-IDF engine (tokenize/stem/buildCorpus/rankSkills) is exported so other
-// tools — e.g. scripts/openhands-loader-sim.js — reuse the exact routing
+// tools can reuse the exact routing
 // math the eval tier runs, instead of forking a divergent copy.
 module.exports = {
   materializeWorkspace,
