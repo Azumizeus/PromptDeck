@@ -18,3 +18,13 @@ dist/
 agent-skills/menubar-app-bridge/assets/
 agent-skills/menubar-app-galaxy/assets/
 node_modules/
+
+# Brouillons et ressources locales (personnels, hors projet — ne jamais pousser)
+/agent-skills/My Claude resource vault /
+/agent-skills/grok svg/
+/agent-skills/menubar-app-luxe/audit-2.16.1/
+/bin/
+/graphify-*.html
+/interface set seeker - nexus/
+/skill/
+/.opencode/
