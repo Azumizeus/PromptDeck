@@ -3991,8 +3991,10 @@ window.MG_OPENHANDS = MG_OPENHANDS; // une const globale n'existe pas sur window
     });
     h.addEventListener('pointermove', function (e) {
       if (!rs) return;
-      const w = Math.max(320, Math.min(sw + (sx - e.clientX), window.innerWidth - 24));
-      const ht = Math.max(220, Math.min(sh + (sy - e.clientY), window.innerHeight - 24));
+      // 🐛 Fix resize inversé : la poignée est en haut-gauche — tirer vers la
+      // droite/bas doit RÉTRÉCIR, pas agrandir (ancien « + »).
+      const w = Math.max(320, Math.min(sw - (e.clientX - sx), window.innerWidth - 24));
+      const ht = Math.max(220, Math.min(sh - (e.clientY - sy), window.innerHeight - 24));
       panel.style.width = w + 'px'; panel.style.height = ht + 'px';
     });
     h.addEventListener('pointerup', function () { if (rs) { rs = false; store.set('customSize', { w: panel.offsetWidth, h: panel.offsetHeight }); } });
