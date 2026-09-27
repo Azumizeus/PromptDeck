@@ -3575,6 +3575,8 @@ window.MG_OPENHANDS = MG_OPENHANDS; // une const globale n'existe pas sur window
   #mgp-llmbtn:hover,#mgp-llmmenu.open ~ #mgp-llmbtn{border-color:#14f195;color:#eef0f6}
   #mgp-llmbtn b{color:#14f195}
   #mgp-llmmenu{position:absolute;bottom:calc(100% + 8px);left:0;z-index:1000002;min-width:170px;background:#14151c;
+  /* 🐛 fix : menu LLM borné au viewport + scroll (23 fournisseurs dépassaient la fenêtre) */
+  max-height:calc(100vh - 110px);overflow-y:auto;overscroll-behavior:contain;
     border:1px solid #31343f;border-radius:12px;padding:5px;box-shadow:0 18px 50px rgba(0,0,0,.55);display:none}
   #mgp-llmmenu.open{display:block}
   #mgp-llmmenu button{display:flex;width:100%;border:none;background:none;color:#a8adbd;cursor:pointer;text-align:left;

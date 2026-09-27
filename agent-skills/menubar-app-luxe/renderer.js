@@ -505,6 +505,11 @@ if (!MAC_HOST) document.body.innerHTML = ''; // ne vide le body QUE hors launche
 APP_PARENT.insertAdjacentHTML('afterbegin', `
 <main id="app" role="application" aria-label="MEGA PACK">
   <header id="top">
+    <span class="lights" aria-hidden="false">
+      <button class="light lc" title="${LANG === 'fr' ? 'Masquer le panneau (⚡ / ⌥Espace pour rouvrir)' : 'Hide panel (⚡ / ⌥Space to reopen)'}" aria-label="${LANG === 'fr' ? 'Fermer' : 'Close'}"></button>
+      <button class="light lm" title="${LANG === 'fr' ? 'Masquer le panneau' : 'Hide panel'}" aria-label="${LANG === 'fr' ? 'Réduire' : 'Minimize'}"></button>
+      <button class="light lx2" title="${LANG === 'fr' ? 'Taille suivante (S/M/L/XL)' : 'Next size (S/M/L/XL)'}" aria-label="${LANG === 'fr' ? 'Agrandir' : 'Zoom'}"></button>
+    </span>
     <span id="brand">⚡ <b>MEGA&nbsp;PACK</b></span>
     <span id="counts">${S.length} skills · ${A.length} agents</span>
     <button id="incb" title="${LANG === 'fr' ? 'Incidents récents — ouvrir le 🛡 Journal des Réglages' : 'Recent incidents — open Settings 🛡 Journal'}" aria-label="incidents" hidden style="border:none;background:transparent;font-size:14px;cursor:pointer;padding:0 4px">⚠️</button>
@@ -1663,6 +1668,13 @@ $('qclear').onclick = () => {
 };
 // ⚙ Réglages depuis le panneau (même chemin que ⌘,)
 $('setb').onclick = () => window.mgp.openSettings();
+// 🚦 Feux du header (2.19.1) : rouge/jaune = masquer (toggle tray), vert = preset suivant
+(() => {
+  const doHide = () => { try { hideLlmMenu(); } catch (e) {} window.mgp.hide && window.mgp.hide(); };
+  document.querySelector('#top .lc') && (document.querySelector('#top .lc').onclick = doHide);
+  document.querySelector('#top .lm') && (document.querySelector('#top .lm').onclick = doHide);
+  document.querySelector('#top .lx2') && (document.querySelector('#top .lx2').onclick = () => rzCyclePreset());
+})();
 // 🛡 Badge incidents : ⚠️ n visible dans le header si des incidents critiques ont < 30 min —
 // clic → ouvre les Réglages (section Journal visible immédiatement). Rafraîchi périodiquement.
 const incb = $('incb');

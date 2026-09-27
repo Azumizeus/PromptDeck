@@ -58,6 +58,9 @@ contextBridge.exposeInMainWorld('mgp', {
   // 🐛 fix 2.19.0 : resize/move pilotés par le main (window.resizeTo = no-op en fenêtre principale)
   setPanelGeometry: (req) => ipcRenderer.send('panelGeometry', req),
   getPanelGeometry: () => ipcRenderer.sendSync('panelGeometry', { type: 'get' }),
+  // 🐛 fix 2.19.1 : setKeepVisible RÉTABLI (avalé par erreur lors de l'ajout des ponts geometry —
+  // sans lui, le bouton 📌 épingler ne persistait plus la préférence).
+  setKeepVisible: (on) => ipcRenderer.send('set-keep-visible', on),
   // 🎮 MEGA PACK ARENA : ouverture du jeu + choix du dossier
   arenaOpen: () => ipcRenderer.invoke('arena-open'),
   arenaDirChoose: () => ipcRenderer.invoke('arena-dir-choose'),

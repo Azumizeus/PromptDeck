@@ -1097,6 +1097,13 @@ check(rSrc37.includes('setPanelGeometry') && rSrc37.includes('getPanelGeometry')
 check(/anchorX.*'right'/.test(rSrc37) && /anchorY.*'bottom'/.test(rSrc37), 'renderer : ancrage du bord opposé au drag (coins w/n ancrent droite/bas)');
 check(mainSrc37.includes("ipcMain.on('panelGeometry'") && mainSrc37.includes('setContentSize'), 'main : handler panelGeometry applique setContentSize + repositionne');
 check(pSrc37.includes('setPanelGeometry') && pSrc37.includes('getPanelGeometry'), 'preload : pont setPanelGeometry/getPanelGeometry exposé');
+// 🐛 fix 2.19.1 : régression épingler — le pont setKeepVisible avait été avalé par l'ajout geometry
+check(pSrc37.includes('setKeepVisible') && mainSrc37.includes("ipcMain.on('set-keep-visible'"), 'preload : pont setKeepVisible présent (bouton 📌 fonctionnel)');
+// 🚦 fix 2.19.1 : feux macOS dessinés (fenêtres transparentes : les feux natifs sont invisibles)
+check(/id="top"\/>|class="lights"/.test(rSrc37) || rSrc37.includes('class="lights"'), 'renderer : 3 feux macOS dans le header (rouge/jaune masquent, vert = preset)');
+check(tSrc37.includes('#top button.light') && tSrc37.includes('#ff5f57'), 'theme : feux stylés (cercles 12px, couleurs macOS)');
+// 🐛 fix 2.19.1 : menu LLM borné au viewport (23 fournisseurs dépassaient la fenêtre)
+check(tSrc37.includes('max-height:calc(100vh - 110px)') && tSrc37.includes('overflow-y:auto'), 'theme : menu LLM scrollable (max-height viewport)');
 check(rSrc37.includes('hoverPopupEnabled') && /popFor/.test(rSrc37), 'renderer : popup flottant interactif au survol');
 check(rSrc37.includes('"pact fav"') && rSrc37.includes('"pact run"'), 'renderer+CSS : boutons favori/lancer dans le popup');
 check(/PREFS\.hoverPopup/.test(mainSrc37) && /hoverpopup/.test(sHtml37) && /hoverPopup: hoverPopupCb/.test(sJs37), 'option Réglages : hoverPopup persisté + checkbox');

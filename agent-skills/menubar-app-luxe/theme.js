@@ -23,6 +23,17 @@ body{font:13.5px/1.45 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-se
 
 /* ── header ── */
 #top{display:flex;gap:10px;align-items:center;padding:11px 14px 9px;user-select:none}
+/* 🐛 fix 2.19.1 : fenêtres transparentes sans titleBarStyle → les feux macOS natifs sont
+   invisibles (et setWindowButtonVisibility ne s'affiche pas en transparent). Feux dessinés,
+   câblés au comportement du panneau : rouge/jaune = masquer (⚡/⌥Espace pour rouvrir),
+   vert = taille suivante (presets S/M/L/XL). */
+#top .lights{display:flex;gap:7px;align-items:center;margin-right:2px}
+#top button.light{width:12px;height:12px;min-width:12px;max-width:12px;border-radius:50%;
+  border:1px solid rgba(0,0,0,.35);padding:0;cursor:pointer;transition:filter .15s;flex:none}
+#top button.light.lc{background:#ff5f57}
+#top button.light.lm{background:#febc2e}
+#top button.light.lx2{background:#28c840}
+#top button.light:hover{filter:brightness(1.18);transform:none}
 #brand{font-size:12.5px;letter-spacing:.4px;display:flex;gap:7px;align-items:center}
 #brand b{font-weight:700}
 #counts{font-size:11px;color:var(--mut);font-variant-numeric:tabular-nums;margin-left:2px}
@@ -192,7 +203,10 @@ body{font:13.5px/1.45 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-se
 #llmbtn b{color:var(--grn);font-weight:700}
 #llmmenu{position:absolute;bottom:calc(100% + 8px);right:0;z-index:80;min-width:190px;
   padding:6px;border-radius:12px;background:var(--card);border:1px solid var(--line2);
-  box-shadow:0 18px 50px rgba(0,0,0,.5)}
+  box-shadow:0 18px 50px rgba(0,0,0,.5);
+  /* 🐛 fix 2.19.1 : 23 fournisseurs = menu plus haut que la fenêtre (rogné au-dessus, entrées
+     inclicables). Hauteur bornée au viewport + défilement interne. */
+  max-height:calc(100vh - 110px);overflow-y:auto;overscroll-behavior:contain}
 #llmmenu[hidden]{display:none}
 #llmmenu button{display:flex;width:100%;border:none;background:none;color:var(--txt2);cursor:pointer;
   text-align:left;font:inherit;font-size:12px;padding:6px 9px;border-radius:8px;align-items:center;gap:4px}
