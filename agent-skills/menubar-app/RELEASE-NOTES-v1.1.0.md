@@ -6,6 +6,14 @@
 > ajout des 38 skills du « My Claude resource vault » → catalogue porté à **177 skills · 231 agents ·
 > 408 experts**. Les DMG ci-dessous embarquent le catalogue 326 items de la release ; les builds
 > suivants embarqueront 408 items.
+>
+> **ADDENDUM 2 (27/09, Luxe 2.19.x)** : resize des poignées **réellement réparé** (2.19.0) — cause
+> racine : `window.resizeTo/moveTo` sont des no-ops dans une fenêtre principale Electron + décalage
+> de 28 px par frame (barre de titre cachée) ; nouveau routage IPC `panelGeometry` avec ancrage du
+> bord opposé, validé au pixel sur les 4 coins. **2.19.1** : bouton 📌 épingler de nouveau persistant
+> (pont preload `setKeepVisible` rétabli), **3 feux macOS** (rouge/jaune masquer, vert = taille) dans
+> le header des fenêtres transparentes, **sélecteur LLM scrollable** (23 fournisseurs ne débordent
+> plus de la fenêtre). Vérifiés en live par clics CDP trusted ; `test-app.sh` 22/0, smoke PASS.
 
 ## 🆕 Aide contextuelle ⌘⌥/
 
