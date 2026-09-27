@@ -24,6 +24,10 @@ contextBridge.exposeInMainWorld('mgp', {
   catalog,
   copy: (t) => ipcRenderer.send('copy', t),
   hide: () => ipcRenderer.send('hide'),
+  show: () => ipcRenderer.send('show'),
+  // 🔎 miroir de visibilité (win.hide() ne change pas document.visibilityState) :
+  // le main notifie show/hide ; onWindowVisibility enregistre le callback, window.mgpHidden lit l'état.
+  onWindowVisibility: (cb) => { try { ipcRenderer.on('window-visibility', (_e, v) => cb(!!v)); } catch (e) { /* */ } },
   openLLM: (target, prompt) => ipcRenderer.send('open-llm', { target, prompt }),
   openSettings: () => ipcRenderer.send('open-settings'),
   restartTour: () => ipcRenderer.send('restart-tour'),

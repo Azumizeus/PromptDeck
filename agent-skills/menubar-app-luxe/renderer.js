@@ -497,6 +497,10 @@ let idx = 0;
 let lockOnly = false;          // 🔒 filtre « verrouillés seulement » (cumulable avec onglets + recherche)
 
 const $ = (id) => document.getElementById(id);
+// 🔎 Miroir de visibilité de la fenêtre (win.hide() ne change pas visibilityState) : le main
+// notifie show/hide via window-visibility ; le harnais CDP lit window.__mgpWinVisible.
+window.__mgpWinVisible = true;
+window.mgp && window.mgp.onWindowVisibility && window.mgp.onWindowVisibility((v) => { window.__mgpWinVisible = v; });
 
 // ---------- DOM ----------
 // Launcher : si la page fournit une fenêtre mac (.macwin), l'app s'intègre dedans

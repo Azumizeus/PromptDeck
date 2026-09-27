@@ -1041,6 +1041,8 @@ function createPanel() {
   };
   win.on('move', saveBounds);
   win.on('resize', saveBounds);
+  win.on('show', mirrorVisibility);
+  win.on('hide', mirrorVisibility);
   win.loadFile('index.html');
   // 🛡 Auto-récupération : si le process renderer meurt (OOM, GPU…), on journalise et on
   // reconstruit le panneau tout seul — plus d'app « vivante mais inerte » sans fenêtre.
@@ -1432,6 +1434,12 @@ ipcMain.on('copy', (e, text) => {
   } catch (err) { /* notification optionnelle */ }
 });
 ipcMain.on('hide', () => { if (win && !win.isDestroyed()) win.hide(); });
+ipcMain.on('show', () => { if (win && !win.isDestroyed() && !win.isVisible()) win.show(); });
+// 🔎 Miroir de visibilité : document.visibilityState ne reflète PAS win.hide() dans
+// Electron (occlusion native ≠ état page). On notifie le renderer à chaque show/hide —
+// utilisé par le panneau (états visuels) et par le harnais de tests CDP.
+const mirrorVisibility = () => { try { win && !win.isDestroyed() && win.webContents.send('window-visibility', win.isVisible()); } catch (e) { /* */ } };
+
 // 💬 Mini-chat IA intégré : même moteur que l'Atelier (llmChat), historique dans PREFS.chat.
 // Cascade de providers : demandé → apiProvider (Réglages) → tous ceux avec une clé.
 // Si le premier échoue (403, quota, réseau…), le suivant prend le relais — le chat marche

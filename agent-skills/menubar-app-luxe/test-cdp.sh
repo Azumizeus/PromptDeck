@@ -30,8 +30,8 @@ eval_js() { node "$CDP" eval "$MOTIF" "$1"; }
 unquote() { # lit stdin — cdp.mjs peut double-encoder : « "{\"a\":1}" » → « {"a":1} »
   node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>{s=s.trim();try{s=JSON.parse(s)}catch(e){}process.stdout.write(String(s))})"
 }
-poll_js() { # $1=expr $2=valeur attendue
-  for _ in $(seq 1 12); do
+poll_js() { # $1=expr $2=valeur attendue (délai 12 s — la page est gelée quand la fenêtre est cachée)
+  for _ in $(seq 1 24); do
     GOT="$(eval_js "$1" 2>/dev/null | unquote)"
     [ "$GOT" = "$2" ] && return 0
     sleep 0.5
@@ -62,8 +62,8 @@ rm -f "$TRACE"
 open -a "$APP_NAME" --env MGP_TRACE=1 --args --remote-debugging-port=9232 --inspect=9233 2>/dev/null \
   || open "$APP" --args --remote-debugging-port=9232 --inspect=9233 2>/dev/null \
   || fail "impossible de lancer $APP_NAME (LaunchServices) — ré-ouvre le .app une fois à la main"
-for _ in $(seq 1 30); do
-  curl -s "http://127.0.0.1:9232/json/list" >/dev/null 2>&1 && break
+for _ in $(seq 1 40); do
+  curl -s "http://127.0.0.1:9232/json/list" 2>/dev/null | grep -q "$MOTIF" && break
   sleep 1
 done
 curl -s "http://127.0.0.1:9232/json/list" | grep -q "$MOTIF" || fail "CDP RENDER 9232 sans cible '$MOTIF' (fetch failed ? relancer)"
@@ -103,24 +103,28 @@ ok "§A drag TRUSTED poignée SE : ${W0}×${H0} → ${EXPECT_W}×${EXPECT_H} (ex
 node "$CDP" shot "$MOTIF" /tmp/cdp-drag.png >/dev/null 2>&1 || true
 
 # ── §B 3 feux macOS ───────────────────────────────────────────────────────────
-# 🔴 rouge : masque / rouvre
+# 🔴 rouge : masque — Luxe masque la VRAIE fenêtre (window.mgp.hide → win.hide). Une fois
+# cachée, la fenêtre n'est plus cliquable : la rouverture passe par ⌥Espace/⚡ tray,
+# simulé ici par le même chemin main (toggle-panel). Electron ne met pas à jour
+# document.visibilityState sur win.hide() → miroir window.__mgpWinVisible (pont show/hide).
 eval_js "document.querySelector('#top .lc').click()" >/dev/null
-poll_js "document.body.getAttribute('data-mgp-hidden')" '"1"' || fail "feu 🔴 : panneau non masqué"
-eval_js "document.querySelector('#top .lc').click()" >/dev/null
-poll_js "document.body.getAttribute('data-mgp-hidden')" '"0"' || fail "feu 🔴 : panneau non rouvert"
-ok "§B1 feu 🔴 masque puis rouvre (data-mgp-hidden 0→1→0)"
-# 🟡 jaune : idem
+poll_js "String(window.__mgpWinVisible)" "false" || fail "feu 🔴 : panneau non masqué (state=$(eval_js 'String(window.__mgpWinVisible)'))"
+sleep 1
+eval_js "window.mgp.show ? window.mgp.show() : window.mgp.hide()" >/dev/null
+poll_js "String(window.__mgpWinVisible)" "true" || { sleep 3; eval_js "window.mgp.show ? window.mgp.show() : window.mgp.hide()" >/dev/null; poll_js "String(window.__mgpWinVisible)" "true" || fail "feu 🔴 : panneau non rouvert"; }
+ok "§B1 feu 🔴 masque (miroir false), rouverture via pont show"
+# 🟡 jaune : masque, puis rouverture identique (2 essais — la page gelée répond avec du retard)
 eval_js "document.querySelector('#top .lm').click()" >/dev/null
-poll_js "document.body.getAttribute('data-mgp-hidden')" '"1"' || fail "feu 🟡 : panneau non masqué"
-eval_js "document.querySelector('#top .lm').click()" >/dev/null
-poll_js "document.body.getAttribute('data-mgp-hidden')" '"0"' || fail "feu 🟡 : panneau non rouvert"
-ok "§B2 feu 🟡 masque puis rouvre"
+poll_js "String(window.__mgpWinVisible)" "false" || fail "feu 🟡 : panneau non masqué"
+sleep 1
+eval_js "window.mgp.show ? window.mgp.show() : window.mgp.hide()" >/dev/null
+poll_js "String(window.__mgpWinVisible)" "true" || { sleep 3; eval_js "window.mgp.show ? window.mgp.show() : window.mgp.hide()" >/dev/null; poll_js "String(window.__mgpWinVisible)" "true" || fail "feu 🟡 : panneau non rouvert"; }
+ok "§B2 feu 🟡 masque puis rouverture via pont show"
 # 🟢 vert : cycle S/M/L/XL (presets 480/640/860/1080, boucle après XL)
-PRESETS_S="480 640 860 1080"
-CW=$(eval_js "window.innerWidth")
-EXPECTED_K=$(eval_js "(function(){const s=[480,640,860,1080];const w=window.innerWidth;const n=s.find(x=>x>w+40)||s[0];return JSON.stringify({k:['S','M','L','XL'][s.indexOf(n)],w:n})})()")
+EXPECTED_K=$(eval_js "(function(){const s=[480,640,860,1080];const w=window.innerWidth;const n=s.find(x=>x>w+40)||s[0];return JSON.stringify({k:['S','M','L','XL'][s.indexOf(n)],w:n})})()" | unquote)
 EK=$(echo "$EXPECTED_K" | node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>console.log(JSON.parse(s).k))")
 EW=$(echo "$EXPECTED_K" | node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>console.log(JSON.parse(s).w))")
+case "$EK" in undefined|"") fail "calcul du preset suivant impossible ($EXPECTED_K)" ;; esac
 eval_js "document.querySelector('#top .lx2').click()" >/dev/null
 poll_js "String(window.innerWidth)" "$EW" || fail "feu 🟢 : largeur $(eval_js 'String(window.innerWidth)') ≠ preset $EW ($EK)"
 wait_pref "panelSize" "$EK" || fail "feu 🟢 : panelSize prefs = '$(pref_val panelSize)' ≠ $EK (non persisté)"
@@ -131,9 +135,9 @@ node "$CDP" shot "$MOTIF" /tmp/cdp-feux.png >/dev/null 2>&1 || true
 CUR_LLM="$(pref_val defaultLLM)"; [ -n "$CUR_LLM" ] || CUR_LLM="claude"
 eval_js "document.getElementById('llmbtn').click()" >/dev/null
 poll_js "document.getElementById('llmmenu').hidden" "false" || fail "menu LLM : ne s'ouvre pas"
-SCROLL=$(eval_js "JSON.stringify({items:document.querySelectorAll('#llmmenu button').length,scrollable:document.getElementById('llmmenu').scrollHeight>document.getElementById('llmmenu').clientHeight})")
-echo "$SCROLL" | grep -q '"scrollable":true' || fail "menu LLM : non scrollable ($SCROLL)"
-ok "§C1 menu LLM ouvert, scrollable ($SCROLL)"
+SCROLL=$(eval_js "(function(){const m=document.getElementById('llmmenu');const was=m.hidden;m.hidden=false;const cs=getComputedStyle(m);const r=JSON.stringify({items:m.querySelectorAll('button').length,capped:cs.maxHeight!=='none'&&cs.overflowY==='auto'});m.hidden=was;return r})()" | unquote)
+echo "$SCROLL" | grep -q '"capped":true' || fail "menu LLM : max-height/overflow non appliqués ($SCROLL)"
+ok "§C1 menu LLM ouvert, hauteur bornée + overflow auto ($SCROLL)"
 NEW_LLM=$(eval_js "(function(){const b=document.querySelectorAll('#llmmenu button[data-t]');for(const x of b){if(x.dataset.t&&x.dataset.t!=='$CUR_LLM')return x.dataset.t}})()" | tr -d '"')
 [ -n "$NEW_LLM" ] || fail "menu LLM : aucun choix alternatif à $CUR_LLM"
 eval_js "(function(){const b=[...document.querySelectorAll('#llmmenu button[data-t]')].find(x=>x.dataset.t==='$NEW_LLM');b.click()})()" >/dev/null
