@@ -249,3 +249,15 @@ test('CRLF line endings are handled', () => {
   const result = lintSkillContent('fenced', content, FENCE_KNOWN);
   assert.equal(overviewMissing(result), true);
 });
+
+test('YAML block scalar descriptions (>) are joined, not dropped', () => {
+  const fm = ['---', 'name: alpha', 'description: >', '  Designs alphas.', '  Use when building one.', '---'].join('\n');
+  const result = lintSkillContent('alpha', withAllSections(fm), KNOWN);
+  assert.equal(result.errors.some(e => e.includes("'when to use' trigger")), false);
+});
+
+test('"Use for …" counts as a trigger', () => {
+  const fm = ['---', 'name: alpha', 'description: Reviews code. Use for pull requests.', '---'].join('\n');
+  const result = lintSkillContent('alpha', withAllSections(fm), KNOWN);
+  assert.equal(result.errors.some(e => e.includes("'when to use' trigger")), false);
+});

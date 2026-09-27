@@ -33,10 +33,10 @@ const KEBAB_CASE = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 
 // A description must state WHEN to use the skill, not just what it does
 // (docs/skill-anatomy.md → Required). Accept the canonical "Use when …"
-// plus the equivalent "Use before/after/during …" phrasings in use today.
+// plus the equivalent "Use for/before/after/during …" phrasings in use today.
 // Reject negated forms ("Do not use when …", "Don't use when …") — those
 // describe exclusions, not trigger conditions.
-const DESCRIPTION_TRIGGER        = /\buse (this )?when\b|\buse (before|after|during)\b/i;
+const DESCRIPTION_TRIGGER        = /\buse (this )?when\b|\buse (for|before|after|during)\b/i;
 const DESCRIPTION_TRIGGER_NEGATE = /\b(do not|don't|never) use (this )?(when|before|after|during)\b/i;
 
 // Sections every standard SKILL.md must contain.
@@ -57,6 +57,14 @@ const REQUIRED_SECTIONS = [
 const SECTION_EXEMPT_SKILLS = {
   'using-agent-skills': 'Meta-skill — orchestrates other skills; When-to-Use and Verification are not applicable to a routing document.',
   'idea-refine':        'Legacy structure predating skill-anatomy.md — uses How-It-Works/Usage/Anti-patterns instead of standard headings. Tracked for conformance in https://github.com/addyosmani/agent-skills/issues',
+  'security-audit':         'Mature audit workflow predating skill-anatomy.md — six-phase structure with its own deliverables (report + evidence).',
+  'typesafe-ai':            'Imported vendor skill (TypeSafe) — follows its own format, not the skill-anatomy template.',
+  'cognee-memory':          'Imported skill (cognee) — usage-focused doc without skill-anatomy headings.',
+  'headroom-compression':   'Imported skill (headroom) — usage-focused doc without skill-anatomy headings.',
+  'llm-provider-cascade':   'Pack operational note (LLM cascade) — free-form doc like the other imported skills.',
+  'solana-anchor-claude-skill': 'Imported Solana/Anchor skill — upstream format, not the skill-anatomy template.',
+  'solana-dev-skill':       'Imported Solana dev skill — upstream format, not the skill-anatomy template.',
+  'solana-game-skill':      'Imported Solana game skill — upstream format, not the skill-anatomy template.',
 };
 
 // Regex patterns that indicate an explicit cross-skill reference.
@@ -136,12 +144,26 @@ function parseFrontmatter(content) {
   if (!match) return null;
 
   const result = {};
+  let blockKey = null;
   for (const line of match[1].split(/\r?\n/)) {
+    // YAML block scalar (description: > ou |) : la valeur vit sur les lignes
+    // suivantes, plus indentées — on les concatène au lieu de traiter « > »
+    // comme la valeur (ou pire, de sauter la description entière).
+    if (blockKey !== null) {
+      if (/^\s+\S/.test(line)) { result[blockKey] += ' ' + line.trim(); continue; }
+      blockKey = null; // fin du bloc : la ligne courante est réanalysée ci-dessous
+    }
     const colonIdx = line.indexOf(':');
     if (colonIdx === -1) continue;
     const key   = line.slice(0, colonIdx).trim();
     const value = line.slice(colonIdx + 1).trim().replace(/^['"]|['"]$/g, '');
-    if (key) result[key] = value;
+    if (!key) continue;
+    if (/^>[-+]?$|^\|[-+]?$/.test(value)) {
+      blockKey = key;
+      result[key] = '';
+      continue;
+    }
+    result[key] = value;
   }
   return result;
 }
@@ -287,8 +309,41 @@ function lintSkillContent(dirName, content, knownSkills) {
  * lintSkillContent. This is the thin filesystem wrapper the CLI uses.
  * Returns { errors, warnings, exempt }.
  */
-function lintSkill(dirName, skillsDir, knownSkills) {
-  const skillPath = path.join(skillsDir, dirName, 'SKILL.md');
+/**
+ * Walk the skills tree (2 levels: category folders + skill folders) and return
+ * every directory that contains a SKILL.md.
+ *   skills/<name>/SKILL.md            → { name, dir }
+ *   skills/<category>/<name>/SKILL.md → { name, dir }  (imported collections:
+ *   game-design, blockchain-skills, lightprotocol-skills, solana-* …)
+ * A folder without SKILL.md is treated as a category folder and scanned one
+ * level down; deeper nesting is not scanned (asset folders, not skills).
+ */
+function discoverSkills(skillsDir) {
+  const found = [];
+  for (const entry of fs.readdirSync(skillsDir, { withFileTypes: true })) {
+    if (!entry.isDirectory()) continue;
+    const dir = path.join(skillsDir, entry.name);
+    if (fs.existsSync(path.join(dir, 'SKILL.md'))) {
+      found.push({ name: entry.name, dir });
+      continue;
+    }
+    for (const sub of fs.readdirSync(dir, { withFileTypes: true })) {
+      if (!sub.isDirectory()) continue;
+      const subDir = path.join(dir, sub.name);
+      if (fs.existsSync(path.join(subDir, 'SKILL.md'))) {
+        found.push({ name: sub.name, dir: subDir });
+      }
+    }
+  }
+  return found;
+}
+
+/**
+ * Lint one skill directory (flat or under a category folder): reads its
+ * SKILL.md, then delegates to lintSkillContent. Returns { errors, warnings, exempt }.
+ */
+function lintSkillDir(skillDir, knownSkills) {
+  const skillPath = path.join(skillDir, 'SKILL.md');
 
   if (!fs.existsSync(skillPath)) {
     return { errors: ['Missing SKILL.md'], warnings: [], exempt: false };
@@ -301,7 +356,7 @@ function lintSkill(dirName, skillsDir, knownSkills) {
     return { errors: [`Unreadable SKILL.md: ${err.message}`], warnings: [], exempt: false };
   }
 
-  return lintSkillContent(dirName, content, knownSkills);
+  return lintSkillContent(path.basename(skillDir), content, knownSkills);
 }
 
 // Export only the linting functions. The policy collections (REQUIRED_SECTIONS,
@@ -312,5 +367,6 @@ module.exports = {
   parseFrontmatter,
   extractSkillReferences,
   lintSkillContent,
-  lintSkill,
+  lintSkillDir,
+  discoverSkills,
 };

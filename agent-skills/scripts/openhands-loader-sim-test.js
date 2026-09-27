@@ -278,7 +278,12 @@ test('the real repository passes the simulation end-to-end', () => {
     encoding: 'utf8',
   });
 
+  const expectedSkillCount = fs.readdirSync(path.join(root, 'skills'), { withFileTypes: true })
+    .filter(entry => entry.isDirectory()
+      && fs.existsSync(path.join(root, 'skills', entry.name, 'SKILL.md')))
+    .length;
+
   assert.equal(result.status, 0, result.stdout + result.stderr);
   assert.match(result.stdout, /Simulation PASSED/);
-  assert.match(result.stdout, /Loaded skills \(30\):/);
+  assert.match(result.stdout, new RegExp(`Loaded skills \\(${expectedSkillCount}\\):`));
 });

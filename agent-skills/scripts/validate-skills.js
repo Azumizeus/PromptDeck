@@ -6,7 +6,8 @@
  * docs/skill-anatomy.md. The rules themselves live in scripts/lib/skill-lint.js
  * (a single source of truth, importable and unit-testable); this file is a thin
  * wrapper that walks the skills directory, runs the linter, prints the report,
- * and sets the exit code.
+ * and sets the exit code. Skills live at skills/<name>/ or under a category
+ * folder, skills/<category>/<name>/ (imported collections).
  *
  * Exit codes: 0 = all clear, 1 = one or more errors
  */
@@ -16,7 +17,7 @@
 const fs   = require('fs');
 const path = require('path');
 
-const { lintSkill } = require('./lib/skill-lint');
+const { lintSkillDir, discoverSkills } = require('./lib/skill-lint');
 
 const SKILLS_DIR = path.resolve(__dirname, '..', 'skills');
 
@@ -28,33 +29,39 @@ function main() {
     process.exit(1);
   }
 
-  const skillDirs = fs.readdirSync(SKILLS_DIR)
-    .filter(d => fs.statSync(path.join(SKILLS_DIR, d)).isDirectory())
-    .sort();
+  const skills = discoverSkills(SKILLS_DIR).sort((a, b) => a.name.localeCompare(b.name));
 
-  const knownSkills = new Set(skillDirs);
+  const knownSkills = new Set(skills.map(s => s.name));
 
   let totalErrors   = 0;
   let totalWarnings = 0;
 
-  for (const dirName of skillDirs) {
-    const { errors, warnings, exempt } = lintSkill(dirName, SKILLS_DIR, knownSkills);
-    totalErrors   += errors.length;
-    totalWarnings += warnings.length;
+  for (const skill of skills) {
+    const { errors, warnings, exempt } = lintSkillDir(skill.dir, knownSkills);
+    // Skills sous un dossier-catégorie (skills/<category>/<name>/) = collections
+    // importées (game-design, lightprotocol-skills, solana-* …) : elles suivent
+    // leur propre format, pas skill-anatomy.md. Leurs écarts sont signalés en
+    // avertissements (non bloquants) ; le cœur du plugin (skills/<name>/)
+    // reste validé strictement.
+    const imported = path.relative(SKILLS_DIR, skill.dir).includes(path.sep);
+    const shownErrors   = imported ? [] : errors;
+    const shownWarnings = imported ? errors.map(e => `[imported] ${e}`).concat(warnings) : warnings;
+    totalErrors   += shownErrors.length;
+    totalWarnings += shownWarnings.length;
 
     if (errors.length === 0 && warnings.length === 0) {
       const tag = exempt ? ' (section checks exempt)' : '';
-      console.log(`  ✓  ${dirName}${tag}`);
+      console.log(`  ✓  ${skill.name}${tag}`);
     } else {
       const icon = errors.length > 0 ? '  ✗ ' : '  ⚠ ';
-      console.log(`${icon} ${dirName}`);
-      for (const msg of errors)   console.log(`       ERROR: ${msg}`);
-      for (const msg of warnings) console.log(`       WARN:  ${msg}`);
+      console.log(`${icon} ${skill.name}${imported ? ' (imported)' : ''}`);
+      for (const msg of shownErrors)   console.log(`       ERROR: ${msg}`);
+      for (const msg of shownWarnings) console.log(`       WARN:  ${msg}`);
     }
   }
 
   const status = totalErrors > 0 ? 'FAILED' : totalWarnings > 0 ? 'PASSED WITH WARNINGS' : 'PASSED';
-  console.log(`\n${skillDirs.length} skills checked — ${totalErrors} error(s), ${totalWarnings} warning(s) — ${status}`);
+  console.log(`\n${skills.length} skills checked — ${totalErrors} error(s), ${totalWarnings} warning(s) — ${status}`);
 
   if (totalErrors > 0) process.exit(1);
 }

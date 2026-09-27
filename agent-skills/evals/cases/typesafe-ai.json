@@ -1,0 +1,44 @@
+{
+  "skill_name": "typesafe-ai",
+  "trigger": {
+    "positive": [
+      {
+        "prompt": "Use TypeSafe to turn a natural-language request into a typed judgment and probability for routing.",
+        "top_k": 1
+      },
+      {
+        "prompt": "Which TypeSafe primitive should I choose for one-of-many labels, and how should confidence and a no-match outcome be modeled?",
+        "top_k": 1
+      },
+      {
+        "prompt": "Design a TypeSafe/Jev workflow that extracts a field, verifies it against evidence, and escalates uncertainty instead of generating prose.",
+        "top_k": 1
+      }
+    ],
+    "negative": [
+      {
+        "prompt": "Add retry with exponential backoff to the deployment poller.",
+        "owner": "ci-cd-and-automation"
+      },
+      {
+        "prompt": "Design the public interface and versioning contract for the billing API.",
+        "owner": "api-and-interface-design"
+      }
+    ]
+  },
+  "evals": [
+    {
+      "id": 1,
+      "kind": "dialogue",
+      "prompt": "I need a feature that routes a support ticket to the right queue, extracts the customer's requested change, and asks for human review when the evidence is weak. Design the smallest TypeSafe integration: choose the primitive or primitives, define the state and questions, compose the workflow, and say how you would test it. Read the current documentation before committing to API details.",
+      "expected_output": "A documentation-grounded TypeSafe design that separates deterministic code from semantic judgments, selects suitable primitives, handles uncertainty, and defines verification",
+      "expectations": [
+        "The design consults the current TypeSafe documentation or installed SDK and does not present unverified version-specific API details as facts",
+        "Known rules, exact lookups, and execution remain in code while TypeSafe supplies only the semantic judgments that need them",
+        "The chosen primitive or primitives are justified, with meaningful state, instructions, criteria, probabilities or confidence, and a no-match or escalation path where needed",
+        "The workflow composes independent judgments sensibly and distinguishes uncertainty from a hard failure or truth guarantee",
+        "The response includes representative verification cases and keeps any API credentials server-side"
+      ]
+    }
+  ]
+}

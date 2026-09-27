@@ -1,0 +1,43 @@
+{
+  "skill_name": "cognee-memory",
+  "trigger": {
+    "positive": [
+      {
+        "prompt": "Before I answer, check our shared agent memory: which port and stack are documented for the ChatDeck hub project?",
+        "top_k": 1
+      },
+      {
+        "prompt": "Retrieve the durable decisions and configuration facts about the hub from the cognee datasets instead of guessing them.",
+        "top_k": 1
+      },
+      {
+        "prompt": "Save a dated, standalone note in persistent memory that this service uses port 5199, not 5173, and confirm how it was stored.",
+        "top_k": 1
+      }
+    ],
+    "negative": [
+      {
+        "prompt": "Compress these repetitive JSON build logs locally before they reach the model.",
+        "owner": "headroom-compression"
+      },
+      {
+        "prompt": "Write a failing test for the date parser before changing its implementation.",
+        "owner": "test-driven-development"
+      }
+    ]
+  },
+  "evals": [
+    {
+      "id": 1,
+      "kind": "dialogue",
+      "prompt": "I need a reliable answer about the hub: what stack and port are recorded for ChatDeck, and please remember that the team decided to keep port 5199. Use the shared memory; if it has no record, say that plainly rather than filling the gap.",
+      "expected_output": "A memory-grounded response that recalls the relevant datasets, records the dated decision when appropriate, and explicitly reports an empty or failed recall instead of inventing hub facts",
+      "expectations": [
+        "The assistant recalls the relevant cognee datasets before asserting facts about the hub",
+        "The response distinguishes remembered facts from assumptions and does not invent a stack or port",
+        "If recall is empty or fails, the response explicitly says that the memory is empty and does not present a guessed value as fact",
+        "The decision being saved is expressed as a standalone, dated fact suitable for persistent memory, and secrets are never exposed"
+      ]
+    }
+  ]
+}

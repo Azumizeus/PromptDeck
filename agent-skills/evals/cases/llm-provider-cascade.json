@@ -1,0 +1,43 @@
+{
+  "skill_name": "llm-provider-cascade",
+  "trigger": {
+    "positive": [
+      {
+        "prompt": "My Groq request returns 403 or a quota error; make the agent try each configured LLM provider in order until one answers.",
+        "top_k": 1
+      },
+      {
+        "prompt": "Add a reliable provider cascade for this chat script, from the local providers to the cloud, without ever printing API keys.",
+        "top_k": 1
+      },
+      {
+        "prompt": "Before routing requests, check the health of the configured LLM providers and cache the result so we do not probe them on every call.",
+        "top_k": 1
+      }
+    ],
+    "negative": [
+      {
+        "prompt": "Compress repetitive JSON and build logs locally before they reach the model.",
+        "owner": "headroom-compression"
+      },
+      {
+        "prompt": "Store a dated project decision in the shared cognee datasets for future agents.",
+        "owner": "cognee-memory"
+      }
+    ]
+  },
+  "evals": [
+    {
+      "id": 1,
+      "kind": "dialogue",
+      "prompt": "The chat script is failing whenever Groq returns a quota error. Explain and propose a reliable fallback design across the configured providers, including health checks, timeouts, ordering, tracing, and how to keep credentials out of logs.",
+      "expected_output": "A secure provider-cascade plan that preserves availability by trying providers in a defined order while bounding cost and exposing useful diagnostics",
+      "expectations": [
+        "The response uses the documented cascade order, trying local providers before cloud providers and moving on after a failed attempt",
+        "It recommends a cached health check and a bounded timeout rather than probing every provider on every request",
+        "It records the provider actually used and fallback attempts without exposing API keys or full credentials",
+        "It distinguishes provider failure from an application error and leaves credentials in environment variables or the supported auth store"
+      ]
+    }
+  ]
+}

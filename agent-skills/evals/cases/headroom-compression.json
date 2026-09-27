@@ -1,0 +1,43 @@
+{
+  "skill_name": "headroom-compression",
+  "trigger": {
+    "positive": [
+      {
+        "prompt": "The agent context is bloated with repetitive grep results, JSON, and build logs; compress it locally before it reaches the LLM.",
+        "top_k": 1
+      },
+      {
+        "prompt": "Can you diagnose the Headroom proxy on port 8787 and show the token savings and average compression?",
+        "top_k": 1
+      },
+      {
+        "prompt": "I need cheaper agents: wrap OpenCode through Headroom and tell me whether the proxy is healthy.",
+        "top_k": 1
+      }
+    ],
+    "negative": [
+      {
+        "prompt": "Store a dated project decision in the shared cognee datasets for future agents.",
+        "owner": "cognee-memory"
+      },
+      {
+        "prompt": "When Groq returns a quota error, fall back through the configured LLM providers.",
+        "owner": "llm-provider-cascade"
+      }
+    ]
+  },
+  "evals": [
+    {
+      "id": 1,
+      "kind": "dialogue",
+      "prompt": "An agent is slow and expensive because it is sending huge repetitive logs and JSON through an LLM. Recommend the safest local Headroom setup, give the exact diagnostic and wrapping commands, and explain what must not be compressed.",
+      "expected_output": "A practical local Headroom diagnosis and routing plan grounded in the proxy, health, statistics, and wrap commands, with safeguards for exact data",
+      "expectations": [
+        "The response starts with a health or statistics check and identifies the local proxy on port 8787",
+        "It recommends routing the agent with the appropriate Headroom wrap command and distinguishes the proxy from the headroom/ model prefix",
+        "It uses measured statistics rather than promising a universal compression percentage",
+        "It explicitly leaves exact byte-for-byte data such as keys and short diffs uncompressed"
+      ]
+    }
+  ]
+}

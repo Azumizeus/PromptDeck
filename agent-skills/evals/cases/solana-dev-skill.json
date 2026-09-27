@@ -1,5 +1,5 @@
 {
-  "skill_name": "solana-dev",
+  "skill_name": "solana-dev-skill",
   "trigger": {
     "positive": [
       {
@@ -22,7 +22,7 @@
       },
       {
         "prompt": "Handle the in-game wallet session of my Solana game client",
-        "owner": "solana-game"
+        "owner": "solana-game-skill"
       }
     ]
   },

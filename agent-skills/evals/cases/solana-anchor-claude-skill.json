@@ -18,11 +18,11 @@
     "negative": [
       {
         "prompt": "Integrate a Jupiter swap route in my frontend",
-        "owner": "solana-dev"
+        "owner": "solana-dev-skill"
       },
       {
         "prompt": "Design the token economy of a play-and-own web game",
-        "owner": "solana-game"
+        "owner": "solana-game-skill"
       }
     ]
   },
