@@ -55,6 +55,19 @@ if os.path.exists(catalog_path):
 else:
     errors.append(f"{catalog_path} absent → lance : python3 build-interface.py")
 
+# ── Catalogues embarqués inline (HTML non régénérés par build-interface.py) ──
+# Leur bloc « // Skills: n | Agents: m » doit refléter le réel — sinon divergence.
+for emb in ("interface/panel-demo-inline.html",):
+    if os.path.exists(emb):
+        txt = open(emb, encoding="utf-8").read()
+        for m in re.finditer(r"// Skills: (\d+) \| Agents: (\d+)", txt):
+            s_n, a_n = int(m.group(1)), int(m.group(2))
+            if s_n != real_skills or a_n != real_agents:
+                errors.append(
+                    f"{emb} embarque un catalogue {s_n}/{a_n} (réel : {real_skills}/{real_agents}) "
+                    f"→ resynchronise le bloc MEGA_CATALOG"
+                )
+
 # ── Docs : balayage des mentions « N skills » / « N experts » / « N items » ──
 # Chaque mention trouvée doit égaler le décompte réel (les écarts datés d'une
 # version passée — p. ex. « 133 skills installés » dans l'historique v0.7.3 —
@@ -64,6 +77,8 @@ DOC_FILES = [
     "plugin.json", ".codex-plugin/plugin.json", ".agents/plugins/marketplace.json",
     "menubar-app-luxe/README.md", "menubar-app/README.md", "menubar-app-v2/README.md",
     "interface/README-EN.md", "interface/LISEZMOI-INTERFACE.md",
+    "interface/panel-demo-inline.html",
+    "menubar-app/build-app.sh", "menubar-app-v2/build-app.sh",
 ]
 PAT = re.compile(r"\b(\d{2,4})\s+(skills|experts|items|agents|workflows)\b")
 
