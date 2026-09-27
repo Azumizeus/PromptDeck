@@ -55,6 +55,8 @@ NOUVEAUTÉS v1.1.0
 · 12 destinations « Ouvrir dans » : Claude, ChatGPT, Perplexity, Copilot, DeepSeek, Z.ai, Kimi, Mammouth.ia, Freebuff, OpenCode (desktop + terminal), presse-papiers
 · Lancement auto au démarrage · raccourci ⌥Espace (⌘Espace est réservé par Spotlight)
 · Fenêtre déplaçable/redimensionnable (position mémorisée) · export/import de configuration JSON
+· 🛠 Correctifs 2.19.x (app Luxe) : resize des poignées réparé au pixel (IPC panelGeometry),
+  bouton 📌 épingler de nouveau persistant, 3 feux macOS dans l en-tête, sélecteur LLM scrollable
 
 USAGE
 · ⚡ dans la barre de menus : clic gauche = panneau de recherche · clic droit = tout le catalogue

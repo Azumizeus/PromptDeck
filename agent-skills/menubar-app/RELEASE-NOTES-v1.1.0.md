@@ -51,9 +51,11 @@ Audit anti-fuite effectué sur : stdin, logs, historique shell, `ps`, fichiers t
 
 | Fichier | Taille | SHA-256 |
 |---|---|---|
-| `MEGA PACK-universal.dmg` (Intel + Apple Silicon) | 192 Mo | `27552c4b4e44aa8fc8d8c67aebb4285d5ef2596a0ea22fb7f0cffd91e149062e` |
-| `MEGA PACK-darwin-x64.dmg` (Intel) | 113 Mo | `c72bc984a9b498c7983edb4a2633cb9b0df892c45b60c15dfd9f0294c280ea21` |
-| `MEGA PACK-darwin-arm64.dmg` (Apple Silicon) | 105 Mo | `251040efc3b359717cee450bc9df58988ce3b24d540bc5fd040e0e61ff456e61` |
+| `MEGA PACK-universal.dmg` (Intel + Apple Silicon) | 192 Mo | `363bfa46883f7a64de315c75d59b6b60e3ccfb359bad327f7a77beadaa547050` |
+| `MEGA PACK-darwin-x64.dmg` (Intel) | 112 Mo | `e59b7d3e7326e704256b08804af29f3d2bf9e1943eb8e9df189fe8c820ba3556` |
+| `MEGA PACK-darwin-arm64.dmg` (Apple Silicon) | 106 Mo | `9cf6685db072fa01a325769d60b1e1e471624c688652c7151d8d82af4c9be712` |
+
+> Reconstruits le 27/09 (soir) : app Luxe 2.19.1 embarquée (resize IPC, épingler, feux, LLM scrollable) + LISEZMOI à jour.
 
 Installation : glisser **MEGA PACK.app** sur **Applications**, puis clic droit → Ouvrir (app non notarisée). Vérifier un DMG : `shasum -a 256 "MEGA PACK-universal.dmg"`.
 
