@@ -30,6 +30,9 @@ const SOURCES = [
   { file: 'menubar-app-luxe/mac-chrome.js', kind: 'js' },
   { file: 'menubar-app/renderer.js', kind: 'js' },
   { file: 'menubar-app/index.html', kind: 'html' },
+  // Interface Chrome : userscript + banc d'essai inline (mêmes protections que l app)
+  { file: 'interface/mega-pack-panel-full.user.js', kind: 'js' },
+  { file: 'interface/panel-demo-inline.html', kind: 'html' },
 ];
 
 function extractControls() {
