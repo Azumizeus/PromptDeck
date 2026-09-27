@@ -1,8 +1,9 @@
 # 📇 AGENTS-CATALOGUE — Les 190 agents spécialistes
 
-> **Généré le :** 24 septembre 2026 · **Total :** 190 agents
+> **Généré le :** 27 septembre 2026 · **Total :** 190 agents
 > Source : `agent-skills/agents/` — rôle = première phrase de la `description` de chaque agent
 > 🇫🇷 Colonne Rôle traduite en français (`scripts/agents-roles-fr.json`)
+> 💡 **Pour savoir *lequel* choisir et *quand***, voir [`PROTOCOL-UTILISATION.md`](./PROTOCOL-UTILISATION.md) et [`MODE-EMPLOI.md`](./MODE-EMPLOI.md).
 
 ## Où ils sont installés
 
@@ -10,7 +11,7 @@
 |------|-------------|--------|
 | Claude Code | `~/.claude/agents/` | subagent natif (name, description) |
 | OpenCode | `~/.config/opencode/agents/` | subagent markdown (`mode: subagent`) — invoquables via `@nom` |
-| OpenHands + Freebuff | `~/.agents/skills/agent-<nom>/SKILL.md` | Agent Skills (progressive disclosure + triggers) |
+| Freebuff / Codex | `~/.agents/skills/agent-<nom>/SKILL.md` | Agent Skills (progressive disclosure + triggers) |
 
 OpenCode : vérifié via `opencode agent list` → 190 agents + 2 built-in = 192 subagents.
 
@@ -283,12 +284,12 @@ OpenCode : vérifié via `opencode agent list` → 190 agents + 2 built-in = 192
 
 - **Claude Code** : déclenchement auto par description, ou mention explicite (« utilise security-auditor »).
 - **OpenCode** : `@<nom-agent>` dans la session (ex. `@tokenomics-designer`), ou délégation auto par l'agent principal.
-- **OpenHands / Freebuff** : les skills `agent-*` sont annoncés dans le catalogue (progressive disclosure) ;
+- **Freebuff / Codex** : les skills `agent-*` sont annoncés dans le catalogue (progressive disclosure) ;
   l'agent les invoque quand la tâche correspond, et les `triggers` (mots-clés du nom) accélèrent l'activation.
 
-## Skills non-agents du pack (31)
+## Skills non-agents du pack (33)
 
-Skills portables installés à côté des agents (OpenCode, Claude, Freebuff/OpenHands) :
+Skills portables installés à côté des agents (OpenCode, Claude, Freebuff / Codex) :
 
 | Skill | Description |
 |-------|-------------|
@@ -297,6 +298,7 @@ Skills portables installés à côté des agents (OpenCode, Claude, Freebuff/Ope
 | `ci-cd-and-automation` | Automates CI/CD pipeline setup. Use when setting up or modifying build and deployment pipelines. Use when you need to automate quality gates, configure test runners in CI, or establish deployment strategies. |
 | `code-review-and-quality` | Conducts multi-axis code review. Use before merging any change. Use when reviewing code written by yourself, another agent, or a human. Use when you need to assess code quality across multiple dimensions before it enters the main branch. |
 | `code-simplification` | Simplifies code for clarity. Use when refactoring code for clarity without changing behavior. Use when code works but is harder to read, maintain, or extend than it should be. Use when reviewing code that has accumulated unnecessary complexity. |
+| `cognee-memory` | Interroge la mémoire partagée persistante des agents (serveur MCP cognee, local sur cette machine, datasets hub_architecture / hub_chatdeck / hub_agents). Use when the question porte sur l'historique, les décisions, les conventions ou la configuration du hub Mikael (projets, ports, stacks, providers, agents, scripts), quand l'utilisateur mentionne cognee, mémoire partagée, se souvenir, ou quand tu dois mémoriser une décision, une convention ou un fait durable. Contient la règle anti-hallucination : toujours appeler cognee recall avant de répondre sur le hub, et dire explicitement quand la mémoire est vide. |
 | `constraint-driven-development` | Establishes a project's quality bar as a written contract and stops agents quietly lowering it. Interviews the user on which dimensions matter, supplies sane default thresholds when they have no number in mind, records everything in CONSTRAINTS.md, and watches the diff for a weakened bar — new @ts-ignore or eslint-disable suppressions, skipped or deleted tests, assertions stripped out, unimplemented stubs, thresholds edited down. Use when no quality bar is written down, when the user says "set up constraints" or "define our standards", when the user wants dimensions they care about — accessibility, web performance, coverage — set up as enforced constraints, when an agent keeps silencing checks or skipping tests to get to green, when you need a coverage or performance threshold and don't know what number to pick, or when an agent writes more code than anyone will read. |
 | `context-engineering` | Optimizes agent context setup. Use when starting a new session, when agent output quality degrades, when switching between tasks, or when you need to configure rules files and context for a project. |
 | `debugging-and-error-recovery` | Guides systematic root-cause debugging. Use when tests fail, builds break, something that worked yesterday broke, behavior doesn't match expectations, or you encounter any unexpected error. Use when you need to figure out what broke and why — a systematic approach to finding and fixing the root cause rather than guessing. |
@@ -309,6 +311,7 @@ Skills portables installés à côté des agents (OpenCode, Claude, Freebuff/Ope
 | `idea-refine` | Refines raw ideas into sharp, actionable concepts through structured divergent and convergent thinking. Use when an idea is still vague, when you need to stress-test assumptions before committing to a plan, or when you want to expand options before converging on one. Triggers on "ideate", "refine this idea", or "stress-test my plan". |
 | `incremental-implementation` | Delivers changes incrementally in thin, verifiable slices. Use when implementing any feature or change that touches more than one file, or when picking up the next task from a plan. Use when rolling a change out behind a feature flag, when you're about to write a large amount of code at once, or when a task feels too big to land in one step. |
 | `interview-me` | Extracts what the user actually wants instead of what they think they should want. Achieves this through one-question-at-a-time interview until ~95% confidence about the underlying intent. Use when an ask is underspecified ("build me X" without "for whom" or "why now"), when the user explicitly invokes ("interview me", "grill me", "are we sure?", "stress-test my thinking"), or when you catch yourself silently filling in ambiguous requirements before any plan, spec, or code exists. |
+| `llm-provider-cascade` | Route LLM requests through a fallback cascade of API providers (omniroute → freellm → groq → cerebras → mistral → cohere → gemini → openrouter → anthropic) so a chat, script or agent keeps working when one provider fails with 403, quota or network errors. Use when the user mentions provider cascade, fallback LLM routing, 403/quota errors on an API, multi-provider resilience, MEGA PACK chat cascade, or wants one prompt to try every configured API key (OpenCode auth.json, env vars) until one answers. |
 | `observability-and-instrumentation` | Instruments code so production behavior is visible and diagnosable. Use when adding logging, metrics, tracing, or alerting. Use when shipping any feature that runs in production and you need evidence it works. Use when production issues are reported but you can't tell what happened from the available data. |
 | `performance-optimization` | Optimizes application performance across frontend, backend, queries, and databases. Use when performance requirements exist, when you suspect performance regressions, when Core Web Vitals or load times need improvement, when N+1 query patterns need fixing, or when profiling reveals bottlenecks. |
 | `planning-and-task-breakdown` | Breaks work into ordered tasks. Use when you have a spec or clear requirements and need to break work into implementable tasks. Use when a task feels too large to start, when you need to estimate scope, or when parallel work is possible. |

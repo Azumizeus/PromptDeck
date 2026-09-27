@@ -16,7 +16,7 @@ npm start            # l'app en mode dev (icône ⚡ dans la barre de menus)
 
 ```bash
 node --check main.js && node --check renderer.js && node --check preload.js
-node test-fr.js      # i18n : 321/321 items, recherche bilingue
+node test-fr.js      # i18n : 323/323 items, recherche bilingue
 node test-custom.js  # prompts personnalisés : 28 vérifications
 ./test-all.sh        # suite complète (build requis pour la partie bundle)
 ```
@@ -51,7 +51,7 @@ Les skills vivent dans `agent-skills/skills/` et les agents dans `agent-skills/a
    - `name_fr` / `desc_fr` : **obligatoires** — le catalogue est bilingue, un item
      sans traduction FR cassera `test-fr.js`
    - `category` : une des catégories existantes (regarde les voisins)
-3. Lance `node test-fr.js` : le compte total (321 → 322…) doit rester cohérent
+3. Lance `node test-fr.js` : le compte total (323 → 324…) doit rester cohérent
 4. Rebuild si tu touches au catalogue embarqué : `./build-app.sh`
 
 ## 🎨 Conventions de code

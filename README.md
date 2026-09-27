@@ -2,7 +2,7 @@
 
 # ⚡ PromptDeck
 
-**131 skills + 190 agents IA dans ta barre de menus macOS — en un ⌥Espace.**
+**133 skills + 190 agents IA dans ta barre de menus macOS — en un ⌥Espace.**
 
 Recherche instantanée, prompts personnalisés, envoi vers 12 destinations
 (Claude, ChatGPT, Freebuff, OpenCode…) en un clic.
@@ -19,14 +19,23 @@ Recherche instantanée, prompts personnalisés, envoi vers 12 destinations
 
 ---
 
+## 🧭 Protocol d'utilisation
+
+**Quel agent, quel skill, sur quel hôte, et quand** — voir **[`PROTOCOL-UTILISATION.md`](./PROTOCOL-UTILISATION.md)** : table de routage (tâche → agent + skills), pipeline par phases, aide-mémoire des commandes, et les limites réelles de la machine.
+
+**Pour passer directement à l'action** — voir **[`MODE-EMPLOI.md`](./MODE-EMPLOI.md)** : 15 recettes « je veux faire X → quoi utiliser → commandes → vérification ».
+
+---
+
 ## ✨ C'est quoi ?
 
 PromptDeck est une **app menu-bar macOS** (icône ⚡ en haut à droite) qui transforme
-une bibliothèque de **131 skills** et **190 agents IA** en lanceur instantané :
+une bibliothèque de **133 skills** et **190 agents IA** en lanceur instantané :
 
 | | |
 |---|---|
-| 🔍 **Recherche bilingue** | 321 items filtrés en temps réel, en français comme en anglais (« jupiter », « multi-chaînes »…) |
+| 🔍 **Recherche bilingue** | 323 items filtrés en temps réel, en français comme en anglais (« jupiter », « multi-chaînes »…) |
+| 🧭 **Aide contextuelle** | 15 recettes intégrées, accessibles globalement avec ⌘⌥/ configurable (`?` ou ⌘/ dans le panneau) |
 | ✍️ **Prompts personnalisés** | Crée tes propres prompts, avec **tags**, importés par **glisser-déposer** (.md/.txt) ou exportés en .md |
 | 🌐 **12 destinations** | Claude · ChatGPT · Perplexity · Copilot · DeepSeek · Z.ai · Kimi · Mammouth.ia · Freebuff (app) · OpenCode (desktop) · OpenCode (terminal) · Presse-papiers |
 | ⭐ **Favoris + ⌘1-⌘9** | Épingle tes items et lance les 9 premiers au clavier |
@@ -136,7 +145,7 @@ osascript -e 'tell application "System Events" to get the name of every login it
 ### 5. Installer depuis ce dépôt (build local)
 
 Le script construit `dist/MEGA PACK.app` (catalogue embarqué + signature ad-hoc) et
-`test-app.sh` le vérifie (22 vérifications : structure, catalogue 131+190, signature, lancement réel) :
+`test-app.sh` le vérifie (22 vérifications : structure, catalogue 133+190, signature, lancement réel) :
 
 ```bash
 git clone https://github.com/Azumizeus/PromptDeck.git
@@ -188,8 +197,8 @@ PromptDeck/
 ├── agent-skills/
 │   ├── menubar-app/        ← l'app Electron V1 (main.js, renderer.js, tests, build-app.sh)
 │   ├── menubar-app-luxe/   ← l'app Electron **Édition Luxe** (tooltip, clic droit multi-LLM, Atelier IA, MEGA PROMPT)
-│   ├── interface/          ← launcher HTML, panneau Tampermonkey, catalogue 321 items, MODE-DEMPLOI
-│   ├── skills/             ← 131 skills (SKILL.md)
+│   ├── interface/          ← launcher HTML, panneau Tampermonkey, catalogue 323 items, MODE-DEMPLOI
+│   ├── skills/             ← 133 skills (SKILL.md)
 │   └── agents/             ← 190 agents (fiches de rôle système)
 ├── skill/skills/           ← bibliothèques tierces (Solana, Jupiter, Metaplex…)
 ├── LICENSE                 ← MIT
@@ -201,7 +210,7 @@ PromptDeck/
 ```bash
 cd agent-skills/menubar-app
 ./test-all.sh             # 27 vérifications : syntaxe, bundles, signatures, architectures, DMG
-node test-fr.js           # i18n : 321/321 items traduits, recherche bilingue
+node test-fr.js           # i18n : 323/323 items traduits, recherche bilingue
 node test-custom.js       # prompts personnalisés : 28/28 (créer, chercher, épingler, éditer…)
 ```
 

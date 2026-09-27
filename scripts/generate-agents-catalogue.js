@@ -212,6 +212,7 @@ lines.push('');
 lines.push(`> **Généré le :** ${today} · **Total :** ${agents.length} agents`);
 lines.push('> Source : `agent-skills/agents/` — rôle = première phrase de la `description` de chaque agent');
 lines.push('> 🇫🇷 Colonne Rôle traduite en français (`scripts/agents-roles-fr.json`)');
+lines.push('> 💡 **Pour savoir *lequel* choisir et *quand***, voir [`PROTOCOL-UTILISATION.md`](./PROTOCOL-UTILISATION.md) et [`MODE-EMPLOI.md`](./MODE-EMPLOI.md).');
 lines.push('');
 lines.push('## Où ils sont installés');
 lines.push('');
@@ -219,7 +220,7 @@ lines.push('| Hôte | Emplacement | Format |');
 lines.push('|------|-------------|--------|');
 lines.push('| Claude Code | `~/.claude/agents/` | subagent natif (name, description) |');
 lines.push('| OpenCode | `~/.config/opencode/agents/` | subagent markdown (`mode: subagent`) — invoquables via `@nom` |');
-lines.push('| OpenHands + Freebuff | `~/.agents/skills/agent-<nom>/SKILL.md` | Agent Skills (progressive disclosure + triggers) |');
+lines.push('| Freebuff / Codex | `~/.agents/skills/agent-<nom>/SKILL.md` | Agent Skills (progressive disclosure + triggers) |');
 lines.push('');
 lines.push('OpenCode : vérifié via `opencode agent list` → 190 agents + 2 built-in = 192 subagents.');
 lines.push('');
@@ -240,7 +241,7 @@ lines.push('## Utilisation');
 lines.push('');
 lines.push('- **Claude Code** : déclenchement auto par description, ou mention explicite (« utilise security-auditor »).');
 lines.push('- **OpenCode** : `@<nom-agent>` dans la session (ex. `@tokenomics-designer`), ou délégation auto par l\'agent principal.');
-lines.push('- **OpenHands / Freebuff** : les skills `agent-*` sont annoncés dans le catalogue (progressive disclosure) ;');
+lines.push('- **Freebuff / Codex** : les skills `agent-*` sont annoncés dans le catalogue (progressive disclosure) ;');
 lines.push('  l\'agent les invoque quand la tâche correspond, et les `triggers` (mots-clés du nom) accélèrent l\'activation.');
 lines.push('');
 
@@ -266,7 +267,7 @@ const skillCards = fs.existsSync(SKILLS_DIR)
 if (skillCards.length) {
   lines.push(`## Skills non-agents du pack (${skillCards.length})`);
   lines.push('');
-  lines.push('Skills portables installés à côté des agents (OpenCode, Claude, Freebuff/OpenHands) :');
+  lines.push('Skills portables installés à côté des agents (OpenCode, Claude, Freebuff / Codex) :');
   lines.push('');
   lines.push('| Skill | Description |');
   lines.push('|-------|-------------|');

@@ -1,0 +1,41 @@
+name: Catalogue agents
+
+on:
+  push:
+    branches: [master, main]
+    paths:
+      - 'AGENTS-CATALOGUE.md'
+      - 'scripts/generate-agents-catalogue.js'
+      - 'scripts/agents-roles-fr.json'
+      - 'agent-skills/agents/**'
+  pull_request:
+    branches: [master, main]
+    paths:
+      - 'AGENTS-CATALOGUE.md'
+      - 'scripts/generate-agents-catalogue.js'
+      - 'scripts/agents-roles-fr.json'
+      - 'agent-skills/agents/**'
+  workflow_dispatch:
+
+jobs:
+  check:
+    name: AGENTS-CATALOGUE.md à jour
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Node 22
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+
+      - name: Vérifier le catalogue
+        run: node scripts/generate-agents-catalogue.js --check
+
+      - name: Afficher le diff si échec
+        if: failure()
+        run: |
+          node scripts/generate-agents-catalogue.js
+          git diff -- AGENTS-CATALOGUE.md || true
+          echo "💡 AGENTS-CATALOGUE.md est périmé. Lancez : npm run catalogue:agents, puis commitez le résultat."
