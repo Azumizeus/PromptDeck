@@ -55,7 +55,9 @@ contextBridge.exposeInMainWorld('mgp', {
   customSave: (item) => ipcRenderer.send('custom-save', item),
   customDelete: (name) => ipcRenderer.send('custom-delete', name),
   // 📌 « Garder le panneau visible » : bascule depuis le bouton 📌 du panneau
-  setKeepVisible: (on) => ipcRenderer.send('set-keep-visible', on),
+  // 🐛 fix 2.19.0 : resize/move pilotés par le main (window.resizeTo = no-op en fenêtre principale)
+  setPanelGeometry: (req) => ipcRenderer.send('panelGeometry', req),
+  getPanelGeometry: () => ipcRenderer.sendSync('panelGeometry', { type: 'get' }),
   // 🎮 MEGA PACK ARENA : ouverture du jeu + choix du dossier
   arenaOpen: () => ipcRenderer.invoke('arena-open'),
   arenaDirChoose: () => ipcRenderer.invoke('arena-dir-choose'),

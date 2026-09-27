@@ -88,6 +88,30 @@ def type_text(text):
 
 MODS = {"cmd": 0x100000, "alt": 0x80000, "shift": 0x20000, "ctrl": 0x40000}
 
+KCD = {"down": 1, "dragged": 6, "up": 2}  # kCGEventLeftMouse*
+
+def cdgevent(variant, x, y):
+    """Poste UN événement souris CG brut (down/dragged/up) au point écran (x,y)."""
+    t = KCD[variant]
+    pt = CGPoint(float(x), float(y))
+    ev = cg.CGEventCreateMouseEvent(None, t, pt, 0)
+    cg.CGEventPost(kCGHIDEventTap, ev)
+
+def drag(x1, y1, x2, y2, steps=24):
+    """Glisser réel : bouton enfoncé en (x1,y1), déplacements interpolés, relâche en (x2,y2)."""
+    p1 = CGPoint(float(x1), float(y1))
+    down = cg.CGEventCreateMouseEvent(None, kCGEventLeftMouseDown, p1, 0)
+    cg.CGEventPost(kCGHIDEventTap, down)
+    time.sleep(0.09)
+    for i in range(1, steps + 1):
+        x = x1 + (x2 - x1) * i / steps
+        y = y1 + (y2 - y1) * i / steps
+        mv = cg.CGEventCreateMouseEvent(None, cg.kCGEventLeftMouseDragged if hasattr(cg, 'kCGEventLeftMouseDragged') else 6, CGPoint(float(x), float(y)), 0)
+        cg.CGEventPost(kCGHIDEventTap, mv)
+        time.sleep(0.012)
+    up = cg.CGEventCreateMouseEvent(None, kCGEventLeftMouseUp, CGPoint(float(x2), float(y2)), 0)
+    cg.CGEventPost(kCGHIDEventTap, up)
+
 def key_code(code, mods=()):
     flags = 0
     for m in mods:
@@ -99,6 +123,10 @@ if __name__ == "__main__":
     cmd = sys.argv[1]
     if cmd == "mouse":
         mouse_click(sys.argv[2], sys.argv[3])
+    elif cmd == "drag":
+        drag(*[float(v) for v in sys.argv[2:6]])
+    elif cmd == "cdgevent":
+        cdgevent(sys.argv[2], float(sys.argv[3]), float(sys.argv[4]))
     elif cmd == "move":
         mouse_move(sys.argv[2], sys.argv[3])
     elif cmd == "scroll":

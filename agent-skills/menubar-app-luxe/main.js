@@ -1651,6 +1651,55 @@ ipcMain.on('set-keep-visible', (e, on) => {
   if (PREFS.keepVisible && win && !win.isDestroyed() && !win.isVisible()) win.show();
   if (settings && !settings.isDestroyed()) settings.webContents.send('settings-changed', { theme: PREFS.theme, lang: LANG, keepVisible: PREFS.keepVisible });
 });
+// 🐛 fix 2.19.0 : resize REÇU du renderer. window.resizeTo/moveTo sont des NO-OPS dans une
+// fenêtre principale Electron (ça ne marche que dans les fenêtres window.open) — le drag des
+// poignées de coin n'a donc jamais pu modifier la fenêtre. Le renderer route désormais chaque
+// frame de drag via panelGeometry ; le main applique setContentSize (l'API fiable) et repositionne
+// pour ancrer les bords opposés. Les dimensions sont bornées ICI (source de vérité) ; le renderer
+// garde ses bornes pour l'aperçu. Prefs persistées via win.on('resize') (déjà en place).
+ipcMain.on('panelGeometry', (e, req = {}) => {
+  if (String(req.type) === 'get') { // lecture synchrone : bounds exactes pour ancrer un drag
+    e.returnValue = (win && !win.isDestroyed()) ? win.getContentBounds() : null;
+    return;
+  }
+  if (!win || win.isDestroyed()) return;
+  const type = String(req.type || 'resize');
+  if (type === 'move') {
+    const x = Math.round(Number(req.x)), y = Math.round(Number(req.y));
+    if (Number.isFinite(x) && Number.isFinite(y)) {
+      // coordonnées « contenu » → origine du cadre externe (même conversion que plus bas)
+      const cur = win.getContentBounds();
+      const [fw, fh] = win.getSize();
+      win.setPosition(x - (fw - cur.width), y - (fh - cur.height));
+    }
+    return;
+  }
+  let w = Math.round(Number(req.w)), h = Math.round(Number(req.h));
+  if (!Number.isFinite(w) || !Number.isFinite(h)) return;
+  // bornes côté main (source de vérité) — mêmes valeurs que le renderer, le workArea en plus
+  const disp = screen.getDisplayNearestPoint(win.getBounds()) || screen.getPrimaryDisplay();
+  const wa = disp.workArea;
+  w = Math.max(420, Math.min(w, wa.width - 24));
+  h = Math.max(440, Math.min(h, wa.height - 24));
+  let x = null, y = null;
+  if (req.anchorX === 'left') { x = Math.round(Number(req.left)); }
+  else if (req.anchorX === 'right') { x = Math.round(Number(req.right) - w); }
+  if (req.anchorY === 'top') { y = Math.round(Number(req.top)); }
+  else if (req.anchorY === 'bottom') { y = Math.round(Number(req.bottom) - h); }
+  const cur = win.getContentBounds();
+  if (x === null) x = cur.x;
+  if (y === null) y = cur.y;
+  // clamp écran : la fenêtre reste accessible
+  x = Math.max(wa.x - w + 120, Math.min(x, wa.x + wa.width - 120));
+  y = Math.max(wa.y, Math.min(y, wa.y + wa.height - 80));
+  // 🐛 conversion contenu↔cadre OBLIGATOIRE : setBounds/setPosition/resizeTo opèrent sur la
+  // fenêtre EXTERNE. Avec la barre de titre cachée (28 px), appliquer les coordonnées contenu
+  // telles quelles décale tout de 28 px PAR FRAME de drag — c'est exactement le « resize
+  // inversé/fuyant » historique : le contenu perdait 28 px à chaque frame.
+  const [fw, fh] = win.getSize();
+  const fdx = fw - cur.width, fdy = fh - cur.height; // (0, 28) ici
+  try { win.setBounds({ x: x - fdx, y: y - fdy, width: w + fdx, height: h + fdy }); } catch (e2) { /* fenêtre détruite */ }
+});
 ipcMain.on('get-prefs', (e) => {
   e.returnValue = { theme: PREFS.theme === 'light' ? 'light' : 'dark', keepVisible: !!PREFS.keepVisible, dropMaxChars: PREFS.dropMaxChars || 100000, arenaBus: PREFS.arenaBus !== false, panelSize: PREFS.panelSize || 'M', hoverPopup: PREFS.hoverPopup !== false, defaultLLM: PREFS.defaultLLM, sendTargets: PREFS.sendTargets || [], shortcut: PREFS.shortcut, autostart: !!PREFS.autostart, favShortcuts: PREFS.favShortcuts !== false, favorites: PREFS.favorites, recents: PREFS.recents, customs: PREFS.customs, hasApi: Object.fromEntries(Object.keys(PROVIDERS).map((k) => [k, !!apiKeyFor(k)])), apiDefaultModel: PREFS.apiDefaultModel || '', workshopLocks: { agent: [...lockedNames('agent')], skill: [...lockedNames('skill')], team: [...lockedNames('team')], custom: [...(PREFS.customs || []).filter((c) => c && c.locked).map((c) => c.name)] } };
 });

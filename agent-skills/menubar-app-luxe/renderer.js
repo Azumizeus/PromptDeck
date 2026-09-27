@@ -1692,11 +1692,24 @@ const RZ = {
   drag: null, // { corner, startX, startY, startW, startH }
 };
 function rzResize(w, h) {
-  // borne par l'espace de l'écran courant (jamais plus grand que le workArea - marges)
+  // 🐛 fix 2.19.0 : window.resizeTo est un NO-OP dans la fenêtre principale Electron — le drag
+  // n'a jamais pu redimensionner le panneau. On route via IPC (setPanelGeometry) vers le main
+  // qui applique setContentSize + repositionne. Bornes gardées ici pour l'aperçu immédiat.
   const wa = { w: window.screen ? window.screen.availWidth : 1600, h: window.screen ? window.screen.availHeight : 900 };
   w = Math.max(420, Math.min(Math.round(w), wa.w - 24));
   h = Math.max(440, Math.min(Math.round(h), wa.h - 24));
-  window.resizeTo(w, h);
+  const d = RZ.drag;
+  if (d && window.mgp && window.mgp.setPanelGeometry) {
+    // bords EXACTS de la fenêtre au mousedown (bounds renvoyées par le main, CSS px)
+    const req = { type: 'resize', w, h };
+    if (d.corner.includes('w')) { req.anchorX = 'right'; req.right = d.startLeft + d.startW; } // bord droit fixe
+    else { req.anchorX = 'left'; req.left = d.startLeft; } // bord gauche fixe (coins e)
+    if (d.corner.includes('n')) { req.anchorY = 'bottom'; req.bottom = d.startTop + d.startH; } // bord bas fixe
+    else { req.anchorY = 'top'; req.top = d.startTop; } // bord haut fixe (coins s)
+    window.mgp.setPanelGeometry(req);
+  } else {
+    try { window.resizeTo(w, h); } catch (e) { /* no-op Electron, ignoré */ }
+  }
 }
 // Les presets S/M/L/XL : cycle depuis la taille courante (le « plus proche vers le haut ») ; le choix est mémorisé
 function rzCyclePreset() {
@@ -1715,7 +1728,13 @@ function rzCyclePreset() {
     e.preventDefault();
     // 🐛 Fix resize inversé (1/2) : les facteurs étaient à l'envers — tirer le coin
     // GAUCHE vers la droite doit RÉTRÉCIR (dx=-1), pas agrandir. Idem pour le haut (dy=-1).
-    RZ.drag = { corner, startX: e.screenX, startY: e.screenY, startW: window.innerWidth, startH: window.innerHeight, dx: corner.includes('w') ? -1 : 1, dy: corner.includes('n') ? -1 : 1 };
+    // 🐛 fix 2.19.0 : bounds exactes depuis le main (screenX côté renderer n'est pas fiable en Retina)
+    let bLeft = window.screenX, bTop = window.screenY, bW = window.innerWidth, bH = window.innerHeight;
+    try {
+      const b = window.mgp && window.mgp.getPanelGeometry && window.mgp.getPanelGeometry();
+      if (b) { bLeft = b.x; bTop = b.y; bW = b.width; bH = b.height; }
+    } catch (err) { /* fallback DOM */ }
+    RZ.drag = { corner, startX: e.screenX, startY: e.screenY, startW: bW, startH: bH, startLeft: bLeft, startTop: bTop, dx: corner.includes('w') ? -1 : 1, dy: corner.includes('n') ? -1 : 1, moved: false };
     document.body.classList.add('rz-dragging');
   });
   document.body.appendChild(h);
@@ -1725,6 +1744,7 @@ document.addEventListener('mousemove', (e) => {
   const d = RZ.drag;
   const dw = (e.screenX - d.startX) * d.dx;
   const dh = (e.screenY - d.startY) * d.dy;
+  d.moved = true;
   // 🐛 Fix resize inversé (2/2) : 1 px de souris = 1 px de fenêtre (l'ancien facteur ×2
   // doublait l'inversion et faisait « fuir » la fenêtre sous le curseur).
   let w = d.startW + dw, h = d.startH + dh;
@@ -1738,12 +1758,12 @@ document.addEventListener('mousemove', (e) => {
   }
   const th = Math.round(wa.h * 0.5);
   if (Math.abs(h - th) < SNAP) { h = th; d.snapH = 0.5; }
-  // Le coin opposé ne bouge pas : on repositionne la fenêtre pour ancrer les bords fixes
-  // (bord droit ancré quand on saisit un coin gauche, bord bas quand on saisit le haut).
+  // 🐛 fix 2.19.0 : ancrage des bords opposés DANS rzResize via IPC (window.moveTo = no-op en
+  // fenêtre principale). Ce bloc ne sert plus que de secours si l'IPC est indisponible.
   let left = null, top = null;
-  if (d.corner.includes('w')) left = d.startX + d.startW - w;
-  if (d.corner.includes('n')) top = d.startY + d.startH - h;
-  if (left !== null || top !== null) {
+  if (d.corner.includes('w')) left = d.startLeft + d.startW - w;
+  if (d.corner.includes('n')) top = d.startTop + d.startH - h;
+  if ((left !== null || top !== null) && d.moved && (!window.mgp || !window.mgp.setPanelGeometry)) {
     try { window.moveTo(left !== null ? left : window.screenX, top !== null ? top : window.screenY); } catch (e2) { /* certains WM limitent moveTo */ }
   }
   rzResize(w, h);

@@ -1092,7 +1092,11 @@ const sJs37 = fs.readFileSync(path.join(__dirname, 'settings.js'), 'utf8');
 const tSrc37 = fs.readFileSync(path.join(__dirname, 'theme.js'), 'utf8');
 check(/dx: corner\.includes\('w'\) \? -1 : 1/.test(rSrc37) && /dy: corner\.includes\('n'\) \? -1 : 1/.test(rSrc37), 'renderer : facteurs resize corrigés (coin gauche = rétrécit)');
 check(!/startW \+ dw \* 2/.test(rSrc37) && /startW \+ dw/.test(rSrc37), 'renderer : plus de facteur ×2 (1 px souris = 1 px fenêtre)');
-check(/window\.moveTo/.test(rSrc37), 'renderer : coin opposé ancré (moveTo pendant le glisser)');
+// 🐛 fix 2.19.0 : resize routé via IPC — window.resizeTo/moveTo sont des no-ops dans la fenêtre principale
+check(rSrc37.includes('setPanelGeometry') && rSrc37.includes('getPanelGeometry'), 'renderer : resize routé via IPC setPanelGeometry/getPanelGeometry (resizeTo = no-op Electron)');
+check(/anchorX.*'right'/.test(rSrc37) && /anchorY.*'bottom'/.test(rSrc37), 'renderer : ancrage du bord opposé au drag (coins w/n ancrent droite/bas)');
+check(mainSrc37.includes("ipcMain.on('panelGeometry'") && mainSrc37.includes('setContentSize'), 'main : handler panelGeometry applique setContentSize + repositionne');
+check(pSrc37.includes('setPanelGeometry') && pSrc37.includes('getPanelGeometry'), 'preload : pont setPanelGeometry/getPanelGeometry exposé');
 check(rSrc37.includes('hoverPopupEnabled') && /popFor/.test(rSrc37), 'renderer : popup flottant interactif au survol');
 check(rSrc37.includes('"pact fav"') && rSrc37.includes('"pact run"'), 'renderer+CSS : boutons favori/lancer dans le popup');
 check(/PREFS\.hoverPopup/.test(mainSrc37) && /hoverpopup/.test(sHtml37) && /hoverPopup: hoverPopupCb/.test(sJs37), 'option Réglages : hoverPopup persisté + checkbox');
