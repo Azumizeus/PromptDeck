@@ -28,3 +28,15 @@ node_modules/
 /interface set seeker - nexus/
 /skill/
 /.opencode/
+
+# Outils locaux ChatDeck / cognee / PDF (écosystème perso, hors pack)
+/scripts/deck.mjs
+/scripts/build-chatdeck-pack.mjs
+/scripts/chatdeck.sh
+/scripts/search.mjs
+/scripts/promptdeck-README.md
+/scripts/promptdeck-sync.sh
+/scripts/cognee-deferred-add.py
+/scripts/cognee-mcp-toggle.sh
+/scripts/pdftotext.mjs
+/scripts/pdftotext.sh
