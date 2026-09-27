@@ -2,7 +2,7 @@
 
 # ⚡ PromptDeck
 
-**133 skills + 190 agents IA dans ta barre de menus macOS — en un ⌥Espace.**
+**177 skills + 231 agents IA dans ta barre de menus macOS — en un ⌥Espace.**
 
 Recherche instantanée, prompts personnalisés, envoi vers 12 destinations
 (Claude, ChatGPT, Freebuff, OpenCode…) en un clic.
@@ -145,7 +145,7 @@ osascript -e 'tell application "System Events" to get the name of every login it
 ### 5. Installer depuis ce dépôt (build local)
 
 Le script construit `dist/MEGA PACK.app` (catalogue embarqué + signature ad-hoc) et
-`test-app.sh` le vérifie (22 vérifications : structure, catalogue 133+190, signature, lancement réel) :
+`test-app.sh` le vérifie (22 vérifications : structure, catalogue 177+231, signature, lancement réel) :
 
 ```bash
 git clone https://github.com/Azumizeus/PromptDeck.git
@@ -198,8 +198,8 @@ PromptDeck/
 │   ├── menubar-app/        ← l'app Electron V1 (main.js, renderer.js, tests, build-app.sh)
 │   ├── menubar-app-luxe/   ← l'app Electron **Édition Luxe** (tooltip, clic droit multi-LLM, Atelier IA, MEGA PROMPT)
 │   ├── interface/          ← launcher HTML, panneau Tampermonkey, catalogue 323 items, MODE-DEMPLOI
-│   ├── skills/             ← 133 skills (SKILL.md)
-│   └── agents/             ← 190 agents (fiches de rôle système)
+│   ├── skills/             ← 177 skills (SKILL.md)
+│   └── agents/             ← 231 agents (fiches de rôle système)
 ├── skill/skills/           ← bibliothèques tierces (Solana, Jupiter, Metaplex…)
 ├── LICENSE                 ← MIT
 └── CONTRIBUTING.md         ← guide de contribution

@@ -177,7 +177,7 @@ sandbox.window.mgp = {
   promptDirOpen: async () => true,
   promptMdCreate: async (it) => mdStore.push(it) && { ok: true, path: `/virtuel/MEGA PROMPT/${it.k}/${it.x.name}.md` },
   sourceReveal: async (p) => revealed.push(p) && { ok: true, path: p },
-  promptTreeSync: async () => ({ ok: true, count: 326 }),
+  promptTreeSync: async () => ({ ok: true, count: 408 }),
   workshopMdCreate: async () => ({ ok: true, path: '/virtuel/x.md' }),
   // Sélecteur LLM du footer (harnais : la pref change, comme le main process réel)
   setDefaultLLM: (t) => { defaultLLMStore = t; },
@@ -1205,7 +1205,7 @@ console.log('\n── 43. Garde-fou décomptes docs ↔ catalogue (anti-drift)')
 const catalogSrc43 = fs.readFileSync(path.join(__dirname, '..', 'interface', 'catalog-full.js'), 'utf8');
 const catalog43 = new Function(catalogSrc43 + ';return MEGA_CATALOG;')();
 const realSkills43 = catalog43.skills.length, realAgents43 = catalog43.agents.length;
-check(realSkills43 === 136 && realAgents43 === 190, `catalogue réel : ${realSkills43} skills + ${realAgents43} agents attendus`);
+check(realSkills43 === 177 && realAgents43 === 231, `catalogue réel : ${realSkills43} skills + ${realAgents43} agents attendus`);
 check(catalog43.meta && catalog43.meta.version === '0.7.4', 'catalogue régénéré avec meta.version = 0.7.4');
 const DOC_FILES43 = [
   path.join(__dirname, '..', 'README.md'),

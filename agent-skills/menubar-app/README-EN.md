@@ -1,6 +1,6 @@
 # ⚡ MEGA PACK — macOS menu-bar app
 
-Global search and one-click activation of the **136 skills + 190 agents** from the menu bar.
+Global search and one-click activation of the **177 skills + 231 agents** from the menu bar.
 
 🇫🇷 Version française : [`README.md`](README.md)
 

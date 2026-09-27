@@ -1,7 +1,7 @@
 # 📚 Guide Complet des Commandes, Agents et Skills
 
 > **Dernière mise à jour :** 19 septembre 2026
-> **Total :** 136 skills et 190 agents disponibles (mega pack)
+> **Total :** 177 skills et 231 agents disponibles (mega pack)
 
 ---
 

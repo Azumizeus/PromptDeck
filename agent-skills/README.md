@@ -457,7 +457,7 @@ The portable core stays in shared directories. Host-specific paths are native di
 
 | Layer / consumer | Repository paths | Purpose |
 |---|---|---|
-| Shared workflow core | `skills/` (136 skills : 25 lifecycle + 46 solana-protocols + 7 game-design + 3 packs blockchain/jupiter/lightprotocol + Cloudflare security-audit) | Portable `SKILL.md` workflows used by every integration |
+| Shared workflow core | `skills/` (177 skills : 25 lifecycle + 46 solana-protocols + 7 game-design + 3 packs blockchain/jupiter/lightprotocol + Cloudflare security-audit) | Portable `SKILL.md` workflows used by every integration |
 | Shared review material | `agents/` (190 personas), `references/` (7 checklists) | Specialist reviewers and pack-level checklists carried by whole-repo installs |
 | Claude Code adapter | `.claude/commands/` (10 commands), `.claude-plugin/`, `hooks/` | Slash-command wrappers, marketplace metadata, and lifecycle hooks |
 | Gemini CLI adapter | `.gemini/commands/` (10 commands) | Gemini-native TOML command wrappers |

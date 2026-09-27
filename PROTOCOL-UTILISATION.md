@@ -1,7 +1,7 @@
 # 🧭 PROTOCOLE D'UTILISATION — set d'agents & skills (megapack)
 
 > Guide de décision : **quel agent, quel skill, sur quel hôte, quand**.
-> Source de vérité des agents : [`AGENTS-CATALOGUE.md`](./AGENTS-CATALOGUE.md) (190 agents) · skills : `agent-skills/skills/` (40).
+> Source de vérité des agents : [`AGENTS-CATALOGUE.md`](./AGENTS-CATALOGUE.md) (231 agents) · skills : `agent-skills/skills/` (177).
 > Mis à jour : 25 septembre 2026.
 
 ---
@@ -115,7 +115,7 @@ bash scripts/cognee-mcp-toggle.sh off      # désactiver (défaut : coût au dé
 
 | Outil | Adresse / port | Usage | Coût |
 |---|---|---|---|
-| **OpenCode** | CLI | agent principal, 190 subagents | ~23 s de démarrage sans cognee |
+| **OpenCode** | CLI | agent principal, 231 subagents | ~23 s de démarrage sans cognee |
 | **ChatDeck** | http://localhost:5199 | chat LLM maison (Svelte 5 + TS + Vite), OpenRouter / NVIDIA / Cohere / Mistral | onglet, 0 Mo |
 | **Headroom** | http://127.0.0.1:8787 | compression de tokens, LaunchAgent `ai.headroom.proxy` | ~9 % CPU à chaud |
 | **cognee MCP** | stdio | mémoire partagée, 11 outils | off par défaut |

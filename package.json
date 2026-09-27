@@ -2,7 +2,7 @@
   "name": "promptdeck",
   "private": true,
   "version": "2.2.0",
-  "description": "PromptDeck — 136 skills + 190 agents IA dans la barre de menus macOS (voir README.md)",
+  "description": "PromptDeck — 177 skills + 231 agents IA dans la barre de menus macOS (voir README.md)",
   "license": "MIT",
   "scripts": {
     "catalogue:agents": "node scripts/generate-agents-catalogue.js",

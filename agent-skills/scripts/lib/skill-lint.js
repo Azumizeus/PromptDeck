@@ -65,6 +65,9 @@ const SECTION_EXEMPT_SKILLS = {
   'solana-anchor-claude-skill': 'Imported Solana/Anchor skill — upstream format, not the skill-anatomy template.',
   'solana-dev-skill':       'Imported Solana dev skill — upstream format, not the skill-anatomy template.',
   'solana-game-skill':      'Imported Solana game skill — upstream format, not the skill-anatomy template.',
+  'tutor':       'Imported Obsidian StudyVault skill — upstream format (argument-hint/allowed-tools), not the skill-anatomy template.',
+  'tutor-setup': 'Imported Obsidian StudyVault skill — upstream format (argument-hint/allowed-tools), not the skill-anatomy template.',
+  'graphify':    'Imported knowledge-graph skill — upstream format, not the skill-anatomy template.',
 };
 
 // Regex patterns that indicate an explicit cross-skill reference.

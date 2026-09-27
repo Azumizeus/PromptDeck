@@ -1,6 +1,6 @@
 # 🛠️ MODE D'EMPLOI — quoi utiliser, pour faire quoi, et comment
 
-> Guide pratique du set d'agents. Pour **les règles de décision**, voir [`PROTOCOL-UTILISATION.md`](./PROTOCOL-UTILISATION.md). Pour **la liste des 190 agents**, voir [`AGENTS-CATALOGUE.md`](./AGENTS-CATALOGUE.md).
+> Guide pratique du set d'agents. Pour **les règles de décision**, voir [`PROTOCOL-UTILISATION.md`](./PROTOCOL-UTILISATION.md). Pour **la liste des 231 agents**, voir [`AGENTS-CATALOGUE.md`](./AGENTS-CATALOGUE.md).
 > Toutes les commandes ci-dessous sont réelles et testées sur cette machine. Mis à jour : 25 septembre 2026.
 
 ---

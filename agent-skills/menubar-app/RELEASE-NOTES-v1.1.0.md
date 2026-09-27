@@ -1,6 +1,11 @@
 # MEGA PACK v1.1.0 — Notes de release
 
 > Date : 27 septembre 2026 · Runtime Electron 33.4.11 · Catalogue : **136 skills · 190 agents · 326 experts** (326 items embarqués)
+>
+> **ADDENDUM (27/09, post-release)** : fusion de l'ancien layout `skill/` (+41 agents, +3 skills) et
+> ajout des 38 skills du « My Claude resource vault » → catalogue porté à **177 skills · 231 agents ·
+> 408 experts**. Les DMG ci-dessous embarquent le catalogue 326 items de la release ; les builds
+> suivants embarqueront 408 items.
 
 ## 🆕 Aide contextuelle ⌘⌥/
 

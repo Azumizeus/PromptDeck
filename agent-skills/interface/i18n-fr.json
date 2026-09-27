@@ -1286,5 +1286,157 @@
   "security-audit": {
     "name": "Audit de sécurité (Cloudflare)",
     "desc": "Audit de sécurité multi-phases issu de Cloudflare (skill à l'origine de leur harnais interne de découverte de vulnérabilités). 6 phases orchestrées par agents isolés : 1) Reconnaissance → architecture.md + coverage-ledger.json ; 2) Chasse guidée par couverture avec critiques de couverture ; 3) Validation adversariale — le vérificateur n'est jamais le découvreur ; 4) Sortie structurée findings.json (verdicts confirmed / needs_validation / rejected, validés par report-schema.json) ; 5) Vérification indépendante des enregistrements ; 6) Rapport neutre REPORT.md + FINDINGS-DETAIL.md + NEEDS-VALIDATION.md. 15 guides de classes d'attaques : web/protocole/auth, cache, client-side (DOM, prototype pollution), supply-chain & release, cloud/IaC/serverless, RPC & messaging, épuisement de ressources, isolation multi-tenant, desktop/mobile/IPC, memory-safety/binaire, IA & LLM (prompt injection). Mode « guidance » par défaut pour les questions ciblées ; workflow complet sur demande explicite d'audit ou de pentest. Exécutions multiples additives : chaque run cible les trous de couverture restants. Validateurs Node zero-dependency inclus (65 tests)."
+  },
+  "learn-claude-code": {
+    "name": "Apprendre Claude Code",
+    "desc": "Ressource d'apprentissage : comment fonctionnent les agents Claude Code (subagents, hooks, skills, MCP). À utiliser pour comprendre le modèle d'agents avant d'en construire."
+  },
+  "karpathy-skills": {
+    "name": "Discipline Karpathy",
+    "desc": "Vérifications de discipline inspirées de Karpathy : pas de sur-ingénierie, pas d'abstraction prématurée, pas de code trop malin. À utiliser pour simplifier du code ou relire des choix de conception."
+  },
+  "superpowers": {
+    "name": "Superpowers",
+    "desc": "Cadre de workflow planifier-construire-tester avec brainstorming, planification et TDD imposé. À utiliser pour mener une fonctionnalité de l'idée au code testé."
+  },
+  "ponytail": {
+    "name": "Simplicité (Ponytail)",
+    "desc": "Discipline de simplicité : petits diffs, peu d'abstractions, pas de généricité spéculative. À utiliser en écriture ou relecture de code contre la sur-ingénierie."
+  },
+  "gstack": {
+    "name": "Gstack",
+    "desc": "Couche de planification et de revue : graphes de tâches, points de contrôle et validations. À utiliser quand un projet multi-étapes exige des jalons et des revues structurées."
+  },
+  "ecc": {
+    "name": "ECC",
+    "desc": "Regroupe skills, mémoire persistante et vérifications préalables pour Claude Code. À utiliser quand un assistant a besoin de structure, de mémoire et de garde-fous ensemble."
+  },
+  "oh-my-claudecode": {
+    "name": "Coordination d'équipes d'agents",
+    "desc": "Schémas de coordination d'équipes d'agents : orchestrateur, spécialistes, passations. À utiliser pour découper un projet entre plusieurs agents de code."
+  },
+  "archon": {
+    "name": "Archon",
+    "desc": "Construit des workflows reproductibles à partir de modèles : échafaudage, raffinement, vérification. À utiliser pour transformer un processus ad-hoc en pipeline réutilisable."
+  },
+  "taste-skill": {
+    "name": "Go design",
+    "desc": "Grille de goût pour les interfaces : hiérarchie, espacement, contraste et retenue. À utiliser en revue esthétique d'UI ou avant de livrer un écran."
+  },
+  "anthropics-skills": {
+    "name": "Skills officiels Anthropic",
+    "desc": "Index des skills officiels d'Anthropic (documents, artifacts, outillage web). À utiliser pour chercher une implémentation canonique avant d'écrire un nouveau skill."
+  },
+  "mattpocock-skills": {
+    "name": "Skills TypeScript (Matt Pocock)",
+    "desc": "Skills d'ingénierie TypeScript : types, génériques, design d'API. À utiliser en écriture ou relecture de TS fortement typé."
+  },
+  "wshobson-agents": {
+    "name": "Agents spécialistes (wshobson)",
+    "desc": "Grande bibliothèque de définitions de subagents spécialistes (ingénierie, design, data). À utiliser quand une tâche réclame une persona experte à qui déléguer."
+  },
+  "claude-plugins": {
+    "name": "Plugins Claude",
+    "desc": "Catalogue de plugins Claude Code officiels et communautaires avec instructions d'installation. À utiliser pour étendre Claude Code avant de réinventer."
+  },
+  "addyosmani-skills": {
+    "name": "Contrôles qualité (Addy Osmani)",
+    "desc": "Contrôles qualité d'ingénierie : revue de code, TDD, discipline de débogage. À utiliser pour imposer une discipline de workflow sur les tâches de code."
+  },
+  "ui-ux-pro-max": {
+    "name": "UI/UX Pro",
+    "desc": "Conseils UI/UX senior : design systems, accessibilité, patterns d'interaction, contenus. À utiliser pour concevoir ou auditer des interfaces produit de bout en bout."
+  },
+  "awesome-claude-skills": {
+    "name": "Annuaire de skills communautaires",
+    "desc": "Index communautaire de skills Claude, classés et commentés. À utiliser pour découvrir des skills existants plutôt que d'en écrire."
+  },
+  "planning-with-files": {
+    "name": "Planification en fichiers",
+    "desc": "Garde plans, décisions et avancement dans des fichiers simples à côté du code, repris par n'importe quel agent. À utiliser quand le travail s'étale sur plusieurs sessions."
+  },
+  "claude-mem": {
+    "name": "Mémoire persistante (claude-mem)",
+    "desc": "Couche de mémoire persistante pour Claude Code : se souvenir des décisions et faits entre les sessions. À utiliser quand l'assistant doit retenir le travail passé."
+  },
+  "codegraph": {
+    "name": "Graphe de code",
+    "desc": "Cartographie les relations du code (imports, graphes d'appels, modules) en graphe requêtable. À utiliser pour naviguer ou refactorer une base inconnue."
+  },
+  "repomix": {
+    "name": "Repomix",
+    "desc": "Compile un dépôt entier en un seul fichier structuré et lisible par un LLM. À utiliser pour partager une base de code avec un modèle qui ne peut pas parcourir les fichiers."
+  },
+  "agentmemory": {
+    "name": "Mémoire d'agents",
+    "desc": "Donne aux agents une mémoire persistante et structurée : faits, préférences, état projet. À utiliser quand un agent durable doit se rappeler au-delà de la fenêtre de contexte."
+  },
+  "beads": {
+    "name": "Beads (suivi de tâches)",
+    "desc": "Suit les tâches entre les sessions via un registre local synchronisé à git. À utiliser quand les tâches survivent à une session de chat."
+  },
+  "multica": {
+    "name": "Multica (assignation d'issues)",
+    "desc": "Assigne des issues GitHub à des agents de code et achemine leurs résultats. À utiliser pour répartir le travail entre plusieurs agents IA."
+  },
+  "firecrawl": {
+    "name": "Firecrawl",
+    "desc": "Transforme des sites web en markdown/texte propres pour les LLM : crawl, scrape, recherche. À utiliser quand un agent a besoin de contenu web fiable."
+  },
+  "cc-switch": {
+    "name": "CC Switch (configurations)",
+    "desc": "Gère et bascule entre plusieurs configurations d'outils de code : API, providers, réglages. À utiliser quand on jongle entre plusieurs setups Claude/Codex."
+  },
+  "context7": {
+    "name": "Context7 (docs à jour)",
+    "desc": "Récupère à la demande la documentation à jour des bibliothèques pour les agents. À utiliser quand une réponse exige des docs actuelles plutôt qu'une approximation de mémoire."
+  },
+  "vibe-kanban": {
+    "name": "Vibe Kanban",
+    "desc": "Tableau kanban pour gérer les tâches des agents et suivre leur avancement. À utiliser pour orchestrer visuellement de nombreux travaux d'agents."
+  },
+  "github-mcp": {
+    "name": "GitHub MCP",
+    "desc": "Serveur MCP exposant issues, PR, dépôts et actions GitHub à Claude. À utiliser pour automatiser des workflows GitHub depuis un chat."
+  },
+  "playwright-mcp": {
+    "name": "Playwright MCP",
+    "desc": "Serveur MCP permettant à Claude de piloter un vrai navigateur via Playwright. À utiliser pour tester ou inspecter des apps web de bout en bout."
+  },
+  "serena": {
+    "name": "Serena (navigation sémantique)",
+    "desc": "Boîte à outils de recherche et d'édition sémantique du code (LSP). À utiliser quand la navigation au niveau des symboles compte plus que grep."
+  },
+  "claude-code-router": {
+    "name": "Routeur Claude Code",
+    "desc": "Aiguise les requêtes de Claude Code entre providers et modèles selon des règles. À utiliser pour optimiser coût, vitesse ou disponibilité des appels."
+  },
+  "awesome-mcp-servers": {
+    "name": "Annuaire de serveurs MCP",
+    "desc": "Répertoire commenté de serveurs MCP, classés par catégorie. À utiliser pour chercher un connecteur existant avant d'en construire un."
+  },
+  "system-prompts-ai": {
+    "name": "Prompts système (étude)",
+    "desc": "Collection de vrais prompts système d'outils IA pour les étudier. À utiliser pour concevoir ou comparer ses propres prompts système."
+  },
+  "best-practice": {
+    "name": "Bonnes pratiques Claude Code",
+    "desc": "Recueil de bonnes pratiques Claude Code : CLAUDE.md, permissions, workflows. À utiliser pour régler un setup personnel ou d'équipe."
+  },
+  "codex-plugin-cc": {
+    "name": "Codex dans Claude Code",
+    "desc": "Plugin qui apporte les revues d'OpenAI Codex dans Claude Code. À utiliser pour ajouter l'œil d'un second modèle à ses revues."
+  },
+  "claude-hud": {
+    "name": "Claude HUD (usage)",
+    "desc": "Affiche usage, contexte et coût de la session dans le terminal. À utiliser pour surveiller la consommation de tokens sur les longues sessions."
+  },
+  "rtk": {
+    "name": "RTK (sorties élaguées)",
+    "desc": "Élague et colorise les sorties de commandes pour que les agents lisent moins de bruit. À utiliser quand les sorties d'outils noient la fenêtre de contexte."
+  },
+  "caveman": {
+    "name": "Caveman (réponses brèves)",
+    "desc": "Consigne de style : réponses très courtes et minimales. À utiliser quand on veut des réponses bien plus brèves."
   }
 }

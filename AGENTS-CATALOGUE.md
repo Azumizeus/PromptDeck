@@ -1,6 +1,6 @@
-# 📇 AGENTS-CATALOGUE — Les 190 agents spécialistes
+# 📇 AGENTS-CATALOGUE — Les 231 agents spécialistes
 
-> **Généré le :** 27 septembre 2026 · **Total :** 190 agents
+> **Généré le :** 27 septembre 2026 · **Total :** 231 agents
 > Source : `agent-skills/agents/` — rôle = première phrase de la `description` de chaque agent
 > 🇫🇷 Colonne Rôle traduite en français (`scripts/agents-roles-fr.json`)
 > 💡 **Pour savoir *lequel* choisir et *quand***, voir [`PROTOCOL-UTILISATION.md`](./PROTOCOL-UTILISATION.md) et [`MODE-EMPLOI.md`](./MODE-EMPLOI.md).
@@ -13,15 +13,56 @@
 | OpenCode | `~/.config/opencode/agents/` | subagent markdown (`mode: subagent`) — invoquables via `@nom` |
 | Freebuff / Codex | `~/.agents/skills/agent-<nom>/SKILL.md` | Agent Skills (progressive disclosure + triggers) |
 
-OpenCode : vérifié via `opencode agent list` → 190 agents + 2 built-in = 192 subagents.
+OpenCode : vérifié via `opencode agent list` → 231 agents + 2 built-in = 233 subagents.
 
-## Core (racine) (4)
+## Core (racine) (45)
 
 | Agent | Rôle |
 |-------|------|
+| `agents-orchestrator` | Autonomous pipeline manager that orchestrates the entire development workflow. |
+| `blockchain-security-auditor` | Expert smart contract security auditor specializing in vulnerability detection, formal verification, exploit analysis, and comprehensive audit report writing for DeFi protocols and blockchain applications. |
 | `code-reviewer` | Relecteur de code senior qui évalue les modifications selon cinq dimensions — correction, lisibilité, architecture, sécurité et performance. |
+| `design-brand-guardian` | Expert brand strategist and guardian specializing in brand identity development, consistency maintenance, and strategic brand positioning. |
+| `design-ui-designer` | Expert UI designer specializing in visual design systems, component libraries, and pixel-perfect interface creation. |
+| `design-ux-architect` | Technical architecture and UX specialist who provides developers with solid foundations, CSS systems, and clear implementation guidance. |
+| `engineering-backend-architect` | Senior backend architect specializing in scalable system design, database architecture, API development, and cloud infrastructure. |
+| `engineering-code-reviewer` | Expert code reviewer who provides constructive, actionable feedback focused on correctness, maintainability, security, and performance — not style preferences. |
+| `engineering-codebase-onboarding-engineer` | Expert developer onboarding specialist who helps new engineers understand unfamiliar codebases fast by reading source code, tracing code paths, and stating only facts grounded in the code. |
+| `engineering-devops-automator` | Expert DevOps engineer specializing in infrastructure automation, CI/CD pipeline development, and cloud operations. |
+| `engineering-frontend-developer` | Expert frontend developer specializing in modern web technologies, React/Vue/Angular frameworks, UI implementation, and performance optimization. |
+| `engineering-git-workflow-master` | Expert in Git workflows, branching strategies, and version control best practices including conventional commits, rebasing, worktrees, and CI-friendly branch management. |
+| `engineering-minimal-change-engineer` | Engineering specialist focused on minimum-viable diffs — fixes only what was asked, refuses scope creep, prefers three similar lines over a premature abstraction. |
+| `engineering-mobile-app-builder` | Specialized mobile application developer with expertise in native iOS/Android development and cross-platform frameworks. |
+| `engineering-rapid-prototyper` | Specialized in ultra-fast proof-of-concept development and MVP creation using efficient tools and frameworks. |
+| `engineering-security-engineer` | Expert application security engineer specializing in threat modeling, vulnerability assessment, secure code review, security architecture design, and incident response for modern web, API, and cloud-native applications. |
+| `engineering-software-architect` | Expert software architect specializing in system design, domain-driven design, architectural patterns, and technical decision-making for scalable, maintainable systems. |
+| `engineering-technical-writer` | Expert technical writer specializing in developer documentation, API references, README files, and tutorials. |
+| `finance-bookkeeper-controller` | Expert bookkeeper and controller specializing in day-to-day accounting operations, financial reconciliations, month-end close processes, and internal controls. |
+| `finance-tax-strategist` | Expert tax strategist specializing in tax optimization, multi-jurisdictional compliance, transfer pricing, and strategic tax planning. |
+| `game-designer` | Systems and mechanics architect - Masters GDD authorship, player psychology, economy balancing, and gameplay loop design across all engines and genres. |
+| `godot-gameplay-scripter` | Composition and signal integrity specialist - Masters GDScript 2.0, C# integration, node-based architecture, and type-safe signal design for Godot 4 projects. |
+| `godot-multiplayer-engineer` | Godot 4 networking specialist - Masters the MultiplayerAPI, scene replication, ENet/WebRTC transport, RPCs, and authority models for real-time multiplayer games. |
+| `godot-shader-developer` | Godot 4 visual effects specialist - Masters the Godot Shading Language (GLSL-like), VisualShader editor, CanvasItem and Spatial shaders, post-processing, and performance optimization for 2D/3D effects. |
+| `legal-document-review` | Comprehensive legal document review specialist for contracts, litigation documents, and real estate agreements — summarizing documents, flagging risk clauses, comparing contract versions, and checking compliance across any law firm size or practice area. |
+| `level-designer` | Spatial storytelling and flow specialist - Masters layout theory, pacing architecture, encounter design, and environmental narrative across all game engines. |
+| `marketing-app-store-optimizer` | Expert app store marketing specialist focused on App Store Optimization (ASO), conversion rate optimization, and app discoverability. |
+| `marketing-content-creator` | Expert content strategist and creator for multi-platform campaigns. |
+| `marketing-growth-hacker` | Expert growth strategist specializing in rapid user acquisition through data-driven experimentation. |
+| `marketing-twitter-engager` | Expert Twitter marketing specialist focused on real-time engagement, thought leadership building, and community-driven growth. |
+| `mica-compliance-specialist` | Spécialiste en régulation crypto européenne (Markets in Crypto-Assets Regulation). |
+| `narrative-designer` | Story systems and dialogue architect - Masters GDD-aligned narrative design, branching dialogue, lore architecture, and environmental storytelling across all game engines. |
+| `product-manager` | Holistic product leader who owns the full product lifecycle — from discovery and strategy through roadmap, stakeholder alignment, go-to-market, and outcome measurement. |
+| `product-sprint-prioritizer` | Expert product manager specializing in agile sprint planning, feature prioritization, and resource allocation. |
+| `project-manager-senior` | Converts specs to tasks and remembers previous projects. |
 | `security-auditor` | Ingénieur sécurité axé sur la détection de vulnérabilités, la modélisation des menaces et les pratiques de codage sécurisées. |
+| `specialized-french-consulting-market` | Navigate the French ESN/SI freelance ecosystem — margin models, platform mechanics (Malt, collective.work), portage salarial, rate positioning, and payment cycle realities. |
+| `specialized-mcp-builder` | Expert Model Context Protocol developer who designs, builds, and tests MCP servers that extend AI agent capabilities with custom tools, resources, and prompts. |
+| `support-legal-compliance-checker` | Expert legal and compliance specialist ensuring business operations, data handling, and content creation comply with relevant laws, regulations, and industry standards across multiple jurisdictions. |
+| `technical-artist` | Art-to-engine pipeline specialist - Masters shaders, VFX systems, LOD pipelines, performance budgeting, and cross-engine asset optimization. |
 | `test-engineer` | Ingénieur QA spécialisé en stratégie de test, rédaction de tests et analyse de couverture. |
+| `testing-evidence-collector` | Screenshot-obsessed, fantasy-allergic QA specialist - Default to finding 3-5 issues, requires visual proof for everything. |
+| `testing-reality-checker` | Stops fantasy approvals, evidence-based certification - Default to "NEEDS WORK", requires overwhelming proof for production readiness. |
+| `tokenomics-designer` | Expert en design de tokenomics pour crypto-games et projets Solana. |
 | `web-performance-auditor` | Ingénieur performance web axé sur les Core Web Vitals, le chargement, le rendu et l'optimisation réseau. |
 
 ## Academic (5)
@@ -287,45 +328,86 @@ OpenCode : vérifié via `opencode agent list` → 190 agents + 2 built-in = 192
 - **Freebuff / Codex** : les skills `agent-*` sont annoncés dans le catalogue (progressive disclosure) ;
   l'agent les invoque quand la tâche correspond, et les `triggers` (mots-clés du nom) accélèrent l'activation.
 
-## Skills non-agents du pack (33)
+## Skills non-agents du pack (74)
 
 Skills portables installés à côté des agents (OpenCode, Claude, Freebuff / Codex) :
 
 | Skill | Description |
 |-------|-------------|
+| `addyosmani-skills` | Engineering quality checks: code review, TDD and debugging discipline. Use when enforcing workflow discipline on code tasks. |
+| `agentmemory` | Give agents persistent, structured memory stores: facts, preferences and project state. Use when long-lived agents need recall beyond the context window. |
+| `anthropics-skills` | Curated index of Anthropic's official example skills (documents, artifacts, web tooling). Use when looking for a canonical example before writing a new skill. |
 | `api-and-interface-design` | Guides stable API and interface design. Use when designing APIs, module boundaries, or any public interface. Use when creating REST or GraphQL endpoints, defining type contracts between modules, or establishing boundaries between frontend and backend. |
+| `archon` | Assemble repeatable coding workflows from templates: scaffold, refine, verify. Use when turning an ad-hoc process into a reusable pipeline. |
+| `awesome-claude-skills` | Community index of Claude skills with categories and picks. Use when discovering existing skills instead of writing new ones. |
+| `awesome-mcp-servers` | Curated directory of MCP servers with categories and quality notes. Use when looking for a connector before creating one. |
+| `beads` | Track work items across sessions with a local issue ledger synced to git. Use when tasks outlive a single chat session. |
+| `best-practice` | Collected best practices for Claude Code usage: CLAUDE.md, permissions, workflows. Use when tuning a personal or team setup. |
 | `browser-testing-with-devtools` | Tests in real browsers via Chrome DevTools MCP. Use when building or debugging anything that runs in a browser. Use when you need to inspect the DOM, capture console errors, analyze network requests, profile performance, or verify visual output with real runtime data. Requires the chrome-devtools MCP server to be configured. |
+| `caveman` | Style directive making Claude answer in terse, minimal replies. Use when you want much shorter answers. |
+| `cc-switch` | Manage and switch between coding tool configurations: APIs, providers, settings. Use when juggling several Claude or Codex setups. |
 | `ci-cd-and-automation` | Automates CI/CD pipeline setup. Use when setting up or modifying build and deployment pipelines. Use when you need to automate quality gates, configure test runners in CI, or establish deployment strategies. |
+| `claude-code-router` | Route Claude Code requests across providers and models with rules. Use when optimizing cost, speed or availability of model calls. |
+| `claude-hud` | Display session usage, context and cost in the terminal while coding. Use when monitoring token burn and limits during long sessions. |
+| `claude-mem` | Persistent memory layer for Claude Code: recall decisions and facts across sessions. Use when the assistant should remember past work. |
+| `claude-plugins` | Catalog of official and community Claude Code plugins with install instructions. Use when extending Claude Code before creating one from scratch. |
 | `code-review-and-quality` | Conducts multi-axis code review. Use before merging any change. Use when reviewing code written by yourself, another agent, or a human. Use when you need to assess code quality across multiple dimensions before it enters the main branch. |
 | `code-simplification` | Simplifies code for clarity. Use when refactoring code for clarity without changing behavior. Use when code works but is harder to read, maintain, or extend than it should be. Use when reviewing code that has accumulated unnecessary complexity. |
+| `codegraph` | Map code relationships (imports, call graphs, modules) into a queryable graph. Use when navigating or refactoring an unfamiliar codebase. |
+| `codex-plugin-cc` | Plugin bringing OpenAI Codex reviews into Claude Code. Use when adding a second model's review perspective to a workflow. |
 | `cognee-memory` | Interroge la mémoire partagée persistante des agents (serveur MCP cognee, local sur cette machine, datasets hub_architecture / hub_chatdeck / hub_agents). Use when the question porte sur l'historique, les décisions, les conventions ou la configuration du hub Mikael (projets, ports, stacks, providers, agents, scripts), quand l'utilisateur mentionne cognee, mémoire partagée, se souvenir, ou quand tu dois mémoriser une décision, une convention ou un fait durable. Contient la règle anti-hallucination : toujours appeler cognee recall avant de répondre sur le hub, et dire explicitement quand la mémoire est vide. |
 | `constraint-driven-development` | Establishes a project's quality bar as a written contract and stops agents quietly lowering it. Interviews the user on which dimensions matter, supplies sane default thresholds when they have no number in mind, records everything in CONSTRAINTS.md, and watches the diff for a weakened bar — new @ts-ignore or eslint-disable suppressions, skipped or deleted tests, assertions stripped out, unimplemented stubs, thresholds edited down. Use when no quality bar is written down, when the user says "set up constraints" or "define our standards", when the user wants dimensions they care about — accessibility, web performance, coverage — set up as enforced constraints, when an agent keeps silencing checks or skipping tests to get to green, when you need a coverage or performance threshold and don't know what number to pick, or when an agent writes more code than anyone will read. |
 | `context-engineering` | Optimizes agent context setup. Use when starting a new session, when agent output quality degrades, when switching between tasks, or when you need to configure rules files and context for a project. |
+| `context7` | Fetch up-to-date library documentation on demand for coding agents. Use when answers need current API docs instead of training-data guesses. |
 | `debugging-and-error-recovery` | Guides systematic root-cause debugging. Use when tests fail, builds break, something that worked yesterday broke, behavior doesn't match expectations, or you encounter any unexpected error. Use when you need to figure out what broke and why — a systematic approach to finding and fixing the root cause rather than guessing. |
 | `deprecation-and-migration` | Manages deprecation and migration. Use when removing old systems, APIs, or features. Use when migrating users from one implementation to another. Use when migrating a database schema in production, such as renaming or dropping a column without downtime (expand/contract). Use when deciding whether to maintain or sunset existing code. |
 | `documentation-and-adrs` | Records decisions and documentation. Use when you need to document an architecture decision (ADR) or the reasoning behind a design choice, when changing public APIs, shipping features, or when you need to record context that future engineers and agents will need to understand the codebase. |
 | `doubt-driven-development` | Subjects every non-trivial decision to a fresh-context adversarial review before it stands. Use when you want every assumption cross-examined before proceeding, when stress-testing a plan for hidden failure modes, when correctness matters more than speed, when working in unfamiliar code, when stakes are high (production auth, security-sensitive logic, a high-stakes migration, irreversible operations), or any time a confident output would be cheaper to verify now than to debug later. |
+| `ecc` | Bundles skills, persistent memory and pre-flight checks for Claude Code in one install. Use when an assistant needs structure, memory and safety checks together. |
+| `firecrawl` | Turn websites into clean markdown and text for LLM consumption: crawl, scrape, search. Use when an agent needs reliable web content. |
 | `frontend-ui-engineering` | Builds production-quality, accessible, responsive user-facing UIs. Use when building or modifying interfaces and pages, creating components, implementing layouts, meeting WCAG accessibility requirements, managing state, or when the output needs to look and feel production-quality rather than AI-generated. |
 | `git-workflow-and-versioning` | Structures git workflow practices. Use when making any code change. Use when committing, branching, resolving conflicts, splitting uncommitted work in a messy working tree into clean atomic commits, opening or reviewing a pull request (PR), pushing to a remote, or when you need to organize work across multiple parallel streams. Use when cutting a release, choosing a semantic version bump, tagging, or writing a changelog. |
+| `github-mcp` | MCP server exposing GitHub issues, PRs, repos and actions to Claude. Use when automating GitHub workflows from a chat. |
+| `graphify` | "Use for any question about a codebase, its architecture, file relationships, or project content — especially when graphify-out/ exists, where the question should be treated as a graphify query first. Turns any input (code, docs, papers, images, videos) into a persistent knowledge graph with god nodes, community detection, and query/path/explain tools." |
+| `gstack` | Planning and review workflow layer with task graphs, gates and sign-offs. Use when a multi-step project needs checkpoints and structured reviews. |
 | `headroom-compression` | Compress tool outputs, logs, JSON, code and files before they reach the LLM via the Headroom proxy running locally on port 8787. Use when token costs are high, context is bloated with repetitive tool output (grep results, build logs, large JSON), or when the user mentions headroom, compression, token savings, or cheaper agents. Also covers headroom CLI usage (wrap, doctor, dashboard, stats, learn) and the headroom MCP server tools (headroom_compress, headroom_retrieve, headroom_stats). |
 | `idea-refine` | Refines raw ideas into sharp, actionable concepts through structured divergent and convergent thinking. Use when an idea is still vague, when you need to stress-test assumptions before committing to a plan, or when you want to expand options before converging on one. Triggers on "ideate", "refine this idea", or "stress-test my plan". |
 | `incremental-implementation` | Delivers changes incrementally in thin, verifiable slices. Use when implementing any feature or change that touches more than one file, or when picking up the next task from a plan. Use when rolling a change out behind a feature flag, when you're about to write a large amount of code at once, or when a task feels too big to land in one step. |
 | `interview-me` | Extracts what the user actually wants instead of what they think they should want. Achieves this through one-question-at-a-time interview until ~95% confidence about the underlying intent. Use when an ask is underspecified ("build me X" without "for whom" or "why now"), when the user explicitly invokes ("interview me", "grill me", "are we sure?", "stress-test my thinking"), or when you catch yourself silently filling in ambiguous requirements before any plan, spec, or code exists. |
+| `karpathy-skills` | Coding discipline checks inspired by Andrej Karpathy: no over-engineering, no premature abstraction, no clever code. Use when simplifying code or reviewing design choices. |
+| `learn-claude-code` | Learning resource explaining how Claude Code agents work: subagents, hooks, skills and MCP. Use when learning or teaching the agent model before designing custom workflows. |
 | `llm-provider-cascade` | Route LLM requests through a fallback cascade of API providers (omniroute → freellm → groq → cerebras → mistral → cohere → gemini → openrouter → anthropic) so a chat, script or agent keeps working when one provider fails with 403, quota or network errors. Use when the user mentions provider cascade, fallback LLM routing, 403/quota errors on an API, multi-provider resilience, MEGA PACK chat cascade, or wants one prompt to try every configured API key (OpenCode auth.json, env vars) until one answers. |
+| `mattpocock-skills` | TypeScript-focused engineering skills on types, generics and API design. Use when writing or reviewing type-heavy TypeScript. |
+| `multica` | Assign issues from GitHub to coding agents and route results back. Use when triaging work across several AI coding agents. |
 | `observability-and-instrumentation` | Instruments code so production behavior is visible and diagnosable. Use when adding logging, metrics, tracing, or alerting. Use when shipping any feature that runs in production and you need evidence it works. Use when production issues are reported but you can't tell what happened from the available data. |
+| `oh-my-claudecode` | Agent-team coordination patterns: orchestrator, specialists and hand-offs. Use when decomposing a project across several coding agents. |
 | `performance-optimization` | Optimizes application performance across frontend, backend, queries, and databases. Use when performance requirements exist, when you suspect performance regressions, when Core Web Vitals or load times need improvement, when N+1 query patterns need fixing, or when profiling reveals bottlenecks. |
 | `planning-and-task-breakdown` | Breaks work into ordered tasks. Use when you have a spec or clear requirements and need to break work into implementable tasks. Use when a task feels too large to start, when you need to estimate scope, or when parallel work is possible. |
+| `planning-with-files` | Keep plans, decisions and progress in plain files next to the code so any agent can resume. Use when work spans multiple sessions or agents. |
+| `playwright-mcp` | MCP server letting Claude drive a real browser via Playwright. Use when driving or inspecting web apps end to end. |
+| `ponytail` | Keep-it-simple coding discipline: small diffs, few abstractions, no speculative generality. Use when writing or reviewing code to fight over-engineering. |
+| `repomix` | Pack an entire repository into one AI-friendly file with structure and headers. Use when sharing a codebase with an LLM that cannot browse files. |
+| `rtk` | Trim and colorize command output so agents read less noise. Use when tool output floods the context window. |
 | `security-and-hardening` | Hardens code against vulnerabilities. Use when auditing an input handler for vulnerabilities, when handling user input, authentication, data storage, or external integrations, or when checking a login flow is safe against the OWASP Top Ten. Use when building any feature that accepts untrusted data, manages user sessions, or interacts with third-party services. Use when auditing dependencies for known vulnerabilities, triaging package-manager audit findings, or assessing supply-chain risk in a new package. Use when personal data or privacy compliance (GDPR, CCPA) is involved. |
 | `security-audit` | Security guidance and vulnerability review for codebases, APIs, services, CLI tools, libraries, and daemons. Use for security questions, focused reviews, vulnerability research, security audits, or pen tests. Run the complete workflow only for explicit codebase audit or pen-test requests, full/comprehensive/end-to-end reviews, or requested report artifacts. |
+| `serena` | Semantic code search and edit toolkit backed by the language server. Use when precise, symbol-level code navigation matters more than grep. |
 | `shipping-and-launch` | Prepares production launches. Use when preparing to deploy to production, or when asking what needs to be in place before shipping. Use when you need a pre-launch checklist, when setting up monitoring, when planning a staged rollout, or when you need a rollback strategy. |
 | `solana-anchor-claude-skill` | "Use when working on Solana software, including one or more of: Solana client code using TypeScript, Rust libraries that use Solana crates, Anchor programs, including Rust program files, TypeScript tests, and Anchor.toml configuration. Designed to create minimal, reusable code without unnecessary duplication." |
 | `solana-dev-skill` | Use when user asks to "build a Solana dapp", "write an Anchor program", "create a token", "debug Solana errors", "set up wallet connection", "test my Solana program", "deploy to devnet", or "explain Solana concepts" (rent, accounts, PDAs, CPIs, etc.). End-to-end Solana development playbook covering wallet connection, Anchor/Pinocchio programs, Codama client generation, LiteSVM/Mollusk/Surfpool testing, and security checklists. Integrates with the Solana MCP server for live documentation search. Prefers framework-kit (@solana/client + @solana/react-hooks) for UI, wallet-standard-first connection (incl. ConnectorKit), @solana/kit for client/RPC code, and @solana/web3-compat for legacy boundaries. |
 | `solana-game-skill` | Use when building a game on Solana — Unity, React Native, or web titles where gameplay loops, player progression, or in-game economies must integrate with the blockchain. Gaming-specific patterns this skill covers that core Solana development does not: Solana.Unity-SDK for Unity, Mobile Wallet Adapter session keys, PlaySolana/PSG1, in-game NFT item systems, token-gated content, on-chain leaderboards and progression, and transaction flows tuned for game feel (batching, latency, failover). Use the core solana-dev skill instead for wallets, RPC, Anchor/Pinocchio programs, and dapp plumbing with no gameplay surface. |
 | `source-driven-development` | Grounds every implementation decision in official documentation. Use when you want to verify an approach against the official docs before implementing it, or when you want authoritative, source-cited code free from outdated patterns. Use when building with any framework or library where correctness matters. |
 | `spec-driven-development` | Creates specs before coding. Use when starting a new project, feature, or significant change and no specification exists yet. Use when drafting a PRD or requirements document with objectives and scope, or when requirements are unclear, ambiguous, or only exist as a vague idea. Use when a single requirement spans several independently testable capabilities and needs decomposing into a capability map of modules before specifying. |
+| `superpowers` | Feature lifecycle framework: brainstorming, planning and a red-green verification discipline. Use when driving a feature from idea to verified delivery. |
+| `system-prompts-ai` | Study collection of real system prompts from AI tools. Use when designing or benchmarking your own system prompts. |
+| `taste-skill` | Design taste rubric for interfaces: hierarchy, spacing, contrast and restraint. Use when reviewing UI aesthetics or before shipping an interface. |
 | `test-driven-development` | Drives development with tests using the red-green-refactor loop. Use when implementing any logic, fixing any bug, or changing any behavior. Use when you need to prove that code works, when a bug report arrives, or when you're about to modify existing functionality. |
+| `tutor` | > |
+| `tutor-setup` | > |
 | `typesafe-ai` | > |
+| `ui-ux-pro-max` | Senior UI/UX guidance: design systems, accessibility, interaction patterns and copy. Use when designing or auditing product interfaces end to end. |
 | `using-agent-skills` | Discovers and invokes agent skills. Use when starting a session, or when you need to decide which skill or workflow applies to the piece of work at hand. This is the meta-skill that governs how all other skills are discovered and invoked. |
+| `vibe-kanban` | Kanban board to manage agent tasks and monitor their progress. Use when orchestrating many agent jobs visually. |
+| `wshobson-agents` | Large library of specialist subagent definitions across engineering, design and data. Use when a task needs a domain expert persona to delegate to. |
 
 ---
 *Fichier généré automatiquement par `scripts/generate-agents-catalogue.js` — régénérer après ajout d'agents dans `agent-skills/agents/`.*

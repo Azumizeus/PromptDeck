@@ -125,15 +125,39 @@ footer a{color:var(--acc);text-decoration:none}
 <div class="toast" id="toast"></div>
 <script>
 // Catalogue complet MEGA PACK v0.7.4 — généré par build-interface.py
-// Skills: 136 | Agents: 190
+// Skills: 177 | Agents: 231
 const MEGA_CATALOG = {
  "meta": {
   "generated": "2026-09-26",
   "version": "0.7.4",
-  "skills": 136,
-  "agents": 190
+  "skills": 177,
+  "agents": 231
  },
  "skills": [
+  {
+   "name": "addyosmani-skills",
+   "desc": "Engineering quality checks: code review, TDD and debugging discipline. Use when enforcing workflow discipline on code tasks.",
+   "category": "addyosmani-skills",
+   "path": "skills/addyosmani-skills/",
+   "name_fr": "Contrôles qualité (Addy Osmani)",
+   "desc_fr": "Contrôles qualité d'ingénierie : revue de code, TDD, discipline de débogage. À utiliser pour imposer une discipline de workflow sur les tâches de code."
+  },
+  {
+   "name": "agentmemory",
+   "desc": "Give agents persistent, structured memory stores: facts, preferences and project state. Use when long-lived agents need recall beyond the context window.",
+   "category": "agentmemory",
+   "path": "skills/agentmemory/",
+   "name_fr": "Mémoire d'agents",
+   "desc_fr": "Donne aux agents une mémoire persistante et structurée : faits, préférences, état projet. À utiliser quand un agent durable doit se rappeler au-delà de la fenêtre de contexte."
+  },
+  {
+   "name": "anthropics-skills",
+   "desc": "Curated index of Anthropic's official example skills (documents, artifacts, web tooling). Use when looking for a canonical implementation before writing a new skill.",
+   "category": "anthropics-skills",
+   "path": "skills/anthropics-skills/",
+   "name_fr": "Skills officiels Anthropic",
+   "desc_fr": "Index des skills officiels d'Anthropic (documents, artifacts, outillage web). À utiliser pour chercher une implémentation canonique avant d'écrire un nouveau skill."
+  },
   {
    "name": "api-and-interface-design",
    "desc": "Guides stable API and interface design. Use when designing APIs, module boundaries, or any public interface. Use when creating REST or GraphQL endpoints, defining type contracts between modules, or establishing boundaries between frontend and backend.",
@@ -141,6 +165,46 @@ const MEGA_CATALOG = {
    "path": "skills/api-and-interface-design/",
    "name_fr": "Conception d'API et d'interfaces",
    "desc_fr": "Guide la conception d'API et d'interfaces stables. À utiliser pour concevoir des API, des frontières de modules ou toute interface publique : endpoints REST/GraphQL, contrats de types, frontières front/back."
+  },
+  {
+   "name": "archon",
+   "desc": "Build repeatable coding workflows from templates: scaffold, refine, verify. Use when turning an ad-hoc process into a reusable pipeline.",
+   "category": "archon",
+   "path": "skills/archon/",
+   "name_fr": "Archon",
+   "desc_fr": "Construit des workflows reproductibles à partir de modèles : échafaudage, raffinement, vérification. À utiliser pour transformer un processus ad-hoc en pipeline réutilisable."
+  },
+  {
+   "name": "awesome-claude-skills",
+   "desc": "Community index of Claude skills with categories and picks. Use when discovering existing skills instead of writing new ones.",
+   "category": "awesome-claude-skills",
+   "path": "skills/awesome-claude-skills/",
+   "name_fr": "Annuaire de skills communautaires",
+   "desc_fr": "Index communautaire de skills Claude, classés et commentés. À utiliser pour découvrir des skills existants plutôt que d'en écrire."
+  },
+  {
+   "name": "awesome-mcp-servers",
+   "desc": "Curated directory of MCP servers with categories and quality notes. Use when looking for a connector before building one.",
+   "category": "awesome-mcp-servers",
+   "path": "skills/awesome-mcp-servers/",
+   "name_fr": "Annuaire de serveurs MCP",
+   "desc_fr": "Répertoire commenté de serveurs MCP, classés par catégorie. À utiliser pour chercher un connecteur existant avant d'en construire un."
+  },
+  {
+   "name": "beads",
+   "desc": "Track work items across sessions with a local issue ledger synced to git. Use when tasks outlive a single chat session.",
+   "category": "beads",
+   "path": "skills/beads/",
+   "name_fr": "Beads (suivi de tâches)",
+   "desc_fr": "Suit les tâches entre les sessions via un registre local synchronisé à git. À utiliser quand les tâches survivent à une session de chat."
+  },
+  {
+   "name": "best-practice",
+   "desc": "Collected best practices for Claude Code usage: CLAUDE.md, permissions, workflows. Use when tuning a personal or team setup.",
+   "category": "best-practice",
+   "path": "skills/best-practice/",
+   "name_fr": "Bonnes pratiques Claude Code",
+   "desc_fr": "Recueil de bonnes pratiques Claude Code : CLAUDE.md, permissions, workflows. À utiliser pour régler un setup personnel ou d'équipe."
   },
   {
    "name": "quicknode-skill",
@@ -159,12 +223,60 @@ const MEGA_CATALOG = {
    "desc_fr": "Teste dans de vrais navigateurs via Chrome DevTools MCP : inspection du DOM, erreurs console, requêtes réseau, profil de performance et vérification visuelle avec des données d'exécution réelles."
   },
   {
+   "name": "caveman",
+   "desc": "Style directive making Claude answer in terse, minimal replies. Use when you want much shorter answers.",
+   "category": "caveman",
+   "path": "skills/caveman/",
+   "name_fr": "Caveman (réponses brèves)",
+   "desc_fr": "Consigne de style : réponses très courtes et minimales. À utiliser quand on veut des réponses bien plus brèves."
+  },
+  {
+   "name": "cc-switch",
+   "desc": "Manage and switch between coding tool configurations: APIs, providers, settings. Use when juggling several Claude or Codex setups.",
+   "category": "cc-switch",
+   "path": "skills/cc-switch/",
+   "name_fr": "CC Switch (configurations)",
+   "desc_fr": "Gère et bascule entre plusieurs configurations d'outils de code : API, providers, réglages. À utiliser quand on jongle entre plusieurs setups Claude/Codex."
+  },
+  {
    "name": "ci-cd-and-automation",
    "desc": "Automates CI/CD pipeline setup. Use when setting up or modifying build and deployment pipelines. Use when you need to automate quality gates, configure test runners in CI, or establish deployment strategies.",
    "category": "ci-cd-and-automation",
    "path": "skills/ci-cd-and-automation/",
    "name_fr": "CI/CD et automatisation",
    "desc_fr": "Automatise la mise en place des pipelines CI/CD : quality gates, test runners en CI et stratégies de déploiement."
+  },
+  {
+   "name": "claude-code-router",
+   "desc": "Route Claude Code requests across providers and models with rules. Use when optimizing cost, speed or availability of model calls.",
+   "category": "claude-code-router",
+   "path": "skills/claude-code-router/",
+   "name_fr": "Routeur Claude Code",
+   "desc_fr": "Aiguise les requêtes de Claude Code entre providers et modèles selon des règles. À utiliser pour optimiser coût, vitesse ou disponibilité des appels."
+  },
+  {
+   "name": "claude-hud",
+   "desc": "Display session usage, context and cost in the terminal while coding. Use when monitoring token burn and limits during long sessions.",
+   "category": "claude-hud",
+   "path": "skills/claude-hud/",
+   "name_fr": "Claude HUD (usage)",
+   "desc_fr": "Affiche usage, contexte et coût de la session dans le terminal. À utiliser pour surveiller la consommation de tokens sur les longues sessions."
+  },
+  {
+   "name": "claude-mem",
+   "desc": "Persistent memory layer for Claude Code: recall decisions and facts across sessions. Use when the assistant should remember past work.",
+   "category": "claude-mem",
+   "path": "skills/claude-mem/",
+   "name_fr": "Mémoire persistante (claude-mem)",
+   "desc_fr": "Couche de mémoire persistante pour Claude Code : se souvenir des décisions et faits entre les sessions. À utiliser quand l'assistant doit retenir le travail passé."
+  },
+  {
+   "name": "claude-plugins",
+   "desc": "Catalog of official and community Claude Code plugins with install instructions. Use when extending Claude Code before building from scratch.",
+   "category": "claude-plugins",
+   "path": "skills/claude-plugins/",
+   "name_fr": "Plugins Claude",
+   "desc_fr": "Catalogue de plugins Claude Code officiels et communautaires avec instructions d'installation. À utiliser pour étendre Claude Code avant de réinventer."
   },
   {
    "name": "code-review-and-quality",
@@ -181,6 +293,22 @@ const MEGA_CATALOG = {
    "path": "skills/code-simplification/",
    "name_fr": "Simplification de code",
    "desc_fr": "Simplifie le code pour plus de clarté, sans changer le comportement. À utiliser quand le code fonctionne mais est plus difficile à lire, maintenir ou étendre qu'il ne devrait l'être."
+  },
+  {
+   "name": "codegraph",
+   "desc": "Map code relationships (imports, call graphs, modules) into a queryable graph. Use when navigating or refactoring an unfamiliar codebase.",
+   "category": "codegraph",
+   "path": "skills/codegraph/",
+   "name_fr": "Graphe de code",
+   "desc_fr": "Cartographie les relations du code (imports, graphes d'appels, modules) en graphe requêtable. À utiliser pour naviguer ou refactorer une base inconnue."
+  },
+  {
+   "name": "codex-plugin-cc",
+   "desc": "Plugin bringing OpenAI Codex reviews into Claude Code. Use when adding a second model's review perspective to a workflow.",
+   "category": "codex-plugin-cc",
+   "path": "skills/codex-plugin-cc/",
+   "name_fr": "Codex dans Claude Code",
+   "desc_fr": "Plugin qui apporte les revues d'OpenAI Codex dans Claude Code. À utiliser pour ajouter l'œil d'un second modèle à ses revues."
   },
   {
    "name": "cognee-memory",
@@ -203,6 +331,14 @@ const MEGA_CATALOG = {
    "path": "skills/context-engineering/",
    "name_fr": "Ingénierie du contexte",
    "desc_fr": "Optimise la configuration du contexte d'un agent : démarrage de session, qualité dégradée, changement de tâche, fichiers de règles et contexte d'un projet."
+  },
+  {
+   "name": "context7",
+   "desc": "Fetch up-to-date library documentation on demand for coding agents. Use when answers need current API docs instead of training-data guesses.",
+   "category": "context7",
+   "path": "skills/context7/",
+   "name_fr": "Context7 (docs à jour)",
+   "desc_fr": "Récupère à la demande la documentation à jour des bibliothèques pour les agents. À utiliser quand une réponse exige des docs actuelles plutôt qu'une approximation de mémoire."
   },
   {
    "name": "debugging-and-error-recovery",
@@ -235,6 +371,22 @@ const MEGA_CATALOG = {
    "path": "skills/doubt-driven-development/",
    "name_fr": "Développement piloté par le doute",
    "desc_fr": "Soumet chaque décision non triviale à une revue adversariale à contexte frais : hypothèses contre-interrogées, plans stress-testés, quand l'exactitude prime sur la vitesse."
+  },
+  {
+   "name": "ecc",
+   "desc": "Bundles skills, persistent memory and pre-flight checks for Claude Code in one install. Use when an assistant needs structure, memory and safety checks together.",
+   "category": "ecc",
+   "path": "skills/ecc/",
+   "name_fr": "ECC",
+   "desc_fr": "Regroupe skills, mémoire persistante et vérifications préalables pour Claude Code. À utiliser quand un assistant a besoin de structure, de mémoire et de garde-fous ensemble."
+  },
+  {
+   "name": "firecrawl",
+   "desc": "Turn websites into clean markdown and text for LLM consumption: crawl, scrape, search. Use when an agent needs reliable web content.",
+   "category": "firecrawl",
+   "path": "skills/firecrawl/",
+   "name_fr": "Firecrawl",
+   "desc_fr": "Transforme des sites web en markdown/texte propres pour les LLM : crawl, scrape, recherche. À utiliser quand un agent a besoin de contenu web fiable."
   },
   {
    "name": "frontend-ui-engineering",
@@ -309,6 +461,28 @@ const MEGA_CATALOG = {
    "desc_fr": "Structure les pratiques Git : commits atomiques, branches, résolution de conflits, découpe d'un arbre sale en commits propres, PR et push distant."
   },
   {
+   "name": "github-mcp",
+   "desc": "MCP server exposing GitHub issues, PRs, repos and actions to Claude. Use when automating GitHub workflows from a chat.",
+   "category": "github-mcp",
+   "path": "skills/github-mcp/",
+   "name_fr": "GitHub MCP",
+   "desc_fr": "Serveur MCP exposant issues, PR, dépôts et actions GitHub à Claude. À utiliser pour automatiser des workflows GitHub depuis un chat."
+  },
+  {
+   "name": "graphify",
+   "desc": "Use for any question about a codebase, its architecture, file relationships, or project content — especially when graphify-out/ exists, where the question should be treated as a graphify query first. Turns any input (code, docs, papers, images, videos) into a persistent knowledge graph with god node",
+   "category": "graphify",
+   "path": "skills/graphify/"
+  },
+  {
+   "name": "gstack",
+   "desc": "Planning and review workflow layer with task graphs, gates and sign-offs. Use when a multi-step project needs checkpoints and structured reviews.",
+   "category": "gstack",
+   "path": "skills/gstack/",
+   "name_fr": "Gstack",
+   "desc_fr": "Couche de planification et de revue : graphes de tâches, points de contrôle et validations. À utiliser quand un projet multi-étapes exige des jalons et des revues structurées."
+  },
+  {
    "name": "headroom-compression",
    "desc": "Compress tool outputs, logs, JSON, code and files before they reach the LLM via the Headroom proxy running locally on port 8787. Use when token costs are high, context is bloated with repetitive tool output (grep results, build logs, large JSON), or when the user mentions headroom, compression, toke",
    "category": "headroom-compression",
@@ -369,6 +543,22 @@ const MEGA_CATALOG = {
    "path": "skills/interview-me/",
    "name_fr": "Interviewe-moi",
    "desc_fr": "Extrait ce que l'utilisateur veut vraiment via un entretien une-question-à-la fois jusqu'à ~95 % de confiance sur l'intention sous-jacente, quand la demande est sous-spécifiée."
+  },
+  {
+   "name": "karpathy-skills",
+   "desc": "Coding discipline checks inspired by Andrej Karpathy: no over-engineering, no premature abstraction, no clever code. Use when simplifying code or reviewing design choices.",
+   "category": "karpathy-skills",
+   "path": "skills/karpathy-skills/",
+   "name_fr": "Discipline Karpathy",
+   "desc_fr": "Vérifications de discipline inspirées de Karpathy : pas de sur-ingénierie, pas d'abstraction prématurée, pas de code trop malin. À utiliser pour simplifier du code ou relire des choix de conception."
+  },
+  {
+   "name": "learn-claude-code",
+   "desc": "Learning resource explaining how Claude Code agents work: subagents, hooks, skills and MCP. Use when learning or teaching the agent model before building custom workflows.",
+   "category": "learn-claude-code",
+   "path": "skills/learn-claude-code/",
+   "name_fr": "Apprendre Claude Code",
+   "desc_fr": "Ressource d'apprentissage : comment fonctionnent les agents Claude Code (subagents, hooks, skills, MCP). À utiliser pour comprendre le modèle d'agents avant d'en construire."
   },
   {
    "name": "solana-rent-free-dev",
@@ -457,6 +647,14 @@ const MEGA_CATALOG = {
    "path": "skills/llm-provider-cascade/"
   },
   {
+   "name": "mattpocock-skills",
+   "desc": "TypeScript-focused engineering skills on types, generics and API design. Use when writing or reviewing type-heavy TypeScript.",
+   "category": "mattpocock-skills",
+   "path": "skills/mattpocock-skills/",
+   "name_fr": "Skills TypeScript (Matt Pocock)",
+   "desc_fr": "Skills d'ingénierie TypeScript : types, génériques, design d'API. À utiliser en écriture ou relecture de TS fortement typé."
+  },
+  {
    "name": "metaplex",
    "desc": "Metaplex development on Solana — NFTs, tokens, compressed NFTs, candy machines, token launches, autonomous agents. Use when working with Token Metadata, Core, Bubblegum, Candy Machine, Genesis, Agent Registry, or the mplx CLI.",
    "category": "metaplex-skill",
@@ -465,12 +663,28 @@ const MEGA_CATALOG = {
    "desc_fr": "Développement Metaplex sur Solana : NFTs, tokens, NFTs compressés, candy machines, lancements de tokens, agents autonomes. Pour travailler avec Token Metadata, Core, Bubblegum, Candy Machine, Genesis, Agent Registry ou la CLI mplx."
   },
   {
+   "name": "multica",
+   "desc": "Assign issues from GitHub to coding agents and route results back. Use when triaging work across several AI coding agents.",
+   "category": "multica",
+   "path": "skills/multica/",
+   "name_fr": "Multica (assignation d'issues)",
+   "desc_fr": "Assigne des issues GitHub à des agents de code et achemine leurs résultats. À utiliser pour répartir le travail entre plusieurs agents IA."
+  },
+  {
    "name": "observability-and-instrumentation",
    "desc": "Instruments code so production behavior is visible and diagnosable. Use when adding logging, metrics, tracing, or alerting. Use when shipping any feature that runs in production and you need evidence it works. Use when production issues are reported but you can't tell what happened from the availabl",
    "category": "observability-and-instrumentation",
    "path": "skills/observability-and-instrumentation/",
    "name_fr": "Observabilité et instrumentation",
    "desc_fr": "Instrumente le code pour que le comportement en production soit visible et diagnosable : logs, métriques, tracing, alertes et preuves que ça marche."
+  },
+  {
+   "name": "oh-my-claudecode",
+   "desc": "Agent-team coordination patterns: orchestrator, specialists and hand-offs. Use when decomposing a project across several coding agents.",
+   "category": "oh-my-claudecode",
+   "path": "skills/oh-my-claudecode/",
+   "name_fr": "Coordination d'équipes d'agents",
+   "desc_fr": "Schémas de coordination d'équipes d'agents : orchestrateur, spécialistes, passations. À utiliser pour découper un projet entre plusieurs agents de code."
   },
   {
    "name": "performance-optimization",
@@ -489,6 +703,46 @@ const MEGA_CATALOG = {
    "desc_fr": "Découpe le travail en tâches ordonnées : à partir d'un spec ou d'exigences claires, estimer le périmètre et rendre une tâche trop grosse attaquable."
   },
   {
+   "name": "planning-with-files",
+   "desc": "Keep plans, decisions and progress in plain files next to the code so any agent can resume. Use when work spans multiple sessions or agents.",
+   "category": "planning-with-files",
+   "path": "skills/planning-with-files/",
+   "name_fr": "Planification en fichiers",
+   "desc_fr": "Garde plans, décisions et avancement dans des fichiers simples à côté du code, repris par n'importe quel agent. À utiliser quand le travail s'étale sur plusieurs sessions."
+  },
+  {
+   "name": "playwright-mcp",
+   "desc": "MCP server letting Claude drive a real browser via Playwright. Use when testing or inspecting web apps end to end.",
+   "category": "playwright-mcp",
+   "path": "skills/playwright-mcp/",
+   "name_fr": "Playwright MCP",
+   "desc_fr": "Serveur MCP permettant à Claude de piloter un vrai navigateur via Playwright. À utiliser pour tester ou inspecter des apps web de bout en bout."
+  },
+  {
+   "name": "ponytail",
+   "desc": "Keep-it-simple coding discipline: small diffs, few abstractions, no speculative generality. Use when writing or reviewing code to fight over-engineering.",
+   "category": "ponytail",
+   "path": "skills/ponytail/",
+   "name_fr": "Simplicité (Ponytail)",
+   "desc_fr": "Discipline de simplicité : petits diffs, peu d'abstractions, pas de généricité spéculative. À utiliser en écriture ou relecture de code contre la sur-ingénierie."
+  },
+  {
+   "name": "repomix",
+   "desc": "Pack an entire repository into one AI-friendly file with structure and headers. Use when sharing a codebase with an LLM that cannot browse files.",
+   "category": "repomix",
+   "path": "skills/repomix/",
+   "name_fr": "Repomix",
+   "desc_fr": "Compile un dépôt entier en un seul fichier structuré et lisible par un LLM. À utiliser pour partager une base de code avec un modèle qui ne peut pas parcourir les fichiers."
+  },
+  {
+   "name": "rtk",
+   "desc": "Trim and colorize command output so agents read less noise. Use when tool output floods the context window.",
+   "category": "rtk",
+   "path": "skills/rtk/",
+   "name_fr": "RTK (sorties élaguées)",
+   "desc_fr": "Élague et colorise les sorties de commandes pour que les agents lisent moins de bruit. À utiliser quand les sorties d'outils noient la fenêtre de contexte."
+  },
+  {
    "name": "security-and-hardening",
    "desc": "Hardens code against vulnerabilities. Use when auditing an input handler for vulnerabilities, when handling user input, authentication, data storage, or external integrations, or when checking a login flow is safe against the OWASP Top Ten. Use when building any feature that accepts untrusted data, ",
    "category": "security-and-hardening",
@@ -503,6 +757,14 @@ const MEGA_CATALOG = {
    "path": "skills/security-audit/",
    "name_fr": "Audit de sécurité (Cloudflare)",
    "desc_fr": "Audit de sécurité multi-phases issu de Cloudflare (skill à l'origine de leur harnais interne de découverte de vulnérabilités). 6 phases orchestrées par agents isolés : 1) Reconnaissance → architecture.md + coverage-ledger.json ; 2) Chasse guidée par couverture avec critiques de couverture ; 3) Validation adversariale — le vérificateur n'est jamais le découvreur ; 4) Sortie structurée findings.json (verdicts confirmed / needs_validation / rejected, validés par report-schema.json) ; 5) Vérification indépendante des enregistrements ; 6) Rapport neutre REPORT.md + FINDINGS-DETAIL.md + NEEDS-VALIDATION.md. 15 guides de classes d'attaques : web/protocole/auth, cache, client-side (DOM, prototype pollution), supply-chain & release, cloud/IaC/serverless, RPC & messaging, épuisement de ressources, isolation multi-tenant, desktop/mobile/IPC, memory-safety/binaire, IA & LLM (prompt injection). Mode « guidance » par défaut pour les questions ciblées ; workflow complet sur demande explicite d'audit ou de pentest. Exécutions multiples additives : chaque run cible les trous de couverture restants. Validateurs Node zero-dependency inclus (65 tests)."
+  },
+  {
+   "name": "serena",
+   "desc": "Semantic code search and edit toolkit backed by the language server. Use when precise, symbol-level code navigation matters more than grep.",
+   "category": "serena",
+   "path": "skills/serena/",
+   "name_fr": "Serena (navigation sémantique)",
+   "desc_fr": "Boîte à outils de recherche et d'édition sémantique du code (LSP). À utiliser quand la navigation au niveau des symboles compte plus que grep."
   },
   {
    "name": "shipping-and-launch",
@@ -1189,6 +1451,30 @@ const MEGA_CATALOG = {
    "desc_fr": "Crée les specs avant de coder : nouveau projet, fonctionnalité ou changement majeur sans spécification existante. Rédaction de PRD avec objectifs et périmètre, clarification d'exigences floues ou ambiguës."
   },
   {
+   "name": "superpowers",
+   "desc": "Plan-build-test workflow framework with brainstorming, planning and TDD enforcement skills. Use when driving a feature from idea to tested implementation.",
+   "category": "superpowers",
+   "path": "skills/superpowers/",
+   "name_fr": "Superpowers",
+   "desc_fr": "Cadre de workflow planifier-construire-tester avec brainstorming, planification et TDD imposé. À utiliser pour mener une fonctionnalité de l'idée au code testé."
+  },
+  {
+   "name": "system-prompts-ai",
+   "desc": "Study collection of real system prompts from AI tools. Use when designing or benchmarking your own system prompts.",
+   "category": "system-prompts-ai",
+   "path": "skills/system-prompts-ai/",
+   "name_fr": "Prompts système (étude)",
+   "desc_fr": "Collection de vrais prompts système d'outils IA pour les étudier. À utiliser pour concevoir ou comparer ses propres prompts système."
+  },
+  {
+   "name": "taste-skill",
+   "desc": "Design taste rubric for interfaces: hierarchy, spacing, contrast and restraint. Use when reviewing UI aesthetics or before shipping a screen.",
+   "category": "taste-skill",
+   "path": "skills/taste-skill/",
+   "name_fr": "Go design",
+   "desc_fr": "Grille de goût pour les interfaces : hiérarchie, espacement, contraste et retenue. À utiliser en revue esthétique d'UI ou avant de livrer un écran."
+  },
+  {
    "name": "test-driven-development",
    "desc": "Drives development with tests using the red-green-refactor loop. Use when implementing any logic, fixing any bug, or changing any behavior. Use when you need to prove that code works, when a bug report arrives, or when you're about to modify existing functionality.",
    "category": "test-driven-development",
@@ -1197,10 +1483,30 @@ const MEGA_CATALOG = {
    "desc_fr": "Développe par les tests avec la boucle rouge-vert-refactor : implémenter une logique, corriger un bug, prouver que le code fonctionne."
   },
   {
+   "name": "tutor-setup",
+   "desc": "Transforms knowledge sources into an Obsidian StudyVault. Two modes: (1) Document Mode — PDF/text/web sources → study notes with practice questions. (2) Codebase Mode — source code project → onboarding vault for new developers. Mode is auto-detected based on project markers in CWD.",
+   "category": "tutor-setup",
+   "path": "skills/tutor-setup/"
+  },
+  {
+   "name": "tutor",
+   "desc": "Interactive quiz tutor for Obsidian StudyVault learning. Use when the user wants to: (1) Take a diagnostic assessment of their knowledge, (2) Study or review specific sections/topics, (3) Drill weak areas identified in previous sessions, (4) Check their learning progress or dashboard,",
+   "category": "tutor",
+   "path": "skills/tutor/"
+  },
+  {
    "name": "typesafe-ai",
    "desc": "Build AI-powered software with TypeSafe: small units of AI intelligence you can use like programming primitives. Its System One models, including Jev, turn natural language and application state into typed judgments and probabilities that code can combine. Use when a feature needs programmable commo",
    "category": "typesafe-ai",
    "path": "skills/typesafe-ai/"
+  },
+  {
+   "name": "ui-ux-pro-max",
+   "desc": "Senior UI/UX guidance: design systems, accessibility, interaction patterns and copy. Use when designing or auditing product interfaces end to end.",
+   "category": "ui-ux-pro-max",
+   "path": "skills/ui-ux-pro-max/",
+   "name_fr": "UI/UX Pro",
+   "desc_fr": "Conseils UI/UX senior : design systems, accessibilité, patterns d'interaction, contenus. À utiliser pour concevoir ou auditer des interfaces produit de bout en bout."
   },
   {
    "name": "using-agent-skills",
@@ -1209,6 +1515,22 @@ const MEGA_CATALOG = {
    "path": "skills/using-agent-skills/",
    "name_fr": "Utiliser les agent skills",
    "desc_fr": "Découvre et invoque les agent skills. À utiliser au démarrage d'une session, ou pour décider quel skill ou workflow s'applique au travail en cours. C'est la méta-skill qui gouverne la découverte et l'invocation de tous les autres skills."
+  },
+  {
+   "name": "vibe-kanban",
+   "desc": "Kanban board to manage agent tasks and monitor their progress. Use when orchestrating many agent jobs visually.",
+   "category": "vibe-kanban",
+   "path": "skills/vibe-kanban/",
+   "name_fr": "Vibe Kanban",
+   "desc_fr": "Tableau kanban pour gérer les tâches des agents et suivre leur avancement. À utiliser pour orchestrer visuellement de nombreux travaux d'agents."
+  },
+  {
+   "name": "wshobson-agents",
+   "desc": "Large library of specialist subagent definitions across engineering, design and data. Use when a task needs a domain expert persona to delegate to.",
+   "category": "wshobson-agents",
+   "path": "skills/wshobson-agents/",
+   "name_fr": "Agents spécialistes (wshobson)",
+   "desc_fr": "Grande bibliothèque de définitions de subagents spécialistes (ingénierie, design, data). À utiliser quand une tâche réclame une persona experte à qui déléguer."
   }
  ],
  "agents": [
@@ -1263,6 +1585,22 @@ const MEGA_CATALOG = {
    "desc_fr": "Expert du comportement humain, théories de la personnalité, motivation et patterns cognitifs — construit des personnages et interactions psychologiquement crédibles, ancrés dans des cadres cliniques et de recherche."
   },
   {
+   "name": "agents-orchestrator",
+   "desc": "Autonomous pipeline manager that orchestrates the entire development workflow. You are the leader of this process.",
+   "category": "core",
+   "path": "agents/agents-orchestrator.md",
+   "model": "",
+   "tools": ""
+  },
+  {
+   "name": "blockchain-security-auditor",
+   "desc": "Expert smart contract security auditor specializing in vulnerability detection, formal verification, exploit analysis, and comprehensive audit report writing for DeFi protocols and blockchain applications.",
+   "category": "core",
+   "path": "agents/blockchain-security-auditor.md",
+   "model": "",
+   "tools": ""
+  },
+  {
    "name": "code-reviewer",
    "desc": "Senior code reviewer that evaluates changes across five dimensions — correctness, readability, architecture, security, and performance. Use for thorough code review before merge.",
    "category": "core",
@@ -1271,6 +1609,30 @@ const MEGA_CATALOG = {
    "tools": "",
    "name_fr": "Revoyeur de code senior",
    "desc_fr": "Revoyeur de code senior qui évalue les changements sur cinq dimensions — justesse, lisibilité, architecture, sécurité et performance. Pour une revue approfondie avant fusion."
+  },
+  {
+   "name": "design-brand-guardian",
+   "desc": "Expert brand strategist and guardian specializing in brand identity development, consistency maintenance, and strategic brand positioning",
+   "category": "core",
+   "path": "agents/design-brand-guardian.md",
+   "model": "",
+   "tools": ""
+  },
+  {
+   "name": "design-ui-designer",
+   "desc": "Expert UI designer specializing in visual design systems, component libraries, and pixel-perfect interface creation. Creates beautiful, consistent, accessible user interfaces that enhance UX and reflect brand identity",
+   "category": "core",
+   "path": "agents/design-ui-designer.md",
+   "model": "",
+   "tools": ""
+  },
+  {
+   "name": "design-ux-architect",
+   "desc": "Technical architecture and UX specialist who provides developers with solid foundations, CSS systems, and clear implementation guidance",
+   "category": "core",
+   "path": "agents/design-ux-architect.md",
+   "model": "",
+   "tools": ""
   },
   {
    "name": "Brand Guardian",
@@ -1351,6 +1713,102 @@ const MEGA_CATALOG = {
    "tools": "",
    "name_fr": "Injecteur de fantaisie",
    "desc_fr": "Spécialiste créatif expert en personnalité, plaisir et éléments ludiques dans les expériences de marque. Crée des interactions mémorables et joyeuses qui différencient les marques."
+  },
+  {
+   "name": "engineering-backend-architect",
+   "desc": "Senior backend architect specializing in scalable system design, database architecture, API development, and cloud infrastructure. Builds robust, secure, performant server-side applications and microservices",
+   "category": "core",
+   "path": "agents/engineering-backend-architect.md",
+   "model": "",
+   "tools": ""
+  },
+  {
+   "name": "engineering-code-reviewer",
+   "desc": "Expert code reviewer who provides constructive, actionable feedback focused on correctness, maintainability, security, and performance — not style preferences.",
+   "category": "core",
+   "path": "agents/engineering-code-reviewer.md",
+   "model": "",
+   "tools": ""
+  },
+  {
+   "name": "engineering-codebase-onboarding-engineer",
+   "desc": "Expert developer onboarding specialist who helps new engineers understand unfamiliar codebases fast by reading source code, tracing code paths, and stating only facts grounded in the code.",
+   "category": "core",
+   "path": "agents/engineering-codebase-onboarding-engineer.md",
+   "model": "",
+   "tools": ""
+  },
+  {
+   "name": "engineering-devops-automator",
+   "desc": "Expert DevOps engineer specializing in infrastructure automation, CI/CD pipeline development, and cloud operations",
+   "category": "core",
+   "path": "agents/engineering-devops-automator.md",
+   "model": "",
+   "tools": ""
+  },
+  {
+   "name": "engineering-frontend-developer",
+   "desc": "Expert frontend developer specializing in modern web technologies, React/Vue/Angular frameworks, UI implementation, and performance optimization",
+   "category": "core",
+   "path": "agents/engineering-frontend-developer.md",
+   "model": "",
+   "tools": ""
+  },
+  {
+   "name": "engineering-git-workflow-master",
+   "desc": "Expert in Git workflows, branching strategies, and version control best practices including conventional commits, rebasing, worktrees, and CI-friendly branch management.",
+   "category": "core",
+   "path": "agents/engineering-git-workflow-master.md",
+   "model": "",
+   "tools": ""
+  },
+  {
+   "name": "engineering-minimal-change-engineer",
+   "desc": "Engineering specialist focused on minimum-viable diffs — fixes only what was asked, refuses scope creep, prefers three similar lines over a premature abstraction. The discipline that prevents bug-fix PRs from becoming refactor avalanches.",
+   "category": "core",
+   "path": "agents/engineering-minimal-change-engineer.md",
+   "model": "",
+   "tools": ""
+  },
+  {
+   "name": "engineering-mobile-app-builder",
+   "desc": "Specialized mobile application developer with expertise in native iOS/Android development and cross-platform frameworks",
+   "category": "core",
+   "path": "agents/engineering-mobile-app-builder.md",
+   "model": "",
+   "tools": ""
+  },
+  {
+   "name": "engineering-rapid-prototyper",
+   "desc": "Specialized in ultra-fast proof-of-concept development and MVP creation using efficient tools and frameworks",
+   "category": "core",
+   "path": "agents/engineering-rapid-prototyper.md",
+   "model": "",
+   "tools": ""
+  },
+  {
+   "name": "engineering-security-engineer",
+   "desc": "Expert application security engineer specializing in threat modeling, vulnerability assessment, secure code review, security architecture design, and incident response for modern web, API, and cloud-native applications.",
+   "category": "core",
+   "path": "agents/engineering-security-engineer.md",
+   "model": "",
+   "tools": ""
+  },
+  {
+   "name": "engineering-software-architect",
+   "desc": "Expert software architect specializing in system design, domain-driven design, architectural patterns, and technical decision-making for scalable, maintainable systems.",
+   "category": "core",
+   "path": "agents/engineering-software-architect.md",
+   "model": "",
+   "tools": ""
+  },
+  {
+   "name": "engineering-technical-writer",
+   "desc": "Expert technical writer specializing in developer documentation, API references, README files, and tutorials. Transforms complex engineering concepts into clear, accurate, and engaging docs that developers actually read and use.",
+   "category": "core",
+   "path": "agents/engineering-technical-writer.md",
+   "model": "",
+   "tools": ""
   },
   {
    "name": "AI Data Remediation Engineer",
@@ -1643,6 +2101,22 @@ const MEGA_CATALOG = {
    "desc_fr": "Développeur expert WeChat Mini Program (小程序) : WXML/WXSS/WXS, intégration des APIs WeChat, systèmes de paiement, messages d'abonnement et tout l'écosystème WeChat."
   },
   {
+   "name": "finance-bookkeeper-controller",
+   "desc": "Expert bookkeeper and controller specializing in day-to-day accounting operations, financial reconciliations, month-end close processes, and internal controls. Ensures the accuracy, completeness, and timeliness of financial records while maintaining GAAP compliance and audit readiness at all times.",
+   "category": "core",
+   "path": "agents/finance-bookkeeper-controller.md",
+   "model": "",
+   "tools": ""
+  },
+  {
+   "name": "finance-tax-strategist",
+   "desc": "Expert tax strategist specializing in tax optimization, multi-jurisdictional compliance, transfer pricing, and strategic tax planning. Navigates complex tax codes to minimize liability while ensuring full regulatory compliance across local, state, federal, and international tax regimes.",
+   "category": "core",
+   "path": "agents/finance-tax-strategist.md",
+   "model": "",
+   "tools": ""
+  },
+  {
    "name": "Bookkeeper & Controller",
    "desc": "Expert bookkeeper and controller specializing in day-to-day accounting operations, financial reconciliations, month-end close processes, and internal controls. Ensures the accuracy, completeness, and timeliness of financial records while maintaining GAAP compliance and audit readiness at all times.",
    "category": "finance",
@@ -1691,6 +2165,14 @@ const MEGA_CATALOG = {
    "tools": "",
    "name_fr": "Stratège fiscal",
    "desc_fr": "Stratège fiscal expert : optimisation fiscale, conformité multi-juridictions, prix de transfert et planification fiscale stratégique. Navigue les codes fiscaux complexes en restant pleinement conforme."
+  },
+  {
+   "name": "game-designer",
+   "desc": "Systems and mechanics architect - Masters GDD authorship, player psychology, economy balancing, and gameplay loop design across all engines and genres",
+   "category": "core",
+   "path": "agents/game-designer.md",
+   "model": "",
+   "tools": ""
   },
   {
    "name": "Blender Add-on Engineer",
@@ -1901,6 +2383,78 @@ const MEGA_CATALOG = {
    "tools": "",
    "name_fr": "Constructeur de mondes Unreal",
    "desc_fr": "Spécialiste open-world et environnements — maîtrise World Partition, Landscape, le feuillage procédural, les HLOD et le level streaming à grande échelle pour des mondes ouverts fluides."
+  },
+  {
+   "name": "godot-gameplay-scripter",
+   "desc": "Composition and signal integrity specialist - Masters GDScript 2.0, C# integration, node-based architecture, and type-safe signal design for Godot 4 projects",
+   "category": "core",
+   "path": "agents/godot-gameplay-scripter.md",
+   "model": "",
+   "tools": ""
+  },
+  {
+   "name": "godot-multiplayer-engineer",
+   "desc": "Godot 4 networking specialist - Masters the MultiplayerAPI, scene replication, ENet/WebRTC transport, RPCs, and authority models for real-time multiplayer games",
+   "category": "core",
+   "path": "agents/godot-multiplayer-engineer.md",
+   "model": "",
+   "tools": ""
+  },
+  {
+   "name": "godot-shader-developer",
+   "desc": "Godot 4 visual effects specialist - Masters the Godot Shading Language (GLSL-like), VisualShader editor, CanvasItem and Spatial shaders, post-processing, and performance optimization for 2D/3D effects",
+   "category": "core",
+   "path": "agents/godot-shader-developer.md",
+   "model": "",
+   "tools": ""
+  },
+  {
+   "name": "legal-document-review",
+   "desc": "Comprehensive legal document review specialist for contracts, litigation documents, and real estate agreements — summarizing documents, flagging risk clauses, comparing contract versions, and checking compliance across any law firm size or practice area",
+   "category": "core",
+   "path": "agents/legal-document-review.md",
+   "model": "",
+   "tools": ""
+  },
+  {
+   "name": "level-designer",
+   "desc": "Spatial storytelling and flow specialist - Masters layout theory, pacing architecture, encounter design, and environmental narrative across all game engines",
+   "category": "core",
+   "path": "agents/level-designer.md",
+   "model": "",
+   "tools": ""
+  },
+  {
+   "name": "marketing-app-store-optimizer",
+   "desc": "Expert app store marketing specialist focused on App Store Optimization (ASO), conversion rate optimization, and app discoverability",
+   "category": "core",
+   "path": "agents/marketing-app-store-optimizer.md",
+   "model": "",
+   "tools": ""
+  },
+  {
+   "name": "marketing-content-creator",
+   "desc": "Expert content strategist and creator for multi-platform campaigns. Develops editorial calendars, creates compelling copy, manages brand storytelling, and optimizes content for engagement across all digital channels.",
+   "category": "core",
+   "path": "agents/marketing-content-creator.md",
+   "model": "",
+   "tools": ""
+  },
+  {
+   "name": "marketing-growth-hacker",
+   "desc": "Expert growth strategist specializing in rapid user acquisition through data-driven experimentation. Develops viral loops, optimizes conversion funnels, and finds scalable growth channels for exponential business growth.",
+   "category": "core",
+   "path": "agents/marketing-growth-hacker.md",
+   "model": "",
+   "tools": ""
+  },
+  {
+   "name": "marketing-twitter-engager",
+   "desc": "Expert Twitter marketing specialist focused on real-time engagement, thought leadership building, and community-driven growth. Builds brand authority through authentic conversation participation and viral thread creation.",
+   "category": "core",
+   "path": "agents/marketing-twitter-engager.md",
+   "model": "",
+   "tools": ""
   },
   {
    "name": "Agentic Search Optimizer",
@@ -2203,6 +2757,22 @@ const MEGA_CATALOG = {
    "desc_fr": "Expert marketing Zhihu : thought leadership, crédibilité communautaire et engagement par la connaissance. Maîtrise la stratégie question-réponse et construit l'autorité de marque par le partage d'expertise authentique."
   },
   {
+   "name": "mica-compliance-specialist",
+   "desc": "Spécialiste en régulation crypto européenne (Markets in Crypto-Assets Regulation). Audite les projets crypto-game pour conformité MiCA, RGPD, AML/KYC, lois consommateur EU. Identifie les risques réglementaires (token classification, white paper, marketing restrictions) et recommande les actions conc",
+   "category": "core",
+   "path": "agents/mica-compliance-specialist.md",
+   "model": "",
+   "tools": ""
+  },
+  {
+   "name": "narrative-designer",
+   "desc": "Story systems and dialogue architect - Masters GDD-aligned narrative design, branching dialogue, lore architecture, and environmental storytelling across all game engines",
+   "category": "core",
+   "path": "agents/narrative-designer.md",
+   "model": "",
+   "tools": ""
+  },
+  {
    "name": "Paid Media Auditor",
    "desc": "Comprehensive paid media auditor who systematically evaluates Google Ads, Microsoft Ads, and Meta accounts across 200+ checkpoints spanning account structure, tracking, bidding, creative, audiences, and competitive positioning. Produces actionable audit reports with prioritized recommendations and p",
    "category": "paid-media",
@@ -2271,6 +2841,22 @@ const MEGA_CATALOG = {
    "tools": "WebFetch, WebSearch, Read, Write, Edit, Bash",
    "name_fr": "Spécialiste tracking & mesure",
    "desc_fr": "Expert en architecture de tracking de conversions, gestion de tags et modélisation d'attribution : Google Tag Manager, GA4, Google Ads, Meta CAPI, LinkedIn Insight Tag et implémentations server-side."
+  },
+  {
+   "name": "product-manager",
+   "desc": "Holistic product leader who owns the full product lifecycle — from discovery and strategy through roadmap, stakeholder alignment, go-to-market, and outcome measurement. Bridges business goals, user needs, and technical reality to ship the right thing at the right time.",
+   "category": "core",
+   "path": "agents/product-manager.md",
+   "model": "",
+   "tools": ""
+  },
+  {
+   "name": "product-sprint-prioritizer",
+   "desc": "Expert product manager specializing in agile sprint planning, feature prioritization, and resource allocation. Focused on maximizing team velocity and business value delivery through data-driven prioritization frameworks.",
+   "category": "core",
+   "path": "agents/product-sprint-prioritizer.md",
+   "model": "",
+   "tools": ""
   },
   {
    "name": "Behavioral Nudge Engine",
@@ -2381,6 +2967,14 @@ const MEGA_CATALOG = {
    "tools": "",
    "name_fr": "Chef de projet senior",
    "desc_fr": "Convertit les specs en tâches et se souvient des projets précédents. Focus sur un périmètre réaliste, pas de process en arrière-plan et exigences exactes du spec."
+  },
+  {
+   "name": "project-manager-senior",
+   "desc": "Converts specs to tasks and remembers previous projects. Focused on realistic scope, no background processes, exact spec requirements",
+   "category": "core",
+   "path": "agents/project-manager-senior.md",
+   "model": "",
+   "tools": ""
   },
   {
    "name": "Account Strategist",
@@ -2531,6 +3125,22 @@ const MEGA_CATALOG = {
    "tools": "",
    "name_fr": "Architecte d'interfaces XR",
    "desc_fr": "Designer d'interactions spatiales et stratège d'interfaces pour environnements immersifs AR/VR/XR."
+  },
+  {
+   "name": "specialized-french-consulting-market",
+   "desc": "Navigate the French ESN/SI freelance ecosystem — margin models, platform mechanics (Malt, collective.work), portage salarial, rate positioning, and payment cycle realities",
+   "category": "core",
+   "path": "agents/specialized-french-consulting-market.md",
+   "model": "",
+   "tools": ""
+  },
+  {
+   "name": "specialized-mcp-builder",
+   "desc": "Expert Model Context Protocol developer who designs, builds, and tests MCP servers that extend AI agent capabilities with custom tools, resources, and prompts.",
+   "category": "core",
+   "path": "agents/specialized-mcp-builder.md",
+   "model": "",
+   "tools": ""
   },
   {
    "name": "Accounts Payable Agent",
@@ -2953,6 +3563,14 @@ const MEGA_CATALOG = {
    "desc_fr": "Intendant de base de connaissances dans l'esprit du Zettelkasten de Niklas Luhmann. Perspective par défaut : Luhmann ; bascule vers des experts du domaine (Feynman, Munger, Ogilvy…) selon la tâche. Impose notes atomiques, connectivité et boucles de validation."
   },
   {
+   "name": "support-legal-compliance-checker",
+   "desc": "Expert legal and compliance specialist ensuring business operations, data handling, and content creation comply with relevant laws, regulations, and industry standards across multiple jurisdictions.",
+   "category": "core",
+   "path": "agents/support-legal-compliance-checker.md",
+   "model": "",
+   "tools": ""
+  },
+  {
    "name": "Analytics Reporter",
    "desc": "Expert data analyst transforming raw data into actionable business insights. Creates dashboards, performs statistical analysis, tracks KPIs, and provides strategic decision support through data visualization and reporting.",
    "category": "support",
@@ -3013,6 +3631,14 @@ const MEGA_CATALOG = {
    "desc_fr": "Spécialiste support client expert : service client d'exception, résolution d'issues et optimisation de l'expérience utilisateur. Multi-canaux, soin proactif et transformation du support en expériences de marque positives."
   },
   {
+   "name": "technical-artist",
+   "desc": "Art-to-engine pipeline specialist - Masters shaders, VFX systems, LOD pipelines, performance budgeting, and cross-engine asset optimization",
+   "category": "core",
+   "path": "agents/technical-artist.md",
+   "model": "",
+   "tools": ""
+  },
+  {
    "name": "test-engineer",
    "desc": "QA engineer specialized in test strategy, test writing, and coverage analysis. Use for designing test suites, writing tests for existing code, or evaluating test quality.",
    "category": "core",
@@ -3021,6 +3647,22 @@ const MEGA_CATALOG = {
    "tools": "",
    "name_fr": "Ingénieur QA (tests)",
    "desc_fr": "Ingénieur QA spécialisé en stratégie de test, rédaction de tests et analyse de couverture. Pour concevoir des suites de tests, tester du code existant ou évaluer la qualité des tests."
+  },
+  {
+   "name": "testing-evidence-collector",
+   "desc": "Screenshot-obsessed, fantasy-allergic QA specialist - Default to finding 3-5 issues, requires visual proof for everything",
+   "category": "core",
+   "path": "agents/testing-evidence-collector.md",
+   "model": "",
+   "tools": ""
+  },
+  {
+   "name": "testing-reality-checker",
+   "desc": "Stops fantasy approvals, evidence-based certification - Default to \"NEEDS WORK\", requires overwhelming proof for production readiness",
+   "category": "core",
+   "path": "agents/testing-reality-checker.md",
+   "model": "",
+   "tools": ""
   },
   {
    "name": "Accessibility Auditor",
@@ -3101,6 +3743,14 @@ const MEGA_CATALOG = {
    "tools": "",
    "name_fr": "Optimiseur de workflows",
    "desc_fr": "Spécialiste d'amélioration des process : analyse, optimisation et automatisation des workflows de toutes les fonctions métier pour une productivité et une efficacité maximales."
+  },
+  {
+   "name": "tokenomics-designer",
+   "desc": "Expert en design de tokenomics pour crypto-games et projets Solana. Conçoit des modèles économiques durables (P2E, Skill2E, Casual), évite les Ponzi schemes, équilibre supply/demand, vesting, distribution, sources et puits de tokens. Spécialiste de l'analyse anti-inflation et de la rétention long te",
+   "category": "core",
+   "path": "agents/tokenomics-designer.md",
+   "model": "",
+   "tools": ""
   },
   {
    "name": "web-performance-auditor",

@@ -27,7 +27,7 @@ const AGENTS_DIR = path.join(ROOT, 'agent-skills', 'agents');
 const OUTPUT = path.join(ROOT, 'AGENTS-CATALOGUE.md');
 const TRANSLATIONS = path.join(__dirname, 'agents-roles-fr.json');
 
-const EXPECTED_TOTAL = 190; // garde-fou : à mettre à jour si on ajoute des agents
+const EXPECTED_TOTAL = 231; // garde-fou : à mettre à jour si on ajoute des agents
 
 // Dossier des skills portables du pack (une fiche = un dossier avec SKILL.md)
 const SKILLS_DIR = path.join(ROOT, 'agent-skills', 'skills');
@@ -222,7 +222,7 @@ lines.push('| Claude Code | `~/.claude/agents/` | subagent natif (name, descript
 lines.push('| OpenCode | `~/.config/opencode/agents/` | subagent markdown (`mode: subagent`) — invoquables via `@nom` |');
 lines.push('| Freebuff / Codex | `~/.agents/skills/agent-<nom>/SKILL.md` | Agent Skills (progressive disclosure + triggers) |');
 lines.push('');
-lines.push('OpenCode : vérifié via `opencode agent list` → 190 agents + 2 built-in = 192 subagents.');
+lines.push(`OpenCode : vérifié via \`opencode agent list\` → ${EXPECTED_TOTAL} agents + 2 built-in = ${EXPECTED_TOTAL + 2} subagents.`);
 lines.push('');
 
 for (const cat of orderedCategories) {
