@@ -27,9 +27,12 @@ ok()   { echo "✅ $1"; }
 # eval JS dans le panneau (retour JSON.stringify)
 eval_js() { node "$CDP" eval "$MOTIF" "$1"; }
 # attend que eval_js renvoie la valeur attendue (délai 6 s)
+unquote() { # lit stdin — cdp.mjs peut double-encoder : « "{\"a\":1}" » → « {"a":1} »
+  node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>{s=s.trim();try{s=JSON.parse(s)}catch(e){}process.stdout.write(String(s))})"
+}
 poll_js() { # $1=expr $2=valeur attendue
   for _ in $(seq 1 12); do
-    GOT="$(eval_js "$1" 2>/dev/null || true)"
+    GOT="$(eval_js "$1" 2>/dev/null | unquote)"
     [ "$GOT" = "$2" ] && return 0
     sleep 0.5
   done
@@ -52,9 +55,13 @@ ok "§1 version déployée $GOT"
 # ── §2 relance avec CDP ───────────────────────────────────────────────────────
 pkill -9 -f "MEGA PACK" 2>/dev/null; sleep 1
 "$LSREG" -f "$APP" >/dev/null 2>&1 || true   # pkill peut faire perdre le bundle (procNotFound -600)
+sleep 1
+"$LSREG" -f "$APP" >/dev/null 2>&1 || true   # 2e passe : parfois nécessaire après un kill -9
 : > "$SUP/mgp-journal.log" 2>/dev/null || true
 rm -f "$TRACE"
-open -a "$APP_NAME" --env MGP_TRACE=1 --args --remote-debugging-port=9232 --inspect=9233
+open -a "$APP_NAME" --env MGP_TRACE=1 --args --remote-debugging-port=9232 --inspect=9233 2>/dev/null \
+  || open "$APP" --args --remote-debugging-port=9232 --inspect=9233 2>/dev/null \
+  || fail "impossible de lancer $APP_NAME (LaunchServices) — ré-ouvre le .app une fois à la main"
 for _ in $(seq 1 30); do
   curl -s "http://127.0.0.1:9232/json/list" >/dev/null 2>&1 && break
   sleep 1
@@ -68,17 +75,25 @@ node "$CDP" list | grep -q "app/index" || fail "cible renderer introuvable"
   || eval_js "document.querySelector('#top .lc').click()" >/dev/null
 
 # ── §A drag TRUSTED de la poignée SE ──────────────────────────────────────────
-SIZE0=$(eval_js "JSON.stringify({w:window.innerWidth,h:window.innerHeight})")
+SIZE0=$(eval_js "JSON.stringify({w:window.innerWidth,h:window.innerHeight})" | unquote)
+case "$SIZE0" in *undefined*|"") fail "lecture de la taille du panneau impossible ($SIZE0)" ;; esac
 W0=$(echo "$SIZE0" | node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>console.log(JSON.parse(s).w))")
 H0=$(echo "$SIZE0" | node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>console.log(JSON.parse(s).h))")
-# si le panneau est trop petit pour rétrécir, on agrandit au lieu de rétrécir
+# si le panneau est trop petit pour rétrécir, on agrandit au lieu de rétrécir.
+# 🧲 Le snap magnétique (±32 px autour de ¼/½/¾ écran) dévie la cible : on vérifie
+# l'hypothèse snap et on accepte la taille snappée comme résultat valide.
 DIR="-60 -50"
 EXPECT_W=$((W0-60)); EXPECT_H=$((H0-50))
 if [ "$W0" -lt 520 ] || [ "$H0" -lt 520 ]; then
   DIR="60 50"; EXPECT_W=$((W0+60)); EXPECT_H=$((H0+50))
 fi
+# seuils snap hauteur : 0.5×availHeight (±32). Si la cible est dans la zone, le snap la remplace
+SNAP_H=$(eval_js "Math.round((window.screen ? window.screen.availHeight : 900) * 0.5)")
+SNAP_H=${SNAP_H//\"/}
+DIFF=$((EXPECT_H - SNAP_H)); [ "${DIFF#-}" -le 32 ] && { EXPECT_H=$SNAP_H; ok "(🧲 snap ½ écran anticipé sur la hauteur : $SNAP_H)"; }
 read -r DX DY <<<"$DIR"
-POS=$(eval_js "(function(){const r=document.querySelector('.rz.se').getBoundingClientRect();return JSON.stringify({x:Math.round(r.x+r.width/2),y:Math.round(r.y+r.height/2)})})()")
+POS=$(eval_js "(function(){const r=document.querySelector('.rz.se');if(!r)return 'null';const b=r.getBoundingClientRect();return JSON.stringify({x:Math.round(b.x+b.width/2),y:Math.round(b.y+b.height/2)})})()" | unquote)
+case "$POS" in *undefined*|""|null) fail "poignée SE introuvable dans le panneau ($POS)" ;; esac
 AX=$(echo "$POS" | node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>console.log(JSON.parse(s).x))")
 AY=$(echo "$POS" | node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>console.log(JSON.parse(s).y))")
 node "$CDP" drag "$MOTIF" "$AX" "$AY" "$((AX+DX))" "$((AY+DY))" 10 >/dev/null || fail "drag CDP échoué"

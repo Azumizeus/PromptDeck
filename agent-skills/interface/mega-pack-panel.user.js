@@ -721,7 +721,7 @@ window.MG_TEAMS = MG_TEAMS; // combos de personas réutilisables (⚡ panel)
     let pool = ALL();
     if (tab === 'skills') pool = pool.filter(function (it) { return it.k === 'skill'; });
     else if (tab === 'agents') pool = pool.filter(function (it) { return it.k === 'agent'; });
-    else if (tab === 'teams') pool = pool.filter(function (it) { return it.k === 'team'; });
+    else if (tab === 'teams') pool = pool.filter(function (it) { return it.k === 'team' || it.k === 'oh-team'; });
     else if (tab === 'custom') pool = pool.filter(function (it) { return it.k === 'custom'; });
     else if (tab === 'favs') pool = pool.filter(function (it) { return isFav(it.x.name); });
     results = pool.filter(function (it) {
@@ -913,6 +913,7 @@ window.MG_TEAMS = MG_TEAMS; // combos de personas réutilisables (⚡ panel)
     sizeIdx = SIZES.findIndex(function (s) { return s[0] > cur + 40; });
     if (sizeIdx < 0) sizeIdx = 0; // boucle après XL
     store.set('sizeIdx', sizeIdx);
+    store.set('customSize', null); // 🐛 fix : un preset invalide la taille custom (sinon elle écrasait le preset au rechargement)
     panel.style.width = SIZES[sizeIdx][0] + 'px';
     panel.style.height = SIZES[sizeIdx][1] + 'px';
   };
@@ -960,7 +961,7 @@ window.MG_TEAMS = MG_TEAMS; // combos de personas réutilisables (⚡ panel)
       const ht = Math.max(220, Math.min(sh + (sy - e.clientY), window.innerHeight - 24));
       panel.style.width = w + 'px'; panel.style.height = ht + 'px';
     });
-    h.addEventListener('pointerup', function () { if (rs) { rs = false; store.set('customSize', { w: panel.offsetWidth, h: panel.offsetHeight }); } });
+    h.addEventListener('pointerup', function () { if (rs) { rs = false; store.set('customSize', { w: panel.offsetWidth, h: panel.offsetHeight }); store.set('sizeIdx', 0); } }); // 🐛 fix : un drag custom annule le preset (priorité claire)
     const cs = store.get('customSize', null);
     if (cs) { panel.style.width = cs.w + 'px'; panel.style.height = cs.h + 'px'; }
   })();
