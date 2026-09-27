@@ -47,6 +47,10 @@ jobs:
           node test-fr.js
           node test-custom.js
 
+      - name: 🛡 Garde-fou boutons du panneau (aucun retrait sans mention explicite)
+        working-directory: agent-skills
+        run: node scripts/panel-buttons-guard.js
+
   build-macos:
     name: Build macOS — DMG x64 + arm64 + universel
     needs: tests
