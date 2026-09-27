@@ -35,11 +35,16 @@ done
   && ok "catalogue embarqué (interface/catalog-full.js)" || bad "catalogue embarqué"
 [[ -f "dist/MEGA PACK-darwin-x64/MEGA PACK.app/Contents/Resources/interface/mega-pack-launcher.html" ]] \
   && ok "launcher HTML embarqué" || bad "launcher HTML embarqué"
+[[ -f "$APP/../MODE-EMPLOI.md" ]] \
+  && ok "guide MODE-EMPLOI.md embarqué" || bad "guide MODE-EMPLOI.md embarqué"
 
 section "4. App packagée — contenu fonctionnel"
 grep -q "name_fr" "$APP/renderer.js" && ok "traduction FR dans le renderer" || bad "traduction FR renderer"
 grep -q "custom-save" "$APP/main.js" && ok "IPC prompts ✍️ dans le main" || bad "IPC prompts ✍️"
 grep -q "desc_fr" "$APP/main.js" && ok "prompts FR localisés (menu ⚡)" || bad "prompts FR (menu)"
+grep -q "modeEmploi" "$APP/preload.js" && ok "aide contextuelle embarquée dans le preload" || bad "aide contextuelle absente du preload"
+grep -q "helpShortcut" "$APP/main.js" && grep -q "helpshortcut" "$APP/settings.html" \
+  && ok "raccourci global d’aide configurable" || bad "raccourci global d’aide absent"
 grep -q "return isSkill" "$APP/main.js" && bad "régression : promptFor utilise isSkill (bug #1)" || ok "promptFor corrigé (return kind)"
 
 section "5. Signatures"
@@ -77,6 +82,8 @@ else
   grep -q "v1.1.0" "$VOL/LISEZMOI.txt" && ok "LISEZMOI à jour (v1.1.0)" || bad "LISEZMOI pas à jour"
   [[ -f "$VOL/MEGA PACK.app/Contents/Resources/interface/mega-pack-launcher.html" ]] \
     && ok "launcher HTML embarqué dans le DMG" || bad "launcher absent du DMG"
+  [[ -f "$VOL/MEGA PACK.app/Contents/Resources/MODE-EMPLOI.md" ]] \
+    && ok "guide contextuel embarqué dans le DMG" || bad "guide contextuel absent du DMG"
   codesign --verify --deep --strict "$VOL/MEGA PACK.app" >/dev/null 2>&1 \
     && ok "signature de l'app du DMG" || bad "signature app du DMG"
   hdiutil detach "$VOL" -quiet && trap - EXIT && ok "DMG démonté"

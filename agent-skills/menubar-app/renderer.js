@@ -24,8 +24,12 @@ const I18N = {
     empty: 'Aucun résultat', sel: 'sél.', copyOk: (n) => `⚡ ${n} → prompt copié !`,
     themeOn: (t) => (t === 'light' ? '☀️ Thème clair' : '🌙 Thème sombre'),
     openClaude: '⏎ Ouvrir la sélection dans Claude', openGpt: '⇧⏎ Ouvrir dans ChatGPT',
-    footShort: '↑↓ naviguer · ⏎ copier · ⌘⏎ ouvrir (LLM par défaut) · ⇧⏎ ChatGPT · ⌘, réglages · Échap fermer',
+    footShort: '↑↓ naviguer · ⏎ copier · ⌘⏎ ouvrir · ⇧⏎ ChatGPT · ⌘/ aide · ⌘, réglages · Échap fermer',
     hello: 'Bonjour !',
+    helpDefault: 'Tapez une tâche (corriger, reviewer, Solana, SEO…) ou appuyez sur ⌘/ pour les 15 recettes.',
+    helpTitle: 'Mode d’emploi', helpSub: '15 recettes : quoi utiliser, comment faire, comment vérifier',
+    helpWhat: 'Quoi', helpHow: 'Comment', helpVerify: 'Vérifier', helpCopy: 'Copier la recette',
+    helpCopied: '🧭 Recette copiée !', helpAll: 'Voir les 15 recettes', helpMissing: 'Guide non embarqué — reconstruis PromptDeck.',
   },
   en: {
     ph: '🔍 Search…', all: 'All', skills: 'Skills', agents: 'Agents',
@@ -33,8 +37,12 @@ const I18N = {
     empty: 'No results', sel: 'sel.', copyOk: (n) => `⚡ ${n} → prompt copied!`,
     themeOn: (t) => (t === 'light' ? '☀️ Light theme' : '🌙 Dark theme'),
     openClaude: '⏎ Open selection in Claude', openGpt: '⇧⏎ Open in ChatGPT',
-    footShort: '↑↓ navigate · ⏎ copy · ⌘⏎ open (default LLM) · ⇧⏎ ChatGPT · ⌘, settings · Esc close',
+    footShort: '↑↓ navigate · ⏎ copy · ⌘⏎ open · ⇧⏎ ChatGPT · ⌘/ help · ⌘, settings · Esc close',
     hello: 'Hello!',
+    helpDefault: 'Type a task (fix, review, Solana, SEO…) or press ⌘/ for all 15 recipes.',
+    helpTitle: 'User guide', helpSub: '15 recipes: what to use, how to do it, how to verify',
+    helpWhat: 'What', helpHow: 'How', helpVerify: 'Verify', helpCopy: 'Copy recipe',
+    helpCopied: '🧭 Recipe copied!', helpAll: 'See all 15 recipes', helpMissing: 'Guide not bundled — rebuild PromptDeck.',
   },
 };
 const T = () => I18N[LANG] || I18N.fr;
@@ -42,6 +50,50 @@ const T = () => I18N[LANG] || I18N.fr;
 // Libellés localisés : le catalogue fournit name_fr / desc_fr pour chaque item
 const lname = (x) => (LANG === 'fr' && x.name_fr) ? x.name_fr : x.name;
 const ldesc = (x) => (LANG === 'fr' && x.desc_fr) ? x.desc_fr : (x.desc || '');
+
+// ---------- Aide contextuelle — parse le MODE-EMPLOI.md embarqué par le preload ----------
+const MODE_EMPLOI_SOURCE = (window.mgp && window.mgp.modeEmploi) || '';
+const normalizeHelp = (value) => String(value || '')
+  .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+  .toLowerCase().replace(/[^a-z0-9+#]+/g, ' ').replace(/\s+/g, ' ').trim();
+const HELP_STOP_WORDS = new Set(('avec pour faire comment quoi utiliser utilise avant apres sans plus dans les des une un le la de du et ou au aux en que qui ne pas the and use using with from your you this that').split(' '));
+const helpTokens = (value) => [...new Set(normalizeHelp(value).split(' ').filter((w) => w.length > 2 && !HELP_STOP_WORDS.has(w)))];
+const cleanHelpMarkdown = (value) => String(value || '')
+  .replace(/```[^\n]*\n?/g, '').replace(/`([^`]+)`/g, '$1')
+  .replace(/\*\*([^*]+)\*\*/g, '$1').replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+  .replace(/^\s*\|?.*\|\s*$/gm, (line) => line.replace(/\|/g, ' · ').replace(/^\s*·\s*|·\s*$/g, ''))
+  .replace(/\s+/g, ' ').trim();
+function parseModeEmploi(markdown) {
+  const headings = [...String(markdown || '').matchAll(/^##\s+\d+\.\s+(.+)$/gm)];
+  return headings.map((heading, index) => {
+    const start = heading.index + heading[0].length;
+    const end = index + 1 < headings.length ? headings[index + 1].index : markdown.length;
+    const body = markdown.slice(start, end).trim();
+    const grab = (label, nextLabels) => {
+      const next = nextLabels.length ? `(?=\\n\\*\\*(?:${nextLabels.join('|')})\\*\\*|$)` : '$';
+      const re = new RegExp(`\\*\\*${label}\\*\\*\\s*:?\\s*([\\s\\S]*?)${next}`);
+      return (body.match(re) || [])[1]?.trim() || '';
+    };
+    const title = cleanHelpMarkdown(heading[1]);
+    const whatRaw = grab('Quoi', ['Comment', 'Vérifier']);
+    const howRaw = grab('Comment', ['Vérifier']);
+    const verifyRaw = grab('Vérifier', []);
+    const bodyText = cleanHelpMarkdown(body);
+    const what = cleanHelpMarkdown(whatRaw) || bodyText.slice(0, 260);
+    const how = cleanHelpMarkdown(howRaw);
+    const verify = cleanHelpMarkdown(verifyRaw);
+    const prompt = [
+      `# ${title}`,
+      whatRaw ? `**Quoi :** ${whatRaw}` : '',
+      howRaw ? `**Comment :**\n${howRaw}` : '',
+      verifyRaw ? `**Vérifier :** ${verifyRaw}` : '',
+    ].filter(Boolean).join('\n\n');
+    const searchText = normalizeHelp([title, whatRaw, howRaw, verifyRaw, bodyText].join(' '));
+    return { id: index + 1, title, what, how, verify, prompt, searchText, titleNorm: normalizeHelp(title) };
+  }).filter((recipe) => recipe.title);
+}
+const HELP_RECIPES = parseModeEmploi(MODE_EMPLOI_SOURCE);
+const escHtml = (value) => String(value || '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
 // ---------- Prompts ----------
 function promptSkill(x) {
@@ -77,6 +129,7 @@ document.body.innerHTML = `
 <div id="wrap">
   <div id="searchrow">
     <input id="q" type="text" placeholder="${T().ph}" autofocus>
+    <button id="helpbtn" title="${LANG === 'fr' ? 'Aide contextuelle (⌘/)' : 'Contextual help (⌘/)'}">?</button>
     <button id="addc" title="${LANG === 'fr' ? 'Nouveau prompt personnalisé' : 'New custom prompt'}">＋</button>
     <button id="theme" title="theme">🌙</button>
     <button id="lang" title="langue">FR</button>
@@ -89,8 +142,9 @@ document.body.innerHTML = `
     <div class="tb" data-t="custom">✍️</div>
     <div id="cnt"></div>
   </div>
+  <div id="context" aria-live="polite"></div>
   <div id="list"></div>
-  <div id="foot">↑↓ naviguer · ⏎ copier · ⌘⏎ Claude · ⇧⏎ ChatGPT · ⌘, réglages · Échap fermer</div>
+  <div id="foot">↑↓ naviguer · ⏎ copier · ⌘⏎ Claude · ⇧⏎ ChatGPT · ⌘/ aide · ⌘, réglages · Échap fermer</div>
 </div>
 <div id="modal">
   <div id="mbox">
@@ -105,11 +159,22 @@ document.body.innerHTML = `
       <button id="e-save" class="primary">${LANG === 'fr' ? 'Enregistrer' : 'Save'}</button>
     </div>
   </div>
+</div>
+<div id="help" role="dialog" aria-modal="true" aria-labelledby="help-title">
+  <div id="helpbox">
+    <div id="helphead">
+      <div><b id="help-title">${T().helpTitle}</b><span id="help-sub">${T().helpSub}</span></div>
+      <button id="help-close" title="fermer">×</button>
+    </div>
+    <input id="help-filter" type="search" placeholder="${LANG === 'fr' ? 'Filtrer : bug, UI, sécurité, Solana…' : 'Filter: bug, UI, security, Solana…'}">
+    <div id="help-list"></div>
+  </div>
 </div>`;
 
 const $ = (id) => document.getElementById(id);
-const q = $('q'), list = $('list'), cnt = $('cnt');
-let mode = 'all', sel = new Set(), results = [];
+const q = $('q'), list = $('list'), cnt = $('cnt'), ctx = $('context');
+const helpFilter = $('help-filter'), helpList = $('help-list');
+let mode = 'all', sel = new Set(), results = [], userNavigated = false;
 
 // Préférences système (favoris, récents, LLM par défaut) — fournis par le main process
 const SYS = (window.mgp.getPrefs && window.mgp.getPrefs()) || { favorites: [], recents: [], defaultLLM: 'claude' };
@@ -133,6 +198,11 @@ body.light{--bg:#f4f6fb;--card:#fff;--card2:#eef1f8;--border:#d9deeb;--txt:#1a20
 .tb{padding:4px 12px;border-radius:99px;background:var(--card);border:1px solid var(--border);color:var(--mut);cursor:pointer;font-size:12px;user-select:none}
 .tb.on{background:var(--acc);border-color:var(--acc);color:#fff;font-weight:600}
 #cnt{margin-left:auto;font-size:11px;color:var(--mut);align-self:center}
+#context{min-height:48px;margin:0 8px 6px;padding:7px 9px;border:1px solid var(--border);border-radius:9px;background:linear-gradient(135deg,color-mix(in srgb,var(--acc) 12%,var(--card)),var(--card));color:var(--mut);font-size:11px;display:flex;align-items:center;gap:8px}
+#context b{color:var(--txt);font-size:12px}
+#context .ctx-text{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#context button{border:1px solid var(--border);background:var(--card2);color:var(--txt);border-radius:7px;padding:4px 8px;font:inherit;font-size:10.5px;cursor:pointer;white-space:nowrap}
+#context button:hover{border-color:var(--acc)}
 #list{flex:1;overflow-y:auto;padding:0 8px 8px}
 .it{display:flex;gap:8px;align-items:flex-start;padding:7px 9px;border-radius:9px;cursor:pointer;border:1px solid transparent}
 .fv{background:none;border:none;color:var(--mut);font-size:14px;cursor:pointer;padding:0 2px;line-height:1.2}
@@ -147,8 +217,24 @@ body.light{--bg:#f4f6fb;--card:#fff;--card2:#eef1f8;--border:#d9deeb;--txt:#1a20
 body.light #foot{background:var(--card2)}
 .ev{background:none;border:none;color:var(--mut);font-size:11px;cursor:pointer;padding:0 3px}
 .ev:hover{color:var(--acc)}
-#modal{display:none;position:fixed;inset:0;background:rgba(4,6,12,.62);z-index:50;align-items:center;justify-content:center}
-#mbox{display:flex;flex-direction:column;gap:8px;width:min(480px,92vw);background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px;box-shadow:0 18px 50px rgba(0,0,0,.5)}
+#modal,#help{display:none;position:fixed;inset:0;background:rgba(4,6,12,.62);z-index:50;align-items:center;justify-content:center}
+#help{z-index:60}
+#mbox,#helpbox{display:flex;flex-direction:column;gap:8px;width:min(480px,92vw);background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px;box-shadow:0 18px 50px rgba(0,0,0,.5)}
+#helpbox{width:min(680px,94vw);max-height:90vh}
+#helphead{display:flex;align-items:center;gap:12px}
+#helphead>div{flex:1;display:flex;flex-direction:column}
+#helphead b{font-size:14px}
+#helphead span{color:var(--mut);font-size:11px}
+#help-close{width:28px;height:28px;border:1px solid var(--border);background:var(--card2);color:var(--txt);border-radius:7px;font-size:18px;cursor:pointer}
+#help-filter{background:var(--card2);border:1px solid var(--border);color:var(--txt);border-radius:8px;padding:8px 10px;font:inherit;outline:none}
+#help-filter:focus{border-color:var(--acc)}
+#help-list{overflow-y:auto;display:flex;flex-direction:column;gap:8px;padding-right:2px}
+.hcard{background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:10px 11px}
+.hcard h3{font-size:12.5px;margin-bottom:4px;color:var(--txt)}
+.hcard p{font-size:11px;color:var(--mut);margin:3px 0}
+.hcard .hlabel{color:var(--acc2);font-weight:700;margin-right:4px}
+.hcard .hsteps{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;white-space:pre-wrap}
+.hcard button{margin-top:7px;border:1px solid var(--acc);background:var(--acc);color:#fff;border-radius:7px;padding:4px 9px;font:inherit;font-size:10.5px;cursor:pointer}
 #mbox b{font-size:13px}
 #e-name,#e-txt{background:var(--card2);border:1px solid var(--border);color:var(--txt);border-radius:8px;padding:8px 10px;font:inherit;outline:none}
 #e-name:focus,#e-txt:focus{border-color:var(--acc)}
@@ -174,6 +260,11 @@ function applyLang() {
     if (b.dataset.t === 'skills') b.textContent = T().skills;
     if (b.dataset.t === 'agents') b.textContent = T().agents;
   });
+  $('help-title').textContent = T().helpTitle;
+  $('help-sub').textContent = T().helpSub;
+  $('help-filter').placeholder = LANG === 'fr' ? 'Filtrer : bug, UI, sécurité, Solana…' : 'Filter: bug, UI, security, Solana…';
+  renderHelpList();
+  updateContextualHelp();
 }
 
 function render() {
@@ -195,6 +286,7 @@ function render() {
   cnt.textContent = `${pool.length} · ${sel.size} ${T().sel}`;
   if (!results.length) {
     list.innerHTML = `<div style="padding:30px;text-align:center;color:var(--mut)">${T().empty}</div>`;
+    updateContextualHelp();
     return;
   }
   list.innerHTML = results.map(({ x, a }, i) => `
@@ -229,6 +321,7 @@ function render() {
       activate(results[+el.dataset.i]);
     };
   });
+  updateContextualHelp();
   list.querySelector('.it.on')?.scrollIntoView({ block: 'nearest' });
 }
 
@@ -244,6 +337,80 @@ function flash(msg) {
   foot.style.color = 'var(--acc2)';
   setTimeout(() => { foot.style.color = ''; render(); }, 1500);
 }
+
+// ---------- 🧭 Aide contextuelle ----------
+function scoreHelpRecipe(recipe, text) {
+  const normalized = normalizeHelp(text);
+  const tokens = helpTokens(text);
+  if (!normalized || !tokens.length) return 0;
+  let score = recipe.titleNorm && (recipe.titleNorm.includes(normalized) || normalized.includes(recipe.titleNorm)) ? 20 : 0;
+  for (const token of tokens) {
+    if (recipe.titleNorm.includes(token)) score += 10;
+    if (normalizeHelp(recipe.what).includes(token)) score += 6;
+    if (normalizeHelp(recipe.how).includes(token)) score += 3;
+    if (normalizeHelp(recipe.verify).includes(token)) score += 2;
+    if (recipe.searchText.includes(token)) score += 1;
+  }
+  return score;
+}
+function pickHelpRecipe(text) {
+  return HELP_RECIPES.map((recipe) => ({ recipe, score: scoreHelpRecipe(recipe, text) }))
+    .filter((hit) => hit.score > 0)
+    .sort((a, b) => b.score - a.score || a.recipe.id - b.recipe.id)[0]?.recipe || null;
+}
+function activeHelpContext() {
+  const query = q.value.trim();
+  if (query) return query;
+  if (!userNavigated || !results[idx]) return '';
+  const { x, a } = results[idx];
+  return `${x.name} ${x.category || x.tag || ''} ${ldesc(x)} ${a === 'custom' ? 'prompt personnalisé' : a ? 'agent' : 'skill'}`;
+}
+function updateContextualHelp() {
+  const recipe = pickHelpRecipe(activeHelpContext());
+  if (!recipe) {
+    ctx.innerHTML = `<span class="ctx-text">🧭 ${escHtml(T().helpDefault)}</span><button data-help-open>${escHtml(T().helpAll)}</button>`;
+    return;
+  }
+  ctx.innerHTML = `<b>🧭 ${escHtml(recipe.title)}</b><span class="ctx-text">${escHtml(recipe.what)}</span><button data-help-copy="${recipe.id}">${escHtml(T().helpCopy)}</button><button data-help-open>${escHtml(T().helpAll)}</button>`;
+}
+function recipeCard(recipe) {
+  const steps = recipe.how || recipe.what;
+  return `<article class="hcard"><h3>${recipe.id}. ${escHtml(recipe.title)}</h3><p><span class="hlabel">${escHtml(T().helpWhat)}</span>${escHtml(recipe.what)}</p><p class="hsteps"><span class="hlabel">${escHtml(T().helpHow)}</span>${escHtml(steps)}</p>${recipe.verify ? `<p><span class="hlabel">${escHtml(T().helpVerify)}</span>${escHtml(recipe.verify)}</p>` : ''}<button data-help-copy="${recipe.id}">${escHtml(T().helpCopy)}</button></article>`;
+}
+function renderHelpList() {
+  if (!HELP_RECIPES.length) { helpList.innerHTML = `<div style="padding:30px;text-align:center;color:var(--mut)">${escHtml(T().helpMissing)}</div>`; return; }
+  const terms = normalizeHelp(helpFilter.value).split(' ').filter(Boolean);
+  const filtered = HELP_RECIPES.filter((recipe) => !terms.length || terms.every((term) => recipe.searchText.includes(term)));
+  helpList.innerHTML = filtered.length ? filtered.map(recipeCard).join('') : `<div style="padding:30px;text-align:center;color:var(--mut)">${escHtml(T().empty)}</div>`;
+}
+function openHelp() {
+  $('help').style.display = 'flex';
+  helpFilter.value = q.value.trim();
+  renderHelpList();
+  helpFilter.focus();
+}
+function closeHelp() { $('help').style.display = 'none'; }
+function copyHelpRecipe(id, closeAfter = false) {
+  const recipe = HELP_RECIPES.find((item) => item.id === Number(id));
+  if (!recipe) return;
+  if (closeAfter) closeHelp();
+  window.mgp.copy(recipe.prompt);
+  flash(T().helpCopied);
+}
+ctx.onclick = (event) => {
+  const copy = event.target.closest('[data-help-copy]');
+  if (copy) { copyHelpRecipe(copy.dataset.helpCopy); return; }
+  if (event.target.closest('[data-help-open]')) openHelp();
+};
+$('helpbtn').onclick = openHelp;
+$('help-close').onclick = closeHelp;
+$('help').onclick = (event) => { if (event.target === $('help')) closeHelp(); };
+helpFilter.oninput = renderHelpList;
+helpList.onclick = (event) => {
+  const copy = event.target.closest('[data-help-copy]');
+  if (copy) copyHelpRecipe(copy.dataset.helpCopy, true);
+};
+if (window.mgp.onOpenHelp) window.mgp.onOpenHelp(openHelp);
 
 // ---------- ✍️ Éditeur de prompts personnalisés ----------
 let editingName = null;
@@ -280,7 +447,6 @@ $('e-del').onclick = () => {
 };
 $('e-txt').addEventListener('keydown', (e) => {
   if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') $('e-save').onclick();
-  if (e.key === 'Escape') $('modal').style.display = 'none';
 });
 if (window.mgp.onEditCustom) window.mgp.onEditCustom((c) => openEditor(c)); // « ✎ Éditer » du menu ⚡
 
@@ -323,6 +489,8 @@ function move(d) {
   idx = Math.min(items.length - 1, Math.max(0, idx + d));
   items[idx].classList.add('on');
   items[idx].scrollIntoView({ block: 'nearest' });
+  userNavigated = true;
+  updateContextualHelp();
 }
 q.addEventListener('keydown', (e) => {
   if (e.key === 'ArrowDown') { e.preventDefault(); move(1); }
@@ -336,9 +504,15 @@ q.addEventListener('keydown', (e) => {
   }
 });
 document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape') window.mgp.hide();
+  if (e.key === 'Escape') {
+    if ($('help').style.display === 'flex') { closeHelp(); return; }
+    if ($('modal').style.display === 'flex') { $('modal').style.display = 'none'; return; }
+    window.mgp.hide();
+    return;
+  }
+  if ((e.metaKey || e.ctrlKey) && e.key === '/') { e.preventDefault(); openHelp(); return; }
   if ((e.metaKey || e.ctrlKey) && e.key === ',') window.mgp.openSettings();
-  if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'a' && document.activeElement !== q) {
+  if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'a' && document.activeElement !== q && $('help').style.display !== 'flex' && $('modal').style.display !== 'flex') {
     e.preventDefault(); results.forEach(({ x }) => sel.add(x.name)); render();
   }
 });
@@ -351,13 +525,13 @@ function openSelection(target) {
 }
 
 // ---------- Événements ----------
-q.addEventListener('input', () => { idx = 0; render(); });
+q.addEventListener('input', () => { idx = 0; userNavigated = false; render(); });
 document.querySelectorAll('.tb').forEach((b) => {
   b.onclick = () => {
     mode = b.dataset.t;
     document.querySelectorAll('.tb').forEach((x) => x.classList.remove('on'));
     b.classList.add('on');
-    idx = 0; render();
+    idx = 0; userNavigated = false; render();
   };
 });
 $('theme').onclick = () => {

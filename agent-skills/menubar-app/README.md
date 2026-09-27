@@ -25,6 +25,15 @@ npm start
 | **⇧⏎** | Ouvrir dans ChatGPT |
 | **⌘A** | Tout sélectionner (composeur) |
 | **⌘,** | Réglages · **Échap** fermer le panneau |
+| **⌘⌥/** | Ouvrir directement l’aide contextuelle (configurable dans Réglages) |
+| **⌘/** | Ouvrir l’aide contextuelle depuis le panneau |
+
+## 🧭 Aide contextuelle
+
+Le raccourci global **⌘⌥/** ouvre directement les **15 recettes** sans afficher
+d’abord le catalogue. Il est modifiable ou désactivable dans les Réglages. Le bouton
+**?** du panneau et **⌘/** ouvrent la même aide. Pendant la saisie, une barre recommande automatiquement la recette
+la plus proche de la tâche. Chaque recette est filtrable et copiable en un clic.
 
 **✍️ Prompts personnalisés** : bouton **＋** dans le panneau → nom + texte de ton prompt,
 ajoutés comme les items de base (onglet ✍️, recherche, favoris ⭐, menu ⚡ « Mes prompts »
@@ -38,12 +47,13 @@ pour lancer le prompt dans **12 destinations** : Claude, ChatGPT, Perplexity, Co
 DeepSeek, Z.ai, Kimi, Mammouth.ia, l'**app Freebuff**, **OpenCode desktop**
 (`opencode://`), **OpenCode terminal** — plus une option 📋 presse-papiers
 (le prompt est de toute façon toujours copié).
-Suivent : Ouvrir le panneau, Launcheur HTML, Réglages, Quitter.
+Suivent : Ouvrir le panneau, Launcheur HTML, Aide contextuelle, Réglages, Quitter.
 
 ## Réglages
 
-Thème **clair/sombre**, langue **FR/EN**, **LLM par défaut**, **raccourci global**
-(⌥Espace par défaut), **lancement au démarrage**, **raccourcis favoris** (⌘1-⌘9)
+Thème **clair/sombre**, langue **FR/EN**, **LLM par défaut**, **raccourci global de recherche**
+(⌥Espace par défaut), **raccourci global d’aide** (⌘⌥/ par défaut, configurable),
+**lancement au démarrage**, **raccourcis favoris** (⌘1-⌘9)
 et **export/import de configuration** (JSON : favoris, récents, préférences).
 Le tout mémorisé (`localStorage` + `mgp-prefs.json` pour le menu) et synchronisé
 en direct avec le panneau. Le menu du tray (clic droit) suit la langue choisie.

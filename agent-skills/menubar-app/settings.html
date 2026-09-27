@@ -21,6 +21,7 @@ select{background:var(--bg);color:var(--txt);border:1px solid var(--border);bord
 .btn:hover{border-color:var(--acc)}
 .saved{position:fixed;bottom:14px;left:50%;transform:translateX(-50%);background:var(--acc2);color:#04281f;padding:7px 16px;border-radius:99px;font-weight:600;font-size:12px;opacity:0;transition:opacity .2s}
 .saved.show{opacity:1}
+.saved.error{background:#e5484d;color:#fff}
 </style>
 </head>
 <body>
@@ -32,6 +33,8 @@ select{background:var(--bg);color:var(--txt);border:1px solid var(--border);bord
   <select id="lang"><option value="fr">🇫🇷 Français</option><option value="en">🇬🇧 English</option></select></div>
 <div class="row"><b><span data-i18n="gs">Recherche globale</span><span class="d" data-i18n="gsD">Raccourci système (⌘Espace est réservé par Spotlight)</span></b>
   <select id="shortcut"><option value="Alt+Space">⌥Espace (recommandé)</option><option value="CommandOrControl+Space">⌘Espace</option><option value="Control+Space">⌃Espace</option></select></div>
+<div class="row"><b><span data-i18n="gh">Aide contextuelle</span><span class="d" data-i18n="ghD">Ouvre directement les 15 recettes</span></b>
+  <select id="helpshortcut"><option value="CommandOrControl+Alt+/" data-i18n="ghRecommended">⌘⌥/ (recommandé)</option><option value="CommandOrControl+Alt+H">⌘⌥H</option><option value="CommandOrControl+Shift+F1">⌘⇧F1</option><option value="Disabled" data-i18n="disabled">Désactivé</option></select></div>
 <div class="row"><b><span data-i18n="set">Réglages</span><span class="d" data-i18n="setD">Ouvrir cette fenêtre</span></b><span class="kbd">⌘⇧Espace</span></div>
 <div class="row"><b><span data-i18n="dllm">LLM par défaut</span><span class="d" data-i18n="dllmD">⌘⏎ dans le panneau ouvre ce chat</span></b>
   <select id="dllm"><option value="claude">Claude</option><option value="chatgpt">ChatGPT</option><option value="perplexity">Perplexity</option><option value="copilot">Copilot</option><option value="deepseek">DeepSeek</option><option value="zai">Z.ai</option><option value="kimi">Kimi</option><option value="mammouth">Mammouth.ia</option><option value="freebuff">Freebuff (app)</option><option value="opencode-app">OpenCode (desktop)</option><option value="opencode">OpenCode (terminal)</option></select></div>

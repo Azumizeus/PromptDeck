@@ -43,7 +43,9 @@ function makeEl(tag) {
 const ids = {};
 const byId = (id) => (ids[id] ||= makeEl('div'));
 const listeners = {};
-const inputEl = { ...makeEl('input'), _handlers: {}, addEventListener(ev, fn) { (this._handlers[ev] ||= []).push(fn); } };
+const inputEl = makeEl('input');
+inputEl._handlers = {};
+inputEl.addEventListener = function (ev, fn) { (this._handlers[ev] ||= []).push(fn); };
 ids.q = inputEl;
 ids.list = makeEl('div');
 ids.cnt = makeEl('div');
@@ -68,6 +70,7 @@ const sandbox = {
 sandbox.window = sandbox; // renderer fait window.mgp / document…
 sandbox.window.mgp = {
   catalog: CAT,
+  modeEmploi: fs.readFileSync(path.join(__dirname, '..', '..', 'MODE-EMPLOI.md'), 'utf8'),
   copy: (t) => copied.push(t),
   addRecent: (n) => recents.push(n),
   hide() {}, openLLM() {}, openSettings() {},
@@ -121,6 +124,34 @@ check(/desc_fr/.test(mainSrc), 'promptFor FR du menu clic droit (main.js) inclut
 
 console.log('5) Divers — animations sans effet de bord :');
 check(typeof copied !== 'undefined' && copied.length === 0, 'aucun effet de bord au chargement du renderer');
+
+console.log('6) Aide contextuelle — les 15 recettes du MODE-EMPLOI.md :');
+check(typeof ids.helpbtn.onclick === 'function', 'le bouton ? ouvre l’aide');
+ids.helpbtn.onclick();
+check(ids.help.style.display === 'flex', 'l’aide s’ouvre dans le panneau');
+const helpCards = (ids['help-list']._html.match(/class="hcard"/g) || []).length;
+check(helpCards === 15, 'les 15 recettes sont intégrées');
+check(ids['help-list']._html.includes('Corriger un bug'), 'la recette "Corriger un bug" est présente');
+ids['help-filter'].value = 'sécurité';
+ids['help-filter'].oninput();
+check(ids['help-list']._html.includes('Sécurité') && !ids['help-list']._html.includes('Corriger un bug'), 'le filtre contextuel fonctionne');
+ids['help-close'].onclick();
+check(ids.help.style.display === 'none', 'l’aide se ferme sans fermer PromptDeck');
+ids.q._val = 'corriger un bug';
+ids.q._handlers.input[0]();
+check(ids.context._html.includes('Corriger un bug'), 'la barre contextuelle recommande la bonne recette');
+ids['help-list'].onclick({ target: { closest: (selector) => selector === '[data-help-copy]' ? { dataset: { helpCopy: '3' } } : null } });
+check(copied[copied.length - 1].includes('Corriger un bug'), 'une recette complète peut être copiée');
+const preloadSrc = fs.readFileSync(path.join(__dirname, 'preload.js'), 'utf8');
+const settingsSrc = fs.readFileSync(path.join(__dirname, 'settings.js'), 'utf8');
+const settingsHtml = fs.readFileSync(path.join(__dirname, 'settings.html'), 'utf8');
+const buildSrc = fs.readFileSync(path.join(__dirname, 'build-app.sh'), 'utf8');
+check(/modeEmploi/.test(preloadSrc) && /click: openContextualHelp/.test(mainSrc), 'le menu et le preload ouvrent le guide intégré');
+check(/helpShortcut/.test(mainSrc) && /safeRegister\(helpAcc, openContextualHelp\)/.test(mainSrc), 'le raccourci global d’aide est enregistré');
+check(/id="helpshortcut"/.test(settingsHtml) && /onShortcutStatus/.test(settingsSrc), 'le raccourci est configurable et signale les conflits');
+check(/Resources\/MODE-EMPLOI\.md/.test(buildSrc), 'le guide est embarqué dans les builds macOS');
+ids.q._val = '';
+ids.q._handlers.input[0]();
 
 console.log(fail === 0 ? '\n✅ TOUS LES TESTS PASSENT' : `\n❌ ${fail} test(s) en échec`);
 process.exit(fail === 0 ? 0 : 1);

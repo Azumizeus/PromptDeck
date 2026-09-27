@@ -20,8 +20,20 @@ for (const p of CATALOG_CANDIDATES) {
   } catch (e) { /* candidat suivant */ }
 }
 
+// Guide pratique embarqué : source de vérité MODE-EMPLOI.md à la racine du pack.
+const MODE_EMPLOI_CANDIDATES = [
+  path.join(__dirname, '..', '..', 'MODE-EMPLOI.md'),
+  path.join(process.resourcesPath || __dirname, 'MODE-EMPLOI.md'),
+  path.join(process.resourcesPath || __dirname, 'app', 'MODE-EMPLOI.md'),
+];
+let modeEmploi = '';
+for (const p of MODE_EMPLOI_CANDIDATES) {
+  try { modeEmploi = fs.readFileSync(p, 'utf8'); if (modeEmploi.trim()) break; } catch (e) { /* candidat suivant */ }
+}
+
 contextBridge.exposeInMainWorld('mgp', {
   catalog,
+  modeEmploi,
   copy: (t) => ipcRenderer.send('copy', t),
   hide: () => ipcRenderer.send('hide'),
   openLLM: (target, prompt) => ipcRenderer.send('open-llm', { target, prompt }),
@@ -37,4 +49,6 @@ contextBridge.exposeInMainWorld('mgp', {
   customDelete: (name) => ipcRenderer.send('custom-delete', name),
   exportCustoms: () => ipcRenderer.invoke('export-customs'),
   onEditCustom: (cb) => ipcRenderer.on('edit-custom', (e, c) => cb(c)),
+  onOpenHelp: (cb) => ipcRenderer.on('open-help', () => cb()),
+  onShortcutStatus: (cb) => ipcRenderer.on('shortcut-status', (e, status) => cb(status)),
 });

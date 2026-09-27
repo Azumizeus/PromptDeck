@@ -25,19 +25,22 @@ npm start
 | **⇧⏎** | Open in ChatGPT |
 | **⌘A** | Select all (composer) |
 | **⌘,** | Settings · **Esc** close the panel |
+| **⌘⌥/** | Open contextual help directly (configurable in Settings) |
+| **⌘/** | Open contextual help from the panel |
 
 Right-click the ⚡ icon: a cascading menu with ⭐ Favorites, **Skills** and **Agents**
 grouped by category — each skill/agent opens an **“Open in”** submenu to launch the
 prompt in **12 destinations**: Claude, ChatGPT, Perplexity, Copilot, DeepSeek, Z.ai,
 Kimi, Mammouth.ia, the **Freebuff app**, **OpenCode desktop** (`opencode://`),
 **OpenCode terminal** — plus a 📋 clipboard option (the prompt is always copied anyway). Then: panel, HTML
-Launcher, Settings, Quit. The menu follows the
+Launcher, Contextual help, Settings, Quit. The menu follows the
 language chosen in Settings (FR/EN).
 
 ## Settings
 
-**Light/dark** theme, **FR/EN** language, **default LLM**, **global shortcut**
-(⌥Space default), **launch at startup**, **favorite shortcuts** (⌘1-⌘9) and
+**Light/dark** theme, **FR/EN** language, **default LLM**, **global search shortcut**
+(⌥Space default), **global contextual-help shortcut** (⌘⌥/ default, configurable or
+disabled), **launch at startup**, **favorite shortcuts** (⌘1-⌘9) and
 **config export/import** (JSON: favorites, recents, preferences) — all
 remembered (localStorage + `mgp-prefs.json` for the menu) and synced live with
 the panel.

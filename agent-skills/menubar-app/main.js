@@ -21,9 +21,10 @@ let LANG = 'fr';
 const T = () => I18N[LANG] || I18N.fr;
 function prefsPath() { return path.join(app.getPath('userData'), 'mgp-prefs.json'); }
 // Préférences persistées : langue, favoris, récents, LLM par défaut, raccourci, auto-boot, géométrie
-let PREFS = { lang: 'fr', favorites: [], recents: [], customs: [], defaultLLM: 'claude', shortcut: 'Alt+Space', autostart: false, favShortcuts: true, bounds: null };
+let PREFS = { lang: 'fr', favorites: [], recents: [], customs: [], defaultLLM: 'claude', shortcut: 'Alt+Space', helpShortcut: 'CommandOrControl+Alt+/', autostart: false, favShortcuts: true, bounds: null };
 function loadPrefs() {
   try { Object.assign(PREFS, JSON.parse(fs.readFileSync(prefsPath(), 'utf8'))); } catch (e) { /* défauts */ }
+  if (!HELP_SHORTCUTS.has(PREFS.helpShortcut)) PREFS.helpShortcut = 'CommandOrControl+Alt+/';
   LANG = PREFS.lang === 'en' ? 'en' : 'fr';
 }
 function savePrefs() {
@@ -50,13 +51,26 @@ function seedCustoms() {
   PREFS.seeded = true;
   savePrefs();
 }
-// Raccourci global réparable (⌘Espace est confisqué par Spotlight sur la plupart des Mac)
+// Raccourcis globaux réparables (⌘Espace est confisqué par Spotlight sur la plupart des Mac)
 const SHORTCUTS = { 'Alt+Space': '⌥Espace', 'CommandOrControl+Space': '⌘Espace', 'Control+Space': '⌃Espace' };
+const HELP_SHORTCUTS = new Set([
+  'CommandOrControl+Alt+/', 'CommandOrControl+Alt+H', 'CommandOrControl+Shift+F1', 'Disabled',
+]);
+let SHORTCUT_STATUS = { search: true, help: true, settings: true };
 function applyShortcut() {
   globalShortcut.unregisterAll();
-  const acc = SHORTCUTS[PREFS.shortcut] ? PREFS.shortcut : 'Alt+Space';
-  globalShortcut.register(acc, togglePanel);
-  globalShortcut.register('CommandOrControl+Shift+Space', createSettings);
+  const safeRegister = (accelerator, callback) => {
+    try { return globalShortcut.register(accelerator, callback); } catch (e) { return false; }
+  };
+  const searchAcc = SHORTCUTS[PREFS.shortcut] ? PREFS.shortcut : 'Alt+Space';
+  const helpAcc = HELP_SHORTCUTS.has(PREFS.helpShortcut) ? PREFS.helpShortcut : 'CommandOrControl+Alt+/';
+  SHORTCUT_STATUS = {
+    search: safeRegister(searchAcc, togglePanel),
+    settings: safeRegister('CommandOrControl+Shift+Space', createSettings),
+    help: helpAcc === 'Disabled' ? true : safeRegister(helpAcc, openContextualHelp),
+  };
+  if (settings && !settings.isDestroyed()) settings.webContents.send('shortcut-status', SHORTCUT_STATUS);
+  return SHORTCUT_STATUS;
 }
 function applyAutostart() {
   try { app.setLoginItemSettings({ openAtLogin: !!PREFS.autostart, path: process.execPath }); } catch (e) { /* best effort */ }
@@ -235,7 +249,7 @@ function buildMenuTemplate() {
     { type: 'separator' },
     { label: T().open, click: () => createPanel() },
     { label: T().launcher, click: () => openInterface('mega-pack-launcher.html') },
-    { label: T().help, click: () => openInterface('MODE-DEMPLOI.html') },
+    { label: T().help, click: openContextualHelp },
     { type: 'separator' },
     { label: T().settings, accelerator: 'Cmd+,', click: createSettings },
     { label: T().quit, role: 'quit' },
@@ -324,10 +338,20 @@ function togglePanel() {
   else createPanel();
 }
 
+function openContextualHelp() {
+  createPanel();
+  const panel = win;
+  const sendHelp = () => {
+    if (panel && !panel.isDestroyed()) panel.webContents.send('open-help');
+  };
+  if (panel.webContents.isLoading()) panel.webContents.once('did-finish-load', sendHelp);
+  else setTimeout(sendHelp, 50);
+}
+
 function createSettings() {
   if (settings && !settings.isDestroyed()) { settings.show(); settings.focus(); return; }
   settings = new BrowserWindow({
-    width: 500, height: 660, show: false, resizable: false, minimizable: false,
+    width: 500, height: 720, show: false, resizable: false, minimizable: false,
     fullscreenable: false, title: T().settingsTitle,
     icon: nativeImage.createFromPath(APPICON),
     webPreferences: {
@@ -562,7 +586,7 @@ if (!CAPTURE_MODE && !app.requestSingleInstanceLock()) {
       try { app.dock.setIcon(nativeImage.createFromPath(APPICON)); } catch (e) { /* icône optionnelle */ }
     }
 
-    applyShortcut(); // ⌥Espace par défaut (⌘Espace = Spotlight) · ⌘⇧Espace réglages
+    applyShortcut(); // ⌥Espace recherche · ⌘⌥/ aide · ⌘⇧Espace réglages
     applyAutostart();
 
     app.on('activate', () => createPanel());
@@ -598,13 +622,14 @@ ipcMain.on('open-llm', (e, { target, prompt }) => {
   openLLM(target, prompt);
 });
 ipcMain.on('open-settings', createSettings);
-ipcMain.on('settings-changed', (e, { theme, lang, defaultLLM, autostart, favShortcuts, shortcut } = {}) => {
+ipcMain.on('settings-changed', (e, { theme, lang, defaultLLM, autostart, favShortcuts, shortcut, helpShortcut } = {}) => {
   LANG = lang === 'en' ? 'en' : 'fr';
   PREFS.lang = LANG;
   if (defaultLLM) PREFS.defaultLLM = defaultLLM;
   if (typeof autostart === 'boolean') PREFS.autostart = autostart;
   if (typeof favShortcuts === 'boolean') PREFS.favShortcuts = favShortcuts;
   if (shortcut && SHORTCUTS[shortcut]) PREFS.shortcut = shortcut;
+  if (HELP_SHORTCUTS.has(helpShortcut)) PREFS.helpShortcut = helpShortcut;
   savePrefs();
   applyShortcut();
   applyAutostart();
@@ -613,7 +638,7 @@ ipcMain.on('settings-changed', (e, { theme, lang, defaultLLM, autostart, favShor
   if (win && !win.isDestroyed()) win.webContents.send('settings-changed', { theme, lang });
 });
 ipcMain.on('get-prefs', (e) => {
-  e.returnValue = { defaultLLM: PREFS.defaultLLM, shortcut: PREFS.shortcut, autostart: !!PREFS.autostart, favShortcuts: PREFS.favShortcuts !== false, favorites: PREFS.favorites, recents: PREFS.recents, customs: PREFS.customs };
+  e.returnValue = { defaultLLM: PREFS.defaultLLM, shortcut: PREFS.shortcut, helpShortcut: PREFS.helpShortcut, shortcutStatus: SHORTCUT_STATUS, autostart: !!PREFS.autostart, favShortcuts: PREFS.favShortcuts !== false, favorites: PREFS.favorites, recents: PREFS.recents, customs: PREFS.customs };
 });
 // ✍️ Prompts personnalisés : création/édition et suppression (persistés dans PREFS)
 ipcMain.on('custom-save', (e, item) => {
@@ -669,6 +694,7 @@ ipcMain.handle('import-config', async () => {
     if (data.lang === 'fr' || data.lang === 'en') { PREFS.lang = data.lang; LANG = data.lang; }
     if (data.defaultLLM) PREFS.defaultLLM = data.defaultLLM;
     if (data.shortcut && SHORTCUTS[data.shortcut]) PREFS.shortcut = data.shortcut;
+    if (HELP_SHORTCUTS.has(data.helpShortcut)) PREFS.helpShortcut = data.helpShortcut;
     if (typeof data.autostart === 'boolean') PREFS.autostart = data.autostart;
     if (typeof data.favShortcuts === 'boolean') PREFS.favShortcuts = data.favShortcuts;
     savePrefs(); applyShortcut(); applyAutostart();

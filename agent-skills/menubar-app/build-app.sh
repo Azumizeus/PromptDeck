@@ -50,6 +50,7 @@ NOUVEAUTÉS v1.1.0
 · ⭐ Favoris + raccourcis ⌘1-⌘9 · 🕘 Récents · LLM par défaut (⌘⏎)
 · 12 destinations « Ouvrir dans » : Claude, ChatGPT, Perplexity, Copilot, DeepSeek, Z.ai, Kimi, Mammouth.ia, Freebuff, OpenCode (desktop + terminal), presse-papiers
 · Noms/descriptions en français + recherche bilingue FR/EN (326 items)
+· 🧭 Aide contextuelle intégrée : 15 recettes filtrables, accès global ⌘⌥/ configurable
 · Lancement auto au démarrage · raccourci ⌥Espace (⌘Espace est réservé par Spotlight)
 · Fenêtre déplaçable/redimensionnable (position mémorisée) · export/import de configuration JSON
 
@@ -152,6 +153,11 @@ package_for() {
   cp main.js preload.js renderer.js index.html settings.html settings.js package.json \
      iconTemplate.png iconTemplate@2x.png appIcon.png appIcon@2x.png \
      "$app/Contents/Resources/app/"
+  if [[ -f ../../MODE-EMPLOI.md ]]; then
+    cp ../../MODE-EMPLOI.md "$app/Contents/Resources/MODE-EMPLOI.md"
+  else
+    echo "⚠️  MODE-EMPLOI.md introuvable — aide contextuelle indisponible"
+  fi
   if [[ -f ../interface/catalog-full.js ]]; then
     cp ../interface/catalog-full.js "$app/Contents/Resources/interface/"
   else

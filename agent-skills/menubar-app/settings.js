@@ -2,8 +2,8 @@
 
 // i18n de la fenêtre Réglages (langue partagée avec le panneau via mgp.lang)
 const I18N = {
-  fr: { title: 'MEGA PACK — Réglages', h2: '⚡ MEGA PACK — Réglages', cat: 'Catalogue :', genFrom: '· généré depuis', theme: 'Thème', themeD: 'Appliqué au panneau et à cette fenêtre', dark: '🌙 Sombre', light: '☀️ Clair', lang: 'Langue', langD: 'Interface du panneau', gs: 'Recherche globale', gsD: 'Raccourci système (⌘Espace est réservé par Spotlight)', set: 'Réglages', setD: 'Ouvrir cette fenêtre', dllm: 'LLM par défaut', dllmD: '⌘⏎ dans le panneau ouvre ce chat', auto: 'Lancement au démarrage', autoD: "Ouvre MEGA PACK à l'ouverture de session", fsc: 'Raccourcis favoris', fscD: '⌘1 à ⌘9 lancent les 9 premiers favoris (menu du ⚡ ouvert)', cfg: 'Configuration', cfgD: 'Favoris, récents et préférences en JSON', xp: 'Mes prompts ✍️', xpD: 'Télécharge tous tes prompts en Markdown', osel: 'Ouvrir la sélection', oselD: 'Dans le panneau : ⏎ copie · ⌘⏎ LLM par défaut · ⇧⏎ ChatGPT', saved: '✓ Enregistré', noCat: 'catalogue introuvable' },
-  en: { title: 'MEGA PACK — Settings', h2: '⚡ MEGA PACK — Settings', cat: 'Catalog:', genFrom: '· generated from', theme: 'Theme', themeD: 'Applied to the panel and this window', dark: '🌙 Dark', light: '☀️ Light', lang: 'Language', langD: 'Panel interface', gs: 'Global search', gsD: 'System shortcut (⌘Space is reserved by Spotlight)', set: 'Settings', setD: 'Open this window', dllm: 'Default LLM', dllmD: '⌘⏎ in the panel opens this chat', auto: 'Launch at startup', autoD: 'Open MEGA PACK at login', fsc: 'Favorite shortcuts', fscD: '⌘1 to ⌘9 launch the first 9 favorites (open ⚡ menu)', cfg: 'Configuration', cfgD: 'Favorites, recents and preferences as JSON', xp: 'My prompts ✍️', xpD: 'Download all your prompts as Markdown', osel: 'Open selection', oselD: 'In the panel: ⏎ copy · ⌘⏎ default LLM · ⇧⏎ ChatGPT', saved: '✓ Saved', noCat: 'catalog not found' },
+  fr: { title: 'MEGA PACK — Réglages', h2: '⚡ MEGA PACK — Réglages', cat: 'Catalogue :', genFrom: '· généré depuis', theme: 'Thème', themeD: 'Appliqué au panneau et à cette fenêtre', dark: '🌙 Sombre', light: '☀️ Clair', lang: 'Langue', langD: 'Interface du panneau', gs: 'Recherche globale', gsD: 'Raccourci système (⌘Espace est réservé par Spotlight)', gh: 'Aide contextuelle', ghD: 'Ouvre directement les 15 recettes', ghRecommended: '⌘⌥/ (recommandé)', disabled: 'Désactivé', shortcutError: 'Ce raccourci est déjà utilisé. Choisis-en un autre.', set: 'Réglages', setD: 'Ouvrir cette fenêtre', dllm: 'LLM par défaut', dllmD: '⌘⏎ dans le panneau ouvre ce chat', auto: 'Lancement au démarrage', autoD: "Ouvre MEGA PACK à l'ouverture de session", fsc: 'Raccourcis favoris', fscD: '⌘1 à ⌘9 lancent les 9 premiers favoris (menu du ⚡ ouvert)', cfg: 'Configuration', cfgD: 'Favoris, récents et préférences en JSON', xp: 'Mes prompts ✍️', xpD: 'Télécharge tous tes prompts en Markdown', osel: 'Ouvrir la sélection', oselD: 'Dans le panneau : ⏎ copie · ⌘⏎ LLM par défaut · ⇧⏎ ChatGPT', saved: '✓ Enregistré', noCat: 'catalogue introuvable' },
+  en: { title: 'MEGA PACK — Settings', h2: '⚡ MEGA PACK — Settings', cat: 'Catalog:', genFrom: '· generated from', theme: 'Theme', themeD: 'Applied to the panel and this window', dark: '🌙 Dark', light: '☀️ Light', lang: 'Language', langD: 'Panel interface', gs: 'Global search', gsD: 'System shortcut (⌘Space is reserved by Spotlight)', gh: 'Contextual help', ghD: 'Open the 15 recipes directly', ghRecommended: '⌘⌥/ (recommended)', disabled: 'Disabled', shortcutError: 'This shortcut is already in use. Choose another one.', set: 'Settings', setD: 'Open this window', dllm: 'Default LLM', dllmD: '⌘⏎ in the panel opens this chat', auto: 'Launch at startup', autoD: 'Open MEGA PACK at login', fsc: 'Favorite shortcuts', fscD: '⌘1 to ⌘9 launch the first 9 favorites (open ⚡ menu)', cfg: 'Configuration', cfgD: 'Favorites, recents and preferences as JSON', xp: 'My prompts ✍️', xpD: 'Download all your prompts as Markdown', osel: 'Open selection', oselD: 'In the panel: ⏎ copy · ⌘⏎ default LLM · ⇧⏎ ChatGPT', saved: '✓ Saved', noCat: 'catalog not found' },
 };
 let LANG = 'fr';
 try { LANG = localStorage.getItem('mgp.lang') || 'fr'; } catch (e) {}
@@ -19,6 +19,7 @@ const stats = document.getElementById('stats');
 const themeSel = document.getElementById('theme');
 const langSel = document.getElementById('lang');
 const shortcutSel = document.getElementById('shortcut');
+const helpShortcutSel = document.getElementById('helpshortcut');
 const dllmSel = document.getElementById('dllm');
 const autostartCb = document.getElementById('autostart');
 const favShortcutsCb = document.getElementById('favshortcuts');
@@ -26,6 +27,12 @@ const saved = document.getElementById('saved');
 const exportBtn = document.getElementById('export');
 const importBtn = document.getElementById('import');
 const exportCustomsBtn = document.getElementById('exportcustoms');
+function showShortcutStatus(status) {
+  if (!status || (status.search !== false && status.help !== false && status.settings !== false)) return;
+  saved.textContent = (I18N[LANG] || I18N.fr).shortcutError;
+  saved.classList.add('show', 'error');
+  setTimeout(() => saved.classList.remove('show', 'error'), 2200);
+}
 
 try {
   themeSel.value = localStorage.getItem('mgp.theme') || 'dark';
@@ -36,9 +43,11 @@ try {
 try {
   const P = window.mgp.getPrefs ? window.mgp.getPrefs() : {};
   if (P.shortcut) shortcutSel.value = P.shortcut;
+  if (P.helpShortcut) helpShortcutSel.value = P.helpShortcut;
   if (P.defaultLLM) dllmSel.value = P.defaultLLM;
   autostartCb.checked = !!P.autostart;
   if (typeof P.favShortcuts === 'boolean') favShortcutsCb.checked = P.favShortcuts;
+  showShortcutStatus(P.shortcutStatus);
 } catch (e) { /* défauts */ }
 
 // Compte du catalogue (lecture directe du fichier généré)
@@ -73,16 +82,19 @@ function persist() {
     theme: themeSel.value,
     lang: langSel.value,
     shortcut: shortcutSel.value,
+    helpShortcut: helpShortcutSel.value,
     defaultLLM: dllmSel.value,
     autostart: autostartCb.checked,
     favShortcuts: favShortcutsCb.checked,
   });
+  saved.classList.remove('error');
   saved.classList.add('show');
   setTimeout(() => saved.classList.remove('show'), 1200);
 }
 themeSel.onchange = persist;
 langSel.onchange = persist;
 shortcutSel.onchange = persist;
+helpShortcutSel.onchange = persist;
 dllmSel.onchange = persist;
 autostartCb.onchange = persist;
 favShortcutsCb.onchange = persist;
@@ -92,7 +104,7 @@ if (window.mgp.exportConfig) {
   exportBtn.onclick = async () => {
     if (await window.mgp.exportConfig()) {
       saved.textContent = '✓ ' + (LANG === 'en' ? 'Config exported' : 'Config exportée');
-      saved.classList.add('show'); setTimeout(() => saved.classList.remove('show'), 1500);
+      saved.classList.remove('error'); saved.classList.add('show'); setTimeout(() => saved.classList.remove('show'), 1500);
     }
   };
   importBtn.onclick = async () => {
@@ -100,23 +112,26 @@ if (window.mgp.exportConfig) {
       try {
         const P = window.mgp.getPrefs();
         if (P.shortcut) shortcutSel.value = P.shortcut;
+        if (P.helpShortcut) helpShortcutSel.value = P.helpShortcut;
         if (P.defaultLLM) dllmSel.value = P.defaultLLM;
         autostartCb.checked = !!P.autostart;
         if (typeof P.favShortcuts === 'boolean') favShortcutsCb.checked = P.favShortcuts;
+        showShortcutStatus(P.shortcutStatus);
         if (P.lang) { langSel.value = P.lang; LANG = P.lang; applyLang(); }
       } catch (e) {}
       saved.textContent = '✓ ' + (LANG === 'en' ? 'Config imported' : 'Config importée');
-      saved.classList.add('show'); setTimeout(() => saved.classList.remove('show'), 1500);
+      saved.classList.remove('error'); saved.classList.add('show'); setTimeout(() => saved.classList.remove('show'), 1500);
     }
   };
   exportCustomsBtn.onclick = async () => {
     const ok = await window.mgp.exportCustoms();
     saved.textContent = ok ? '✓ ' + (LANG === 'en' ? 'Prompts exported (.md)' : 'Prompts exportés (.md)')
                            : (LANG === 'en' ? 'No prompts to export' : 'Aucun prompt à exporter');
-    saved.classList.add('show'); setTimeout(() => saved.classList.remove('show'), 1500);
+    saved.classList.remove('error'); saved.classList.add('show'); setTimeout(() => saved.classList.remove('show'), 1500);
   };
 }
 
+if (window.mgp && window.mgp.onShortcutStatus) window.mgp.onShortcutStatus(showShortcutStatus);
 if (window.mgp && window.mgp.onSettings) {
   window.mgp.onSettings(({ theme, lang }) => {
     themeSel.value = theme; langSel.value = lang;
