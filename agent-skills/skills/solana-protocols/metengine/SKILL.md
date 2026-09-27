@@ -2572,3 +2572,30 @@ win_ratio (0-35 pts) + volume (0-25 pts, log10-scaled) + avg_pnl% (0-30 pts) + e
 ```
 
 Minimum 3 closed positions required.
+<!-- Sections ajoutées par scripts/backfill-skill-anatomy.py (conformité skill-anatomy) -->
+
+## Overview
+
+MetEngine Data Agent API
+
+## When to Use
+
+- Real-time smart money analytics API for Polymarket prediction markets, Hyperliquid perpetual futures, and Meteora Solana LP/AMM pools.
+
+## Common Rationalizations
+
+- « Cas simple, pas besoin du workflow » — le workflow vise surtout les cas simples.
+- « Pas le temps de vérifier » — la vérification fait partie du travail.
+- « Je corrigerai plus tard » — il n'y a pas de plus tard ; livrer propre maintenant.
+
+## Red Flags
+
+- S'arrêter sans le livrable attendu du workflow.
+- Ignorer les critères d'usage listés ci-dessus.
+- Modifier sans avoir relu la section Overview.
+
+## Verification
+
+- [ ] Étapes du workflow suivies de bout en bout.
+- [ ] Résultat attendu observé (pas seulement supposé).
+- [ ] Aucune étape sautée sous pression de temps.

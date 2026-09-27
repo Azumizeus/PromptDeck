@@ -381,3 +381,30 @@ MCP extensions are optional, strictly additive capabilities on top of the core p
 | **Sampling** | Request LLM completion from client | `ctx.mcpReq.requestSampling()` |
 | **Tasks** (SEP-1686) | Long-running ops with lifecycle management | Pending |
 | **Progress** | Incremental progress on requests | `ctx.mcpReq.sendProgress()` |
+<!-- Sections ajoutées par scripts/backfill-skill-anatomy.py (conformité skill-anatomy) -->
+
+## Overview
+
+MCP Best Practices
+
+## When to Use
+
+- Build production MCP servers with the TypeScript SDK.
+
+## Common Rationalizations
+
+- « Cas simple, pas besoin du workflow » — le workflow vise surtout les cas simples.
+- « Pas le temps de vérifier » — la vérification fait partie du travail.
+- « Je corrigerai plus tard » — il n'y a pas de plus tard ; livrer propre maintenant.
+
+## Red Flags
+
+- S'arrêter sans le livrable attendu du workflow.
+- Ignorer les critères d'usage listés ci-dessus.
+- Modifier sans avoir relu la section Overview.
+
+## Verification
+
+- [ ] Étapes du workflow suivies de bout en bout.
+- [ ] Résultat attendu observé (pas seulement supposé).
+- [ ] Aucune étape sautée sous pression de temps.

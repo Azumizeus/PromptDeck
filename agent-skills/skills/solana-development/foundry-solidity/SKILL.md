@@ -304,3 +304,30 @@ For detailed guides, see:
 - **Chisel**: See `references/chisel.md` for the interactive Solidity REPL
 - **Cast Advanced**: See `references/cast-advanced.md` for decoding, encoding, wallet management, and batch operations
 - **Anvil Advanced**: See `references/anvil-advanced.md` for impersonation, state manipulation, and mining modes
+<!-- Sections ajoutées par scripts/backfill-skill-anatomy.py (conformité skill-anatomy) -->
+
+## Overview
+
+Foundry Solidity Development
+
+## When to Use
+
+- Test admin address used in fork tests.
+
+## Common Rationalizations
+
+- « Cas simple, pas besoin du workflow » — le workflow vise surtout les cas simples.
+- « Pas le temps de vérifier » — la vérification fait partie du travail.
+- « Je corrigerai plus tard » — il n'y a pas de plus tard ; livrer propre maintenant.
+
+## Red Flags
+
+- S'arrêter sans le livrable attendu du workflow.
+- Ignorer les critères d'usage listés ci-dessus.
+- Modifier sans avoir relu la section Overview.
+
+## Verification
+
+- [ ] Étapes du workflow suivies de bout en bout.
+- [ ] Résultat attendu observé (pas seulement supposé).
+- [ ] Aucune étape sautée sous pression de temps.

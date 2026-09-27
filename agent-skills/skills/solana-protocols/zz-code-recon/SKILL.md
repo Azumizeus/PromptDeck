@@ -485,3 +485,30 @@ code-recon/
 4. **Focus on trust boundaries** - That's where bugs live
 5. **Time-box phases** - Don't get stuck in the weeds early
 6. **Iterate** - Revisit earlier phases as you learn more
+<!-- Sections ajoutées par scripts/backfill-skill-anatomy.py (conformité skill-anatomy) -->
+
+## Overview
+
+CodeRecon - Deep Architectural Context Building
+
+## When to Use
+
+- Use when conducting security reviews, building codebase understanding, mapping trust boundaries, or preparing for vulnerability analysis.
+
+## Common Rationalizations
+
+- « Cas simple, pas besoin du workflow » — le workflow vise surtout les cas simples.
+- « Pas le temps de vérifier » — la vérification fait partie du travail.
+- « Je corrigerai plus tard » — il n'y a pas de plus tard ; livrer propre maintenant.
+
+## Red Flags
+
+- S'arrêter sans le livrable attendu du workflow.
+- Ignorer les critères d'usage listés ci-dessus.
+- Modifier sans avoir relu la section Overview.
+
+## Verification
+
+- [ ] Étapes du workflow suivies de bout en bout.
+- [ ] Résultat attendu observé (pas seulement supposé).
+- [ ] Aucune étape sautée sous pression de temps.

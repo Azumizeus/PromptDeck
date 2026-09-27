@@ -397,3 +397,30 @@ SPA mode: `tanstackStart({ spa: { enabled: true } })` in vite.config.ts
 - **Start Docs**: https://tanstack.com/start/latest/docs/framework/react/overview
 - **GitHub**: https://github.com/TanStack/query | https://github.com/TanStack/router
 - **Discord**: https://discord.gg/tanstack
+<!-- Sections ajoutées par scripts/backfill-skill-anatomy.py (conformité skill-anatomy) -->
+
+## Overview
+
+TanStack (Query + Router + Start)
+
+## When to Use
+
+- Use when working with react-query, data fetching, server state, routing, search params, loaders, SSR, server functions, or full-stack React.
+
+## Common Rationalizations
+
+- « Cas simple, pas besoin du workflow » — le workflow vise surtout les cas simples.
+- « Pas le temps de vérifier » — la vérification fait partie du travail.
+- « Je corrigerai plus tard » — il n'y a pas de plus tard ; livrer propre maintenant.
+
+## Red Flags
+
+- S'arrêter sans le livrable attendu du workflow.
+- Ignorer les critères d'usage listés ci-dessus.
+- Modifier sans avoir relu la section Overview.
+
+## Verification
+
+- [ ] Étapes du workflow suivies de bout en bout.
+- [ ] Résultat attendu observé (pas seulement supposé).
+- [ ] Aucune étape sautée sous pression de temps.

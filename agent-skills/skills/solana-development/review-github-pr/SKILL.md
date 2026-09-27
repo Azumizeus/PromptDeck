@@ -191,3 +191,30 @@ After user confirms and chooses the review type:
 1. Post the review via `gh pr review <number>` with the appropriate flag (`--approve`, `--request-changes`, or `--comment`) and `--body` containing the review text. For multi-line reviews, pass the body via HEREDOC. If using Mode 2 (cloned to /tmp), add `-R owner/repo`.
 
 2. Confirm to the user what was posted. If Mode 2 was used, mention the temp clone path so the user can clean it up if desired.
+<!-- Sections ajoutées par scripts/backfill-skill-anatomy.py (conformité skill-anatomy) -->
+
+## Overview
+
+PR Review
+
+## When to Use
+
+- Alias for GH_TOKEN.
+
+## Common Rationalizations
+
+- « Cas simple, pas besoin du workflow » — le workflow vise surtout les cas simples.
+- « Pas le temps de vérifier » — la vérification fait partie du travail.
+- « Je corrigerai plus tard » — il n'y a pas de plus tard ; livrer propre maintenant.
+
+## Red Flags
+
+- S'arrêter sans le livrable attendu du workflow.
+- Ignorer les critères d'usage listés ci-dessus.
+- Modifier sans avoir relu la section Overview.
+
+## Verification
+
+- [ ] Étapes du workflow suivies de bout en bout.
+- [ ] Résultat attendu observé (pas seulement supposé).
+- [ ] Aucune étape sautée sous pression de temps.

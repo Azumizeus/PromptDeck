@@ -309,3 +309,30 @@ Detailed guides for each tool in `references/`:
 - [ruff docs](https://docs.astral.sh/ruff/) | [ruff GitHub](https://github.com/astral-sh/ruff)
 - [pytest docs](https://docs.pytest.org/en/stable/)
 - [just manual](https://just.systems/man/en/)
+<!-- Sections ajoutées par scripts/backfill-skill-anatomy.py (conformité skill-anatomy) -->
+
+## Overview
+
+Python Development Setup
+
+## When to Use
+
+- Use when creating new Python projects, setting up pyproject.toml, configuring linting, type checking, testing, or build tooling.
+
+## Common Rationalizations
+
+- « Cas simple, pas besoin du workflow » — le workflow vise surtout les cas simples.
+- « Pas le temps de vérifier » — la vérification fait partie du travail.
+- « Je corrigerai plus tard » — il n'y a pas de plus tard ; livrer propre maintenant.
+
+## Red Flags
+
+- S'arrêter sans le livrable attendu du workflow.
+- Ignorer les critères d'usage listés ci-dessus.
+- Modifier sans avoir relu la section Overview.
+
+## Verification
+
+- [ ] Étapes du workflow suivies de bout en bout.
+- [ ] Résultat attendu observé (pas seulement supposé).
+- [ ] Aucune étape sautée sous pression de temps.

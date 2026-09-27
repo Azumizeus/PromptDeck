@@ -161,3 +161,30 @@ Follow these rules in ALL implementations:
 - **Never use `any` for SDK request params** — Import the proper request types (`GetEnhancedTransactionsByAddressRequest`, `GetTransactionsForAddressConfigFull`, etc.) so TypeScript catches name mismatches at compile time. A wrong param name like `before` instead of `beforeSignature` silently does nothing.
 - **Some features require paid Helius plans** — Ascending sort, certain pagination modes, and advanced filters on `getTransactionHistory` may return "only available for paid plans". When this happens, suggest alternative approaches (e.g., use `parseTransactions` with specific signatures, or use `getWalletFundedBy` instead of ascending sort to find first transactions).
 - **Two SDK methods for transaction history** — `helius.enhanced.getTransactionsByAddress()` and `helius.getTransactionsForAddress()` have completely different parameter shapes and pagination mechanisms. Do not mix them. See `references/enhanced-transactions.md` for details.
+<!-- Sections ajoutées par scripts/backfill-skill-anatomy.py (conformité skill-anatomy) -->
+
+## Overview
+
+Helius — Build on Solana
+
+## When to Use
+
+- Build Solana applications with Helius infrastructure.
+
+## Common Rationalizations
+
+- « Cas simple, pas besoin du workflow » — le workflow vise surtout les cas simples.
+- « Pas le temps de vérifier » — la vérification fait partie du travail.
+- « Je corrigerai plus tard » — il n'y a pas de plus tard ; livrer propre maintenant.
+
+## Red Flags
+
+- S'arrêter sans le livrable attendu du workflow.
+- Ignorer les critères d'usage listés ci-dessus.
+- Modifier sans avoir relu la section Overview.
+
+## Verification
+
+- [ ] Étapes du workflow suivies de bout en bout.
+- [ ] Résultat attendu observé (pas seulement supposé).
+- [ ] Aucune étape sautée sous pression de temps.

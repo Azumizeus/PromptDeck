@@ -423,3 +423,30 @@ Always fetch the freshest context from referenced docs/specs before executing a 
 - [Status page](https://status.jup.ag/) — Service health
 - [Documentation sitemap](https://developers.jup.ag/docs/llms.txt) — Full docs index
 - [Tool Kits](https://developers.jup.ag/docs/tool-kits/plugin/index.md) — Plugin, Wallet Kit, Referral Program
+<!-- Sections ajoutées par scripts/backfill-skill-anatomy.py (conformité skill-anatomy) -->
+
+## Overview
+
+Jupiter API Integration
+
+## When to Use
+
+- Use for endpoint selection, integration flows, error handling, and production hardening.
+
+## Common Rationalizations
+
+- « Cas simple, pas besoin du workflow » — le workflow vise surtout les cas simples.
+- « Pas le temps de vérifier » — la vérification fait partie du travail.
+- « Je corrigerai plus tard » — il n'y a pas de plus tard ; livrer propre maintenant.
+
+## Red Flags
+
+- S'arrêter sans le livrable attendu du workflow.
+- Ignorer les critères d'usage listés ci-dessus.
+- Modifier sans avoir relu la section Overview.
+
+## Verification
+
+- [ ] Étapes du workflow suivies de bout en bout.
+- [ ] Résultat attendu observé (pas seulement supposé).
+- [ ] Aucune étape sautée sous pression de temps.

@@ -127,3 +127,30 @@ for i, p in enumerate(peaks[:5]):
 | AEC-processed file is too loud | Missing loudness normalization after processing | Loudness: processed > -10 LUFS |
 | Recording has hiss/noise | Low SNR, noisy mic, or AGC artifacts | SNR < 15dB, high zero-crossing rate |
 | Quiet segments mid-recording | Mic cut out or device changed | Per-minute energy: sudden RMS drop |
+<!-- Sections ajoutées par scripts/backfill-skill-anatomy.py (conformité skill-anatomy) -->
+
+## Overview
+
+Audio Recording Quality Analyzer
+
+## When to Use
+
+- Use when the user wants to check a recording's quality, detect echo or duplication in audio files, measure speech clarity, compare original vs processed audio, diagnose why a recording sounds bad, or analyze audio tracks from Blackbox or any call recording app.
+
+## Common Rationalizations
+
+- « Cas simple, pas besoin du workflow » — le workflow vise surtout les cas simples.
+- « Pas le temps de vérifier » — la vérification fait partie du travail.
+- « Je corrigerai plus tard » — il n'y a pas de plus tard ; livrer propre maintenant.
+
+## Red Flags
+
+- S'arrêter sans le livrable attendu du workflow.
+- Ignorer les critères d'usage listés ci-dessus.
+- Modifier sans avoir relu la section Overview.
+
+## Verification
+
+- [ ] Étapes du workflow suivies de bout en bout.
+- [ ] Résultat attendu observé (pas seulement supposé).
+- [ ] Aucune étape sautée sous pression de temps.

@@ -158,3 +158,30 @@ For advanced proxy instruction remapping (convert standard Solana instructions i
 - **SDK**: [client](./resources/sdk/client.md), [integrations](./resources/sdk/integrations.md), [ix-mapper](./resources/sdk/ix-mapper.md), [mint](./resources/sdk/mint.md), [multisig](./resources/sdk/multisig.md)
 - **Other**: [concepts](./resources/concepts.md), [examples](./examples/EXAMPLES.md), [troubleshooting](./docs/troubleshooting.md)
 - **Docs**: https://docs.glam.systems/
+<!-- Sections ajoutées par scripts/backfill-skill-anatomy.py (conformité skill-anatomy) -->
+
+## Overview
+
+GLAM Protocol Skill
+
+## When to Use
+
+- Solana vault management via GLAM Protocol.
+
+## Common Rationalizations
+
+- « Cas simple, pas besoin du workflow » — le workflow vise surtout les cas simples.
+- « Pas le temps de vérifier » — la vérification fait partie du travail.
+- « Je corrigerai plus tard » — il n'y a pas de plus tard ; livrer propre maintenant.
+
+## Red Flags
+
+- S'arrêter sans le livrable attendu du workflow.
+- Ignorer les critères d'usage listés ci-dessus.
+- Modifier sans avoir relu la section Overview.
+
+## Verification
+
+- [ ] Étapes du workflow suivies de bout en bout.
+- [ ] Résultat attendu observé (pas seulement supposé).
+- [ ] Aucune étape sautée sous pression de temps.

@@ -165,3 +165,30 @@ Use this when the user asks about:
 - **Label proposals clearly** — Alpenglow, BAM, and slashing are still in-progress; don't describe them as shipped features
 - **Redirect implementation questions** — "how do I build X using Helius?" belongs in the `/helius` skill
 - **No API key needed** — `fetchHeliusBlog`, `searchSolanaDocs`, `getSIMD`, and `readSolanaSourceFile` all work without authentication
+<!-- Sections ajoutées par scripts/backfill-skill-anatomy.py (conformité skill-anatomy) -->
+
+## Overview
+
+SVM — Understand Solana's Architecture
+
+## When to Use
+
+- Explore Solana's architecture and protocol internals.
+
+## Common Rationalizations
+
+- « Cas simple, pas besoin du workflow » — le workflow vise surtout les cas simples.
+- « Pas le temps de vérifier » — la vérification fait partie du travail.
+- « Je corrigerai plus tard » — il n'y a pas de plus tard ; livrer propre maintenant.
+
+## Red Flags
+
+- S'arrêter sans le livrable attendu du workflow.
+- Ignorer les critères d'usage listés ci-dessus.
+- Modifier sans avoir relu la section Overview.
+
+## Verification
+
+- [ ] Étapes du workflow suivies de bout en bout.
+- [ ] Résultat attendu observé (pas seulement supposé).
+- [ ] Aucune étape sautée sous pression de temps.

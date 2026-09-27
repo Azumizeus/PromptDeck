@@ -353,3 +353,30 @@ Detailed material lives in `references/`. Read each when you hit the topic.
 - **traits-and-generics.md** - traits as bounds, `dyn` vs `impl Trait` vs generics, common derives, `From`/`Into`/`Display`/`Debug`, blanket impls, the orphan rule
 - **async-basics.md** - `tokio`, `#[tokio::main]`, `.await`, `Send`/`Sync`, common pitfalls (blocking in async, `MutexGuard` across `.await`)
 - **crate-shortlist.md** - minimal usage example for each of the 8 crates above
+<!-- Sections ajoutées par scripts/backfill-skill-anatomy.py (conformité skill-anatomy) -->
+
+## Overview
+
+Rust Development - Day 1
+
+## When to Use
+
+- Use when starting a new Rust project, learning Rust coming from Python/JS/Go/Java/C++, deciding on types and lifetimes, choosing crates, structuring modules, configuring Cargo.toml/clippy/rustfmt, or whenever the user mentions Rust, cargo, ownership, borrow checker, lifetimes, traits, async Rust, or "writing this in Rust".
+
+## Common Rationalizations
+
+- « Cas simple, pas besoin du workflow » — le workflow vise surtout les cas simples.
+- « Pas le temps de vérifier » — la vérification fait partie du travail.
+- « Je corrigerai plus tard » — il n'y a pas de plus tard ; livrer propre maintenant.
+
+## Red Flags
+
+- S'arrêter sans le livrable attendu du workflow.
+- Ignorer les critères d'usage listés ci-dessus.
+- Modifier sans avoir relu la section Overview.
+
+## Verification
+
+- [ ] Étapes du workflow suivies de bout en bout.
+- [ ] Résultat attendu observé (pas seulement supposé).
+- [ ] Aucune étape sautée sous pression de temps.

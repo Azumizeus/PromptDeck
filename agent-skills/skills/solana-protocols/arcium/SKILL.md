@@ -193,3 +193,31 @@ For detailed error solutions: [troubleshooting.md](references/troubleshooting.md
 - **Patterns**: [patterns.md](examples/patterns.md) — 15 curated circuit patterns
 - **Troubleshooting**: [troubleshooting.md](references/troubleshooting.md) — hard-to-debug errors
 - **Minimal working app**: [minimal-circuit.md](examples/minimal-circuit.md) — circuit + program + test
+<!-- Sections ajoutées par scripts/backfill-skill-anatomy.py (conformité skill-anatomy) -->
+
+## Overview
+
+Arcium
+
+## When to Use
+
+- Use when writing Arcis circuits (#[encrypted], #[instruction]), wiring Anchor programs with init/queue_computation/callback flows, choosing Shared vs Mxe encrypted state, encrypting inputs with @arcium-hq/client (RescueCipher, x25519), or debugging ArgBuilder ordering, nonce, callback, or computation finalization failures.
+- Also use for getting started with your first Arcium app.
+
+## Common Rationalizations
+
+- « Cas simple, pas besoin du workflow » — le workflow vise surtout les cas simples.
+- « Pas le temps de vérifier » — la vérification fait partie du travail.
+- « Je corrigerai plus tard » — il n'y a pas de plus tard ; livrer propre maintenant.
+
+## Red Flags
+
+- S'arrêter sans le livrable attendu du workflow.
+- Ignorer les critères d'usage listés ci-dessus.
+- Modifier sans avoir relu la section Overview.
+
+## Verification
+
+- [ ] Étapes du workflow suivies de bout en bout.
+- [ ] Résultat attendu observé (pas seulement supposé).
+- [ ] Aucune étape sautée sous pression de temps.

@@ -169,3 +169,30 @@ This skill does not pull, store, or transmit external secrets. It provides code 
 - **Tool boundary enforced.** The `allowed-tools` list restricts this skill to read-only operations (`Read`, `Glob`, `Grep`), research subagents (`Task`), web fetches to Light Protocol domains, and MCP queries. It cannot load other skills, write files, or execute shell commands. Verify the `allowed-tools` list in the frontmatter above matches these constraints.
 - **Install source.** `npx skills add Lightprotocol/skills` installs from the public GitHub repository ([Lightprotocol/skills](https://github.com/Lightprotocol/skills)). Verify the source before running.
 - **Audited protocol.** Light Protocol smart contracts are independently audited. Reports are published at [github.com/Lightprotocol/light-protocol/tree/main/audits](https://github.com/Lightprotocol/light-protocol/tree/main/audits).
+<!-- Sections ajoutées par scripts/backfill-skill-anatomy.py (conformité skill-anatomy) -->
+
+## Overview
+
+DeepWiki Research
+
+## When to Use
+
+- For questions about Light Protocol's SDK, smart contracts and Solana development, Claude Code features, or agent skills.
+
+## Common Rationalizations
+
+- « Cas simple, pas besoin du workflow » — le workflow vise surtout les cas simples.
+- « Pas le temps de vérifier » — la vérification fait partie du travail.
+- « Je corrigerai plus tard » — il n'y a pas de plus tard ; livrer propre maintenant.
+
+## Red Flags
+
+- S'arrêter sans le livrable attendu du workflow.
+- Ignorer les critères d'usage listés ci-dessus.
+- Modifier sans avoir relu la section Overview.
+
+## Verification
+
+- [ ] Étapes du workflow suivies de bout en bout.
+- [ ] Résultat attendu observé (pas seulement supposé).
+- [ ] Aucune étape sautée sous pression de temps.

@@ -680,3 +680,30 @@ const ethBalance = await chains.ethereum.client.getBalance({ address: '0x...' })
 - **Marketplace**: https://marketplace.quicknode.com/
 - **Sample App Library**: https://www.quicknode.com/sample-app-library
 - **Guide Examples Repo**: https://github.com/quiknode-labs/qn-guide-examples
+<!-- Sections ajoutées par scripts/backfill-skill-anatomy.py (conformité skill-anatomy) -->
+
+## Overview
+
+Quicknode Blockchain Infrastructure
+
+## When to Use
+
+- Use when setting up blockchain infra, configuring real-time data pipelines, processing blockchain events, storing data on IPFS, using Quicknode-specific APIs, querying Solana NFTs/tokens/compressed assets, persisting state with KV Store, querying chain data with SQL, analyzing trading data, or building low-latency gRPC streams.
+
+## Common Rationalizations
+
+- « Cas simple, pas besoin du workflow » — le workflow vise surtout les cas simples.
+- « Pas le temps de vérifier » — la vérification fait partie du travail.
+- « Je corrigerai plus tard » — il n'y a pas de plus tard ; livrer propre maintenant.
+
+## Red Flags
+
+- S'arrêter sans le livrable attendu du workflow.
+- Ignorer les critères d'usage listés ci-dessus.
+- Modifier sans avoir relu la section Overview.
+
+## Verification
+
+- [ ] Étapes du workflow suivies de bout en bout.
+- [ ] Résultat attendu observé (pas seulement supposé).
+- [ ] Aucune étape sautée sous pression de temps.

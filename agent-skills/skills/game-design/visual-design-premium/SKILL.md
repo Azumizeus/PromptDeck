@@ -69,3 +69,30 @@ Pour chaque composant interactif, concevoir au minimum : `default`, `hover` (si 
 6. **Robustesse** : contenu long, dark/light, responsive, performance.
 
 Un score n’est pas une conformité automatique. Prioriser les défauts qui empêchent une tâche, puis les défauts de lisibilité, puis la finition. Joindre pour chaque critique : preuve visible, impact, recommandation testable.
+<!-- Sections ajoutées par scripts/backfill-skill-anatomy.py (conformité skill-anatomy) -->
+
+## Overview
+
+Premium Visual Design System
+
+## When to Use
+
+- Generic framework for designing, auditing, and evolving an accessible premium interface; use for any web, mobile, desktop, or in-game UI.
+
+## Common Rationalizations
+
+- « Cas simple, pas besoin du workflow » — le workflow vise surtout les cas simples.
+- « Pas le temps de vérifier » — la vérification fait partie du travail.
+- « Je corrigerai plus tard » — il n'y a pas de plus tard ; livrer propre maintenant.
+
+## Red Flags
+
+- S'arrêter sans le livrable attendu du workflow.
+- Ignorer les critères d'usage listés ci-dessus.
+- Modifier sans avoir relu la section Overview.
+
+## Verification
+
+- [ ] Étapes du workflow suivies de bout en bout.
+- [ ] Résultat attendu observé (pas seulement supposé).
+- [ ] Aucune étape sautée sous pression de temps.

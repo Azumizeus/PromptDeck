@@ -146,3 +146,30 @@ Use **Core Execute** when an asset (NFT, agent, vault) needs to hold SOL/tokens,
 - Token Metadata: https://metaplex.com/docs/smart-contracts/token-metadata
 - Bubblegum: https://metaplex.com/docs/smart-contracts/bubblegum-v2
 - Candy Machine: https://metaplex.com/docs/smart-contracts/core-candy-machine
+<!-- Sections ajoutées par scripts/backfill-skill-anatomy.py (conformité skill-anatomy) -->
+
+## Overview
+
+Metaplex Development Skill
+
+## When to Use
+
+- Use when working with Token Metadata, Core, Bubblegum, Candy Machine, Genesis, Agent Registry, or the mplx CLI.
+
+## Common Rationalizations
+
+- « Cas simple, pas besoin du workflow » — le workflow vise surtout les cas simples.
+- « Pas le temps de vérifier » — la vérification fait partie du travail.
+- « Je corrigerai plus tard » — il n'y a pas de plus tard ; livrer propre maintenant.
+
+## Red Flags
+
+- S'arrêter sans le livrable attendu du workflow.
+- Ignorer les critères d'usage listés ci-dessus.
+- Modifier sans avoir relu la section Overview.
+
+## Verification
+
+- [ ] Étapes du workflow suivies de bout en bout.
+- [ ] Résultat attendu observé (pas seulement supposé).
+- [ ] Aucune étape sautée sous pression de temps.

@@ -692,3 +692,30 @@ function CreateUser() {
 - **TypeScript 5.9**: https://www.typescriptlang.org/docs/handbook/release-notes/typescript-5-9.html
 - **TypeScript 5.8**: https://www.typescriptlang.org/docs/handbook/release-notes/typescript-5-8.html
 - **React TypeScript Cheatsheet**: https://react-typescript-cheatsheet.netlify.app/
+<!-- Sections ajoutées par scripts/backfill-skill-anatomy.py (conformité skill-anatomy) -->
+
+## Overview
+
+React TypeScript
+
+## When to Use
+
+- Use when creating components, managing state, typing props, handling events, using hooks, or working with React 19 features.
+
+## Common Rationalizations
+
+- « Cas simple, pas besoin du workflow » — le workflow vise surtout les cas simples.
+- « Pas le temps de vérifier » — la vérification fait partie du travail.
+- « Je corrigerai plus tard » — il n'y a pas de plus tard ; livrer propre maintenant.
+
+## Red Flags
+
+- S'arrêter sans le livrable attendu du workflow.
+- Ignorer les critères d'usage listés ci-dessus.
+- Modifier sans avoir relu la section Overview.
+
+## Verification
+
+- [ ] Étapes du workflow suivies de bout en bout.
+- [ ] Résultat attendu observé (pas seulement supposé).
+- [ ] Aucune étape sautée sous pression de temps.

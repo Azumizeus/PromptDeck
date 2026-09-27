@@ -80,3 +80,30 @@ Appliquer lors d’un diagnostic « ça paraît plat », après import d’un lo
 ## Ressources
 
 Voir [`REFERENCE.md`](REFERENCE.md) pour les implémentations JavaScript, les paliers de performance, l’audit de densité, le screenshake à décroissance et le réglage du hitstop.
+<!-- Sections ajoutées par scripts/backfill-skill-anatomy.py (conformité skill-anatomy) -->
+
+## Overview
+
+Visual Rendering & Game Feel
+
+## When to Use
+
+- Use when the game looks flat or inconsistent.
+
+## Common Rationalizations
+
+- « Cas simple, pas besoin du workflow » — le workflow vise surtout les cas simples.
+- « Pas le temps de vérifier » — la vérification fait partie du travail.
+- « Je corrigerai plus tard » — il n'y a pas de plus tard ; livrer propre maintenant.
+
+## Red Flags
+
+- S'arrêter sans le livrable attendu du workflow.
+- Ignorer les critères d'usage listés ci-dessus.
+- Modifier sans avoir relu la section Overview.
+
+## Verification
+
+- [ ] Étapes du workflow suivies de bout en bout.
+- [ ] Résultat attendu observé (pas seulement supposé).
+- [ ] Aucune étape sautée sous pression de temps.

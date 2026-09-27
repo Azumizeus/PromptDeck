@@ -521,3 +521,30 @@ const tickCost = Math.max((outputRate / 1_000_000) * margin, MIN_TICK_COST)
 - Privy MPP guide: https://docs.privy.io (search "MPP" or see agentic wallets recipes)
 - x402 migration: https://mpp.dev/guides/upgrade-x402
 - LLM docs: https://mpp.dev/llms-full.txt
+<!-- Sections ajoutées par scripts/backfill-skill-anatomy.py (conformité skill-anatomy) -->
+
+## Overview
+
+MPP - Machine Payments Protocol
+
+## When to Use
+
+- Tempo chain RPC endpoint override.
+
+## Common Rationalizations
+
+- « Cas simple, pas besoin du workflow » — le workflow vise surtout les cas simples.
+- « Pas le temps de vérifier » — la vérification fait partie du travail.
+- « Je corrigerai plus tard » — il n'y a pas de plus tard ; livrer propre maintenant.
+
+## Red Flags
+
+- S'arrêter sans le livrable attendu du workflow.
+- Ignorer les critères d'usage listés ci-dessus.
+- Modifier sans avoir relu la section Overview.
+
+## Verification
+
+- [ ] Étapes du workflow suivies de bout en bout.
+- [ ] Résultat attendu observé (pas seulement supposé).
+- [ ] Aucune étape sautée sous pression de temps.

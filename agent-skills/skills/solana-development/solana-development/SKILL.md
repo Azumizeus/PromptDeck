@@ -381,3 +381,30 @@ members = [
 2. Use [testing-practices.md](references/testing-practices.md) for comprehensive best practices
 3. Follow [production-deployment.md](references/production-deployment.md) for verified builds
 4. Get security audit with `solana-security` skill
+<!-- Sections ajoutées par scripts/backfill-skill-anatomy.py (conformité skill-anatomy) -->
+
+## Overview
+
+Solana Development
+
+## When to Use
+
+- Use when developing Solana smart contracts, implementing token operations, testing programs, deploying to networks, or working with Solana development.
+
+## Common Rationalizations
+
+- « Cas simple, pas besoin du workflow » — le workflow vise surtout les cas simples.
+- « Pas le temps de vérifier » — la vérification fait partie du travail.
+- « Je corrigerai plus tard » — il n'y a pas de plus tard ; livrer propre maintenant.
+
+## Red Flags
+
+- S'arrêter sans le livrable attendu du workflow.
+- Ignorer les critères d'usage listés ci-dessus.
+- Modifier sans avoir relu la section Overview.
+
+## Verification
+
+- [ ] Étapes du workflow suivies de bout en bout.
+- [ ] Résultat attendu observé (pas seulement supposé).
+- [ ] Aucune étape sautée sous pression de temps.

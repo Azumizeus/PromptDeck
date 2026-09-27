@@ -349,3 +349,30 @@ Follow these rules in ALL implementations:
 - **Not importing `react-native-get-random-values` first** — in React Native, this polyfill must be the very first import or the app will crash on startup.
 - **Client-side only token gating for valuable content** — anyone can bypass frontend checks. Always verify on the server with Helius DAS.
 - **Exposing mint authority in frontend code** — always build NFT mint transactions on the server. The client only signs as the payer.
+<!-- Sections ajoutées par scripts/backfill-skill-anatomy.py (conformité skill-anatomy) -->
+
+## Overview
+
+Helius x Phantom — Build Frontend Solana Apps
+
+## When to Use
+
+- Build frontend Solana applications with Phantom Connect SDK and Helius infrastructure.
+
+## Common Rationalizations
+
+- « Cas simple, pas besoin du workflow » — le workflow vise surtout les cas simples.
+- « Pas le temps de vérifier » — la vérification fait partie du travail.
+- « Je corrigerai plus tard » — il n'y a pas de plus tard ; livrer propre maintenant.
+
+## Red Flags
+
+- S'arrêter sans le livrable attendu du workflow.
+- Ignorer les critères d'usage listés ci-dessus.
+- Modifier sans avoir relu la section Overview.
+
+## Verification
+
+- [ ] Étapes du workflow suivies de bout en bout.
+- [ ] Résultat attendu observé (pas seulement supposé).
+- [ ] Aucune étape sautée sous pression de temps.

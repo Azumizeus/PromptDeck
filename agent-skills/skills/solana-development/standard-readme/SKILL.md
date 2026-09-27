@@ -260,3 +260,30 @@ When checking an existing README:
 - Don't add a ToC to READMEs under 100 lines unless the user specifically asks.
 - Don't include the Title or ToC heading in the Table of Contents links.
 - Don't use external URLs for the banner image.
+<!-- Sections ajoutées par scripts/backfill-skill-anatomy.py (conformité skill-anatomy) -->
+
+## Overview
+
+Standard Readme
+
+## When to Use
+
+- Write or audit README files following the Standard Readme specification (github.com/RichardLitt/standard-readme).
+
+## Common Rationalizations
+
+- « Cas simple, pas besoin du workflow » — le workflow vise surtout les cas simples.
+- « Pas le temps de vérifier » — la vérification fait partie du travail.
+- « Je corrigerai plus tard » — il n'y a pas de plus tard ; livrer propre maintenant.
+
+## Red Flags
+
+- S'arrêter sans le livrable attendu du workflow.
+- Ignorer les critères d'usage listés ci-dessus.
+- Modifier sans avoir relu la section Overview.
+
+## Verification
+
+- [ ] Étapes du workflow suivies de bout en bout.
+- [ ] Résultat attendu observé (pas seulement supposé).
+- [ ] Aucune étape sautée sous pression de temps.
