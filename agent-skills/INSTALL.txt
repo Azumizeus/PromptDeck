@@ -69,6 +69,23 @@ Pour recompiler depuis les sources :
 
 
 ───────────────────────────────────────────────────────────────────
+LE MIROIR « MEGA PROMPT » (app menu bar Luxe)
+───────────────────────────────────────────────────────────────────
+L'app maintient tout le catalogue en fichiers .md lisibles dans
+  ~/Documents/MEGA PROMPT  (skills/ · agents/ · perso/ · equipes/)
+
+  • régénéré au lancement, à chaque édition d'un prompt ✍️,
+    et via le menu tray « 🪞 Miroir .md · N fiches » ;
+  • surveillance à chaud : modifie un .md dans ton éditeur →
+    l'app le détecte (1,5 s), resynchronise le fichier concerné ;
+  • un prompt ✍️ modifié à la main dans le miroir déclenche une
+    notification macOS + un panneau pré-rempli pour réintégrer
+    tes changements dans l'app (import inverse) ;
+  • le cadenas 🔒 protège un item dans les deux sens.
+
+Documentation complète : LISEZMOI.md à la racine du dépôt.
+
+───────────────────────────────────────────────────────────────────
 AUTRES FICHIERS UTILES
 ───────────────────────────────────────────────────────────────────
   interface/MODE-DEMPLOI.html          Guide interactif bilingue

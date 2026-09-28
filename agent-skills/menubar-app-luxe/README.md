@@ -116,6 +116,19 @@ l'arborescence), puis l'**📁 arborescence intégrée au popup** montre tout le
 un clic sur un 📁 dossier l'ouvre dans le Finder **là où il se trouve**, un clic sur un
 fichier .md l'ouvre directement dans ton éditeur — navigation complète sans quitter le panneau.
 
+**🔁 Synchronisation à chaud** : le dossier est surveillé en continu. Si tu modifies un `.md`
+directement (éditeur, drop, CloudDrive…), MEGA PACK le détecte après 1,5 s de calme :
+
+- fichier **reconnu** et non modifié à la main → seul ce fichier est resynchronisé ;
+- prompt ✍️ **modifié à la main** → notification macOS + panneau pré-rempli pour
+  **réintégrer tes changements** dans l'app (import inverse — vérifie puis enregistre) ;
+- fichier **inconnu** → resynchro complète (idempotente : rien n'est réécrit à l'identique).
+
+Le **cadenas 🔒** est respecté dans les deux sens : un item verrouillé n'est jamais écrasé
+dans le miroir, et un `.md` verrouillé n'importe jamais de changements. Le menu tray
+« 🪞 Miroir .md · N fiches » affiche le nombre de fiches écrites et resynchronise tout au clic.
+La référence complète du mécanisme est dans le `LISEZMOI.md` à la racine du dépôt.
+
 ## Intelligence (génération IA de l'Atelier)
 
 Réglages → 🧠 Intelligence : choisir le fournisseur (Groq, OpenAI, Anthropic, OpenRouter,
