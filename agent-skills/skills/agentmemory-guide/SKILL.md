@@ -32,6 +32,15 @@ hybride BM25 + vectoriel + graphe, replay des sessions.
   `/app/agentmemory-npm` + shim `standalone.mjs` proxy REST, `librechat.yaml`).
 - **Import** : transcriptions Claude Code JSONL via `import-jsonl`
   (déjà importées : 2 sessions, tag `jsonl-import`).
+- **Capture auto OpenCode** : plugin `~/.config/opencode/plugins/agentmemory-capture.js`
+  (hook `session.idle`, throttle 10 min/session, préfixe `[OpenCode]`, testé
+  de bout en bout via `opencode serve` + API HTTP).
+- **Dashboard** : `http://localhost:3114` — proxy zéro-dépendance + page
+  mémoires-par-app avec recherche (source `~/projects/agentmemory-dashboard/`,
+  LaunchAgent `com.mickael.agentmemory-dashboard`).
+- **Convention inter-apps** : toute mémoire écrite par un client commence par
+  son préfixe — `[OpenCode]`, `[ChatDeck]`, `[Freebuff]`, `[LibreChat]` — le
+  dashboard classe par préfixe (heuristique de repli sinon).
 - **Binaire** : la commande globale `agentmemory` n'est pas sur le PATH ;
   lancer via `node ~/.nvm/versions/node/v24.16.0/lib/node_modules/@agentmemory/agentmemory/dist/cli.mjs …`.
 
@@ -84,6 +93,9 @@ SKILL.md (sections, frontmatter) et sonde le serveur vivant.
 ```bash
 # 1. Serveur vivant ?
 curl -s -m 4 http://localhost:3111/agentmemory/livez
+
+# 1bis. Dashboard vivant (proxy :3114 → :3111) ?
+curl -s -m 4 http://localhost:3114/api/memories | head -c 80
 
 # 2. Une session importée est bien retrouvée ? (doit citer le tag jsonl-import)
 curl -s -m 6 -X POST http://localhost:3111/agentmemory/mcp/call \
