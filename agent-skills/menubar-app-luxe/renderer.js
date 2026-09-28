@@ -120,6 +120,8 @@ fr: {
   lockedOff: (n) => `🔓 ${n} n\'est plus verrouillé`,
   lockBadge: '🔒',
   lockBadgeT: 'Verrouillé — suppression impossible (clic droit pour retirer)',
+  lockOpen: '🔓',
+  ctxDelete: 'Supprimer (corbeille)',
   delLocked: '🔒 Suppression impossible — cet élément est verrouillé (clic droit → retirer le cadenas).',
   copiedToWs: (k) => `🛠 Copie créée dans l\'Atelier (${k}) — clic droit → Modifier pour l\'ajuster.`,
   copiedToWsErr: 'Échec de la copie vers l\'Atelier',
@@ -330,6 +332,8 @@ en: {
   lockedOff: (n) => `🔓 ${n} is no longer locked`,
   lockBadge: '🔒',
   lockBadgeT: 'Locked — cannot be deleted (right-click to remove)',
+  lockOpen: '🔓',
+  ctxDelete: 'Delete (to trash)',
   delLocked: '🔒 Deletion blocked — this item is locked (right-click → remove the lock).',
   copiedToWs: (k) => `🛠 Copy created in the Workshop (${k}) — right-click → Edit to adjust it.`,
   copiedToWsErr: 'Copy to Workshop failed',
@@ -877,6 +881,17 @@ function ctxHtml(it) {
     ) : it.k === 'custom' ? `<button role="menuitem" data-a="edit-custom">${T.editItem}</button>`
     : it.k === 'team' ? `<button role="menuitem" data-a="edit-team">${T.editItem}</button><button role="menuitem" data-a="copy-ws">${T.copyToWorkshop}</button>`
     : ''}
+    ${(() => {
+      // 🗑 Supprimer : teams, ✍️ perso et items d'Atelier (sans .path catalogue). Un item verrouillé
+      // 🔒 affiche l'option mais la refuse avec un message (cohérent avec l'Atelier et la modale).
+      if (it.k === 'team' || it.k === 'custom' || ((it.k === 'agent' || it.k === 'skill') && !it.x.path)) {
+        const lk = it.k === 'team' ? lockOf('team', x.team || x.name)
+          : it.k === 'custom' ? itemLocked('custom', CUSTOMS.find((c) => c.name === x.name))
+          : itemLocked(it.k, W.items.find((w) => w.name === x.name));
+        return `<button role="menuitem" data-a="del">🗑 ${T.ctxDelete}</button>`;
+      }
+      return '';
+    })()}
     ${((it.k === 'agent' || it.k === 'skill') && !it.x.path) || it.k === 'team' || it.k === 'custom' ? (
       (() => { const lk = it.k === 'team' ? lockOf('team', x.team || x.name)
         : it.k === 'custom' ? lockOf('custom', x.name) : lockOf(it.k, x.name);
@@ -922,6 +937,29 @@ function openCtx(el, it, cx, cy) {
       else if (b.dataset.a === 'edit-custom') { const c = CUSTOMS.find((cc) => cc.name === it.x.name); if (c) openModal(c); }
       else if (b.dataset.a === 'copy-ws') copyToWorkshop(it);
       else if (b.dataset.a === 'lock') toggleLock(it);
+      else if (b.dataset.a === 'del') {
+        // 🗑 Supprimer depuis le clic droit — même logique que l'Atelier : garde cadenas 🔒 puis corbeille
+        const name = it.k === 'team' ? (it.x._t.team || it.x.name) : it.x.name;
+        (async () => {
+          if (it.k === 'team') {
+            if (lockOf('team', name)) { showToast(T.delLocked, 'err'); return; }
+            const d = await window.mgp.teamDelete(name);
+            if (!d || d.ok === false) { showToast(T.delLocked, 'err'); return; }
+          } else if (it.k === 'custom') {
+            const victim = CUSTOMS.find((c) => c.name === name);
+            if (victim && itemLocked('custom', victim)) { showToast(T.delLocked, 'err'); return; }
+            window.mgp.customDelete && window.mgp.customDelete(name);
+            CUSTOMS = CUSTOMS.filter((c) => c.name !== name);
+            rebuildAll(); render();
+          } else {
+            if (itemLocked(it.k, W.items.find((w) => w.name === name))) { showToast(T.delLocked, 'err'); return; }
+            const d = await window.mgp.workshopDelete(it.k, name);
+            if (!d || d.ok === false) { showToast(T.delLocked, 'err'); return; }
+            if (W.items.length) refreshWorkshop();
+          }
+          showToast(LANG === 'fr' ? `🗑 « ${name} » supprimé (corbeille)` : `🗑 “${name}” deleted (trash)`, 'ok');
+        })();
+      }
     };
   });
 }
@@ -2177,7 +2215,7 @@ function renderWorkshop() {
         <span class="wmid"><b>${esc(lname(it.x))}${lk ? ` <span class="lk" title="${T.lockBadgeT}">${T.lockBadge}</span>` : ''}</b><i>${esc((it.k === 'team' ? (it.x.desc || '') : (ldesc(it.x) || '')).slice(0, 80))}</i><u>${esc(det)}</u></span>
         <span class="wact2">
           <button data-a="edit" title="${T.editItem}" aria-label="${T.editItem}">✏️</button>
-          ${it.k !== 'team' ? `<button data-a="lock" title="${lk ? T.unlockItem : T.lockItem}" aria-label="${lk ? T.unlockItem : T.lockItem}">${lk ? '🔓' : '🔒'}</button>` : ''}
+          <button data-a="lock" title="${lk ? T.unlockItem : T.lockItem}" aria-label="${lk ? T.unlockItem : T.lockItem}">${lk ? T.lockBadge : T.lockOpen}</button>
           <button data-a="export" title="${T.atelierExp}" aria-label="${T.atelierExp}">⬇</button>
           <button data-a="del" title="${T.atelierDel}" aria-label="${T.atelierDel}">🗑</button>
         </span>
@@ -2188,7 +2226,7 @@ function renderWorkshop() {
     b.onclick = async () => {
       const it = W.items[+b.closest('.wit').dataset.i];
       if (b.dataset.a === 'edit') { it.k === 'team' ? editTeam(it.x._t.team || it.x.name) : editWorkshopItem(it.k, it.x.name); return; }
-      if (b.dataset.a === 'lock') { toggleLock({ k: it.k, x: it.x._t || it.x }); return; }
+      if (b.dataset.a === 'lock') { if (it.k === 'team') toggleLock({ k: 'team', x: { name: it.x._t.team || it.x.name } }); else toggleLock({ k: it.k, x: it.x }); return; }
       if (b.dataset.a === 'del') {
         if (it.k === 'team') {
           const name = it.x._t.team || it.x.name;

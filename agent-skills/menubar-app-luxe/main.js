@@ -481,7 +481,7 @@ ${(t.workflow || []).map((s, i) => `${i + 1}. ${s}`).join('\n')}
 function syncPromptTree(dir) {
   const base = dir || promptDir();
   let n = 0, locked = 0;
-  const wlock = { agent: lockedNames('agent'), skill: lockedNames('skill'), custom: new Set() };
+  const wlock = { agent: lockedNames('agent'), skill: lockedNames('skill'), custom: new Set((PREFS.customs || []).filter((c) => c && c.locked).map((c) => c.name)) };
   const write = (it) => {
     // 🔒 Les .md d'items verrouillés ne sont jamais écrasés par la régénération.
     const target = path.join(base, itemRelPath(it));
@@ -841,6 +841,9 @@ function buildMenuTemplate() {
         } },
         { label: LANG === 'fr' ? '🧹 Purger l\'audit' : '🧹 Clear audit', click: () => {
           try { fs.writeFileSync(AUDIT_FILE(), ''); } catch (e) { /* */ }
+        } },
+        { label: LANG === 'fr' ? '🪞 Synchroniser le miroir .md (MEGA PROMPT)' : '🪞 Sync .md mirror (MEGA PROMPT)', click: () => {
+          try { const n = syncPromptTree(); traceBoot(`syncPromptTree: ${n} fichiers .md régénérés`); } catch (e) { /* */ }
         } },
         { type: 'separator' },
         { label: AUDIT_FILE(), enabled: false },
@@ -1396,6 +1399,9 @@ if (!CAPTURE_MODE && !app.requestSingleInstanceLock()) {
       traceBoot('whenReady: avant createPanel');
       createPanel();
       traceBoot('whenReady: apres createPanel');
+      // 🪞 Miroir MEGA PROMPT : régénère l'arborescence .md (skills/, agents/, perso/, equipes/)
+      // en tâche de fond au boot — la fenêtre n'attend pas (~400 fichiers, quelques secondes)
+      try { setTimeout(() => { try { syncPromptTree(); } catch (err) { /* best effort */ } }, 4000); } catch (err) { /* */ }
     }
   });
 
@@ -1804,6 +1810,8 @@ ipcMain.handle('workshop-delete', (e, { kind, name }) => {
   saveWorkshops(wk, list);
   trashPush({ id: `${wk}:${name}:${Date.now()}`, kind: wk, name, rec }); // 🗑 restaurable
   arenaEvent('item-deleted', { kind: wk, name }); // 🎮 ARENA : l'ennemi « Bug » perd un PV
+  // 🪞 Miroir MEGA PROMPT : retire le .md (même si l'item n'y était pas — best effort)
+  try { const md = containedJoin(promptDir(), itemRelPath({ x: rec, k: wk })); if (fs.existsSync(md)) fs.unlinkSync(md); } catch (err) { /* best effort */ }
   return true;
 });
 ipcMain.handle('workshop-export', async (e, { kind, name }) => {
@@ -2207,6 +2215,8 @@ ipcMain.handle('team-delete', (e, name) => {
   const [rec] = list.splice(i, 1);
   saveWorkshops('team', list);
   trashPush({ id: `team:${name}:${Date.now()}`, kind: 'team', name, rec }); // 🗑 restaurable
+  // 🪞 Miroir MEGA PROMPT : retire le dossier equipes/<nom>/ (best effort)
+  try { const tdir = containedJoin(promptDir(), 'equipes', mdSafe(rec.team || rec.name || 'equipe')); if (fs.existsSync(tdir)) fs.rmSync(tdir, { recursive: true, force: true }); } catch (err) { /* best effort */ }
   return true;
 });
 // ✏️ Édition d'une équipe : nom, description, orchestrateur, agents, workflow.
@@ -2419,6 +2429,9 @@ ipcMain.on('custom-save', (e, item) => {
   PREFS.customs = (PREFS.customs || []).filter((c) => c.name !== name);
   PREFS.customs.push(rec);
   savePrefs();
+  // 🪞 Miroir MEGA PROMPT : le .md du prompt ✍️ vit désormais dans perso/<tag>/ (au premier lancement,
+  // ce dossier n'existe pas encore → création silencieuse, sinon le fichier reste absent du disque)
+  try { writeItemMd({ x: rec, k: 'custom' }); } catch (err) { /* best effort : pas de blocage UI */ }
   const isNew = !prev; // 🎮 ARENA : un ✍️ fraîchement créé (kit inclus) = ramassage de fragment
   arenaEvent(isNew ? 'custom-created' : 'custom-edited', { name: rec.name, tag: rec.tag || '', chars: rec.desc.length });
 });
@@ -2443,6 +2456,8 @@ function deleteCustom(name) {
   PREFS.customs = cs;
   PREFS.favorites = (PREFS.favorites || []).filter((n) => n !== name);
   savePrefs();
+  // 🪞 Miroir MEGA PROMPT : retire le .md du prompt ✍️ supprimé (best effort)
+  try { if (victim) { const md = containedJoin(promptDir(), itemRelPath({ x: victim, k: 'custom' })); if (fs.existsSync(md)) fs.unlinkSync(md); } } catch (err) { /* best effort */ }
   arenaEvent('custom-deleted', { name }); // 🎮 ARENA
 }
 ipcMain.on('custom-delete', (e, name) => { if (typeof name === 'string' && name) deleteCustom(name); });
