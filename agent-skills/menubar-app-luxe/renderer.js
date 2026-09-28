@@ -525,6 +525,7 @@ APP_PARENT.insertAdjacentHTML('afterbegin', `
     <button id="incb" title="${LANG === 'fr' ? 'Incidents récents — ouvrir le 🛡 Journal des Réglages' : 'Recent incidents — open Settings 🛡 Journal'}" aria-label="incidents" hidden style="border:none;background:transparent;font-size:14px;cursor:pointer;padding:0 4px">⚠️</button>
     <span style="flex:1"></span>
     <button id="newp" title="${T.newp}" aria-label="${T.newp}">＋</button>
+    <button id="pinb" title="${(window.mgp.getPrefs() || {}).keepVisible ? T.pinOn : T.pinOff}" aria-label="${LANG === 'fr' ? 'Épingler le panneau (⌥P)' : 'Pin panel (⌥P)'}" aria-pressed="${(window.mgp.getPrefs() || {}).keepVisible ? 'true' : 'false'}">📌</button>
     <button id="langb" title="FR/EN" aria-label="FR/EN">${LANG === 'fr' ? 'FR' : 'EN'}</button>
     <button id="setb" title="${LANG === 'fr' ? '⚙ Réglages (⌘,)' : '⚙ Settings (⌘,)'}" aria-label="${LANG === 'fr' ? 'Réglages' : 'Settings'}">⚙</button>
   </header>
@@ -1911,13 +1912,19 @@ document.addEventListener('mouseup', () => {
 // 📌 « Garder le panneau visible » : bascule persistée (préférence keepVisible).
 // UN SEUL canal IPC (set-keep-visible) — l'ancien double envoi (set-keep-visible
 // + settings-changed) pouvait faire se contredire main et Réglages.
-$('pinb').onclick = () => {
-  const on = $('pinb').getAttribute('aria-pressed') !== 'true';
-  $('pinb').setAttribute('aria-pressed', String(on));
-  $('pinb').classList.toggle('pinned', on);
-  try { window.mgp.setKeepVisible && window.mgp.setKeepVisible(on); } catch (e) {}
-  showToast(on ? T.pinOn : T.pinOff, 'ok');
-};
+// 🐛 fix 2.19.2 : le bouton #pinb avait disparu du template du header — le
+// câblage ci-dessous s'exécutait sur null et interrompait le script renderer.
+const pinbEl = $('pinb');
+if (pinbEl) {
+  pinbEl.onclick = () => {
+    const on = pinbEl.getAttribute('aria-pressed') !== 'true';
+    pinbEl.setAttribute('aria-pressed', String(on));
+    pinbEl.classList.toggle('pinned', on);
+    pinbEl.title = on ? T.pinOn : T.pinOff;
+    try { window.mgp.setKeepVisible && window.mgp.setKeepVisible(on); } catch (e) {}
+    showToast(on ? T.pinOn : T.pinOff, 'ok');
+  };
+}
 // ---------- 📂 Glisser-déposer de fichier → prompt ✍️ ----------
 // Validation AVANT enregistrement (aucune pollution des ✍️ existants) :
 // non vide, texte (pas de \u0000), taille ≤ dropMaxChars (préférence), nom unique (suffixe -2).
@@ -2132,7 +2139,7 @@ function applyTheme() {
 function onPanelSettings({ theme, lang: l, keepVisible, defaultLLM: dL } = {}) {
   if (l && l !== LANG) location.reload();
   if (theme) document.body.classList.toggle('light', theme === 'light');
-  if (typeof keepVisible === 'boolean') { $('pinb').setAttribute('aria-pressed', String(keepVisible)); $('pinb').classList.toggle('pinned', keepVisible); }
+  if (typeof keepVisible === 'boolean') { const pe = $('pinb'); if (pe) { pe.setAttribute('aria-pressed', String(keepVisible)); pe.classList.toggle('pinned', keepVisible); pe.title = keepVisible ? T.pinOn : T.pinOff; } }
   if (dL) { DEFAULT_LLM = dL; renderLlmBtn(); }
 }
 try { window.mgp.onSettings(onPanelSettings); } catch (e) {}
