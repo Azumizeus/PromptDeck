@@ -1284,6 +1284,16 @@ console.log('\n── 40. GOLDEN cadenas Atelier + miroir .md à chaud ──');
   check(/MIRROR_BUSY\) return;/.test(mainSrcM), 'miroir : MIRROR_BUSY neutralise les événements pendant la resynchro');
   check(/1500\)/.test(mainSrcM), 'miroir : débounce 1,5 s avant resynchro');
   check(/try \{ syncPromptTree\(\); armMirrorWatcher\(\); \} catch/.test(mainSrcM), 'miroir : changement de dossier → resynchro + watcher ré-armé');
+  // c2) resynchro INCRÉMENTALE + IMPORT INVERSE ( décision ciblée du watcher )
+  check(/function mirrorOnChanged\(\)/.test(mainSrcM), 'miroir : décision ciblée mirrorOnChanged (incrémentale / import / complet)');
+  check(/if \(importMirrorIfChanged\(rel, abs\)\) return;/.test(mainSrcM), 'miroir : import inverse essayé AVANT la resynchro (priorité à la main de l\'utilisateur)');
+  check(/function resyncOneFile\(rel\)/.test(mainSrcM), 'miroir : resynchro du SEUL fichier modifié (resyncOneFile)');
+  check(/function importMirrorIfChanged\(rel, abs\)/.test(mainSrcM), 'miroir : import inverse importMirrorIfChanged (miroir modifié à la main → source)');
+  check(/function mirrorItemFor\(rel\)/.test(mainSrcM), 'miroir : résolution fichier → item de l\'app (mirrorItemFor)');
+  check(/if \(item\.locked\) return false;/.test(mainSrcM), 'miroir : cadenas respecté (ni import ni resynchro d\'un verrouillé)');
+  check(/new Notification\(\{ title: 'MEGA PROMPT'/.test(mainSrcM), 'miroir : notification macOS quand un .md perso diverge');
+  check(/_mirrorImport: true/.test(mainSrcM), 'miroir : panneau ✍️ pré-rempli (edit-custom avec le contenu importé)');
+  check(/!rel\.startsWith\('\.\.'\)/.test(mainSrcM), 'miroir : chemin relatif gardé sous le dossier (pas d\'évasion ../)');
   // d) compteur de fiches écrites dans le menu tray
   check(/Miroir \.md \(MEGA PROMPT\) · \$\{MIRROR_WRITES\} fiches/.test(mainSrcM), 'miroir : compteur MIRROR_WRITES affiché dans le menu tray');
   check(/MIRROR_WRITES\+\+/.test(mainSrcM), 'miroir : compteur incrémenté sur chaque écriture réelle');

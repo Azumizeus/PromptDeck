@@ -530,16 +530,17 @@ function syncPromptTree(dir) {
   // changerait l'octet et le watcher fs.watch se réveillerait en boucle sur lui-même.
   const readme = path.join(base, 'LISEZMOI.md');
   try {
-    writeIfChanged(readme, `# ⚡ MEGA PROMPT — bibliothèque de prompts\n\nGénérée par MEGA PACK Édition Luxe.\n\n- **skills/** — ${MCAT.skills.length} procédures expertes, par catégorie\n- **agents/** — ${MCAT.agents.length} personas experts, par catégorie\n- **perso/** — tes prompts ✍️ (par tag)\n\nChaque fichier .md contient la fiche de l'item + le **prompt d'activation** prêt à coller dans n'importe quel LLM.\n`);
+    writeIfChanged(readme, `# ⚡ MEGA PROMPT — bibliothèque de prompts\n\nGénérée et **maintenue à jour automatiquement** par MEGA PACK Édition Luxe.\n\n## 🗂 Arborescence\n\n- **skills/** — ${MCAT.skills.length} procédures expertes, classées par catégorie\n- **agents/** — ${MCAT.agents.length} personas experts, classées par catégorie\n- **perso/** — tes prompts ✍️ (classés par tag)\n- **equipes/** — équipes multi-agents (ORCHESTRATEUR.md, WORKFLOW.md, agents/)\n\nChaque fichier .md contient la fiche de l'item + le **prompt d'activation** prêt à coller dans n'importe quel LLM.\n\n## 🔁 Synchronisation automatique (miroir)\n\n- **Au lancement** de MEGA PACK et **à chaque édition d'un prompt ✍️**, l'arborescence est régénérée ici.\n- **À chaud** : si tu modifies un fichier de ce dossier (éditeur de texte, drop, CloudDrive…), MEGA PACK le détecte tout seul.\n  - Fichier **reconnu** → seul ce fichier est resynchronisé.\n  - Fichier **perso modifié à la main** → une notification propose de **réintégrer tes changements** dans l'app (panneau pré-rempli : vérifie, puis enregistre).\n  - Fichier **inconnu** → resynchro complète de l'arbre.\n- **Cadenas 🔒** : un item verrouillé dans l'app n'est **jamais** écrasé ici — le cadenas gagne dans les deux sens.\n- Le **menu tray** (« 🪞 Miroir .md · N fiches ») affiche le nombre de fiches écrites et resynchronise tout au clic.\n\n*Astuce : ce fichier est régénéré automatiquement — garde tes notes personnelles dans tes propres fichiers.*\n`);
   } catch (e) { /* best effort */ }
   return n;
 }
 // ── 🔭 Miroir à chaud : fs.watch sur le dossier MEGA PROMPT ──
 // Toute modification EXTERNE de l'arborescence (édition du .md par l'utilisateur,
-// drop de fichiers, CloudDrive…) déclenche une resynchro complète après 1,5 s de
-// calme (débounce). La resynchro elle-même est IDEMPOTENTE (writeIfChanged ne
-// réécrit pas un .md à l'identique), donc le watcher ne boucle jamais sur ses
-// propres écritures. MIRROR_BUSY neutralise les événements pendant la resynchro.
+// drop de fichiers, CloudDrive…) déclenche une action ciblée après 1,5 s de calme :
+//  1) le .md correspond à un item connu et non verrouillé → resynchro du SEUL fichier
+//     (pas tout l'arbre) ; 2) le .md a été modifié À LA MAIN et diverge de la source
+//     → IMPORT INVERSE proposé (notification macOS + panneau pré-rempli) ; 3) fichier
+//     inconnu/verrouillé → resynchro complète (idempotente, donc sans écriture inutile).
 let MIRROR_WRITES = 0, MIRROR_BUSY = false;
 const _syncPromptTree = syncPromptTree;
 syncPromptTree = function (dir) {
@@ -555,12 +556,24 @@ function armMirrorWatcher() {
     if (mirrorDebounce) clearTimeout(mirrorDebounce);
     mirrorDebounce = setTimeout(() => {
       mirrorDebounce = null;
-      try {
-        const n = syncPromptTree();
-        traceBoot(`fs.watch miroir : resynchro lancée (${n} fichiers .md) — total ${MIRROR_WRITES} fiches écrites depuis le lancement`);
-      } catch (e) { traceBoot('fs.watch miroir : erreur resynchro : ' + String((e && e.message) || e).slice(0, 120)); }
+      try { mirrorOnChanged(); } catch (e) { traceBoot('fs.watch miroir : erreur : ' + String((e && e.message) || e).slice(0, 120)); }
     }, 1500);
   }
+  // 🔭 Décision ciblée : incrémentale, import inverse, ou fallback resynchro complète.
+  function mirrorOnChanged() {
+    const rel = mirrorRelPath(mirrorFname, promptDir());
+    mirrorFname = null;
+    if (rel) {
+      const abs = path.join(promptDir(), rel);
+      if (fs.existsSync(abs)) {
+        if (importMirrorIfChanged(rel, abs)) return; // ← import inverse (à la main) : rien d'autre à faire
+        if (resyncOneFile(rel)) return;               // ← resynchro du seul fichier concerné
+      }
+    }
+    const n = syncPromptTree();
+    if (n >= 0) traceBoot(`fs.watch miroir : resynchro complète (${n} fichiers) — total ${MIRROR_WRITES} fiches écrites`);
+  }
+  let mirrorFname = null; // dernier fichier signalé par fs.watch (événements groupés)
   try {
     fs.watch(promptDir(), { persistent: false, recursive: true }, (event, fname) => {
       // On ignore nos propres écritures (résultat d'une resynchro) — l'arborescence
@@ -569,12 +582,74 @@ function armMirrorWatcher() {
       // Les fichiers temporaires (dotfiles) ne concernent pas le miroir — et fname
       // peut être null sur certains événements.
       if (fname && /^\./.test(String(fname))) return;
+      mirrorFname = fname || mirrorFname;
       mirrorChanged();
     });
     traceBoot(`fs.watch miroir armé sur ${promptDir()} (miroir déjà à jour : ${MIRROR_WRITES} fiches écrites)`);
   } catch (e) {
     traceBoot('fs.watch miroir indisponible (' + String((e && e.message) || e).slice(0, 80) + ') — la resynchro à chaud est désactivée');
   }
+}
+// Retrouve l'item de l'app correspondant à un chemin relatif du miroir (perso/…,
+// skills/…, agents/…, equipes/…) → { item, k } ou null.
+function mirrorItemFor(rel) {
+  const relNorm = String(rel || '').split(path.sep).join('/');
+  const byPath = (it, k) => (path.join(itemRelPath(it), path.sep) === relNorm + '/' || itemRelPath(it) === relNorm) ? { item: it, k } : null;
+  for (const c of (PREFS.customs || [])) { const m = byPath({ x: c }, 'custom'); if (m) return m; }
+  for (const s of MCAT.skills) { const m = byPath({ x: s }, 'skill'); if (m) return m; }
+  for (const a of MCAT.agents) { const m = byPath({ x: a }, 'agent'); if (m) return m; }
+  return null;
+}
+// Import inverse : si le .md a été modifié À LA MAIN (diffère de ce que l'app
+// générerait), pousse le contenu actuel du .md dans la source (custom/Atelier),
+// notifie et pré-remplit la fenêtre d'édition ✍️. Retourne true si l'import a eu lieu.
+function importMirrorIfChanged(rel, abs) {
+  const found = mirrorItemFor(rel);
+  if (!found) return false;
+  const { item, k } = found;
+  if (item.locked) return false; // 🔒 verrouillé : l'import inverse ne s'applique pas
+  if (k === 'custom') {
+    const body = String(fs.readFileSync(abs, 'utf8'));
+    const lines = body.split('\n');
+    const title = (lines.find((l) => l.startsWith('# ')) || '').replace(/^#\s*(✍️\s*)?/, '').trim();
+    let desc = body.replace(/^#[^\n]*\n+/, '');
+    desc = desc.replace(/^\*tag : [^*]*\*\n+/, '').replace(/^> ⚠️[^\n]*\n+/, '').trim();
+    if (!desc || desc === String(item.desc || '').trim()) return false; // pas de divergence réelle
+    const tagM = /\*tag : (.+?)\*/.exec(body);
+    const rec = { name: item.name, desc, tag: tagM ? tagM[1].trim() : (item.tag || '') };
+    try {
+      const { Notification } = require('electron');
+      new Notification({ title: 'MEGA PROMPT', body: `« ${item.name} » a été modifié dans le miroir — import inverse proposé.` }).show();
+    } catch (e) { /* notification indisponible : le panneau suffit */ }
+    // Ouvre (ou réveille) le panneau puis pré-remplit la fiche ✍️ — même mécanique
+    // que le menu tray (« ✍️ Nouveau prompt ») : createPanel + edit-custom différé.
+    createPanel();
+    setTimeout(() => { try { if (win && !win.isDestroyed()) win.webContents.send('edit-custom', { ...rec, _mirrorImport: true }); } catch (e2) { /* */ } }, 500);
+    traceBoot(`import inverse (perso) : ${item.name} ← miroir (${rel})`);
+    return true;
+  }
+  return false; // skills/agents du catalogue : lecture seule côté miroir (import non applicable)
+}
+// Resynchro INCRÉMENTALE : régénère uniquement le .md du fichier modifié.
+// Retourne true si le fichier était connu et a été resynchronisé (ou laissé
+// intact : contenu identique), false s'il faut retomber sur la resynchro complète.
+function resyncOneFile(rel) {
+  const found = mirrorItemFor(rel);
+  if (!found) return false;
+  const { item, k } = found;
+  if (k === 'custom') {
+    if (item.locked) return false; // 🔒 resynchro complète (qui respectera le cadenas)
+    writeItemMd({ x: item, k: 'custom' });
+    return true;
+  }
+  writeItemMd({ x: item, k });
+  return true;
+}
+// Chemin relatif (vs promptDir) du fichier signalé par fs.watch — null si hors dossier.
+function mirrorRelPath(fname, base) {
+  if (!fname) return null;
+  const rel = path.relative(base, path.resolve(base, String(fname)));
+  return (rel && !rel.startsWith('..') && !path.isAbsolute(rel)) ? rel : null;
 }
 function loadPrefs() {
   try { Object.assign(PREFS, JSON.parse(fs.readFileSync(prefsPath(), 'utf8'))); } catch (e) { /* défauts */ }
