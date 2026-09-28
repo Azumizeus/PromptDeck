@@ -158,6 +158,15 @@ fi
 #    le stub et le corrompt.
 #    NB : pas de `find | while` ici — avec pipefail, un find sans résultat fait échouer
 #    le pipeline et le for s'arrête après le premier tour. On passe par des glob.
+# 6b. Élagage des paquets de langues (lproj) — l'app est FR/EN, Electron en embarque 164+109.
+#     ⚠️ On conserve en.lproj + fr.lproj (et fr-CA) dans CHAQUE frameworks imbriqué. À faire
+#     AVANT la signature ad-hoc (sinon invalidation). ~26 Mo économisés sur le bundle.
+echo "• Élagage des langues (en/fr conservées)…"
+KEEP='(en|fr)(-CA)?\\.lproj'
+SAVED0=$(du -sk "$CONTENTS" | cut -f1)
+find "$CONTENTS" -name '*.lproj' -type d | grep -Ev "/(en|fr)(-CA)?\.lproj$" | while IFS= read -r d; do rm -rf "$d"; done
+echo "  → $(( (SAVED0 - $(du -sk "$CONTENTS" | cut -f1)) / 1024 )) Mo économisés"
+
 echo "• Signature ad-hoc…"
 shopt -s nullglob
 for h in "$CONTENTS/Frameworks/"*.app; do
