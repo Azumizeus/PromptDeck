@@ -976,9 +976,12 @@ const blurBlock = mainSrc28.slice(mainSrc28.indexOf("win.on('blur'"), mainSrc28.
 check(blurBlock.includes('setTimeout(') && blurBlock.includes('PREFS.keepVisible'), 'main : blur différé (pas de hide pendant le clic 📌)');
 check(mainSrc28.includes('!win.isVisible()) win.show()') || mainSrc28.includes('!win.isVisible()) win.show();'), 'main : épingler une fenêtre cachée la remontre');
 // c) renderer : un seul canal IPC pour le pin (plus de double envoi contradictoire)
+// 🐛 fix 2.19.2 : bouton #pinb de retour dans le template header + câblage null-safe (pinbEl)
 const rSrc30 = fs.readFileSync(path.join(__dirname, 'renderer.js'), 'utf8');
-const pinBlock = rSrc30.slice(rSrc30.indexOf("$('pinb').onclick"), rSrc30.indexOf('$(\'pinb\').onclick') + 600);
-check(pinBlock.includes('setKeepVisible') && !pinBlock.includes('onSettingsChange'), 'renderer : 📌 = un seul canal IPC (set-keep-visible)');
+check(rSrc30.includes('id="pinb"'), 'renderer : bouton 📌 présent dans le template du header (il avait disparu)');
+check(rSrc30.includes('aria-pressed="${(window.mgp.getPrefs()'), 'renderer : état initial 📌 lu depuis les prefs persistées');
+const pinBlock = rSrc30.slice(rSrc30.indexOf('const pinbEl = $(\'pinb\')'), rSrc30.indexOf('const pinbEl = $(\'pinb\')') + 700);
+check(pinBlock.includes('setKeepVisible') && pinBlock.includes("if (pinbEl)"), 'renderer : 📌 câblage null-safe = un seul canal IPC (set-keep-visible)');
 // d) le settings-changed continue de synchroniser le bouton (Réglages ↔ panneau)
 check(rSrc30.includes('typeof keepVisible === \'boolean\''), 'renderer : echo Réglages → bouton 📌 conservé');
 
@@ -1297,6 +1300,12 @@ console.log('\n── 40. GOLDEN cadenas Atelier + miroir .md à chaud ──');
   // d) compteur de fiches écrites dans le menu tray
   check(/Miroir \.md \(MEGA PROMPT\) · \$\{MIRROR_WRITES\} fiches/.test(mainSrcM), 'miroir : compteur MIRROR_WRITES affiché dans le menu tray');
   check(/MIRROR_WRITES\+\+/.test(mainSrcM), 'miroir : compteur incrémenté sur chaque écriture réelle');
+
+  // e) sonde Santé API tolérante à la charge (retry réseau uniquement)
+  check(/const PROBE_RETRIES = 2;/.test(mainSrcM), 'sonde : PROBE_RETRIES=2 (timeout unique ≠ échec sous charge)');
+  check(/const PROBE_RETRY_TIMEOUT_MS = 20000;/.test(mainSrcM), 'sonde : budget étendu 20 s sur les réessais');
+  check(/if \(rec\.status !== 0\) break;/.test(mainSrcM), 'sonde : une réponse HTTP (même 401) est un verdict définitif, pas de retry');
+  check(/attempts: attempt \+ 1/.test(mainSrcM), 'sonde : nombre de tentatives tracé dans le cache');
 }
 
 console.log('');

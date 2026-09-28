@@ -189,6 +189,13 @@ function migratePlaintextApiKeys() {
 // sans dépenser de quota de génération. Résultat gardé 10 min (cache) pour éviter de
 // sonder à chaque ouverture de l'Atelier.
 const PROBE_TIMEOUT_MS = 8000;
+// Sous charge machine élevée, les routeurs locaux répondent parfois en plusieurs
+// secondes : un timeout unique ne doit pas condamner un fournisseur. On réessaie
+// UNIQUEMENT sur échec réseau (aucune réponse HTTP) — un 401/404 est une réponse
+// authentique du serveur, réessayer ne changerait rien.
+const PROBE_RETRIES = 2;
+const PROBE_RETRY_TIMEOUT_MS = 20000;
+const PROBE_RETRY_PAUSE_MS = 1500;
 const PROBE_CACHE_MS = 10 * 60 * 1000;
 const probeCache = new Map(); // provider → { ok, status, at }
 function probeCacheGet(provider) {
@@ -203,18 +210,23 @@ async function probeProvider(provider) {
   const prov = PROVIDERS[provider];
   let rec = { ok: false, status: 0, at: Date.now() };
   if (prov && prov.base) {
-    try {
-      const key = apiKeyFor(provider);
-      const headers = {};
-      if (key) headers.authorization = 'Bearer ' + key;
+    const key = apiKeyFor(provider);
+    const headers = {};
+    if (key) headers.authorization = 'Bearer ' + key;
+    const url = prov.base.replace(/\/chat\/completions$/, '') + '/models';
+    for (let attempt = 0; attempt <= PROBE_RETRIES; attempt++) {
       const ctl = new AbortController();
-      const timer = setTimeout(() => ctl.abort(), PROBE_TIMEOUT_MS);
+      const timer = setTimeout(() => ctl.abort(), attempt === 0 ? PROBE_TIMEOUT_MS : PROBE_RETRY_TIMEOUT_MS);
       try {
         const t0 = Date.now();
-        const res = await fetch(prov.base.replace(/\/chat\/completions$/, '') + '/models', { headers, signal: ctl.signal });
+        const res = await fetch(url, { headers, signal: ctl.signal });
         rec = { ok: res.ok, status: res.status, at: Date.now(), latency: Date.now() - t0 };
+      } catch (e) {
+        rec = { ok: false, status: 0, at: Date.now(), attempts: attempt + 1 };
       } finally { clearTimeout(timer); }
-    } catch (e) { rec = { ok: false, status: 0, at: Date.now() }; }
+      if (rec.status !== 0) break; // réponse HTTP obtenue → verdict définitif
+      if (attempt < PROBE_RETRIES) await new Promise((r) => setTimeout(r, PROBE_RETRY_PAUSE_MS));
+    }
   }
   probeCache.set(provider, rec);
   return rec;
