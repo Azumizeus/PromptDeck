@@ -66,6 +66,9 @@ ARCH_MAC="$(uname -m)"; [ "$ARCH_MAC" = "arm64" ] && DMG="$DIST/$APP_NAME-darwin
 echo "— boot réel depuis $(basename "$DMG") —"
 MNT="$(mktemp -d /tmp/mgp-testdmg.XXXXXX)"
 attach_dmg "$DMG" "$MNT" || fail "montage boot impossible (>90 s ou erreur)"
+# purge des boots précédents — OBLIGATOIREMENT avant la copie : placée après,
+# elle détruisait la copie fraîche (binaire fantôme → « process absent » systématique)
+rm -rf /tmp/mgp-boot.* 2>/dev/null || true
 BOOTDIR="$(mktemp -d /tmp/mgp-boot.XXXXXX)"
 BOOT="$BOOTDIR/$APP_NAME.app"
 rm -rf "$BOOT"
@@ -74,13 +77,16 @@ hdiutil detach "$MNT" >/dev/null
 rmdir "$MNT" 2>/dev/null || true
 
 pkill -9 -f "$APP_NAME" 2>/dev/null; sleep 1   # pattern large : copie /tmp incluse (lock singleton)
-rm -rf /tmp/mgp-boot.* 2>/dev/null || true
 "$LSREG" -f "$BOOT" >/dev/null 2>&1 || true
 : > "$HOME/Library/Application Support/megapack-menubar-luxe/mgp-journal.log" 2>/dev/null || true
 rm -f "$TRACE"
-MGP_TRACE=1 "$BOOT/Contents/MacOS/$APP_NAME" >/dev/null 2>&1 &
-sleep 12
-pgrep -f "MacOS/$APP_NAME" >/dev/null || fail "copie DMG : process absent après 12 s (trace : $(tail -2 "$TRACE" 2>/dev/null | tr '\n' ' '))"
+MGP_TRACE=1 "$BOOT/Contents/MacOS/$APP_NAME" >/tmp/mgp-boot-stdout.log 2>&1 &
+# boot parfois lent (charge machine, AMFI sur copie fraîche) : polling 30 s au lieu d'un sleep unique
+for _ in $(seq 1 30); do
+  [ -f "$TRACE" ] && grep -q "createTray" "$TRACE" 2>/dev/null && break
+  sleep 1
+done
+pgrep -f "MacOS/$APP_NAME" >/dev/null || fail "copie DMG : process absent après 30 s (trace : $(tail -2 "$TRACE" 2>/dev/null | tr '\n' ' ')) (stdout : $(tail -3 /tmp/mgp-boot-stdout.log 2>/dev/null | tr '\n' ' ')) (journal : $(tail -2 "$HOME/Library/Application Support/megapack-menubar-luxe/mgp-journal.log" 2>/dev/null | tr '\n' ' '))"
 ok "copie DMG lancée, process vivant"
 [ -f "$TRACE" ] || fail "trace absente (MGP_TRACE ignoré)"
 grep -q "uncaughtException\|unhandledRejection\|did-fail-load" "$TRACE" && fail "exception au boot : $(grep -m1 'Exception\|Rejection' "$TRACE")"
