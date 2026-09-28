@@ -17,6 +17,24 @@ APP_VERSION="$(node -p "require('$MBA/package.json').version")"
 eval "$(awk '/^write_lisezmoi\(\) \{/{f=1} f{print} f&&/^\}$/{exit}' "$MBA/../menubar-app/build-app.sh")"
 declare -F write_lisezmoi >/dev/null || { echo "✗ write_lisezmoi introuvable dans menubar-app/build-app.sh" >&2; exit 1; }
 
+# hdiutil_retry : hdiutil create échoue par « Ressource occupée » quand la charge
+# machine grimpe pendant la compression (VM/Docker, sauvegardes…). On réessaie
+# 3 fois espacées de 60 s avant d'abandonner — la release ne doit pas mourir pour
+# un pic de charge transitoire.
+hdiutil_retry() { # $1 = dmg de sortie, $2… = arguments hdiutil create
+  local out="$1"; shift
+  local attempt=1
+  until hdiutil create -volname "$APP_NAME" -srcfolder "$root" -ov -format UDZO "$out" >/dev/null 2>&1; do
+    if [ "$attempt" -ge 3 ]; then
+      echo "❌ hdiutil create a échoué après 3 tentatives : $out" >&2
+      return 1
+    fi
+    echo "  ⏳ hdiutil occupé (tentative $attempt/3) — nouvel essai dans 60 s…"
+    sleep 60
+    attempt=$((attempt + 1))
+  done
+}
+
 build_one() { # $1 = runtime (local|arm64) · $2 = nom DMG · $3 = universal ? (yes|no)
   local rt="$1" dmgname="$2" uni="${3:-no}"
   local outdir="dist/MEGA PACK-darwin-$dmgname"
@@ -30,8 +48,7 @@ build_one() { # $1 = runtime (local|arm64) · $2 = nom DMG · $3 = universal ? (
   cp -R "$outdir/$APP_NAME.app" "$root/"
   ln -s /Applications "$root/Applications"
   write_lisezmoi "$root" $([[ "$uni" == yes ]] && echo universal || echo "")
-  hdiutil create -volname "$APP_NAME" -srcfolder "$root" -ov -format UDZO \
-    "dist/$APP_NAME-darwin-$dmgname.dmg" >/dev/null
+  hdiutil_retry "dist/$APP_NAME-darwin-$dmgname.dmg"
   codesign --force --sign - "dist/$APP_NAME-darwin-$dmgname.dmg" >/dev/null 2>&1 || true
   rm -rf "$root"
   echo "✅ dist/$APP_NAME-darwin-$dmgname.dmg ($(du -sh "dist/$APP_NAME-darwin-$dmgname.dmg" | cut -f1))"
@@ -62,8 +79,7 @@ build_universal() {
   ln -s /Applications "$root/Applications"
   write_lisezmoi "$root" universal
   [[ -f "$DOC" ]] && cp "$DOC" "$root/$APP_NAME.app/Contents/Resources/MODE-EMPLOI.md"
-  hdiutil create -volname "$APP_NAME" -srcfolder "$root" -ov -format UDZO \
-    "dist/$APP_NAME-universal.dmg" >/dev/null
+  hdiutil_retry "dist/$APP_NAME-universal.dmg"
   codesign --force --sign - "dist/$APP_NAME-universal.dmg" >/dev/null 2>&1 || true
   rm -rf "$root"
   echo "✅ dist/$APP_NAME-universal.dmg ($(du -sh "dist/$APP_NAME-universal.dmg" | cut -f1))"
