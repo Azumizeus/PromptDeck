@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         MEGA PACK Panel Luxe — Skills, Agents & Équipes pour tout LLM
 // @namespace    mega-pack
-// @version      2.11.0
-// @description  Panneau flottant Édition Luxe dans une fenêtre macOS : 136 skills + 190 agents + 🕸 équipes + ✍️ prompts perso + ★ favoris, recherche instantanée, tooltip expert, clic droit multi-LLM, 🗺 canvas infini des experts, sélecteur de LLM par défaut, composeur ⌘-clic — injectable dans n'importe quelle conversation LLM (Claude, ChatGPT, Gemini, Perplexity, Mistral, OpenCode Web…)
+// @version      2.12.0
+// @description  Panneau flottant Édition Luxe dans une fenêtre macOS : 136 skills + 190 agents + 🕸 équipes + ✍️ prompts perso + ★ favoris, recherche instantanée, tooltip expert, clic droit multi-LLM, sélecteur de LLM par défaut, composeur ⌘-clic — injectable dans n'importe quelle conversation LLM (Claude, ChatGPT, Gemini, Perplexity, Mistral, OpenCode Web…)
 // @author       MEGA PACK
 // @match        *://*/*
 // @grant        GM_xmlhttpRequest
@@ -3137,10 +3137,6 @@ window.MG_TEAMS = MG_TEAMS; // combos de personas réutilisables (⚡ panel)
       tipCat: 'Catégorie',
       agentsN: 'agents',
       orch: 'Orchestrateur',
-      canvasTitle: 'Canvas des experts — glisse, zoome, connecte',
-      cbarAuto: '✧ Auto', cbarReset: '⟲ Réinitialiser',
-      cHint: 'Molette = zoom · fond = déplacer · clic = injecter · ⌘-clic = sélection · clic droit = envoyer à',
-      cLive: 'actifs 24 h',
       pSkill: function (x) { return 'Utilise le skill "' + x.name + '" (' + x.path + '). Charge et suis son SKILL.md strictement. ' + ((x.desc_fr || x.desc || '')).slice(0, 200) + ' Réponds toujours en français.'; },
       pAgent: function (x) { return 'Agis désormais comme l\'agent "' + x.name + '" (' + x.path + '). ' + ((x.desc_fr || x.desc || '')).slice(0, 200) + ' Adopte ce persona pour toute la conversation et réponds toujours en français.'; },
       pCustom: function (x) { return x.name + '\n\n' + (x.desc || ''); },
@@ -3206,10 +3202,6 @@ window.MG_TEAMS = MG_TEAMS; // combos de personas réutilisables (⚡ panel)
       tipCat: 'Category',
       agentsN: 'agents',
       orch: 'Orchestrator',
-      canvasTitle: 'Expert canvas — drag, zoom, connect',
-      cbarAuto: '✧ Auto', cbarReset: '⟲ Reset',
-      cHint: 'Wheel = zoom · drag background = pan · click = inject · ⌘-click = select · right-click = send to',
-      cLive: 'active 24h',
       pSkill: function (x) { return 'Use the skill "' + x.name + '" (' + x.path + '). Load and strictly follow its SKILL.md. ' + (x.desc || '').slice(0, 200); },
       pAgent: function (x) { return 'From now on, act as the agent "' + x.name + '" (' + x.path + '). ' + (x.desc || '').slice(0, 200) + ' Adopt this persona for the whole conversation.'; },
       pCustom: function (x) { return x.name + '\n\n' + (x.desc || ''); },
@@ -3256,9 +3248,6 @@ window.MG_TEAMS = MG_TEAMS; // combos de personas réutilisables (⚡ panel)
     if (i >= 0) f.splice(i, 1); else f.push(n);
     store.set('favs', f); return i < 0;
   }
-  // 🗺 Canvas : historique d'usage (statut live 24 h des nœuds)
-  function markUsed(n) { const u = store.get('used.at', {}); u[n] = Date.now(); store.set('used.at', u); }
-  function lastUsed(n) { const u = store.get('used.at', {}); return (u[n] || 0) > Date.now() - 86400000; }
   // ── Équipes multi-agents générées (MG_TEAMS) ──
   function ohTeamItems() {
     if (!window.MG_TEAMS || !Array.isArray(window.MG_TEAMS)) return [];
@@ -3563,48 +3552,6 @@ window.MG_TEAMS = MG_TEAMS; // combos de personas réutilisables (⚡ panel)
   #mgp-e-save{background:linear-gradient(120deg,#9945ff,#14f195);border:none;color:#0b0c10}
   #mgp-list::-webkit-scrollbar{width:8px}
   #mgp-list::-webkit-scrollbar-thumb{background:#31343f;border-radius:4px}
-  /* ── 🗺 Canvas infini des experts (inspiré nodeterm) ── */
-  #mgp-canvas{position:fixed;inset:0;z-index:999998;display:none;overflow:hidden;
-    background:radial-gradient(1200px 800px at 30% 20%, rgba(153,69,255,.08), transparent 60%),
-      radial-gradient(1000px 700px at 75% 70%, rgba(20,241,149,.06), transparent 60%),#0b0c10;
-    font:13px/1.45 -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#eef0f6}
-  #mgp-canvas.open{display:block}
-  #mgp-canvas::before{content:'';position:absolute;inset:0;pointer-events:none;
-    background-image:radial-gradient(rgba(255,255,255,.07) 1px, transparent 1px);background-size:26px 26px}
-  #mgp-world{position:absolute;left:0;top:0;transform-origin:0 0;will-change:transform}
-  #mgp-edges{position:absolute;left:0;top:0;overflow:visible;pointer-events:none}
-  #mgp-edges line{stroke:rgba(154,163,192,.26);stroke-width:1.2}
-  #mgp-edges line.t{stroke:rgba(20,241,149,.4);stroke-width:1.6}
-  .mgp-node{position:absolute;width:176px;padding:9px 11px 8px;border-radius:12px;cursor:grab;touch-action:none;
-    background:rgba(20,21,28,.92);border:1px solid #31343f;box-shadow:0 10px 28px rgba(0,0,0,.45);user-select:none}
-  .mgp-node:active{cursor:grabbing}
-  .mgp-node .nt{font-size:12.5px;font-weight:700;display:flex;gap:6px;align-items:center;
-    white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .mgp-node .nd{font-size:10.5px;color:#8a90a5;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .mgp-node .dot{width:8px;height:8px;border-radius:50%;flex:none;background:#3a3e4c}
-  .mgp-node.k-agent .dot{background:#9945ff}
-  .mgp-node.k-skill .dot{background:#14f195}
-  .mgp-node.k-team .dot,.mgp-node.k-oh-team .dot{background:#38bdf8}
-  .mgp-node.k-custom .dot{background:#f5c518}
-  .mgp-node.used .dot{background:#14f195;box-shadow:0 0 0 3px rgba(20,241,149,.25)}
-  .mgp-node.fav{border-color:#f5c518}
-  .mgp-node.selc{border-color:#9945ff;box-shadow:0 0 0 2px rgba(153,69,255,.35),0 10px 28px rgba(0,0,0,.45)}
-  .mgp-node.flash{animation:mgpPulse .9s ease}
-  @keyframes mgpPulse{0%{box-shadow:0 0 0 0 rgba(20,241,149,.55)}100%{box-shadow:0 0 0 16px rgba(20,241,149,0)}}
-  #mgp-cbar{position:absolute;top:14px;left:50%;transform:translateX(-50%);z-index:2;display:flex;gap:8px;align-items:center;
-    background:rgba(20,21,28,.92);border:1px solid #31343f;border-radius:99px;padding:7px 14px;box-shadow:0 12px 40px rgba(0,0,0,.5)}
-  #mgp-cbar b{font-size:12px}
-  #mgp-cbar .cnt{font-size:11px;color:#8a90a5;font-variant-numeric:tabular-nums}
-  #mgp-cbar button{border:1px solid #31343f;background:none;color:#a8adbd;cursor:pointer;
-    font:600 11px/1 -apple-system,sans-serif;padding:5px 10px;border-radius:99px}
-  #mgp-cbar button:hover{border-color:#9945ff;color:#eef0f6}
-  #mgp-chint{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);z-index:2;font-size:11px;color:#8a90a5;
-    background:rgba(20,21,28,.85);border:1px solid #23252f;border-radius:99px;padding:6px 13px}
-  body.mgp-light #mgp-canvas{background:radial-gradient(1200px 800px at 30% 20%, rgba(107,70,242,.08), transparent 60%),#f2f4fc}
-  body.mgp-light #mgp-canvas::before{background-image:radial-gradient(rgba(20,25,50,.12) 1px, transparent 1px)}
-  body.mgp-light .mgp-node{background:#ffffff;border-color:#dfe4f3}
-  body.mgp-light .mgp-node .nd{color:#5d6885}
-  body.mgp-light #mgp-cbar,body.mgp-light #mgp-chint{background:#ffffff;border-color:#c5cfeb;color:#2c3556}
   `;
 
   // ── UI ─────────────────────────────────────────────────────────────────────
@@ -3623,7 +3570,6 @@ window.MG_TEAMS = MG_TEAMS; // combos de personas réutilisables (⚡ panel)
       '<button class="l l-min" title="' + (LANG === 'fr' ? 'Masquer le panneau' : 'Hide panel') + '"></button>' +
       '<button class="l l-max" title="' + (LANG === 'fr' ? 'Taille suivante (S/M/L/XL)' : 'Next size (S/M/L/XL)') + '"></button>' +
       '</span><span class="ttl">⚡ MEGA PACK — Édition Luxe</span>' +
-      '<span class="lx"><button id="mgp-canvas-btn" title="🗺">🗺</button>' +
       '<button id="mgp-tourbtn" title="' + T().tourTitle + '">🎓</button>' +
       '<button id="mgp-set" title="' + T().settingsTitle + '">' + T().settings + '</button>' +
       '<button id="mgp-newp" title="' + T().newpTitle + '">' + T().newp + '</button>' +
@@ -4277,216 +4223,6 @@ window.MG_TEAMS = MG_TEAMS; // combos de personas réutilisables (⚡ panel)
     applyLang();
   };
 
-  // ── 🗺 Canvas infini des experts (inspiré nodeterm) ─────────────────────────
-  let canvasItems = []; // déclaré avant usage (mode strict)
-  function canvasOpen() { store.set('canvas.open', true); return buildCanvas(); }
-  function canvasClose() { store.set('canvas.open', false); const c = document.getElementById('mgp-canvas'); if (c) c.classList.remove('open'); }
-
-  function buildCanvas() {
-    let root = document.getElementById('mgp-canvas');
-    if (!root) {
-      root = document.createElement('div');
-      root.id = 'mgp-canvas';
-      root.innerHTML =
-        '<div id="mgp-cbar"><b>🗺 ' + T().canvasTitle + '</b><span class="cnt" id="mgp-ccnt"></span>' +
-        '<button id="mgp-c-auto">' + T().cbarAuto + '</button><button id="mgp-c-reset">' + T().cbarReset + '</button>' +
-        '<button id="mgp-c-x">✕</button></div>' +
-        '<div id="mgp-world"><svg id="mgp-edges"></svg></div>' +
-        '<div id="mgp-chint">' + T().cHint + '</div>';
-      document.body.appendChild(root);
-      root.querySelector('#mgp-c-x').onclick = canvasClose;
-      root.querySelector('#mgp-c-reset').onclick = function () {
-        // 🗺 reset : positions + vue (zoom/pan) — les favoris et l'usage sont conservés
-        ['canvas.pos', 'canvas.zoom', 'canvas.tx', 'canvas.ty'].forEach(function (k) { store.del(k); });
-        root.classList.remove('open');
-        setTimeout(function () { buildCanvas(); }, 0);
-      };
-      root.querySelector('#mgp-c-auto').onclick = function () {
-        autoLayout(canvasItems, root);
-        drawEdges(root, canvasItems);
-      };
-      canvasPanZoom(root);
-    }
-    canvasItems = ALL();
-    canvasNodes(root, canvasItems);
-    root.classList.add('open');
-    canvasRestoreView(root);
-    canvasUpdateCount(root);
-    return root;
-  }
-
-  function canvasUpdateCount(root) {
-    const n = canvasItems.length, live = canvasItems.filter(function (it) { return lastUsed(it.x.name); }).length;
-    root.querySelector('#mgp-ccnt').textContent = n + ' experts · ' + live + ' ' + T().cLive;
-  }
-
-  function canvasNodes(root, items) {
-    const world = root.querySelector('#mgp-world');
-    const saved = store.get('canvas.pos', {});
-    world.querySelectorAll('.mgp-node').forEach(function (n) { n.remove(); });
-    items.forEach(function (it, i) {
-      const x = it.x;
-      const p = saved[x.name] || autoPos(i, items.length);
-      const el = document.createElement('div');
-      el.className = 'mgp-node k-' + it.k + (isFav(x.name) ? ' fav' : '') + (sel.indexOf(x.name) !== -1 ? ' selc' : '') + (lastUsed(x.name) ? ' used' : '');
-      el.dataset.n = x.name;
-      el.style.left = p.x + 'px'; el.style.top = p.y + 'px';
-      el.innerHTML = '<span class="dot"></span><span class="nt">' + lname(x) + '</span><span class="nd">' + ldesc(x).slice(0, 60) + '</span>';
-      el.title = lname(x) + ' — ' + ldesc(x).slice(0, 160);
-      el.onclick = function (ev) {
-        ev.stopPropagation();
-        if (el._moved) { el._moved = false; return; } // drag ≠ clic
-        if (ev.metaKey || ev.ctrlKey) {
-          const n = x.name, q = sel.indexOf(n);
-          if (q >= 0) sel.splice(q, 1); else sel.push(n);
-          el.classList.toggle('selc');
-          renderSelRow();
-          return;
-        }
-        activate(it, el);
-        el.classList.add('flash');
-        setTimeout(function () { el.classList.remove('flash'); el.classList.add('used'); }, 950);
-      };
-      el.oncontextmenu = function (ev) { ev.preventDefault(); openCtx(el, it, ev.clientX, ev.clientY); };
-      canvasDrag(root, el, x.name);
-      world.appendChild(el);
-    });
-    drawEdges(root, items);
-  }
-
-  const CW = 12000, CH = 8000; // dimensions du monde (canvas infini)
-  function autoPos(i, n) {
-    // Anneaux concentriques : équipes au centre, agents autour, skills en périphérie
-    const cx = CW / 2, cy = CH / 2;
-    const ring = Math.floor(i / 18);
-    const a = (i % 18) / 18 * Math.PI * 2 + ring * 0.35;
-    const r = 130 + ring * 210;
-    return { x: Math.round(cx + Math.cos(a) * r * 1.5), y: Math.round(cy + Math.sin(a) * r) };
-  }
-  // Vue par défaut : centrée sur le cœur des anneaux, tout le monde visible
-  function canvasDefaultView() {
-    const scale = Math.min(0.28, Math.max(0.12, Math.min(window.innerWidth / CW, window.innerHeight / CH) * 1.1));
-    return { scale: scale, tx: window.innerWidth / 2 - scale * (CW / 2), ty: window.innerHeight / 2 - scale * (CH / 2) };
-  }
-
-  function autoLayout(items, root) {
-    const world = root.querySelector('#mgp-world');
-    const saved = store.get('canvas.pos', {});
-    const nodes = Array.prototype.slice.call(world.querySelectorAll('.mgp-node'));
-    items.forEach(function (it, i) {
-      const p = autoPos(i, items.length);
-      saved[it.x.name] = p;
-      const el = nodes.find(function (n2) { return n2.dataset.n === it.x.name; });
-      if (el) { el.style.left = p.x + 'px'; el.style.top = p.y + 'px'; }
-    });
-    store.set('canvas.pos', saved);
-  }
-
-  function drawEdges(root, items) {
-    const svg = root.querySelector('#mgp-edges');
-    if (!svg) return;
-    const world = root.querySelector('#mgp-world');
-    const saved = store.get('canvas.pos', {});
-    const byName = {};
-    items.forEach(function (it) { byName[it.x.name] = it; });
-    // positions effectives : sauvegardées, sinon placement auto (pour les liens dès la 1re ouverture)
-    const posOf = {};
-    items.forEach(function (it, i) { posOf[it.x.name] = saved[it.x.name] || autoPos(i, items.length); });
-    const edges = [];
-    items.forEach(function (it) {
-      if (it.k !== 'team' || !it.x._t) return;
-      (it.x._t.agents || []).forEach(function (a) {
-        if (byName[a.name || a]) edges.push([it.x.name, a.name || a, true]);
-      });
-      if (it.x._t.orchestrator && byName[it.x._t.orchestrator.name]) edges.push([it.x.name, it.x._t.orchestrator.name, true]);
-    });
-    items.forEach(function (it) {
-      if (it.k !== 'oh-team' || !it.x._tc) return;
-      (it.x._tc.agents || []).forEach(function (nm) {
-        const target = items.find(function (o) { return o.x.name === nm; });
-        if (target) edges.push([it.x.name, nm, false]);
-      });
-    });
-    svg.setAttribute('width', String(CW)); svg.setAttribute('height', String(CH));
-    svg.innerHTML = edges.map(function (e) {
-      const a = posOf[e[0]], b = posOf[e[1]];
-      if (!a || !b) return '';
-      return '<line' + (e[2] ? ' class="t"' : '') + ' x1="' + (a.x + 88) + '" y1="' + (a.y + 30) + '" x2="' + (b.x + 88) + '" y2="' + (b.y + 30) + '"></line>';
-    }).join('');
-    world.style.minWidth = CW + 'px'; world.style.minHeight = CH + 'px';
-  }
-
-  function canvasDrag(root, el, name) {
-    let sx = 0, sy = 0, ox = 0, oy = 0, on = false;
-    el.addEventListener('pointerdown', function (e) {
-      if (e.button !== 0) return;
-      on = true; sx = e.clientX; sy = e.clientY;
-      ox = parseFloat(el.style.left) || 0; oy = parseFloat(el.style.top) || 0;
-      el.setPointerCapture(e.pointerId);
-      e.stopPropagation();
-    });
-    el.addEventListener('pointermove', function (e) {
-      if (!on) return;
-      el.style.left = (ox + e.clientX - sx) + 'px';
-      el.style.top = (oy + e.clientY - sy) + 'px';
-      if (Math.abs(e.clientX - sx) + Math.abs(e.clientY - sy) > 4) el._moved = true;
-    });
-    el.addEventListener('pointerup', function (e) {
-      if (!on) return;
-      on = false;
-      const saved = store.get('canvas.pos', {});
-      saved[name] = { x: parseFloat(el.style.left) || 0, y: parseFloat(el.style.top) || 0 };
-      store.set('canvas.pos', saved);
-      drawEdges(root, canvasItems);
-      // clic simple (sans déplacement) → géré par onclick ; ici on ne fait rien de plus
-      e.stopPropagation();
-    });
-  }
-
-  function canvasPanZoom(root) {
-    const dv = canvasDefaultView();
-    let scale = store.get('canvas.zoom', dv.scale), tx = store.get('canvas.tx', dv.tx), ty = store.get('canvas.ty', dv.ty);
-    const world = root.querySelector('#mgp-world');
-    function apply() {
-      world.style.transform = 'translate(' + tx + 'px,' + ty + 'px) scale(' + scale + ')';
-      store.set('canvas.zoom', scale); store.set('canvas.tx', tx); store.set('canvas.ty', ty);
-    }
-    apply();
-    root.addEventListener('wheel', function (e) {
-      e.preventDefault();
-      const r = root.getBoundingClientRect();
-      const mx = e.clientX - r.left, my = e.clientY - r.top;
-      const f = e.deltaY < 0 ? 1.12 : 1 / 1.12;
-      const ns = Math.max(0.12, Math.min(2.4, scale * f));
-      tx = mx - (mx - tx) * (ns / scale);
-      ty = my - (my - ty) * (ns / scale);
-      scale = ns;
-      apply();
-    }, { passive: false });
-    let panning = false, px = 0, py = 0;
-    root.addEventListener('pointerdown', function (e) {
-      if (e.target.closest('.mgp-node') || e.target.closest('#mgp-cbar')) return;
-      panning = true; px = e.clientX; py = e.clientY;
-    });
-    window.addEventListener('pointermove', function (e) {
-      if (!panning) return;
-      tx += e.clientX - px; ty += e.clientY - py; px = e.clientX; py = e.clientY; apply();
-    });
-    window.addEventListener('pointerup', function () { panning = false; });
-  }
-
-  function canvasRestoreView(root) {
-    const world = root.querySelector('#mgp-world');
-    const dv = canvasDefaultView();
-    const scale = store.get('canvas.zoom', dv.scale), tx = store.get('canvas.tx', dv.tx), ty = store.get('canvas.ty', dv.ty);
-    world.style.transform = 'translate(' + tx + 'px,' + ty + 'px) scale(' + scale + ')';
-  }
-
-  panel.querySelector('#mgp-canvas-btn').onclick = function () {
-    const existing = document.getElementById('mgp-canvas');
-    if (existing && existing.classList.contains('open')) canvasClose();
-    else canvasOpen();
-  };
 
   // ── Injection CSS + DOM ────────────────────────────────────────────────────
   const st = document.createElement('style');
@@ -4499,5 +4235,4 @@ window.MG_TEAMS = MG_TEAMS; // combos de personas réutilisables (⚡ panel)
   document.body.appendChild(tour);
   applyTheme();
   applyLang();
-  if (store.get('canvas.open', false)) setTimeout(canvasOpen, 300);
 })();

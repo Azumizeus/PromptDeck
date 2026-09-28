@@ -470,45 +470,6 @@ body.rz-dragging .rz{opacity:1}
 #dz{border:2px dashed var(--vio);border-radius:16px;padding:34px 44px;font-size:14px;
   font-weight:600;color:var(--txt);background:rgba(153,69,255,.08)}
 
-/* ── 🗺 Canvas infini des experts (inspiré nodeterm) ── */
-#mgp-canvas{position:fixed;inset:0;z-index:900;display:none;overflow:hidden;
-  background:radial-gradient(1200px 800px at 30% 20%, rgba(153,69,255,.09), transparent 60%),
-    radial-gradient(1000px 700px at 75% 70%, rgba(20,241,149,.07), transparent 60%),var(--bg);
-  color:var(--txt)}
-#mgp-canvas.open{display:block}
-#mgp-canvas::before{content:'';position:absolute;inset:0;pointer-events:none;
-  background-image:radial-gradient(rgba(255,255,255,.07) 1px, transparent 1px);background-size:26px 26px}
-body.light #mgp-canvas::before{background-image:radial-gradient(rgba(20,25,50,.13) 1px, transparent 1px)}
-#mgp-world{position:absolute;left:0;top:0;transform-origin:0 0;will-change:transform}
-#mgp-edges{position:absolute;left:0;top:0;overflow:visible;pointer-events:none}
-#mgp-edges line{stroke:rgba(154,163,192,.28);stroke-width:1.2}
-#mgp-edges line.t{stroke:var(--grn);stroke-width:1.6;stroke-opacity:.5}
-.mgp-node{position:absolute;width:176px;padding:9px 11px 8px;border-radius:12px;cursor:grab;touch-action:none;
-  background:var(--card);border:1px solid var(--line2);box-shadow:0 10px 28px rgba(0,0,0,.4);user-select:none}
-.mgp-node:active{cursor:grabbing}
-.mgp-node .nt{font-size:12.5px;font-weight:700;display:flex;gap:6px;align-items:center;
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.mgp-node .nd{font-size:10.5px;color:var(--txt2);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.mgp-node .dot{width:8px;height:8px;border-radius:50%;flex:none;background:var(--line2)}
-.mgp-node.k-agent .dot{background:var(--vio)}
-.mgp-node.k-skill .dot{background:var(--grn)}
-.mgp-node.k-team .dot{background:#38bdf8}
-.mgp-node.k-custom .dot{background:var(--amb)}
-.mgp-node.used .dot{background:var(--grn);box-shadow:0 0 0 3px rgba(20,241,149,.25)}
-.mgp-node.fav{border-color:var(--amb)}
-.mgp-node.selc{border-color:var(--vio);box-shadow:0 0 0 2px rgba(153,69,255,.35),0 10px 28px rgba(0,0,0,.4)}
-.mgp-node.flash{animation:mgpPulse .9s ease}
-@keyframes mgpPulse{0%{box-shadow:0 0 0 0 rgba(20,241,149,.55)}100%{box-shadow:0 0 0 16px rgba(20,241,149,0)}}
-#mgp-cbar{position:absolute;top:14px;left:50%;transform:translateX(-50%);z-index:2;display:flex;gap:8px;align-items:center;
-  background:var(--card);border:1px solid var(--line2);border-radius:99px;padding:7px 14px;box-shadow:0 12px 40px rgba(0,0,0,.45)}
-#mgp-cbar b{font-size:12px}
-#mgp-cbar .cnt{font-size:11px;color:var(--txt2);font-variant-numeric:tabular-nums}
-#mgp-cbar button{border:1px solid var(--line);background:none;color:var(--txt2);cursor:pointer;
-  font:600 11px/1 -apple-system,sans-serif;padding:5px 10px;border-radius:99px}
-#mgp-cbar button:hover{border-color:var(--vio);color:var(--txt)}
-#mgp-chint{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);z-index:2;font-size:11px;color:var(--txt2);
-  background:var(--card);border:1px solid var(--line);border-radius:99px;padding:6px 13px}
-
 @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
 @media (prefers-contrast: more){
   :root{--txt:#fff;--txt2:#d5d9e5;--line2:#565b6b;--panel:rgba(10,11,16,.97)}
