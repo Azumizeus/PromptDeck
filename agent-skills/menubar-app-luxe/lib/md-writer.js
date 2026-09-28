@@ -6,6 +6,7 @@
 // absolus, vides (après filtrage), « . » et « .. » sont refusés, et la joiture
 // finale est vérifiée contre la base résolue. Un config JSON importé ne peut
 // donc plus faire sortir une écriture du dossier cible.
+const fs = require('fs');
 const path = require('path');
 
 // Assainit un composant de nom de fichier : séparateurs et caractères
@@ -51,4 +52,15 @@ function containedJoin(baseDir, ...segs) {
   return abs;
 }
 
-module.exports = { mdSafe, containedJoin };
+// Vrai si le fichier existe déjà avec exactement ce contenu. Sert à rendre
+// la régénération du miroir IDEMPOTENTE : ne pas réécrire un .md à l'identique,
+// sinon un fs.watch sur le dossier se re-déclencherait sur ses propres écritures.
+function sameFileContent(absPath, content) {
+  try {
+    const st = fs.statSync(absPath);
+    if (!st.isFile() || st.size !== Buffer.byteLength(String(content), 'utf8')) return false;
+    return fs.readFileSync(absPath, 'utf8') === String(content);
+  } catch (e) { return false; } // absent ou illisible : il faut écrire
+}
+
+module.exports = { mdSafe, containedJoin, sameFileContent };
