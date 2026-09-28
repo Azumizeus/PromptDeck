@@ -2526,6 +2526,9 @@ window.__mgp = {
   openWorkshop: () => openWorkshop(),
   setWkind: (k) => setWkind(k),
   workshopItems: () => W.items,
+  // 🧪 Atelier : re-rendu + HTML réel de la liste (tests — golden cadenas 🔒/🔓)
+  renderWorkshop: () => renderWorkshop(),
+  workshopListHtml: () => String(wlist._html || ''),
   setDefaultLLM: (t) => { DEFAULT_LLM = t; renderLlmBtn(); },
   defaultLLM: () => DEFAULT_LLM,
   llmMenu: () => llmMenuHtml(),

@@ -1241,6 +1241,54 @@ if (process.env.MGP_LIVE !== '1') {
   check(/CASCADE LIVE: PASS/.test(out), 'cascade live : au moins un provider répond réellement');
 }
 
+console.log('\n── 40. GOLDEN cadenas Atelier + miroir .md à chaud ──');
+{
+  // a) GOLDEN cadenas : le bouton 🔒/🔓 de l'Atelier affiche le BON emoji selon l'état
+  //    (régression 2.19.1 : le test était inversé dans renderWorkshop).
+  const lockBtn = /<button data-a="lock"[^>]*>([^<]*)<\/button>/.exec(MGP.workshopListHtml()) || [];
+  const firstItem = MGP.workshopItems()[0];
+  const firstLocked = firstItem ? (firstItem.k === 'team'
+    ? MGP.lockOf('team', firstItem.x._t.team || firstItem.x.name) : MGP.lockOf(firstItem.k, firstItem.x.name)) : false;
+  check(!!lockBtn, 'golden cadenas : un bouton cadenas est rendu dans la liste Atelier');
+  check(lockBtn[1] === (firstLocked ? MGP.i18n('fr').lockBadge : MGP.i18n('fr').lockOpen),
+    `golden cadenas : emoji ${lockBtn[1] === MGP.i18n('fr').lockBadge ? '🔒' : '🔓'} affiché = état ${firstLocked ? 'verrouillé' : 'libre'} du premier item (régression 2.19.1 bloquée)`);
+  //    Bascule en direct : le re-rendu suit le nouvel état (pas d'inversion)
+  const itLock = firstItem;
+  if (itLock) {
+    const arg = itLock.k === 'team' ? { k: 'team', x: { name: itLock.x._t.team || itLock.x.name } } : { k: itLock.k, x: itLock.x };
+    await MGP.toggleLock(arg);
+    MGP.renderWorkshop();
+    const lockBtn2 = /<button data-a="lock"[^>]*>([^<]*)<\/button>/.exec(MGP.workshopListHtml()) || [];
+    check(lockBtn2[1] === MGP.i18n('fr').lockBadge, 'golden cadenas : après toggleLock l\'emoji bascule bien vers 🔒');
+    await MGP.toggleLock(arg);
+    MGP.renderWorkshop();
+    const lockBtn3 = /<button data-a="lock"[^>]*>([^<]*)<\/button>/.exec(MGP.workshopListHtml()) || [];
+    check(lockBtn3[1] === MGP.i18n('fr').lockOpen, 'golden cadenas : après retrait du cadenas, retour à 🔓');
+  } else {
+    check(false, 'golden cadenas : aucun item Atelier à tester (liste vide)');
+  }
+  // b) Miroir : primitive idempotente (pas de réécriture si contenu identique)
+  const mdw = require('./lib/md-writer');
+  const osm = require('os');
+  const tmpd = fs.mkdtempSync(path.join(osm.tmpdir(), 'mgp-mirror-'));
+  const target = path.join(tmpd, 'skills', 'test', 'Skill Idempotent.md');
+  fs.mkdirSync(path.dirname(target), { recursive: true });
+  fs.writeFileSync(target, 'contenu v1\n');
+  check(mdw.sameFileContent(target, 'contenu v1\n') === true, 'miroir : sameFileContent détecte un contenu identique (pas de réécriture)');
+  check(mdw.sameFileContent(target, 'contenu v2\n') === false, 'miroir : sameFileContent détecte une différence');
+  check(mdw.sameFileContent(path.join(tmpd, 'absent.md'), 'x') === false, 'miroir : sameFileContent sur fichier absent = false');
+  // c) main.js : le watcher fs.watch est armé au boot, débounce 1,5 s, ré-armé si le dossier change
+  const mainSrcM = fs.readFileSync(path.join(__dirname, 'main.js'), 'utf8');
+  check(/setTimeout\(\(\) => \{ try \{ syncPromptTree\(\); armMirrorWatcher\(\)/.test(mainSrcM), 'miroir : boot → syncPromptTree puis armMirrorWatcher (à chaud)');
+  check(/fs\.watch\(promptDir\(\), \{ persistent: false, recursive: true \}/.test(mainSrcM), 'miroir : fs.watch récursif non-persistent sur promptDir()');
+  check(/MIRROR_BUSY\) return;/.test(mainSrcM), 'miroir : MIRROR_BUSY neutralise les événements pendant la resynchro');
+  check(/1500\)/.test(mainSrcM), 'miroir : débounce 1,5 s avant resynchro');
+  check(/try \{ syncPromptTree\(\); armMirrorWatcher\(\); \} catch/.test(mainSrcM), 'miroir : changement de dossier → resynchro + watcher ré-armé');
+  // d) compteur de fiches écrites dans le menu tray
+  check(/Miroir \.md \(MEGA PROMPT\) · \$\{MIRROR_WRITES\} fiches/.test(mainSrcM), 'miroir : compteur MIRROR_WRITES affiché dans le menu tray');
+  check(/MIRROR_WRITES\+\+/.test(mainSrcM), 'miroir : compteur incrémenté sur chaque écriture réelle');
+}
+
 console.log('');
 if (fail) { console.log(`❌ ${fail} test(s) en échec`); process.exit(1); }
 console.log('✅ TOUS LES TESTS PASSENT');
