@@ -1773,6 +1773,7 @@ if (incb) {
 // La fenêtre Electron n'est resizable que par sa poignée native (bas-droite) ; ces
 // poignées DOM ajoutent les 3 autres coins + le snapper S/M/L/XL (tailles utiles).
 const RZ = {
+  dragWin: null, // { startX, startY, baseLeft, baseTop } — drag de la fenêtre via le header
   sizes: [
     { k: 'S', w: 480, h: 500 },
     { k: 'M', w: 640, h: 660 },
@@ -1829,6 +1830,39 @@ function rzCyclePreset() {
   });
   document.body.appendChild(h);
 });
+// 🐛 fix « fenêtre inmuable » : la fenêtre transparente (#app inset:0) recouvre la barre de
+// titre native → aucun drag natif possible. -webkit-app-region est instable dans ce setup
+// (fenêtre transparente + alwaysOnTop). Le header #top déclenche donc le même canal que les
+// poignées de resize : IPC panelGeometry {type:'move'} appliqué par le main (setPosition).
+// Écoute au CAPTURE pour préempter tout bouton du header (sauf no-drag explicite).
+document.addEventListener('mousedown', (e) => {
+  const top = e.target && e.target.closest && e.target.closest('#top');
+  if (!top || !window.mgp || !window.mgp.getPanelGeometry) return;
+  if (e.target.closest('button, input, select, textarea, a, .lights')) return; // contrôles cliquables
+  if (e.button !== 0) return;
+  e.preventDefault();
+  try {
+    const b = window.mgp.getPanelGeometry();
+    const mx = (typeof e.screenX === 'number' && (e.screenX || b.x)) ? e.screenX : b.x + 400;
+    const my = (typeof e.screenY === 'number' && (e.screenY || b.y)) ? e.screenY : b.y + 20;
+    RZ.dragWin = { startX: mx, startY: my, baseLeft: b.x, baseTop: b.y, refWin: b };
+    document.body.classList.add('rz-dragging');
+  } catch (err) { /* géométrie indisponible */ }
+}, true);
+document.addEventListener('mousemove', (e) => {
+  if (!RZ.dragWin) return;
+  const d = RZ.dragWin;
+  const nx = d.baseLeft + (e.screenX - d.startX);
+  const ny = d.baseTop + (e.screenY - d.startY);
+  if (window.mgp && window.mgp.setPanelGeometry) {
+    window.mgp.setPanelGeometry({ type: 'move', x: nx, y: ny });
+  } else { try { window.moveTo(nx, ny); } catch (err) { /* no-op */ } }
+}, true);
+document.addEventListener('mouseup', () => {
+  if (!RZ.dragWin) return;
+  RZ.dragWin = null;
+  document.body.classList.remove('rz-dragging');
+}, true);
 document.addEventListener('mousemove', (e) => {
   if (!RZ.drag) return;
   const d = RZ.drag;

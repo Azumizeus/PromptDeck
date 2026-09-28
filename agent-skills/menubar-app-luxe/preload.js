@@ -39,6 +39,7 @@ contextBridge.exposeInMainWorld('mgp', {
   getPrefs: () => ipcRenderer.sendSync('get-prefs'),
   // 🩺 Santé API : état live de tous les providers (sonde /models par provider)
   apiHealth: (force) => ipcRenderer.invoke('api-health', { force: !!force }),
+  agentsHealth: () => ipcRenderer.invoke('agents-health'),
   // 🛡 Journal anti-crash : lecture + purge (Réglages)
   journalGet: () => ipcRenderer.invoke('journal-get'),
   journalClear: () => ipcRenderer.invoke('journal-clear'),

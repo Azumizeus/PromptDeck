@@ -260,6 +260,23 @@ ipcMain.handle('api-health', async (e, { force } = {}) => {
   }
   return { at: Date.now(), results };
 });
+// 🕸 Santé des agents : lit le /api/health du dashboard agentmemory (:3114)
+// (agentmemory :3111, venv browser-use, ChatDeck :5199, configs MCP des
+// clients OpenCode/Freebuff/ChatDeck/Claude Desktop). Cache 15 s côté proxy —
+// on re-sonde à chaque appel, léger.
+ipcMain.handle('agents-health', async () => {
+  try {
+    const res = await fetch('http://127.0.0.1:3114/api/health', { signal: AbortSignal.timeout(8000) });
+    if (!res.ok) return { ok: false, error: 'HTTP ' + res.status };
+    const data = await res.json();
+    // profite du sondage renderer pour rafraîchir la pastille tray
+    agentsBadge.down = (!data.agentmemory ? 1 : 0) + (!data.browserUseBinary ? 1 : 0);
+    agentsBadge.checkedAt = Date.now();
+    updateTrayIcon();
+    return { ok: true, data };
+  } catch (e) { return { ok: false, error: String((e && e.message) || e).slice(0, 120) };
+  }
+});
 // Une clé réenregistrée (ou retirée) invalide le résultat du test correspondant.
 ipcMain.handle('models-list', async (e, provider) => {
   const prov = PROVIDERS[provider];
@@ -366,7 +383,7 @@ function teamSystemPrompt(lang) {
 // skills/<catégorie>/<nom>.md · agents/<catégorie>/<nom>.md · perso/<tag ou racine>/<nom>.md
 // Assainissement et containment délégués à lib/md-writer.js (audit run-1 F-2 :
 // mdSafe refusait les segments '..' au lieu de les neutraliser).
-const { mdSafe, containedJoin } = require('./lib/md-writer');
+const { mdSafe, containedJoin, sameFileContent } = require('./lib/md-writer');
 const fr = () => LANG !== 'en';
 function promptDir() {
   // Audit prefs 2.11 : si le dossier choisi a été supprimé/déplacé, retombe sur le défaut
@@ -407,8 +424,11 @@ function writeItemMd(it, dir) {
   // containedJoin vérifie la containment au sink : refuse les chemins absolus
   // et tout segment '..' qui sortirait de la base (dir ou promptDir).
   const abs = containedJoin(dir || promptDir(), itemRelPath(it));
+  const content = mdForItem(it);
   fs.mkdirSync(path.dirname(abs), { recursive: true });
-  fs.writeFileSync(abs, mdForItem(it), 'utf8');
+  // Idempotent : si le .md existe déjà à l'identique, on ne le réécrit pas —
+  // c'est ce qui empêche fs.watch de boucler sur ses propres écritures.
+  if (!sameFileContent(abs, content)) { fs.writeFileSync(abs, content, 'utf8'); MIRROR_WRITES++; }
   return abs;
 }
 // ── 🕸 Équipes multi-agents : dossier equipes/<nom>/ (ORCHESTRATEUR.md, WORKFLOW.md, agents/) ──
@@ -454,9 +474,9 @@ ${wf}
 function writeTeamMd(t, dir) {
   const base = containedJoin(dir || promptDir(), 'equipes', mdSafe(t.team || t.name || 'equipe'));
   fs.mkdirSync(path.join(base, 'agents'), { recursive: true });
-  fs.writeFileSync(path.join(base, 'ORCHESTRATEUR.md'), teamMd(t), 'utf8');
+  writeIfChanged(path.join(base, 'ORCHESTRATEUR.md'), teamMd(t));
   for (const a of (t.agents || [])) {
-    fs.writeFileSync(path.join(base, 'agents', `${mdSafe(a.name)}.md`), `# 👤 ${a.name} — ${a.role || ''}
+    writeIfChanged(path.join(base, 'agents', `${mdSafe(a.name)}.md`), `# 👤 ${a.name} — ${a.role || ''}
 
 > ${a.desc || ''}
 
@@ -468,15 +488,24 @@ function writeTeamMd(t, dir) {
 \`\`\`
 ${a.system || ''}
 \`\`\`
-`, 'utf8');
+`);
   }
-  fs.writeFileSync(path.join(base, 'WORKFLOW.md'), `# 🔁 Workflow — ${t.team || t.name}
+  writeIfChanged(path.join(base, 'WORKFLOW.md'), `# 🔁 Workflow — ${t.team || t.name}
 
 > ${t.desc || ''}
 
 ${(t.workflow || []).map((s, i) => `${i + 1}. ${s}`).join('\n')}
-`, 'utf8');
+`);
   return base;
+}
+// Écriture idempotente : ne touche pas au fichier si le contenu est identique
+// (le watcher fs.watch du miroir ne doit jamais se réveiller sur ses propres écritures).
+function writeIfChanged(abs, content) {
+  if (sameFileContent(abs, content)) return false;
+  fs.mkdirSync(path.dirname(abs), { recursive: true });
+  fs.writeFileSync(abs, content, 'utf8');
+  MIRROR_WRITES++;
+  return true;
 }
 function syncPromptTree(dir) {
   const base = dir || promptDir();
@@ -497,11 +526,55 @@ function syncPromptTree(dir) {
       writeTeamMd(t, base); n += 1 + (t.agents || []).length;
     } catch (e) { /* best effort */ }
   }
+  // LISEZMOI.md : contenu DÉTERMINISTE (pas d'horodatage) — sinon chaque régénération
+  // changerait l'octet et le watcher fs.watch se réveillerait en boucle sur lui-même.
   const readme = path.join(base, 'LISEZMOI.md');
   try {
-    fs.writeFileSync(readme, `# ⚡ MEGA PROMPT — bibliothèque de prompts\n\nGénérée par MEGA PACK Édition Luxe le ${new Date().toLocaleString('fr-FR')}.\n\n- **skills/** — ${MCAT.skills.length} procédures expertes, par catégorie\n- **agents/** — ${MCAT.agents.length} personas experts, par catégorie\n- **perso/** — tes prompts ✍️ (par tag)\n\nChaque fichier .md contient la fiche de l'item + le **prompt d'activation** prêt à coller dans n'importe quel LLM.\n`, 'utf8');
+    writeIfChanged(readme, `# ⚡ MEGA PROMPT — bibliothèque de prompts\n\nGénérée par MEGA PACK Édition Luxe.\n\n- **skills/** — ${MCAT.skills.length} procédures expertes, par catégorie\n- **agents/** — ${MCAT.agents.length} personas experts, par catégorie\n- **perso/** — tes prompts ✍️ (par tag)\n\nChaque fichier .md contient la fiche de l'item + le **prompt d'activation** prêt à coller dans n'importe quel LLM.\n`);
   } catch (e) { /* best effort */ }
   return n;
+}
+// ── 🔭 Miroir à chaud : fs.watch sur le dossier MEGA PROMPT ──
+// Toute modification EXTERNE de l'arborescence (édition du .md par l'utilisateur,
+// drop de fichiers, CloudDrive…) déclenche une resynchro complète après 1,5 s de
+// calme (débounce). La resynchro elle-même est IDEMPOTENTE (writeIfChanged ne
+// réécrit pas un .md à l'identique), donc le watcher ne boucle jamais sur ses
+// propres écritures. MIRROR_BUSY neutralise les événements pendant la resynchro.
+let MIRROR_WRITES = 0, MIRROR_BUSY = false;
+const _syncPromptTree = syncPromptTree;
+syncPromptTree = function (dir) {
+  if (MIRROR_BUSY) { traceBoot('syncPromptTree : resynchro déjà en cours, appel ignoré'); return -1; }
+  MIRROR_BUSY = true;
+  try { return _syncPromptTree(dir); } finally { MIRROR_BUSY = false; }
+};
+function armMirrorWatcher() {
+  // Débounce : les batchs (copier-coller, éditeur, CloudDrive…) déclenchent une
+  // rafale d'événements — on attend que le dossier soit calme avant la resynchro.
+  let mirrorDebounce = null;
+  function mirrorChanged() {
+    if (mirrorDebounce) clearTimeout(mirrorDebounce);
+    mirrorDebounce = setTimeout(() => {
+      mirrorDebounce = null;
+      try {
+        const n = syncPromptTree();
+        traceBoot(`fs.watch miroir : resynchro lancée (${n} fichiers .md) — total ${MIRROR_WRITES} fiches écrites depuis le lancement`);
+      } catch (e) { traceBoot('fs.watch miroir : erreur resynchro : ' + String((e && e.message) || e).slice(0, 120)); }
+    }, 1500);
+  }
+  try {
+    fs.watch(promptDir(), { persistent: false, recursive: true }, (event, fname) => {
+      // On ignore nos propres écritures (résultat d'une resynchro) — l'arborescence
+      // régénérée est idempotente (writeIfChanged), elle ne peut pas déclencher une boucle.
+      if (MIRROR_BUSY) return;
+      // Les fichiers temporaires (dotfiles) ne concernent pas le miroir — et fname
+      // peut être null sur certains événements.
+      if (fname && /^\./.test(String(fname))) return;
+      mirrorChanged();
+    });
+    traceBoot(`fs.watch miroir armé sur ${promptDir()} (miroir déjà à jour : ${MIRROR_WRITES} fiches écrites)`);
+  } catch (e) {
+    traceBoot('fs.watch miroir indisponible (' + String((e && e.message) || e).slice(0, 80) + ') — la resynchro à chaud est désactivée');
+  }
 }
 function loadPrefs() {
   try { Object.assign(PREFS, JSON.parse(fs.readFileSync(prefsPath(), 'utf8'))); } catch (e) { /* défauts */ }
@@ -842,7 +915,9 @@ function buildMenuTemplate() {
         { label: LANG === 'fr' ? '🧹 Purger l\'audit' : '🧹 Clear audit', click: () => {
           try { fs.writeFileSync(AUDIT_FILE(), ''); } catch (e) { /* */ }
         } },
-        { label: LANG === 'fr' ? '🪞 Synchroniser le miroir .md (MEGA PROMPT)' : '🪞 Sync .md mirror (MEGA PROMPT)', click: () => {
+        { // 🪞 Compteur de synchronisations du miroir (recalculé à chaque ouverture du menu,
+          // le template est reconstruit dynamiquement) ; un clic resynchronise tout.
+          label: LANG === 'fr' ? `🪞 Miroir .md (MEGA PROMPT) · ${MIRROR_WRITES} fiches` : `🪞 .md mirror (MEGA PROMPT) · ${MIRROR_WRITES} files`, click: () => {
           try { const n = syncPromptTree(); traceBoot(`syncPromptTree: ${n} fichiers .md régénérés`); } catch (e) { /* */ }
         } },
         { type: 'separator' },
@@ -973,15 +1048,38 @@ function recentIncidents() {
     }).length;
   } catch (e) { return 0; }
 }
+// 🕸 Pastille rouge agents : supervise :3114/api/health (agentmemory + venv browser-use).
+// 1 service down ou dashboard injoignable → 🔴 affiché à côté de l'icône du tray
+// (tray.setTitle — natif macOS, l'icône template reste inchangée).
+let agentsBadge = { down: 0, checkedAt: 0 };
+async function agentsDownCount() {
+  try {
+    const res = await fetch('http://127.0.0.1:3114/api/health', { signal: AbortSignal.timeout(6000) });
+    if (!res.ok) return 1; // dashboard muet = supervision aveugle → alerte
+    const h = await res.json();
+    let down = 0;
+    if (!h.agentmemory) down += 1;
+    if (!h.browserUseBinary) down += 1;
+    return down;
+  } catch (e) { return 1; }
+}
+async function refreshAgentsBadge() {
+  agentsBadge.down = await agentsDownCount();
+  agentsBadge.checkedAt = Date.now();
+  updateTrayIcon();
+}
 function updateTrayIcon() {
   // Badge ⚠️ : l'icône template macOS ne supporte pas l'overlay natif sans canvas — le
   // signalement passe par le tooltip (survol immédiat) et l'item 🛡 du menu devient « ⚠️ n ».
   if (!tray || tray.isDestroyed()) return;
   try {
     const n = recentIncidents();
-    tray.setToolTip(n > 0
-      ? 'MEGA PACK — Skills & Agents · ⚠️ ' + n + ' incident(s) récent(s) — voir 🛡 Journal'
-      : 'MEGA PACK — Skills & Agents');
+    const a = agentsBadge.down || 0;
+    tray.setTitle(a > 0 ? ' 🔴' : ''); // pastille rouge = un agent est down
+    tray.setToolTip((a > 0 ? '🔴 ' + a + ' agent(s) down (agentmemory/browser-use) — dashboard :3114 · ' : '') +
+      (n > 0
+        ? 'MEGA PACK — Skills & Agents · ⚠️ ' + n + ' incident(s) récent(s) — voir 🛡 Journal'
+        : 'MEGA PACK — Skills & Agents'));
   } catch (e) { /* jamais bloquant */ }
 }
 function journal(msg) {
@@ -1399,9 +1497,13 @@ if (!CAPTURE_MODE && !app.requestSingleInstanceLock()) {
       traceBoot('whenReady: avant createPanel');
       createPanel();
       traceBoot('whenReady: apres createPanel');
+      // 🕸 Pastille rouge agents : 1er sondage 15 s après le boot, puis toutes les 60 s
+      try { setTimeout(refreshAgentsBadge, 15000); setInterval(refreshAgentsBadge, 60000); } catch (err) { /* jamais bloquant */ }
       // 🪞 Miroir MEGA PROMPT : régénère l'arborescence .md (skills/, agents/, perso/, equipes/)
       // en tâche de fond au boot — la fenêtre n'attend pas (~400 fichiers, quelques secondes)
-      try { setTimeout(() => { try { syncPromptTree(); } catch (err) { /* best effort */ } }, 4000); } catch (err) { /* */ }
+      // 🪞 Miroir MEGA PROMPT : régénération au boot puis watcher fs.watch — toute
+      // modification externe du dossier resynchronise l'arborescence à chaud.
+      try { setTimeout(() => { try { syncPromptTree(); armMirrorWatcher(); } catch (err) { /* best effort */ } }, 4000); } catch (err) { /* */ }
     }
   });
 
@@ -1973,6 +2075,8 @@ ipcMain.handle('promptdir-choose', async () => {
   if (r.canceled || !r.filePaths.length) return null;
   PREFS.promptDir = r.filePaths[0];
   savePrefs();
+  // 🔭 Nouveau dossier miroir : resynchro immédiate puis watcher ré-armé dessus.
+  try { syncPromptTree(); armMirrorWatcher(); } catch (e) { /* best effort */ }
   return PREFS.promptDir;
 });
 ipcMain.handle('prompt-md-create', (e, it) => {

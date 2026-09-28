@@ -22,7 +22,14 @@ body{font:13.5px/1.45 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-se
   backdrop-filter:blur(28px) saturate(1.4);border:1px solid var(--line2);border-radius:14px;overflow:hidden}
 
 /* ── header ── */
-#top{display:flex;gap:10px;align-items:center;padding:11px 14px 9px;user-select:none}
+/* 🐛 fix « fenêtre inmuable » : le panneau transparent (#app{position:fixed;inset:0})
+   recouvre la barre de titre native → plus aucune zone de déplacement. Le header
+   devient la poignée de drag (fenêtre + Réglages héritent de ce CSS via theme.js).
+   Les contrôles interactifs repassent en no-drag pour rester cliquables. */
+#top{display:flex;gap:10px;align-items:center;padding:11px 14px 9px;user-select:none;
+  -webkit-app-region:drag;cursor:grab}
+#top:active{cursor:grabbing}
+#top button, #top input, #top .lights{-webkit-app-region:no-drag}
 /* 🐛 fix 2.19.1 : fenêtres transparentes sans titleBarStyle → les feux macOS natifs sont
    invisibles (et setWindowButtonVisibility ne s'affiche pas en transparent). Feux dessinés,
    câblés au comportement du panneau : rouge/jaune = masquer (⚡/⌥Espace pour rouvrir),
