@@ -1153,7 +1153,7 @@ function lcCredsCopy() {
 }
 // 🛡 Heuristique « incident récent » pour le badge tray : entrée critique de moins de 30 min.
 const JOURNAL_BADGE_MS = 30 * 60 * 1000;
-const JOURNAL_CRITICAL = /uncaughtException|unhandledRejection|render-process-gone|child-process-gone/;
+const JOURNAL_CRITICAL = /uncaughtException|unhandledRejection|render-process-gone|child-process-gone|INJOIGNABLE/;
 let lastIncidentNotified = 0; // 🔔 notification macOS : une seule par salve d'incidents
 function maybeNotifyFirstIncident(msg) {
   try {
@@ -1248,11 +1248,42 @@ async function agentsDownCount() {
     const res = await fetch('http://127.0.0.1:3114/api/health', { signal: AbortSignal.timeout(6000) });
     if (!res.ok) return 1; // dashboard muet = supervision aveugle → alerte
     const h = await res.json();
-    let down = 0;
-    if (!h.agentmemory) down += 1;
-    if (!h.browserUseBinary) down += 1;
-    return down;
+    // Les 7 sondes du dashboard :3114 (même liste que son onglet Santé).
+    const keys = ['agentmemory', 'browserUseBinary', 'chatdeckApi', 'cdpKeeper', 'sidecarAgent', 'librechat', 'solscanOs'];
+    return keys.reduce((n, k) => n + (h[k] === false ? 1 : 0), 0);
   } catch (e) { return 1; }
+}
+// 🛡 Relais dashboard : les transitions des sondes :3114 (service qui tombe
+// ou revient) laissent une entrée horodatée dans le journal — le badge ⚠️
+// du menu tray s'allume comme pour un incident interne. Le proxy :3114 est
+// la source de vérité (sonde chaque service toutes les 15 s) ; on ne
+// journalise que les CHANGEMENTS (pas de spam 60 s).
+let lastHealthFingerprint = '';
+async function relayDashboardHealth() {
+  try {
+    const res = await fetch('http://127.0.0.1:3114/api/health', { signal: AbortSignal.timeout(6000) });
+    if (!res.ok) return;
+    const h = await res.json();
+    const labels = {
+      agentmemory: 'agentmemory :3111', chatdeckApi: 'ChatDeck :5199', cdpKeeper: 'CDP :9222',
+      sidecarAgent: 'Sidecar :8788', librechat: 'LibreChat :3080', solscanOs: 'AEGIS-7 :3001', browserUseBinary: 'venv browser-use',
+    };
+    const fp = keysFingerprint(h);
+    if (fp === lastHealthFingerprint) return;
+    if (lastHealthFingerprint !== '') {
+      for (const [k, label] of Object.entries(labels)) {
+        if (h[k] === false) journal('dashboard : ' + label + ' INJOIGNABLE (sonde :3114)');
+        else if (h[k] === true && lastHealth && lastHealth[k] === false) journal('dashboard : ' + label + ' de retour en ligne');
+      }
+      updateTrayIcon(); // le badge ⚠️ compte maintenant ces entrées
+    }
+    lastHealth = h;
+    lastHealthFingerprint = fp;
+  } catch (e) { /* dashboard muet : agentsDownCount gère l'alerte */ }
+}
+let lastHealth = null;
+function keysFingerprint(h) {
+  return ['agentmemory', 'browserUseBinary', 'chatdeckApi', 'cdpKeeper', 'sidecarAgent', 'librechat', 'solscanOs'].map((k) => (h[k] === false ? '0' : '1')).join('');
 }
 async function refreshAgentsBadge() {
   agentsBadge.down = await agentsDownCount();
@@ -1689,7 +1720,12 @@ if (!CAPTURE_MODE && !app.requestSingleInstanceLock()) {
       createPanel();
       traceBoot('whenReady: apres createPanel');
       // 🕸 Pastille rouge agents : 1er sondage 15 s après le boot, puis toutes les 60 s
-      try { setTimeout(refreshAgentsBadge, 15000); setInterval(refreshAgentsBadge, 60000); } catch (err) { /* jamais bloquant */ }
+      try {
+        setTimeout(refreshAgentsBadge, 15000);
+        setInterval(refreshAgentsBadge, 60000);
+        setTimeout(relayDashboardHealth, 20000);
+        setInterval(relayDashboardHealth, 90000); // le proxy :3114 sonde déjà toutes les 15 s
+      } catch (err) { /* jamais bloquant */ }
       // 🪞 Miroir MEGA PROMPT : régénère l'arborescence .md (skills/, agents/, perso/, equipes/)
       // en tâche de fond au boot — la fenêtre n'attend pas (~400 fichiers, quelques secondes)
       // 🪞 Miroir MEGA PROMPT : régénération au boot puis watcher fs.watch — toute
