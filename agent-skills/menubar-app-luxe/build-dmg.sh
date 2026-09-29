@@ -11,6 +11,13 @@ MBA="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 APP_NAME="MEGA PACK"
 DOC="$MBA/../../MODE-EMPLOI.md"
 
+
+# node absent du PATH des shells détachés/launchd → élargit le PATH (shim)
+case ":$PATH:" in
+  *":$HOME/.nvm/versions/node/v24.16.0/bin:"*) ;;
+  *) PATH="$HOME/.nvm/versions/node/v24.16.0/bin:$PATH"; export PATH ;;
+esac
+
 # write_lisezmoi : source unique = menubar-app/build-app.sh (extraction à chaud)
 # APP_VERSION = version de l'app embarquée (Luxe), pas celle de menubar-app.
 APP_VERSION="$(node -p "require('$MBA/package.json').version")"

@@ -17,6 +17,13 @@ EXPECT="${1:-2.16.2}"
 fail() { echo "❌ SMOKE FAIL — $1"; exit 1; }
 ok()   { echo "✅ $1"; }
 
+
+# node absent du PATH des shells détachés/launchd → élargit le PATH (shim)
+case ":$PATH:" in
+  *":$HOME/.nvm/versions/node/v24.16.0/bin:"*) ;;
+  *) PATH="$HOME/.nvm/versions/node/v24.16.0/bin:$PATH"; export PATH ;;
+esac
+
 # ── 1. App déployée + version ────────────────────────────────────────────────
 [ -d "$APP" ] || fail "app absente de /Applications"
 GOT=$(/usr/libexec/PlistBuddy -c "Print :CFBundleShortVersionString" "$APP/Contents/Info.plist" 2>/dev/null)

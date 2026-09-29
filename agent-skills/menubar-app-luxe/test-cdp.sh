@@ -21,6 +21,13 @@ SUP="$HOME/Library/Application Support/megapack-menubar-luxe"
 PREFS_FILE="$SUP/mgp-prefs.json"
 LSREG="/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister"
 
+
+# node absent du PATH des shells détachés/launchd → élargit le PATH (shim)
+case ":$PATH:" in
+  *":$HOME/.nvm/versions/node/v24.16.0/bin:"*) ;;
+  *) PATH="$HOME/.nvm/versions/node/v24.16.0/bin:$PATH"; export PATH ;;
+esac
+
 fail() { echo "❌ CDP FAIL — $1"; exit 1; }
 ok()   { echo "✅ $1"; }
 

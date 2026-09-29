@@ -4,7 +4,11 @@
 #   --runtime local : runtime Electron de node_modules (arch de cette machine ; x64 ici)
 #   --runtime arm64 : runtime officiel arm64 mis en cache (~/.cache/megapack, voir menubar-app/build-app.sh)
 #   --out           : dossier/nom de sortie (défaut dist/MEGA PACK.app)
-set -euo pipefail
+set -e
+
+# node absent du PATH des shells détachés/launchd → résolution explicite
+NODE_BIN="$(command -v node || true)"; [ -n "$NODE_BIN" ] || NODE_BIN="$HOME/.nvm/versions/node/v24.16.0/bin/node"
+uo pipefail
 cd "$(dirname "$0")"
 
 APP_NAME="MEGA PACK"
@@ -20,7 +24,7 @@ done
 case "$RUNTIME" in
   local) ELECTRON_APP="node_modules/electron/dist/Electron.app" ;;
   arm64)
-    EV=$(node -p "require('./node_modules/electron/package.json').version")
+    EV=$("$NODE_BIN" -p "require('./node_modules/electron/package.json').version")
     ELECTRON_APP="$HOME/.cache/megapack/electron-v${EV}-darwin-arm64/Electron.app"
     if [[ ! -d "$ELECTRON_APP" ]]; then
       # repli : n'importe quel runtime arm64 déjà en cache (l'app Luxe tourne en 31 comme en 33)
@@ -127,7 +131,7 @@ PLIST="$CONTENTS/Info.plist"
 /usr/libexec/PlistBuddy -c "Add :CFBundleDisplayName string $APP_NAME" "$PLIST"
 /usr/libexec/PlistBuddy -c "Set :CFBundleIdentifier com.megapack.luxe" "$PLIST" 2>/dev/null || \
 /usr/libexec/PlistBuddy -c "Add :CFBundleIdentifier string com.megapack.luxe" "$PLIST"
-VERSION=$(node -p "require('./package.json').version")
+VERSION=$("$NODE_BIN" -p "require('./package.json').version")
 /usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString $VERSION" "$PLIST" 2>/dev/null || \
 /usr/libexec/PlistBuddy -c "Add :CFBundleShortVersionString string $VERSION" "$PLIST"
 
