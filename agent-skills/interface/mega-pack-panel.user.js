@@ -1,8 +1,10 @@
 // ==UserScript==
 // @name         MEGA PACK Panel Luxe — Skills, Agents & Équipes pour tout LLM
 // @namespace    mega-pack
-// @version      2.10.3
-// @description  Panneau flottant Édition Luxe dans une fenêtre macOS : 136 skills + 190 agents + 🕸 équipes + ✍️ prompts perso + ★ favoris, recherche instantanée, tooltip expert, clic droit multi-LLM, sélecteur de LLM par défaut, composeur ⌘-clic — injectable dans n'importe quelle conversation LLM (Claude, ChatGPT, Gemini, Perplexity, Mistral, OpenCode Web…)
+// @version      2.13.0
+// @description  Panneau flottant Édition Luxe dans une fenêtre macOS : 177 skills + 231 agents + 🕸 équipes + ✍️ prompts perso + ★ favoris, recherche instantanée, tooltip expert, clic droit multi-LLM, sélecteur de LLM par défaut, composeur ⌘-clic, menu « Vérifier les mises à jour » — injectable dans n'importe quelle conversation LLM (Claude, ChatGPT, Gemini, Perplexity, Mistral, OpenCode Web…)
+// @updateURL    https://raw.githubusercontent.com/Azumizeus/PromptDeck/master/agent-skills/interface/mega-pack-panel-full.user.js
+// @downloadURL  https://raw.githubusercontent.com/Azumizeus/PromptDeck/master/agent-skills/interface/mega-pack-panel-full.user.js
 // @author       MEGA PACK
 // @match        *://*/*
 // @grant        GM_xmlhttpRequest
@@ -87,6 +89,53 @@ window.MG_TEAMS = MG_TEAMS; // combos de personas réutilisables (⚡ panel)
       ontimeout: function () { cb({ error: 'Délai dépassé (60 s)' }); },
     });
   }
+  // ── Mises à jour : version.json distant + menu Tampermonkey + badge ● ────────
+  const UPD_URL = 'https://raw.githubusercontent.com/Azumizeus/PromptDeck/master/agent-skills/interface/panel-version.json';
+  const INSTALL_URL = 'https://github.com/Azumizeus/PromptDeck/raw/master/agent-skills/interface/mega-pack-panel-full.user.js';
+  function updOpen() { try { location.href = INSTALL_URL; } catch (e) {} }
+  function updFetch(cb) {
+    if (typeof GM_xmlhttpRequest !== 'function') {
+      try { fetch(UPD_URL, { cache: 'no-store' }).then(function (r) { return r.json(); }).then(function (j) { cb(null, j); }).catch(function (e) { cb(e); }); }
+      catch (e) { cb(e); }
+      return;
+    }
+    GM_xmlhttpRequest({ method: 'GET', url: UPD_URL, timeout: 15000,
+      onload: function (r) { try { cb(null, JSON.parse(r.responseText)); } catch (e) { cb(e); } },
+      onerror: function () { cb(new Error('réseau')); }, ontimeout: function () { cb(new Error('timeout')); } });
+  }
+  function updShowBadge() {
+    if (!store.get('upd.available', false)) return;
+    const lx = panel.querySelector('#mgp-macbar .lx');
+    if (lx && !lx.querySelector('.upd')) {
+      const b = document.createElement('button');
+      b.className = 'upd'; b.textContent = '↑'; b.title = 'Nouvelle version du panneau — cliquer pour installer';
+      b.onclick = updOpen;
+      lx.insertBefore(b, lx.firstChild);
+    }
+  }
+  function updCheck(silent) {
+    updFetch(function (err, j) {
+      if (err || !j || !j.version) {
+        if (!silent) alert('MEGA PACK — mises à jour\n\nImpossible de vérifier (' + (err && err.message || 'réponse invalide') + ').\nVersion installée : ' + V);
+        return;
+      }
+      const newer = String(j.version) !== V;
+      store.set('upd.available', newer);
+      if (newer) updShowBadge();
+      if (!silent) {
+        const notes = j.notes ? ('\n\nNotes : ' + j.notes) : '';
+        alert('MEGA PACK — mises à jour\n\nInstallée : ' + V + '\nDisponible : ' + j.version + (newer ? notes : '\n\n✅ Vous êtes à jour.')
+          + '\n\n' + (newer ? 'Installer la nouvelle version ?' : ''));
+        if (newer && confirm('Ouvrir la page d\'installation ?')) updOpen();
+      }
+    });
+  }
+  if (typeof GM_registerMenuCommand === 'function') {
+    GM_registerMenuCommand('⚡ Vérifier les mises à jour', function () { updCheck(false); });
+    GM_registerMenuCommand('⚡ Installer la dernière version', updOpen);
+  }
+  setTimeout(function () { updCheck(true); }, 6000);
+
   let LANG = store.get('lang', 'fr');
 
   const I18N = {
@@ -387,7 +436,9 @@ window.MG_TEAMS = MG_TEAMS; // combos de personas réutilisables (⚡ panel)
   .l-close{background:#ff5f57}.l-min{background:#febc2e}.l-max{background:#28c840}
   #mgp-macbar .ttl{flex:1;text-align:center;font:600 12px/1 -apple-system,sans-serif;color:#9298a9;
     white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  #mgp-macbar .lx{display:flex;gap:6px;flex:none}
+  #mgp-macbar .lx{display:flex;gap:6px;flex:none;align-items:center}
+  #mgp-macbar .lx .upd{width:11px;height:11px;border-radius:50%;background:#0a0d12;border:1px solid #9945ff;
+    color:#14f195;font:700 9px/9px -apple-system,sans-serif;text-align:center;cursor:pointer;padding:0}
   #mgp-macbar .lx button{border:1px solid #31343f;background:none;color:#a8adbd;cursor:pointer;
     font:600 10.5px/1 -apple-system,sans-serif;padding:4px 9px;border-radius:99px}
   #mgp-macbar .lx button:hover{border-color:#9945ff;color:#eef0f6}
@@ -421,6 +472,7 @@ window.MG_TEAMS = MG_TEAMS; // combos de personas réutilisables (⚡ panel)
   #mgp-panel.light{background:#f6f7fd;border-color:#dfe4f3;color:#131a2e}
   #mgp-panel.light #mgp-macbar{background:linear-gradient(#ffffff,#f0f1f9);border-bottom-color:#dfe4f3}
   #mgp-panel.light #mgp-macbar .ttl{color:#5d6885}
+  #mgp-panel.light #mgp-macbar .lx .upd{background:#f3f5fb;border-color:#9945ff;color:#0b8457}
   #mgp-panel.light #mgp-macbar .lx button{border-color:#c5cfeb;color:#5d6885}
   #mgp-panel.light #mgp-macbar .lx button:hover{border-color:#9945ff;color:#131a2e}
   #mgp-panel.light #mgp-head{border-bottom-color:#dfe4f3}
@@ -572,8 +624,8 @@ window.MG_TEAMS = MG_TEAMS; // combos de personas réutilisables (⚡ panel)
       '<button class="l l-close" title="' + (LANG === 'fr' ? 'Masquer le panneau (⚡ pour rouvrir)' : 'Hide panel (⚡ to reopen)') + '"></button>' +
       '<button class="l l-min" title="' + (LANG === 'fr' ? 'Masquer le panneau' : 'Hide panel') + '"></button>' +
       '<button class="l l-max" title="' + (LANG === 'fr' ? 'Taille suivante (S/M/L/XL)' : 'Next size (S/M/L/XL)') + '"></button>' +
-      '</span><span class="ttl">⚡ MEGA PACK — Édition Luxe</span>' +
-      '<span class="lx"><button id="mgp-tourbtn" title="' + T().tourTitle + '">🎓</button>' +
+      '</span><span class="ttl">⚡ MEGA PACK — Édition Luxe</span><span class="lx">' +
+      '<button id="mgp-tourbtn" title="' + T().tourTitle + '">🎓</button>' +
       '<button id="mgp-set" title="' + T().settingsTitle + '">' + T().settings + '</button>' +
       '<button id="mgp-newp" title="' + T().newpTitle + '">' + T().newp + '</button>' +
       '<button id="mgp-lang">' + LANG.toUpperCase() + '</button></span></div>' +
@@ -1097,7 +1149,7 @@ window.MG_TEAMS = MG_TEAMS; // combos de personas réutilisables (⚡ panel)
   function tourSteps() {
     const fr = LANG === 'fr';
     return [
-      { title: fr ? '⚡ Bienvenue !' : '⚡ Welcome!', desc: fr ? '326 experts prêts à l\'emploi : 136 skills 🛠 et 190 agents 👤. Tape quelques lettres : la liste filtre instantanément.' : '323 ready-to-use experts: 136 skills 🛠 and 190 agents 👤. Type a few letters: the list filters instantly.', help: fr ? '💡 ↑↓ naviguent, ⏎ injecte dans la conversation.' : '💡 ↑↓ navigate, ⏎ injects into the conversation.', target: null },
+      { title: fr ? '⚡ Bienvenue !' : '⚡ Welcome!', desc: (function () { var c = cat(); return fr ? (c.skills.length + c.agents.length) + ' experts prêts à l\'emploi : ' + c.skills.length + ' skills 🛠 et ' + c.agents.length + ' agents 👤. Tape quelques lettres : la liste filtre instantanément.' : (c.skills.length + c.agents.length) + ' ready-to-use experts: ' + c.skills.length + ' skills 🛠 and ' + c.agents.length + ' agents 👤. Type a few letters: the list filters instantly.'; })(), help: fr ? '💡 ↑↓ naviguent, ⏎ injecte dans la conversation.' : '💡 ↑↓ navigate, ⏎ injects into the conversation.', target: null },
       { title: fr ? '🗂 Les onglets' : '🗂 Tabs', desc: fr ? 'Tout, Skills, Agents, 🕸 Équipes, ✍️ Perso, ★ Favoris : chaque clic filtre le catalogue.' : 'All, Skills, Agents, 🕸 Teams, ✍️ Custom, ★ Favorites: each click filters the catalog.', help: fr ? '💡 ⌘-clic sélectionne plusieurs experts pour les composer ensemble (⌥⏎).' : '💡 ⌘-click selects several experts to compose them together (⌥⏎).', target: 'mgp-tabs' },
       { title: fr ? '⌨ Le LLM par défaut' : '⌨ The default LLM', desc: fr ? 'En bas, le bouton « ⌨ LLM » choisit la destination par défaut : Claude, ChatGPT, Perplexity… (règlable aussi dans ⚙).' : 'At the bottom, the « ⌨ LLM » button picks the default destination: Claude, ChatGPT, Perplexity… (also in ⚙).', help: fr ? '💡 ⌘⏎ envoie vers ce LLM · ⇧⏎ force ChatGPT.' : '💡 ⌘⏎ sends there · ⇧⏎ forces ChatGPT.', target: 'mgp-foot' },
       { title: fr ? '🖱 Le clic droit' : '🖱 Right-click', desc: fr ? 'Clic droit sur un expert : Envoyer à (tes destinations ⚙), ⧉ copier, ★ favori, presse-papiers.' : 'Right-click an expert: Send to (your ⚙ destinations), ⧉ copy, ★ favorite, clipboard.', help: fr ? '💡 Les destinations se choisissent dans ⚙ Réglages.' : '💡 Pick destinations in ⚙ Settings.', target: 'mgp-list' },
@@ -1234,4 +1286,5 @@ window.MG_TEAMS = MG_TEAMS; // combos de personas réutilisables (⚡ panel)
   document.body.appendChild(tour);
   applyTheme();
   applyLang();
+  updShowBadge();
 })();
