@@ -1067,6 +1067,14 @@ function buildMenuTemplate() {
       }]),
     },
     {
+      // 📈 Disponibilité des services surveillés par le dashboard :3114
+      // (uptime 7 j, sonde en fond 15 s côté proxy). Le sous-menu est
+      // reconstruit à chaque ouverture du menu → toujours à jour avec le
+      // poll 60 s de refreshAgentsBadge (même endpoint /api/uptime).
+      label: LANG === 'fr' ? '📈 Disponibilité (7 j)' : '📈 Uptime (7 d)',
+      submenu: uptimeSubmenuItems(),
+    },
+    {
       label: LANG === 'fr' ? '💬 Mini-chat IA' : '💬 Mini AI chat',
       click: () => {
         createPanel();
@@ -1262,6 +1270,15 @@ ipcMain.handle('local-key-resync', async (e, { provider } = {}) => {
 // 1 service down ou dashboard injoignable → 🔴 affiché à côté de l'icône du tray
 // (tray.setTitle — natif macOS, l'icône template reste inchangée).
 let agentsBadge = { down: 0, checkedAt: 0 };
+// 📈 Dernier rapport /api/uptime du dashboard :3114 ({services, labels, overall})
+// — rempli par refreshAgentsBadge (polling 60 s, même endpoint), lu par le
+// sous-menu « 📈 Disponibilité » du tray.
+let uptimeCache = null;
+// Référence au Menu tray hissée au niveau module : buildMenuTemplate (boutons
+// « Re-sonder ») et le sous-menu 📈 doivent pouvoir reconstruire/rouvrir le
+// menu — une déclaration locale à createTray les faisait lever une
+// ReferenceError (avalée par le try/catch → bouton inerte).
+let trayMenu = null;
 async function agentsDownCount() {
   try {
     const res = await fetch('http://127.0.0.1:3114/api/health', { signal: AbortSignal.timeout(6000) });
@@ -1309,16 +1326,45 @@ async function refreshAgentsBadge() {
   agentsBadge.checkedAt = Date.now();
   // 📈 Disponibilité dashboard :3114 (uptime 7 j) — le service le plus
   // fragile affiché dans le tooltip du tray (les tests destructifs du jour
-  // expliquent les % bas ; ça se normalise).
+  // expliquent les % bas ; ça se normalise). Remplit aussi uptimeCache,
+  // lu par le sous-menu « 📈 Disponibilité » du menu tray.
+  await fetchUptime();
+  updateTrayIcon();
+}
+async function fetchUptime() {
   try {
     const r = await fetch('http://127.0.0.1:3114/api/uptime', { signal: AbortSignal.timeout(5000) });
     const j = await r.json();
-    const vals = (j.services || []).map((k) => j.overall && j.overall[k]).filter((v) => typeof v === 'number');
+    uptimeCache = { services: j.services || [], labels: j.labels || [], overall: j.overall || {} };
+    const vals = uptimeCache.services.map((k) => uptimeCache.overall[k]).filter((v) => typeof v === 'number');
     agentsBadge.lowestUptime = vals.length ? Math.min(...vals) : null;
     agentsBadge.lowestLabel = vals.length
-      ? (j.services[vals.indexOf(Math.min(...vals))] || '') : null;
-  } catch (e) { agentsBadge.lowestUptime = null; agentsBadge.lowestLabel = null; }
-  updateTrayIcon();
+      ? (uptimeCache.services[vals.indexOf(Math.min(...vals))] || '') : null;
+  } catch (e) { uptimeCache = null; agentsBadge.lowestUptime = null; agentsBadge.lowestLabel = null; }
+}
+// 📈 Items du sous-menu « Disponibilité (7 j) » : un item par service du
+// dashboard (8 clés de la sonde :3114), pastille ✓ (≥ 99,5 %) / 🟠 (≥ 95 %) /
+// 🔴 en dessous. Items informatifs ; « Re-sonder » rafraîchit le cache puis
+// rouvre le menu à jour (trayMenu est une variable module).
+const UPTIME_WARN_PCT = 95;
+function uptimeSubmenuItems() {
+  if (!uptimeCache || !Array.isArray(uptimeCache.services) || !uptimeCache.services.length) {
+    return [{ label: LANG === 'fr' ? '· dashboard :3114 injoignable' : '· dashboard :3114 unreachable', enabled: false }];
+  }
+  return uptimeCache.services.map((k, i) => {
+    const pct = uptimeCache.overall ? uptimeCache.overall[k] : null;
+    const label = (uptimeCache.labels && uptimeCache.labels[i]) || k;
+    const mark = pct == null ? '·' : pct >= 99.5 ? '✓' : pct >= UPTIME_WARN_PCT ? '🟠' : '🔴';
+    return { label: mark + ' ' + label + ' — ' + (pct == null ? '?' : pct + '%') + ' (7 j)', enabled: false };
+  }).concat([{
+    label: LANG === 'fr' ? '🔄 Re-sonder la dispo' : '🔄 Re-probe uptime',
+    click: () => {
+      (async () => {
+        await fetchUptime();
+        try { tray.popUpContextMenu(trayMenu); } catch (e2) { /* le menu se rouvre à jour */ }
+      })();
+    },
+  }]);
 }
 // 🌐 Routeurs locaux (OmniRoute :20128, FreeLLM :8000) : un 401 = service VIVANT
 // (il répond et exige la clé) — seul un échec réseau (status 0 / timeout) est un down.
@@ -1731,7 +1777,9 @@ function captureShots() {
 
 function createTray() {
   traceBoot('createTray: entree');
-  let trayMenu = null; // Menu conservé tant que le menu natif est affiché (voir commentaire ci-dessus)
+  // trayMenu : variable MODULE (déclarée au-dessus) — conservée tant que le
+  // menu natif est affiché (voir commentaire ci-dessous) et accessible depuis
+  // buildMenuTemplate pour rouvrir le menu à jour après un re-sondage.
   tray = new Tray(iconImage());
   traceBoot('createTray: Tray construit, ecrans=' + (function () { try { return screen.getAllDisplays().length; } catch (e) { return '?'; } })());
   tray.setToolTip('MEGA PACK — Skills & Agents');
