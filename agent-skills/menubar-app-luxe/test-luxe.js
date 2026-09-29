@@ -1344,6 +1344,16 @@ console.log('\n── 40. GOLDEN cadenas Atelier + miroir .md à chaud ──');
   check(usSrc.includes("+ LANG.toUpperCase() + '</button></span></div>'"), 'macbar : span .lx refermé juste après le bouton FR (mgp-lang)');
   check(/#mgp-macbar \.lx\{display:flex/.test(usSrc), 'macbar : CSS #mgp-macbar .lx (rangée flex) présent');
   check(/#mgp-macbar \.lx button\{/.test(usSrc), 'macbar : CSS #mgp-macbar .lx button (style sombre) présent');
+
+  // h) routeurs locaux dans le tray : OmniRoute/FreeLLM, 401 = vivant, re-sonde un clic
+  check(/const LOCAL_ROUTERS = \[/.test(mainSrcM), 'routeurs : table LOCAL_ROUTERS (OmniRoute + FreeLLM)');
+  check(/127\.0\.0\.1:20128\/models/.test(mainSrcM), 'routeurs : OmniRoute sondé sur :20128/models');
+  check(/127\.0\.0\.1:8000\/v1\/models/.test(mainSrcM), 'routeurs : FreeLLM sondé sur :8000/v1/models');
+  check(/function probeLocalRouter/.test(mainSrcM) && /return \{ ok: true, status: res\.status, latency/.test(mainSrcM), 'routeurs : 200 comme 401/403 = vivant (seul un échec réseau est un down)');
+  check(/setInterval\(refreshRouterStatus, 90000\)/.test(mainSrcM), 'routeurs : re-sonde automatique toutes les 90 s');
+  check(/'🌐 Routeurs locaux'/.test(mainSrcM), 'routeurs : item menu tray avec état ✓/✗');
+  check(/'🔄 Re-sonder les routeurs'/.test(mainSrcM) && /await refreshRouterStatus\(\);[\s\S]{0,80}popUpContextMenu/.test(mainSrcM), 'routeurs : re-sonde un clic → menu rouvert à jour');
+  check(/rd\.length > 0 \? ' 🟠'/.test(mainSrcM), 'routeurs : pastille 🟠 tray quand un routeur est down');
 }
 
 console.log('');

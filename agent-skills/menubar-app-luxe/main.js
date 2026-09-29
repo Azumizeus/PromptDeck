@@ -1048,6 +1048,25 @@ function buildMenuTemplate() {
         }])),
     },
     {
+      // 🌐 Routeurs locaux : OmniRoute/FreeLLM répondent 401 quand ils sont vivants
+      // (clé requise) — seul un échec réseau est un down. « Re-sonder » relance et rouvre.
+      label: LANG === 'fr' ? '🌐 Routeurs locaux' : '🌐 Local routers',
+      submenu: LOCAL_ROUTERS.map((r) => {
+        const s = routerStatus[r.id];
+        const mark = !s ? '·' : s.ok ? '✓' : '✗';
+        const extra = !s ? '' : s.ok ? ' — ' + (s.status === 401 ? '401 (clé requise, vivant)' : 'HTTP ' + s.status) + ' · ' + s.latency + ' ms' : ' — HTTP réseau (down)';
+        return { label: mark + ' ' + r.label + extra, enabled: false };
+      }).concat([{
+        label: LANG === 'fr' ? '🔄 Re-sonder les routeurs' : '🔄 Re-probe routers',
+        click: () => {
+          (async () => {
+            await refreshRouterStatus();
+            try { tray.popUpContextMenu(trayMenu); } catch (e2) { /* le menu se rouvre à jour */ }
+          })();
+        },
+      }]),
+    },
+    {
       label: LANG === 'fr' ? '💬 Mini-chat IA' : '💬 Mini AI chat',
       click: () => {
         createPanel();
@@ -1290,6 +1309,31 @@ async function refreshAgentsBadge() {
   agentsBadge.checkedAt = Date.now();
   updateTrayIcon();
 }
+// 🌐 Routeurs locaux (OmniRoute :20128, FreeLLM :8000) : un 401 = service VIVANT
+// (il répond et exige la clé) — seul un échec réseau (status 0 / timeout) est un down.
+// C'est exactement le verdict de la sonde retry (section e) appliqué à nos deux routeurs.
+const LOCAL_ROUTERS = [
+  { id: 'omniroute', label: 'OmniRoute', url: 'http://127.0.0.1:20128/models' },
+  { id: 'freellm', label: 'FreeLLM', url: 'http://127.0.0.1:8000/v1/models' },
+];
+let routerStatus = {}; // id → { ok, status, latency } | undefined = pas encore sondé
+async function probeLocalRouter(r) {
+  const t0 = Date.now();
+  try {
+    const res = await fetch(r.url, { signal: AbortSignal.timeout(8000) });
+    // 200 (sans clé) comme 401/403 (clé requise) = le service répond → OK.
+    return { ok: true, status: res.status, latency: Date.now() - t0 };
+  } catch (e) {
+    return { ok: false, status: 0, latency: Date.now() - t0 }; // HTTP réseau = down
+  }
+}
+async function refreshRouterStatus() {
+  for (const r of LOCAL_ROUTERS) routerStatus[r.id] = await probeLocalRouter(r);
+  updateTrayIcon();
+}
+function routersDown() {
+  return LOCAL_ROUTERS.filter((r) => routerStatus[r.id] && routerStatus[r.id].ok === false);
+}
 function updateTrayIcon() {
   // Badge ⚠️ : l'icône template macOS ne supporte pas l'overlay natif sans canvas — le
   // signalement passe par le tooltip (survol immédiat) et l'item 🛡 du menu devient « ⚠️ n ».
@@ -1297,8 +1341,12 @@ function updateTrayIcon() {
   try {
     const n = recentIncidents();
     const a = agentsBadge.down || 0;
-    tray.setTitle(a > 0 ? ' 🔴' : ''); // pastille rouge = un agent est down
-    tray.setToolTip((a > 0 ? '🔴 ' + a + ' agent(s) down (agentmemory/browser-use) — dashboard :3114 · ' : '') +
+    const rd = routersDown();
+    tray.setTitle((a > 0 ? ' 🔴' : '') + (rd.length > 0 ? ' 🟠' : '')); // 🔴 agent down · 🟠 routeur local down
+    tray.setToolTip((a > 0 ? '🔴 ' + a + ' agent(s) down — dashboard :3114 · ' : '') +
+      (rd.length > 0
+        ? '🟠 ' + rd.map((r) => r.label + ' down (HTTP réseau)').join(' · ') + ' · '
+        : '') +
       (n > 0
         ? 'MEGA PACK — Skills & Agents · ⚠️ ' + n + ' incident(s) récent(s) — voir 🛡 Journal'
         : 'MEGA PACK — Skills & Agents'));
@@ -1725,6 +1773,9 @@ if (!CAPTURE_MODE && !app.requestSingleInstanceLock()) {
         setInterval(refreshAgentsBadge, 60000);
         setTimeout(relayDashboardHealth, 20000);
         setInterval(relayDashboardHealth, 90000); // le proxy :3114 sonde déjà toutes les 15 s
+        // 🌐 Routeurs locaux : 1er sondage 20 s après le boot, puis toutes les 90 s
+        setTimeout(refreshRouterStatus, 20000);
+        setInterval(refreshRouterStatus, 90000);
       } catch (err) { /* jamais bloquant */ }
       // 🪞 Miroir MEGA PROMPT : régénère l'arborescence .md (skills/, agents/, perso/, equipes/)
       // en tâche de fond au boot — la fenêtre n'attend pas (~400 fichiers, quelques secondes)
