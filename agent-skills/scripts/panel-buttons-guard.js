@@ -96,6 +96,23 @@ function main() {
 
   const golden = loadGolden();
   const problems = [];
+  // 🚫 anti-doublon : un id de bouton NE DOIT apparaître QU'UNE fois par source
+  // (bug 2.19.3 : deux boutons 📌 id="pinb" — le second, mort, polluait l'UI).
+  for (const src of SOURCES) {
+    const abs = path.join(ROOT, src.file);
+    if (!fs.existsSync(abs)) continue;
+    const text = fs.readFileSync(abs, 'utf8');
+    const seen = new Map(); // id → 1re occurrence
+    const rx = /<(?:button|input|select|textarea|a)\b[^>]*\bid="([^"]+)"/g;
+    for (const m of text.matchAll(rx)) {
+      const id = m[1];
+      if (id.includes('${')) continue; // ids générés par item (corbeille, listes) : légitimes en template
+      if (seen.has(id)) {
+        const first = text.slice(0, m.index).split('\n').length;
+        problems.push({ app: src.file.split('/')[0], id, control: `${id} (doublon — 1re occurrence ligne ${seen.get(id)}, doublon ligne ${text.slice(0, m.index).split('\n').length})`, soft: false, dup: true });
+      } else seen.set(id, text.slice(0, m.index).split('\n').length);
+    }
+  }
   for (const [app, controls] of Object.entries(golden.apps)) {
     const cur = current[app] || new Set();
     for (const c of controls) {
@@ -119,23 +136,25 @@ function main() {
 
   if (!hard.length) {
     const total = Object.values(current).reduce((a, s) => a + s.size, 0);
-    console.log(`✅ garde-fou boutons : aucun retrait détecté (${total} contrôles inventoriés)`);
+    console.log(`✅ garde-fou boutons : aucun retrait détecté (${total} contrôles inventoriés, zéro doublon d'id)`);
     return;
   }
 
   const msg = commitMessage();
   const blocked = [], allowed = [];
   for (const p of hard) {
+    if (p.dup) { blocked.push(p); continue; } // un doublon ne se négocie pas via buttons-removed
     const why = removalAllowed(p.id, msg);
     (why ? allowed : blocked).push({ ...p, why });
   }
   for (const a of allowed) console.log(`↩️  retrait toléré ${a.app}/${a.id} (${a.why})`);
 
   if (blocked.length) {
-    console.error(`\n🛡 RETRAIT(S) DE BOUTON SANS MENTION EXPLICITE :`);
+    console.error(`\n🛡 RETRAIT(S) DE BOUTON SANS MENTION EXPLICITE OU DOUBLON(S) D'ID :`);
     for (const b of blocked) console.error(`   - ${b.app} : ${b.control}`);
-    console.error(`\nSoit restaure ces contrôles, soit mentionne-les explicitement dans le`);
-    console.error(`message de commit (l'id du contrôle), soit ajoute une ligne :`);
+    console.error(`\nSoit restaure ces contrôles, soit corrige le doublon (un id = un bouton),`);
+    console.error(`soit mentionne-les explicitement dans le message de commit (l'id),`);
+    console.error(`soit ajoute une ligne (retraits uniquement, pas les doublons) :`);
     console.error(`   buttons-removed: ${blocked.map((b) => b.id).join(', ')}`);
     process.exit(1);
   }
