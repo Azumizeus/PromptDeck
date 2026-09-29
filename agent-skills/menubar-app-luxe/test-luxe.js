@@ -1322,6 +1322,10 @@ console.log('\n── 40. GOLDEN cadenas Atelier + miroir .md à chaud ──');
   check(preSrcF.includes("localKeyResync: (provider) => ipcRenderer.invoke('local-key-resync'"), 'clés : pont preload localKeyResync');
   const setSrcF = fs.readFileSync(path.join(__dirname, 'settings.js'), 'utf8');
   check(setSrcF.includes("querySelectorAll('.kresync')"), 'clés : bouton 🔧 Resynchroniser dans le panneau Santé');
+  // anti-doublon : le bouton 📌 doit exister UNE seule fois (bug 2.19.3 : header + footer)
+  const renSrcPin = fs.readFileSync(path.join(__dirname, 'renderer.js'), 'utf8');
+  const pinCount = (renSrcPin.match(/id="pinb"/g) || []).length;
+  check(pinCount === 1, `bouton 📌 unique dans le panneau (trouvé : ${pinCount})`);
   check(setSrcF.includes('window.mgp.localKeyResync(b.dataset.p)'), 'clés : clic bouton → IPC local-key-resync');
   check(setSrcF.includes('refreshHealth(true)'), 'clés : re-sonde sans cache après resync');
 }

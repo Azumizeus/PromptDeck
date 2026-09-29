@@ -563,7 +563,6 @@ APP_PARENT.insertAdjacentHTML('afterbegin', `
     <span class="helpw"><button id="hatb" class="helpb" data-help="helpAtb" aria-label="${T.helpAtb}">?</button></span>
     <button id="trb" title="${T.trashT}" aria-haspopup="dialog">${T.trashBtn}</button>
     <span class="helpw"><button id="htrb" class="helpb" data-help="helpTrb" aria-label="${T.helpTrb}">?</button></span>
-    <button id="pinb" title="${T.pinT}" aria-pressed="false">📌</button>
     <span class="helpw"><button id="hpin" class="helpb" data-help="helpPin" aria-label="${T.helpPin}">?</button></span>
     <button id="rtb" title="${LANG === 'fr' ? '🧭 Router la demande tapée (jev-decision-router) : propose le skill ou l\'agent gagnant avec sa confiance' : '🧭 Route the typed request (jev-decision-router): suggests the winning skill or agent with its confidence'}">🧭</button>
     <span class="helpw"><button id="hrt" class="helpb" data-help="helpRtb" aria-label="${LANG === 'fr' ? 'Aide routeur' : 'Router help'}">?</button></span>
