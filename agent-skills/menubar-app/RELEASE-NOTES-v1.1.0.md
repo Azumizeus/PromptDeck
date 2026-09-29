@@ -51,11 +51,11 @@ Audit anti-fuite effectué sur : stdin, logs, historique shell, `ps`, fichiers t
 
 | Fichier | Taille | SHA-256 |
 |---|---|---|
-| `MEGA PACK-universal.dmg` (Intel + Apple Silicon) | 177M | `88d29b45a3c5ba7d5f4935501f834bca63950e359a27d0a6b287325dc58c60cc` |
-| `MEGA PACK-darwin-x64.dmg` (Intel) |  99M | `dc997e8c6102b74ececd40b7be27a18e9772fa32835a2ab034187cf4ed6b3380` |
-| `MEGA PACK-darwin-arm64.dmg` (Apple Silicon) |  92M | `34309738998e671f95cfce6632b2e1bc3690f15d026befd33e548f15b161cfcc` |
+| `MEGA PACK-universal.dmg` (Intel + Apple Silicon) | 177M | `3f3ad0b75d85f1692e1fccda23df39fdbe99e87a3ba3a7b7605e2c66b642fe37` |
+| `MEGA PACK-darwin-x64.dmg` (Intel) |  98M | `770e9b7f2f5a3e93c8623b8a0a973179c5a8834b997c1189b4d390fefa939b6c` |
+| `MEGA PACK-darwin-arm64.dmg` (Apple Silicon) |  92M | `37c32caeb42d491254b7f88f97597407b75b07dd22419f036b0e0d08b53e2625` |
 
-> Reconstruits le 27/09 (soir) : app Luxe 2.19.1 embarquée (resize IPC, épingler, feux, LLM scrollable) + LISEZMOI bilingue FR/EN + doc ⌘⌥/ synchronisée. Repack du 27/09 (fin) via `repack-dmg.sh` (LISEZMOI + MODE-EMPLOI mis à jour sans rebuild, apps inchangées). — release.sh du 28/09 (ponts show/miroir + jev-router 🧭 + retrait canvas, build 2.19.1 intégral) — release.sh du 28/09 — release.sh du 28/09 — release.sh du 28/09
+> Reconstruits le 27/09 (soir) : app Luxe 2.19.1 embarquée (resize IPC, épingler, feux, LLM scrollable) + LISEZMOI bilingue FR/EN + doc ⌘⌥/ synchronisée. Repack du 27/09 (fin) via `repack-dmg.sh` (LISEZMOI + MODE-EMPLOI mis à jour sans rebuild, apps inchangées). — release.sh du 28/09 (ponts show/miroir + jev-router 🧭 + retrait canvas, build 2.19.1 intégral) — release.sh du 28/09 — release.sh du 28/09 — release.sh du 28/09 — release.sh du 29/09
 
 Installation : glisser **MEGA PACK.app** sur **Applications**, puis clic droit → Ouvrir (app non notarisée). Vérifier un DMG : `shasum -a 256 "MEGA PACK-universal.dmg"`.
 
