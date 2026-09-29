@@ -1,6 +1,6 @@
 # 📇 AGENTS-CATALOGUE — Les 231 agents spécialistes
 
-> **Généré le :** 27 septembre 2026 · **Total :** 231 agents
+> **Généré le :** 30 septembre 2026 · **Total :** 231 agents
 > Source : `agent-skills/agents/` — rôle = première phrase de la `description` de chaque agent
 > 🇫🇷 Colonne Rôle traduite en français (`scripts/agents-roles-fr.json`)
 > 💡 **Pour savoir *lequel* choisir et *quand***, voir [`PROTOCOL-UTILISATION.md`](./PROTOCOL-UTILISATION.md) et [`MODE-EMPLOI.md`](./MODE-EMPLOI.md).
@@ -19,49 +19,49 @@ OpenCode : vérifié via `opencode agent list` → 231 agents + 2 built-in = 233
 
 | Agent | Rôle |
 |-------|------|
-| `agents-orchestrator` | Autonomous pipeline manager that orchestrates the entire development workflow. |
-| `blockchain-security-auditor` | Expert smart contract security auditor specializing in vulnerability detection, formal verification, exploit analysis, and comprehensive audit report writing for DeFi protocols and blockchain applications. |
+| `agents-orchestrator` | Gestionnaire de pipeline autonome qui orchestre l'ensemble du workflow de développement. |
+| `blockchain-security-auditor` | Auditeur de sécurité de smart contracts expert, spécialisé dans la détection de vulnérabilités, la vérification formelle, l'analyse d'exploits et la rédaction de rapports d'audit complets pour les protocoles DeFi et applications blockchain. |
 | `code-reviewer` | Relecteur de code senior qui évalue les modifications selon cinq dimensions — correction, lisibilité, architecture, sécurité et performance. |
-| `design-brand-guardian` | Expert brand strategist and guardian specializing in brand identity development, consistency maintenance, and strategic brand positioning. |
-| `design-ui-designer` | Expert UI designer specializing in visual design systems, component libraries, and pixel-perfect interface creation. |
-| `design-ux-architect` | Technical architecture and UX specialist who provides developers with solid foundations, CSS systems, and clear implementation guidance. |
-| `engineering-backend-architect` | Senior backend architect specializing in scalable system design, database architecture, API development, and cloud infrastructure. |
-| `engineering-code-reviewer` | Expert code reviewer who provides constructive, actionable feedback focused on correctness, maintainability, security, and performance — not style preferences. |
-| `engineering-codebase-onboarding-engineer` | Expert developer onboarding specialist who helps new engineers understand unfamiliar codebases fast by reading source code, tracing code paths, and stating only facts grounded in the code. |
-| `engineering-devops-automator` | Expert DevOps engineer specializing in infrastructure automation, CI/CD pipeline development, and cloud operations. |
-| `engineering-frontend-developer` | Expert frontend developer specializing in modern web technologies, React/Vue/Angular frameworks, UI implementation, and performance optimization. |
-| `engineering-git-workflow-master` | Expert in Git workflows, branching strategies, and version control best practices including conventional commits, rebasing, worktrees, and CI-friendly branch management. |
-| `engineering-minimal-change-engineer` | Engineering specialist focused on minimum-viable diffs — fixes only what was asked, refuses scope creep, prefers three similar lines over a premature abstraction. |
-| `engineering-mobile-app-builder` | Specialized mobile application developer with expertise in native iOS/Android development and cross-platform frameworks. |
-| `engineering-rapid-prototyper` | Specialized in ultra-fast proof-of-concept development and MVP creation using efficient tools and frameworks. |
-| `engineering-security-engineer` | Expert application security engineer specializing in threat modeling, vulnerability assessment, secure code review, security architecture design, and incident response for modern web, API, and cloud-native applications. |
-| `engineering-software-architect` | Expert software architect specializing in system design, domain-driven design, architectural patterns, and technical decision-making for scalable, maintainable systems. |
-| `engineering-technical-writer` | Expert technical writer specializing in developer documentation, API references, README files, and tutorials. |
-| `finance-bookkeeper-controller` | Expert bookkeeper and controller specializing in day-to-day accounting operations, financial reconciliations, month-end close processes, and internal controls. |
-| `finance-tax-strategist` | Expert tax strategist specializing in tax optimization, multi-jurisdictional compliance, transfer pricing, and strategic tax planning. |
-| `game-designer` | Systems and mechanics architect - Masters GDD authorship, player psychology, economy balancing, and gameplay loop design across all engines and genres. |
-| `godot-gameplay-scripter` | Composition and signal integrity specialist - Masters GDScript 2.0, C# integration, node-based architecture, and type-safe signal design for Godot 4 projects. |
-| `godot-multiplayer-engineer` | Godot 4 networking specialist - Masters the MultiplayerAPI, scene replication, ENet/WebRTC transport, RPCs, and authority models for real-time multiplayer games. |
-| `godot-shader-developer` | Godot 4 visual effects specialist - Masters the Godot Shading Language (GLSL-like), VisualShader editor, CanvasItem and Spatial shaders, post-processing, and performance optimization for 2D/3D effects. |
-| `legal-document-review` | Comprehensive legal document review specialist for contracts, litigation documents, and real estate agreements — summarizing documents, flagging risk clauses, comparing contract versions, and checking compliance across any law firm size or practice area. |
-| `level-designer` | Spatial storytelling and flow specialist - Masters layout theory, pacing architecture, encounter design, and environmental narrative across all game engines. |
-| `marketing-app-store-optimizer` | Expert app store marketing specialist focused on App Store Optimization (ASO), conversion rate optimization, and app discoverability. |
-| `marketing-content-creator` | Expert content strategist and creator for multi-platform campaigns. |
-| `marketing-growth-hacker` | Expert growth strategist specializing in rapid user acquisition through data-driven experimentation. |
-| `marketing-twitter-engager` | Expert Twitter marketing specialist focused on real-time engagement, thought leadership building, and community-driven growth. |
-| `mica-compliance-specialist` | Spécialiste en régulation crypto européenne (Markets in Crypto-Assets Regulation). |
-| `narrative-designer` | Story systems and dialogue architect - Masters GDD-aligned narrative design, branching dialogue, lore architecture, and environmental storytelling across all game engines. |
-| `product-manager` | Holistic product leader who owns the full product lifecycle — from discovery and strategy through roadmap, stakeholder alignment, go-to-market, and outcome measurement. |
-| `product-sprint-prioritizer` | Expert product manager specializing in agile sprint planning, feature prioritization, and resource allocation. |
-| `project-manager-senior` | Converts specs to tasks and remembers previous projects. |
+| `design-brand-guardian` | Stratège de marque expert et gardien de l'identité, spécialisé dans le développement de l'identité de marque, le maintien de la cohérence et le positionnement stratégique de la marque. |
+| `design-ui-designer` | Designer UI expert, spécialisé dans les systèmes de design visuel, les bibliothèques de composants et la création d'interfaces au pixel près. Crée des interfaces belles, cohérentes et accessibles qui enrichissent l'UX et reflètent l'identité de marque. |
+| `design-ux-architect` | Spécialiste de l'architecture technique et de l'UX qui fournit aux développeurs des fondations solides, des systèmes CSS et des conseils d'implémentation clairs. |
+| `engineering-backend-architect` | Architecte backend senior, spécialisé dans la conception de systèmes scalables, l'architecture de bases de données, le développement d'API et l'infrastructure cloud. Construit des applications serveur et des microservices robustes, sécurisés et performants. |
+| `engineering-code-reviewer` | Relecteur de code expert qui fournit un feedback constructif et actionnable, centré sur la correction, la maintenabilité, la sécurité et la performance — pas sur les préférences de style. |
+| `engineering-codebase-onboarding-engineer` | Spécialiste de l'intégration des développeurs qui aide les nouveaux ingénieurs à comprendre rapidement une base de code inconnue en lisant le code source, en traçant les chemins d'exécution et en ne tenant que des faits appuyés sur le code. |
+| `engineering-devops-automator` | Ingénieur DevOps expert, spécialisé dans l'automatisation d'infrastructure, le développement de pipelines CI/CD et les opérations cloud. |
+| `engineering-frontend-developer` | Développeur frontend expert, spécialisé dans les technologies web modernes, les frameworks React/Vue/Angular, l'implémentation UI et l'optimisation des performances. |
+| `engineering-git-workflow-master` | Expert des workflows Git, des stratégies de branchement et des bonnes pratiques de gestion de versions : commits conventionnels, rebase, worktrees et gestion de branches compatible CI. |
+| `engineering-minimal-change-engineer` | Spécialiste du diff minimal — ne corrige que ce qui est demandé, refuse l'élargissement de périmètre, préfère trois lignes similaires à une abstraction prématurée. La discipline qui évite qu'un fix devienne une avalanche de refactoring. |
+| `engineering-mobile-app-builder` | Développeur mobile spécialisé, expert du développement natif iOS/Android et des frameworks multiplateformes. |
+| `engineering-rapid-prototyper` | Spécialisé dans le prototypage ultra-rapide et la création de MVP avec des outils et frameworks efficaces. |
+| `engineering-security-engineer` | Ingénieur sécurité applicative expert, spécialisé dans la modélisation des menaces, l'évaluation des vulnérabilités, la revue de code sécurisée, l'architecture sécurité et la réponse aux incidents pour applications web, API et cloud-native modernes. |
+| `engineering-software-architect` | Architecte logiciel expert, spécialisé dans la conception de systèmes, le domain-driven design, les patterns d'architecture et la prise de décision technique pour des systèmes scalables et maintenables. |
+| `engineering-technical-writer` | Rédacteur technique expert, spécialisé dans la documentation développeur, les références API, les README et les tutoriels. Transforme des concepts d'ingénierie complexes en documents clairs, exacts et engageants que les développeurs lisent vraiment. |
+| `finance-bookkeeper-controller` | Expert comptable et contrôleur de gestion, spécialisé dans la comptabilité quotidienne, les rapprochements financiers, les clôtures mensuelles et le contrôle interne. Garantit l'exactitude, l'exhaustivité et la ponctualité des enregistrements financiers, en conformité GAAP et prêt pour l'audit en permanence. |
+| `finance-tax-strategist` | Stratège fiscal expert, spécialisé dans l'optimisation fiscale, la conformité multi-juridictions, les prix de transfert et la planification fiscale stratégique. Navigue des codes fiscaux complexes pour minimiser la charge tout en assurant la pleine conformité réglementaire, du local à l'international. |
+| `game-designer` | Architecte de systèmes et de mécaniques — maîtrise la rédaction de GDD, la psychologie du joueur, l'équilibrage économique et la conception de boucles de gameplay sur tous les moteurs et genres. |
+| `godot-gameplay-scripter` | Spécialiste de la composition et de l'intégrité des signaux — maîtrise GDScript 2.0, l'intégration C#, l'architecture par nœuds et la conception de signaux typés pour les projets Godot 4. |
+| `godot-multiplayer-engineer` | Spécialiste du réseau Godot 4 — maîtrise la MultiplayerAPI, la réplication de scènes, le transport ENet/WebRTC, les RPC et les modèles d'autorité pour des jeux multijoueurs en temps réel. |
+| `godot-shader-developer` | Spécialiste des effets visuels Godot 4 — maîtrise le langage de shaders Godot (proche GLSL), l'éditeur VisualShader, les shaders CanvasItem et Spatial, le post-processing et l'optimisation des effets 2D/3D. |
+| `legal-document-review` | Spécialiste complet de la revue de documents juridiques pour contrats, pièces de contentieux et accords immobiliers — synthèse des documents, signalement des clauses à risque, comparaison de versions de contrats et vérification de conformité, quelle que soit la taille du cabinet ou le domaine de pratique. |
+| `level-designer` | Spécialiste du level design spatial et du flow — maîtrise la théorie des layouts, l'architecture du pacing, la conception d'encounters et la narration environnementale sur tous les moteurs de jeu. |
+| `marketing-app-store-optimizer` | Spécialiste marketing app store expert, focalisé sur l'App Store Optimization (ASO), l'optimisation du taux de conversion et la découvrabilité des applications. |
+| `marketing-content-creator` | Stratège et créateur de contenu expert pour des campagnes multiplateformes. Élabore des calendriers éditoriaux, rédige des textes percutants, gère le storytelling de marque et optimise l'engagement sur tous les canaux numériques. |
+| `marketing-growth-hacker` | Stratège croissance expert, spécialisé dans l'acquisition rapide d'utilisateurs par l'expérimentation pilotée par la donnée. Développe des boucles virales, optimise les tunnels de conversion et trouve des canaux de croissance scalables. |
+| `marketing-twitter-engager` | Spécialiste marketing Twitter (X) expert, focalisé sur l'engagement en temps réel, la construction d'autorité et la croissance communautaire. Bâtit l'autorité de marque par des conversations authentiques et des threads viraux. |
+| `mica-compliance-specialist` | Spécialiste en régulation crypto européenne (règlement Markets in Crypto-Assets). |
+| `narrative-designer` | Architecte de systèmes narratifs et de dialogues — maîtrise la conception narrative alignée GDD, les dialogues à embranchements, l'architecture du lore et le storytelling environnemental sur tous les moteurs de jeu. |
+| `product-manager` | Leader produit holistique qui pilote l'ensemble du cycle de vie produit — de la découverte et de la stratégie jusqu'à la roadmap, l'alignement des parties prenantes, le go-to-market et la mesure des résultats. |
+| `product-sprint-prioritizer` | Product manager expert, spécialisé dans la planification de sprints agiles, la priorisation des fonctionnalités et l'allocation des ressources. Maximise la vélocité de l'équipe et la valeur livrée grâce à des frameworks de priorisation fondés sur la donnée. |
+| `project-manager-senior` | Convertit les specs en tâches et se souvient des projets précédents. Privilégie le périmètre réaliste, pas de processus en arrière-plan, exigences exactes de la spec. |
 | `security-auditor` | Ingénieur sécurité axé sur la détection de vulnérabilités, la modélisation des menaces et les pratiques de codage sécurisées. |
-| `specialized-french-consulting-market` | Navigate the French ESN/SI freelance ecosystem — margin models, platform mechanics (Malt, collective.work), portage salarial, rate positioning, and payment cycle realities. |
-| `specialized-mcp-builder` | Expert Model Context Protocol developer who designs, builds, and tests MCP servers that extend AI agent capabilities with custom tools, resources, and prompts. |
-| `support-legal-compliance-checker` | Expert legal and compliance specialist ensuring business operations, data handling, and content creation comply with relevant laws, regulations, and industry standards across multiple jurisdictions. |
-| `technical-artist` | Art-to-engine pipeline specialist - Masters shaders, VFX systems, LOD pipelines, performance budgeting, and cross-engine asset optimization. |
+| `specialized-french-consulting-market` | Guide dans l'écosystème freelance ESN/SI français — modèles de marge, mécaniques des plateformes (Malt, collective.work), portage salarial, positionnement tarifaire et réalités des délais de paiement. |
+| `specialized-mcp-builder` | Développeur Model Context Protocol expert qui conçoit, construit et teste des serveurs MCP qui étendent les capacités des agents IA avec des outils, ressources et prompts personnalisés. |
+| `support-legal-compliance-checker` | Spécialiste juridique et conformité expert qui garantit que les opérations, le traitement des données et la création de contenu respectent les lois, règlements et normes sectorielles applicables, sur plusieurs juridictions. |
+| `technical-artist` | Spécialiste du pipeline art-vers-moteur — maîtrise les shaders, les systèmes VFX, les pipelines LOD, le budget de performance et l'optimisation d'assets multi-moteurs. |
 | `test-engineer` | Ingénieur QA spécialisé en stratégie de test, rédaction de tests et analyse de couverture. |
-| `testing-evidence-collector` | Screenshot-obsessed, fantasy-allergic QA specialist - Default to finding 3-5 issues, requires visual proof for everything. |
-| `testing-reality-checker` | Stops fantasy approvals, evidence-based certification - Default to "NEEDS WORK", requires overwhelming proof for production readiness. |
+| `testing-evidence-collector` | Spécialiste QA obsédé par les captures d'écran, allergique au fantasme — cherche par défaut 3-5 problèmes, exige une preuve visuelle pour tout. |
+| `testing-reality-checker` | Stoppe les validations fantaisistes, certification fondée sur les preuves — verdict par défaut « NEEDS WORK », exige des preuves accablantes pour la mise en production. |
 | `tokenomics-designer` | Expert en design de tokenomics pour crypto-games et projets Solana. |
 | `web-performance-auditor` | Ingénieur performance web axé sur les Core Web Vitals, le chargement, le rendu et l'optimisation réseau. |
 
@@ -328,7 +328,7 @@ OpenCode : vérifié via `opencode agent list` → 231 agents + 2 built-in = 233
 - **Freebuff / Codex** : les skills `agent-*` sont annoncés dans le catalogue (progressive disclosure) ;
   l'agent les invoque quand la tâche correspond, et les `triggers` (mots-clés du nom) accélèrent l'activation.
 
-## Skills non-agents du pack (74)
+## Skills non-agents du pack (77)
 
 Skills portables installés à côté des agents (OpenCode, Claude, Freebuff / Codex) :
 
@@ -336,6 +336,7 @@ Skills portables installés à côté des agents (OpenCode, Claude, Freebuff / C
 |-------|-------------|
 | `addyosmani-skills` | Engineering quality checks: code review, TDD and debugging discipline. Use when enforcing workflow discipline on code tasks. |
 | `agentmemory` | Give agents persistent, structured memory stores: facts, preferences and project state. Use when long-lived agents need recall beyond the context window. |
+| `agentmemory-guide` | >- |
 | `anthropics-skills` | Curated index of Anthropic's official example skills (documents, artifacts, web tooling). Use when looking for a canonical example before writing a new skill. |
 | `api-and-interface-design` | Guides stable API and interface design. Use when designing APIs, module boundaries, or any public interface. Use when creating REST or GraphQL endpoints, defining type contracts between modules, or establishing boundaries between frontend and backend. |
 | `archon` | Assemble repeatable coding workflows from templates: scaffold, refine, verify. Use when turning an ad-hoc process into a reusable pipeline. |
@@ -344,6 +345,7 @@ Skills portables installés à côté des agents (OpenCode, Claude, Freebuff / C
 | `beads` | Track work items across sessions with a local issue ledger synced to git. Use when tasks outlive a single chat session. |
 | `best-practice` | Collected best practices for Claude Code usage: CLAUDE.md, permissions, workflows. Use when tuning a personal or team setup. |
 | `browser-testing-with-devtools` | Tests in real browsers via Chrome DevTools MCP. Use when building or debugging anything that runs in a browser. Use when you need to inspect the DOM, capture console errors, analyze network requests, profile performance, or verify visual output with real runtime data. Requires the chrome-devtools MCP server to be configured. |
+| `browser-use-guide` | >- |
 | `caveman` | Style directive making Claude answer in terse, minimal replies. Use when you want much shorter answers. |
 | `cc-switch` | Manage and switch between coding tool configurations: APIs, providers, settings. Use when juggling several Claude or Codex setups. |
 | `ci-cd-and-automation` | Automates CI/CD pipeline setup. Use when setting up or modifying build and deployment pipelines. Use when you need to automate quality gates, configure test runners in CI, or establish deployment strategies. |
@@ -374,6 +376,7 @@ Skills portables installés à côté des agents (OpenCode, Claude, Freebuff / C
 | `idea-refine` | Refines raw ideas into sharp, actionable concepts through structured divergent and convergent thinking. Use when an idea is still vague, when you need to stress-test assumptions before committing to a plan, or when you want to expand options before converging on one. Triggers on "ideate", "refine this idea", or "stress-test my plan". |
 | `incremental-implementation` | Delivers changes incrementally in thin, verifiable slices. Use when implementing any feature or change that touches more than one file, or when picking up the next task from a plan. Use when rolling a change out behind a feature flag, when you're about to write a large amount of code at once, or when a task feels too big to land in one step. |
 | `interview-me` | Extracts what the user actually wants instead of what they think they should want. Achieves this through one-question-at-a-time interview until ~95% confidence about the underlying intent. Use when an ask is underspecified ("build me X" without "for whom" or "why now"), when the user explicitly invokes ("interview me", "grill me", "are we sure?", "stress-test my thinking"), or when you catch yourself silently filling in ambiguous requirements before any plan, spec, or code exists. |
+| `jev-decision-router` | > |
 | `karpathy-skills` | Coding discipline checks inspired by Andrej Karpathy: no over-engineering, no premature abstraction, no clever code. Use when simplifying code or reviewing design choices. |
 | `learn-claude-code` | Learning resource explaining how Claude Code agents work: subagents, hooks, skills and MCP. Use when learning or teaching the agent model before designing custom workflows. |
 | `llm-provider-cascade` | Route LLM requests through a fallback cascade of API providers (omniroute → freellm → groq → cerebras → mistral → cohere → gemini → openrouter → anthropic) so a chat, script or agent keeps working when one provider fails with 403, quota or network errors. Use when the user mentions provider cascade, fallback LLM routing, 403/quota errors on an API, multi-provider resilience, MEGA PACK chat cascade, or wants one prompt to try every configured API key (OpenCode auth.json, env vars) until one answers. |

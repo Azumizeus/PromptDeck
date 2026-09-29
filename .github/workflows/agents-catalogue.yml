@@ -8,6 +8,7 @@ on:
       - 'scripts/generate-agents-catalogue.js'
       - 'scripts/agents-roles-fr.json'
       - 'agent-skills/agents/**'
+      - 'agent-skills/scripts/validate-agents.js'
   pull_request:
     branches: [master, main]
     paths:
@@ -15,6 +16,7 @@ on:
       - 'scripts/generate-agents-catalogue.js'
       - 'scripts/agents-roles-fr.json'
       - 'agent-skills/agents/**'
+      - 'agent-skills/scripts/validate-agents.js'
   workflow_dispatch:
 
 jobs:
@@ -29,6 +31,9 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: 22
+
+      - name: Valider les agents (frontmatter, unicité, couverture catalogue)
+        run: node agent-skills/scripts/validate-agents.js
 
       - name: Vérifier le catalogue
         run: node scripts/generate-agents-catalogue.js --check

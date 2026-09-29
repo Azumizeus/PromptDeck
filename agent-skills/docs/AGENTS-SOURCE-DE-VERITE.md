@@ -57,12 +57,23 @@ Fichier **généré** par [`build-interface.py`](../build-interface.py) (`v0.7.4
 - `model`, `tools` : métadonnées d'exécution **absentes du frontmatter** (voir §2) ;
 - `name_fr` / `desc_fr` : libellés français du panneau.
 
-⚠️ **Risque documenté (régénération)** : `build-interface.py` relit les `.md` pour
-construire le catalogue. Comme les `model`/`tools`/emoji ont été retirés des
-frontmatters (§2), une future régénération **perdrait ces champs** dans le catalogue.
-Avant de relancer `build-interface.py`, s'assurer qu'il préserve `model`/`tools`
-(lecture depuis le catalogue actuel, ou sidecar). Tant que rien n'est régénéré,
-le catalogue embarqué reste complet et correct.
+✅ **Risque régénération MITIGÉ (0.7.4+)** : [`build-interface.py`](../build-interface.py)
+preserve désormais `model`/`tools`/`name_fr`/`desc_fr` lors d'une régénération —
+l'ancien catalogue sert de mémoire (clé `path`), ce que le disque définit reste
+prioritaire, et `interface/i18n-fr.json` écrase ensuite les traductions. Vérification :
+
+```bash
+python3 build-interface.py --self-test   # échoue (exit 1) si un champ serait perdu
+```
+
+Le chemin complet de rattrapage du décompte (ex. 177 → 180 skills réels) :
+
+```bash
+python3 build-interface.py && python3 build-userscript.py \
+  && python3 scripts/verify-counts.py --update
+```
+
+Tant qu'une régénération n'est pas jouée, le catalogue embarqué reste complet et correct.
 
 ## 4. Synchroniser vers OpenCode
 
@@ -106,9 +117,19 @@ Les trois sont **idempotents** : les relancer ne change rien.
 
 1. Créer `agents/<categorie>/<slug>.md` (ou `agents/<slug>.md`) avec le frontmatter §2 ;
 2. `name:` unique dans tout le repo ;
-3. Ajouter l'entrée dans `interface/catalog-full.js` (ou régénérer — voir le risque §3) ;
+3. Ajouter l'entrée dans `interface/catalog-full.js` (ou régénérer — §3, préservation active) ;
 4. `node scripts/sync-agents-opencode.js` puis vérifier avec
    `opencode debug agent "<name>"`.
+
+### Garde-fous automatisés
+
+- **`node agent-skills/scripts/validate-agents.js`** (CI : workflow « Catalogue agents ») :
+  frontmatter liste blanche, `name` uniques, modes/couleurs valides, couverture
+catalogue exacte (0 manquant, 0 fantôme, total fichier = total entrées). Tests :
+  `node --test agent-skills/scripts/validate-agents-test.js`.
+- **`node scripts/generate-agents-catalogue.js --check`** (même workflow) :
+  `AGENTS-CATALOGUE.md` régénéré = version commitée ; tout nouveau `name` doit avoir
+  son rôle FR dans `scripts/agents-roles-fr.json`.
 
 ## 7. Backups OpenCode
 
