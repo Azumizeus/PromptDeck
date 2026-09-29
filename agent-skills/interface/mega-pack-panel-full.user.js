@@ -3569,7 +3569,7 @@ window.MG_TEAMS = MG_TEAMS; // combos de personas réutilisables (⚡ panel)
       '<button class="l l-close" title="' + (LANG === 'fr' ? 'Masquer le panneau (⚡ pour rouvrir)' : 'Hide panel (⚡ to reopen)') + '"></button>' +
       '<button class="l l-min" title="' + (LANG === 'fr' ? 'Masquer le panneau' : 'Hide panel') + '"></button>' +
       '<button class="l l-max" title="' + (LANG === 'fr' ? 'Taille suivante (S/M/L/XL)' : 'Next size (S/M/L/XL)') + '"></button>' +
-      '</span><span class="ttl">⚡ MEGA PACK — Édition Luxe</span>' +
+      '</span><span class="ttl">⚡ MEGA PACK — Édition Luxe</span><span class="lx">' +
       '<button id="mgp-tourbtn" title="' + T().tourTitle + '">🎓</button>' +
       '<button id="mgp-set" title="' + T().settingsTitle + '">' + T().settings + '</button>' +
       '<button id="mgp-newp" title="' + T().newpTitle + '">' + T().newp + '</button>' +
