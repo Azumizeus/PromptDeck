@@ -1344,9 +1344,20 @@ async function fetchUptime() {
 }
 // 📈 Items du sous-menu « Disponibilité (7 j) » : un item par service du
 // dashboard (8 clés de la sonde :3114), pastille ✓ (≥ 99,5 %) / 🟠 (≥ 95 %) /
-// 🔴 en dessous. Items informatifs ; « Re-sonder » rafraîchit le cache puis
-// rouvre le menu à jour (trayMenu est une variable module).
+// 🔴 en dessous. Les services relançables via le dashboard sont CLIQUABLES :
+// le clic POSTe /api/action {action, via:'tray'} — le dashboard journalise
+// via last-action (toast « 📈 Tray : … » dans la page ouverte le cas échéant).
 const UPTIME_WARN_PCT = 95;
+// service (clé sonde :3114) → action du whitelist /api/action. Absent =
+// pas de relance possible (item informatif seulement).
+const UPTIME_ACTION_BY_SERVICE = {
+  agentmemory: 'restart-agentmemory',
+  chatdeckApi: 'restart-chatdeck',
+  cdpKeeper: 'restart-cdpkeeper',
+  sidecarAgent: 'restart-sidecar',
+  solscanOs: 'restart-solscan',
+  notifyClick: 'recompile-notify-click',
+};
 function uptimeSubmenuItems() {
   if (!uptimeCache || !Array.isArray(uptimeCache.services) || !uptimeCache.services.length) {
     return [{ label: LANG === 'fr' ? '· dashboard :3114 injoignable' : '· dashboard :3114 unreachable', enabled: false }];
@@ -1355,7 +1366,32 @@ function uptimeSubmenuItems() {
     const pct = uptimeCache.overall ? uptimeCache.overall[k] : null;
     const label = (uptimeCache.labels && uptimeCache.labels[i]) || k;
     const mark = pct == null ? '·' : pct >= 99.5 ? '✓' : pct >= UPTIME_WARN_PCT ? '🟠' : '🔴';
-    return { label: mark + ' ' + label + ' — ' + (pct == null ? '?' : pct + '%') + ' (7 j)', enabled: false };
+    const act = UPTIME_ACTION_BY_SERVICE[k];
+    if (!act) {
+      return { label: mark + ' ' + label + ' — ' + (pct == null ? '?' : pct + '%') + ' (7 j)', enabled: false };
+    }
+    // Item cliquable : « clic = relance ». toolTip du menu Electron non
+    // supporté → l'intitulé dit tout : la relance s'affiche dans la
+    // console/log via journal() au retour.
+    return {
+      label: mark + ' ' + label + ' — ' + (pct == null ? '?' : pct + '%') + ' (7 j) · ↻',
+      click: () => {
+        (async () => {
+          let ok = false, note = '';
+          try {
+            const r = await fetch('http://127.0.0.1:3114/api/action', {
+              method: 'POST', headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ action: act, via: 'tray' }), signal: AbortSignal.timeout(90000),
+            });
+            const j = await r.json();
+            ok = j.ok !== false; note = j.note || j.error || '';
+          } catch (e2) { note = e2.message; }
+          journal('📈 tray : ' + act + ' → ' + (ok ? 'ok' : 'ÉCHEC') + (note ? ' — ' + note : ''));
+          await fetchUptime();
+          try { tray.popUpContextMenu(trayMenu); } catch (e3) { /* le menu se rouvre à jour */ }
+        })();
+      },
+    };
   }).concat([{
     label: LANG === 'fr' ? '🔄 Re-sonder la dispo' : '🔄 Re-probe uptime',
     click: () => {
