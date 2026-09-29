@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         MEGA PACK Panel Luxe — Skills, Agents & Équipes pour tout LLM
 // @namespace    mega-pack
-// @version      2.13.0
+// @version      2.13.1
 // @description  Panneau flottant Édition Luxe dans une fenêtre macOS : 177 skills + 231 agents + 🕸 équipes + ✍️ prompts perso + ★ favoris, recherche instantanée, tooltip expert, clic droit multi-LLM, sélecteur de LLM par défaut, composeur ⌘-clic, menu « Vérifier les mises à jour » — injectable dans n'importe quelle conversation LLM (Claude, ChatGPT, Gemini, Perplexity, Mistral, OpenCode Web…)
 // @updateURL    https://raw.githubusercontent.com/Azumizeus/PromptDeck/master/agent-skills/interface/mega-pack-panel-full.user.js
 // @downloadURL  https://raw.githubusercontent.com/Azumizeus/PromptDeck/master/agent-skills/interface/mega-pack-panel-full.user.js
@@ -151,6 +151,8 @@ window.MG_TEAMS = MG_TEAMS; // combos de personas réutilisables (⚡ panel)
       selected: 'sél.',
       compose: '✚ Composer ({n})',
       newp: '＋', newpTitle: 'Nouveau prompt ✍️',
+      pinOn: '📌 Panneau épinglé — reste visible quand tu cliques dans la page',
+      pinOff: '📌 Désépinglé — se masque au clic dans la page (⌥P pour ré-épingler)',
       mName: 'Nom', mPrompt: 'Prompt', mSave: 'Enregistrer', mDel: 'Supprimer', mCancel: 'Annuler',
       setAi: '🧠 Intelligence — clé API', setAiD: 'Pour le bouton ✨ Générer : l\'IA rédige tes agents, skills et prompts',
       setAiProv: 'Fournisseur', setAiKey: 'Clé API', setAiModel: 'Modèle (option)', setAiSave: 'Enregistrer', setAiDel: 'Effacer',
@@ -216,6 +218,8 @@ window.MG_TEAMS = MG_TEAMS; // combos de personas réutilisables (⚡ panel)
       selected: 'sel.',
       compose: '✚ Compose ({n})',
       newp: '＋', newpTitle: 'New prompt ✍️',
+      pinOn: '📌 Panel pinned — stays visible when you click the page',
+      pinOff: '📌 Unpinned — hides when you click the page (⌥P to re-pin)',
       mName: 'Name', mPrompt: 'Prompt', mSave: 'Save', mDel: 'Delete', mCancel: 'Cancel',
       setAi: '🧠 Intelligence — API key', setAiD: 'For the ✨ Generate button: the AI writes your agents, skills and prompts',
       setAiProv: 'Provider', setAiKey: 'API key', setAiModel: 'Model (optional)', setAiSave: 'Save', setAiDel: 'Clear',
@@ -442,6 +446,7 @@ window.MG_TEAMS = MG_TEAMS; // combos de personas réutilisables (⚡ panel)
   #mgp-macbar .lx button{border:1px solid #31343f;background:none;color:#a8adbd;cursor:pointer;
     font:600 10.5px/1 -apple-system,sans-serif;padding:4px 9px;border-radius:99px}
   #mgp-macbar .lx button:hover{border-color:#9945ff;color:#eef0f6}
+  #mgp-macbar .lx button.pinned{border-color:#14f195;color:#14f195}
   #mgp-set{font-size:13px;line-height:1}
   #mgp-tourbtn{font-size:13px;line-height:1}
   #mgp-tourbtn:hover{border-color:#14f195 !important;color:#14f195 !important}
@@ -628,6 +633,7 @@ window.MG_TEAMS = MG_TEAMS; // combos de personas réutilisables (⚡ panel)
       '<button id="mgp-tourbtn" title="' + T().tourTitle + '">🎓</button>' +
       '<button id="mgp-set" title="' + T().settingsTitle + '">' + T().settings + '</button>' +
       '<button id="mgp-newp" title="' + T().newpTitle + '">' + T().newp + '</button>' +
+      '<button id="mgp-pin" title="' + T().pinOn + '">📌</button>' +
       '<button id="mgp-lang">' + LANG.toUpperCase() + '</button></span></div>' +
     '<div id="mgp-head"><b>⚡ MEGA PACK</b><span class="c" id="mgp-counts"></span></div>' +
     '<div id="mgp-qrow"><span class="l">⌕</span><input id="mgp-q"></div>' +
@@ -948,6 +954,43 @@ window.MG_TEAMS = MG_TEAMS; // combos de personas réutilisables (⚡ panel)
     flash(btn, '⌘' + n + ' → ' + lname(it.x));
   });
   function closePanel() { panel.classList.remove('open'); }
+  // ── Épingle 📌 + ⌥P (aligné app Luxe #pinb / keepVisible) ─────────────────
+  // App Luxe : keepVisible=false → la fenêtre se masque au blur (setAlwaysOnTop côté main).
+  // Web : pas de blur OS — l'équivalent honnête est le clic hors du panneau.
+  // Défaut ÉPINGLÉ (comportement historique du userscript : ne jamais se cacher tout seul) ;
+  // désépinglé = le panneau se masque au clic dans la page. État persisté (keepVisible).
+  (function () {
+    let pinned = store.get('keepVisible', true);
+    const pinBtn = panel.querySelector('#mgp-pin');
+    function pinApply() {
+      pinBtn.setAttribute('aria-pressed', String(pinned));
+      pinBtn.classList.toggle('pinned', pinned);
+      pinBtn.title = pinned ? T().pinOn : T().pinOff;
+    }
+    function pinSet(v, opts) {
+      pinned = !!v;
+      store.set('keepVisible', pinned);
+      pinApply();
+      if (!(opts && opts.silent)) flash(pinBtn, pinned ? T().pinOn : T().pinOff);
+      if (pinned && !(opts && opts.noReveal) && !panel.classList.contains('open')) openPanel(); // ⌥P ON révèle le panneau caché (comme l'app)
+    }
+    pinBtn.onclick = function () { pinSet(!pinned); };
+    // ⌥P global : bascule l'épinglage même panneau fermé (doc MODE-DEMPLOI ⌥P)
+    document.addEventListener('keydown', function (e) {
+      if (!e.altKey || e.metaKey || e.ctrlKey) return;
+      if (e.code !== 'KeyP' && e.key !== 'p' && e.key !== 'P') return;
+      e.preventDefault();
+      pinSet(!pinned);
+    });
+    // Désépinglé : clic hors du panneau (et hors ⚡/menus flottants) → masque
+    document.addEventListener('pointerdown', function (e) {
+      if (pinned || !panel.classList.contains('open')) return;
+      if (e.target.closest && (e.target.closest('#mgp-panel') || e.target.closest('#mgp-btn') ||
+        e.target.closest('#mgp-ctx') || e.target.closest('#mgp-tip') || e.target.closest('#mgp-tour'))) return;
+      closePanel();
+    });
+    pinApply();
+  })();
   // 🐛 fix 2.19.x (feux alignés Luxe) : la fenêtre Chrome n'a pas de feux natifs → feux dessinés,
   // câblés au comportement du panneau : rouge/jaune = masquer (⚡ pour rouvrir), vert = taille suivante.
   const mgpLlmMenu = panel.querySelector('#mgp-llmmenu');
@@ -1000,22 +1043,46 @@ window.MG_TEAMS = MG_TEAMS; // combos de personas réutilisables (⚡ panel)
   // ── Redimensionnement : poignée en haut à gauche (la fenêtre s'ouvre vers le bas-droite) ──
   (function () {
     const h = document.createElement('div'); h.id = 'mgp-rsz'; panel.appendChild(h);
-    let sx = 0, sy = 0, sw = 0, sh = 0, rs = false;
+    let sx = 0, sy = 0, sw = 0, sh = 0, rs = false, rl = 0, rb = 0;
     h.addEventListener('pointerdown', function (e) {
       e.preventDefault(); e.stopPropagation();
       const r = panel.getBoundingClientRect();
-      sx = e.clientX; sy = e.clientY; sw = r.width; sh = r.height; rs = true;
+      sx = e.clientX; sy = e.clientY; sw = r.width; sh = r.height;
+      rl = r.right; rb = r.bottom; rs = true; // 🐛 fix resize : coin bas-droit GELÉ — la poignée haut-gauche reste la seule qui bouge, quel que soit l'ancrage (bottom/right ou left/top)
       h.setPointerCapture(e.pointerId);
     });
     h.addEventListener('pointermove', function (e) {
       if (!rs) return;
-      const w = Math.max(320, Math.min(sw + (sx - e.clientX), window.innerWidth - 24));
-      const ht = Math.max(220, Math.min(sh + (sy - e.clientY), window.innerHeight - 24));
+      const w = Math.max(320, Math.min(sw + (sx - e.clientX), rl - 4));
+      const ht = Math.max(220, Math.min(sh + (sy - e.clientY), rb - 4));
       panel.style.width = w + 'px'; panel.style.height = ht + 'px';
+      panel.style.left = Math.max(4, Math.round(rl - w)) + 'px'; // bas-droit immobile
+      panel.style.top = Math.max(4, Math.round(rb - ht)) + 'px';
+      panel.style.right = 'auto'; panel.style.bottom = 'auto';
     });
-    h.addEventListener('pointerup', function () { if (rs) { rs = false; store.set('customSize', { w: panel.offsetWidth, h: panel.offsetHeight }); store.set('sizeIdx', 0); } }); // 🐛 fix : un drag custom annule le preset (priorité claire)
+    h.addEventListener('pointerup', function () {
+      if (!rs) return;
+      rs = false;
+      const r = panel.getBoundingClientRect();
+      store.set('customSize', { w: panel.offsetWidth, h: panel.offsetHeight });
+      store.set('sizeIdx', 0); // 🐛 fix : un drag custom annule le preset (priorité claire)
+      store.set('pos', { left: r.left, top: r.top }); // la position suit : la réouverture réaffiche exactement cette géométrie
+    });
     const cs = store.get('customSize', null);
-    if (cs) { panel.style.width = cs.w + 'px'; panel.style.height = cs.h + 'px'; }
+    if (cs) {
+      // 🐛 fix resize : géométrie restaurée bornée au viewport (une pos/taille mémorisée
+      // depuis une autre fenêtre pouvait placer la poignée hors écran → resize impossible).
+      // NB : panneau encore display:none ici → lire style.left/top (pos déjà restaurée par
+      // le bloc déplacement), PAS getBoundingClientRect ; repli = ancrage CSS (bottom/right).
+      const vw = window.innerWidth, vh = window.innerHeight;
+      const w = Math.min(Math.max(320, cs.w), vw - 8), ht = Math.min(Math.max(220, cs.h), vh - 8);
+      panel.style.width = w + 'px'; panel.style.height = ht + 'px';
+      const px = parseFloat(panel.style.left), py = parseFloat(panel.style.top);
+      const hasPos = !isNaN(px) && !isNaN(py);
+      const left0 = hasPos ? px : vw - 20 - w, top0 = hasPos ? py : vh - 148 - ht;
+      const left = Math.max(4, Math.min(left0, vw - w - 4)), top = Math.max(4, Math.min(top0, vh - ht - 4));
+      panel.style.left = left + 'px'; panel.style.top = top + 'px'; panel.style.right = 'auto'; panel.style.bottom = 'auto';
+    }
   })();
   // ── Réglages (⚙) — même panneau que l'app macOS ──────────────────────────
   const sendTargets = () => store.get('sendTargets', ['claude', 'chatgpt']);

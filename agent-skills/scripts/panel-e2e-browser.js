@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // 🔬 Test E2E du panneau MEGA PACK dans le navigateur RÉEL (Chrome-mgp, CDP 9223).
-// Vérifie sur claude.ai : bouton ⚡, span .lx, les 4 boutons dans l'ordre,
+// Vérifie sur claude.ai : bouton ⚡, span .lx, les 5 boutons dans l'ordre,
 // style pastille sombre (pas de fond blanc navigateur), ouverture du panneau.
 //
 // Prérequis :  open -na "Google Chrome" --args \
@@ -100,7 +100,7 @@ async function waitPanel(tab, maxMs) {
     })()`);
     add(rep.btn, 'local : bouton ⚡ présent', rep.btn ? '' : 'userscript non exécuté');
     add(rep.lx, 'local : span .lx présent dans la macbar', rep.lx ? '' : 'span perdu → fond blanc');
-    add(rep.lxButtons.join(',') === 'mgp-tourbtn,mgp-set,mgp-newp,mgp-lang', 'local : 4 boutons dans .lx, dans l ordre', JSON.stringify(rep.lxButtons));
+    add(rep.lxButtons.join(',') === 'mgp-tourbtn,mgp-set,mgp-newp,mgp-pin,mgp-lang', 'local : 5 boutons dans .lx, dans l ordre', JSON.stringify(rep.lxButtons));
     add(rep.style && rep.style.border === 'rgb(49, 52, 63)' && rep.style.radius === '99px', 'local : style pastille sombre (#31343f, r=99px)', JSON.stringify(rep.style));
     add(rep.open, 'local : panneau s ouvre au clic', rep.open ? '' : 'clic ⚡ sans effet');
     add(/177/.test(rep.counts || ''), 'local : catalogue frais (177·231)', rep.counts);
@@ -129,7 +129,7 @@ async function waitPanel(tab, maxMs) {
         return r;
       })()`);
       add(rep.lx, 'claude.ai : span .lx présent', rep.lx ? '' : 'span perdu → fond blanc');
-      add(rep.lxButtons.join(',') === 'mgp-tourbtn,mgp-set,mgp-newp,mgp-lang', 'claude.ai : 4 boutons dans .lx, dans l ordre', JSON.stringify(rep.lxButtons));
+      add(rep.lxButtons.join(',') === 'mgp-tourbtn,mgp-set,mgp-newp,mgp-pin,mgp-lang', 'claude.ai : 5 boutons dans .lx, dans l ordre', JSON.stringify(rep.lxButtons));
       add(rep.style && rep.style.border === 'rgb(49, 52, 63)' && rep.style.radius === '99px', 'claude.ai : style pastille sombre', JSON.stringify(rep.style));
       add(rep.open, 'claude.ai : panneau s ouvre au clic', '');
       add(/177/.test(rep.counts || ''), 'claude.ai : catalogue frais (177·231) = version installée à jour', rep.counts);
