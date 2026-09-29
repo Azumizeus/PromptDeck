@@ -1328,6 +1328,22 @@ console.log('\n── 40. GOLDEN cadenas Atelier + miroir .md à chaud ──');
   check(pinCount === 1, `bouton 📌 unique dans le panneau (trouvé : ${pinCount})`);
   check(setSrcF.includes('window.mgp.localKeyResync(b.dataset.p)'), 'clés : clic bouton → IPC local-key-resync');
   check(setSrcF.includes('refreshHealth(true)'), 'clés : re-sonde sans cache après resync');
+
+  // g) macbar : structure HTML du userscript — span .lx autour des 4 boutons de droite
+  // (régression 2.19.4 : span perdu → boutons sur fond blanc navigateur ; fix commit 70b2698)
+  const usSrc = fs.readFileSync(path.join(__dirname, '..', 'interface', 'mega-pack-panel-full.user.js'), 'utf8');
+  const LX_MARKER = '</span><span class="ttl">⚡ MEGA PACK — Édition Luxe</span><span class="lx">';
+  check(usSrc.includes(LX_MARKER), 'macbar : span .lx ouvert juste après le titre (boutons de droite stylés)');
+  const iLx = usSrc.indexOf(LX_MARKER);
+  const iLxEnd = iLx >= 0 ? usSrc.indexOf('</span></div>', iLx + 1) : -1;
+  const lxBlock = iLx >= 0 && iLxEnd > iLx ? usSrc.slice(iLx, iLxEnd) : '';
+  const LX_BTNS = ['id="mgp-tourbtn"', 'id="mgp-set"', 'id="mgp-newp"', 'id="mgp-lang"'];
+  let lxPrev = -1, lxOrdered = LX_BTNS.length > 0;
+  for (const b of LX_BTNS) { const at = lxBlock.indexOf(b); if (at < 0 || at < lxPrev) { lxOrdered = false; break; } lxPrev = at; }
+  check(lxOrdered, 'macbar : les 4 boutons (🎓 ⚙ ＋ FR) sont DANS le span .lx, dans l\'ordre');
+  check(usSrc.includes("+ LANG.toUpperCase() + '</button></span></div>'"), 'macbar : span .lx refermé juste après le bouton FR (mgp-lang)');
+  check(/#mgp-macbar \.lx\{display:flex/.test(usSrc), 'macbar : CSS #mgp-macbar .lx (rangée flex) présent');
+  check(/#mgp-macbar \.lx button\{/.test(usSrc), 'macbar : CSS #mgp-macbar .lx button (style sombre) présent');
 }
 
 console.log('');
