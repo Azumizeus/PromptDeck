@@ -5,6 +5,7 @@ const { app, BrowserWindow, Tray, Menu, globalShortcut, clipboard, shell, screen
 const { execFile, execFileSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
+const http = require('http');
 const os = require('os');
 
 // V2 : dossier de données isolé de la V1 — les deux versions peuvent tourner côte à côte
@@ -992,6 +993,12 @@ function buildMenuTemplate() {
       ],
     },
     {
+      // 🔑 Copie des identifiants LibreChat (déchiffrés par le dashboard :3114,
+      // jamais affichés — voir lcCredsCopy). Entrée directe du menu tray.
+      label: LANG === 'fr' ? '🔑 Copier les identifiants LibreChat' : '🔑 Copy LibreChat credentials',
+      click: lcCredsCopy,
+    },
+    {
       // 🧾 Journal d'audit NDJSON (gateway OpenBot) : dernières actions copiées/injectées/équipes.
       label: LANG === 'fr' ? '🧾 Journal d\'audit' : '🧾 Audit log',
       submenu: [
@@ -1115,6 +1122,35 @@ const TRACE_FILE = '/tmp/mgp-boot-trace.log';
 // MGP_TRACE est optionnel — chaque incident doit laisser une trace sur disque, même
 // quand l'app n'est pas lancée en mode debug. Journal plafonné (~120 lignes).
 const journalPath = () => { try { return path.join(app.getPath('userData'), 'mgp-journal.log'); } catch (e) { return '/tmp/mgp-journal.log'; } };
+// 🔑 Identifiants LibreChat : jamais stockés en clair ici — le dashboard :3114
+// les garde chiffrés (AES-256-GCM, ~/.agentmemory-dashboard/) et son endpoint
+// /api/creds/copy déchiffre côté serveur puis pousse directement dans le
+// presse-papiers macOS (pbcopy). Le clair ne traverse ni l'app ni le réseau.
+function lcCredsCopy() {
+  const done = (ok, note) => {
+    try {
+      const { Notification } = require('electron');
+      new Notification({ title: ok ? '🔑 LibreChat' : '⚠️ LibreChat', body: note, silent: true }).show();
+    } catch (e) { traceBoot('lcCredsCopy notification: ' + e.message); }
+  };
+  try {
+    const req = http.request(
+      { host: '127.0.0.1', port: 3114, path: '/api/creds/copy', method: 'POST',
+        headers: { 'Content-Type': 'application/json' }, timeout: 5000 },
+      (r) => {
+        let d = '';
+        r.on('data', (c) => (d += c));
+        r.on('end', () => {
+          try { const j = JSON.parse(d); done(!!j.ok, j.ok ? 'Identifiants copiés dans le presse-papiers' : (j.error || 'copie impossible')); }
+          catch (e) { done(false, 'réponse illisible du dashboard'); }
+        });
+      }
+    );
+    req.on('error', () => done(false, 'dashboard :3114 injoignable — LaunchAgent agentmemory-dashboard ?'));
+    req.on('timeout', () => { req.destroy(); done(false, 'dashboard :3114 ne répond pas (timeout)'); });
+    req.end(JSON.stringify({ slot: 'librechat' }));
+  } catch (e) { done(false, e.message); }
+}
 // 🛡 Heuristique « incident récent » pour le badge tray : entrée critique de moins de 30 min.
 const JOURNAL_BADGE_MS = 30 * 60 * 1000;
 const JOURNAL_CRITICAL = /uncaughtException|unhandledRejection|render-process-gone|child-process-gone/;
