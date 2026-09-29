@@ -374,6 +374,10 @@ Pre-configured specialist personas for targeted reviews:
 
 See [docs/agents.md](docs/agents.md) for the decision matrix, orchestration rules, and how personas compose with skills and slash commands.
 
+> **231 agents au total** (45 à plat + 186 par catégorie) : conventions de frontmatter,
+> catalogue embarqué et synchronisation OpenCode sont documentés dans
+> [docs/AGENTS-SOURCE-DE-VERITE.md](docs/AGENTS-SOURCE-DE-VERITE.md) — le dépôt est la source de vérité.
+
 ---
 
 ## Reference Checklists
