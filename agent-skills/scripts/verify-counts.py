@@ -96,13 +96,22 @@ def scan_file(path):
                 out.append((i, n, unit))
     return out
 
-AUTO_FIX = [
-    ("README.md", [(r"\b133 skills", f"{real_skills} skills")]),
-    ("INSTALL.txt", [(r"\b133 skills", f"{real_skills} skills"), (r"\b323 items", f"{real_experts} items"),
-                     (r"\b323 experts", f"{real_experts} experts")]),
-    ("COMMANDES-ET-AGENTS.md", [(r"\(133\)", f"({real_skills})"), (r"\b133 skills", f"{real_skills} skills")]),
-    ("menubar-app-luxe/README.md", [(r"\b133 skills", f"{real_skills} skills"), (r"\b323 experts", f"{real_experts} experts")]),
+# Motifs génériques de rattrapage — adaptés à chaque génération de décomptes.
+# Chaque entrée : (fichier, [(regex, remplacement), …]). Les remplacements utilisent
+# les décomptes réels du jour, donc --update reste correct après une future évolution.
+_COUNT_PAIRS = [
+    (r"\b177 skills", f"{real_skills} skills"),
+    (r"\b136 skills", f"{real_skills} skills"),
+    (r"\b177 workflows", f"{real_skills} workflows"),
+    (r"\b408 items", f"{real_experts} items"),
+    (r"\b408 experts", f"{real_experts} experts"),
+    (r"\b323 experts", f"{real_experts} experts"),
+    (r"\b323 items", f"{real_experts} items"),
+    (r"\b177 · 231\b", f"{real_skills} · {real_agents}"),
+    (r"\b177·231\b", f"{real_skills}·{real_agents}"),
+    (r"\b136 · 190\b", f"{real_skills} · {real_agents}"),
 ]
+AUTO_FIX = [(p, _COUNT_PAIRS) for p in DOC_FILES]
 
 if "--update" in sys.argv:
     for path, pairs in AUTO_FIX:

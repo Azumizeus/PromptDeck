@@ -1217,8 +1217,13 @@ console.log('\n── 43. Garde-fou décomptes docs ↔ catalogue (anti-drift)')
 const catalogSrc43 = fs.readFileSync(path.join(__dirname, '..', 'interface', 'catalog-full.js'), 'utf8');
 const catalog43 = new Function(catalogSrc43 + ';return MEGA_CATALOG;')();
 const realSkills43 = catalog43.skills.length, realAgents43 = catalog43.agents.length;
-check(realSkills43 === 177 && realAgents43 === 231, `catalogue réel : ${realSkills43} skills + ${realAgents43} agents attendus`);
-check(catalog43.meta && catalog43.meta.version === '0.7.4', 'catalogue régénéré avec meta.version = 0.7.4');
+// Anti-drift dynamique : le catalogue est cohérent avec le DISQUE (agents + skills), pas
+// avec un nombre codé en dur — sinon chaque ajout de skill casse le harnais pour rien.
+let diskAgents43 = 0, diskSkills43 = 0;
+(function walk43(d) { for (const e of fs.readdirSync(d, { withFileTypes: true })) { const p = path.join(d, e.name); if (e.isDirectory()) walk43(p); else if (e.name.endsWith('.md')) diskAgents43++; } })(path.join(__dirname, '..', 'agents'));
+(function walk43(d) { for (const e of fs.readdirSync(d, { withFileTypes: true })) { const p = path.join(d, e.name); if (e.isDirectory()) walk43(p); else if (e.name === 'SKILL.md') diskSkills43++; } })(path.join(__dirname, '..', 'skills'));
+check(realSkills43 === diskSkills43 && realAgents43 === diskAgents43, `catalogue ↔ disque : ${realSkills43} skills + ${realAgents43} agents (disque : ${diskSkills43}+${diskAgents43})`);
+check(catalog43.meta && /^0\.7\.[5-9]$/.test(catalog43.meta.version), 'catalogue régénéré avec meta.version ≥ 0.7.5 (actuel : ' + (catalog43.meta || {}).version + ')');
 const DOC_FILES43 = [
   path.join(__dirname, '..', 'README.md'),
   path.join(__dirname, '..', 'MEGA-PACK.md'),
@@ -1344,6 +1349,22 @@ console.log('\n── 40. GOLDEN cadenas Atelier + miroir .md à chaud ──');
   check(usSrc.includes("+ LANG.toUpperCase() + '</button></span></div>'"), 'macbar : span .lx refermé juste après le bouton FR (mgp-lang)');
   check(/#mgp-macbar \.lx\{display:flex/.test(usSrc), 'macbar : CSS #mgp-macbar .lx (rangée flex) présent');
   check(/#mgp-macbar \.lx button\{/.test(usSrc), 'macbar : CSS #mgp-macbar .lx button (style sombre) présent');
+
+  // i) épingle 📌 du userscript ↔ app Luxe : mêmes libellés, même couleur d'état, ⌥P, persistance
+  //    (le pin web est un miroir du #pinb Electron — divergences volontaires : défaut keepVisible,
+  //    portée ⌥P — voir commentaire « écarts VOLONTAIRES » dans mega-pack-panel.user.js)
+  const renSrc2 = fs.readFileSync(path.join(__dirname, 'renderer.js'), 'utf8');
+  const pinOnApp = renSrc2.match(/pinOn: '([^']+)'/), pinOffApp = renSrc2.match(/pinOff: '([^']+)'/);
+  const pinOnFr = usSrc.match(/pinOn: '([^']+)'/), pinOffFr = usSrc.match(/pinOff: '([^']+)'/);
+  check(pinOnApp && pinOnFr && pinOnApp[1] === pinOnFr[1], `pin : libellé FR épinglé identique app ↔ userscript (« ${pinOnFr ? pinOnFr[1].slice(0, 40) : '?'}… »)`);
+  check(pinOffApp && pinOffFr && pinOffApp[1] === pinOffFr[1], 'pin : libellé FR désépinglé identique app ↔ userscript');
+  const pinOnEnApp = renSrc2.match(/pinOn: '📌 Panel[^']+'/), pinOnEn = usSrc.match(/pinOn: '📌 Panel[^']+'/);
+  check(pinOnEnApp && pinOnEn && pinOnEnApp[0] === pinOnEn[0], 'pin : libellé EN épinglé identique app ↔ userscript');
+  check(/#mgp-macbar \.lx button\.pinned\{border-color:#9945ff/.test(usSrc), 'pin : CSS état épinglé violet (aligné app Luxe #pinb[aria-pressed=true])');
+  check(/aria-label="' \+ \(LANG === 'fr' \? 'Épingler le panneau \(⌥P\)'/ .test(usSrc), 'pin : aria-label « Épingler le panneau (⌥P) » comme l app');
+  check(/store\.get\('keepVisible', true\)/.test(usSrc) && /store\.set\('keepVisible',/.test(usSrc), 'pin : état persisté via keepVisible (même clé que l app)');
+  check(/code !== 'KeyP'/.test(usSrc) || /e\.key !== 'p'/.test(usSrc), 'pin : raccourci ⌥P câblé (portée page — voir écarts volontaires)');
+  check(/closest\('#mgp-panel'\)/.test(usSrc), 'pin : clic extérieur masque seulement si désépinglé');
 
   // h) routeurs locaux dans le tray : OmniRoute/FreeLLM, 401 = vivant, re-sonde un clic
   check(/const LOCAL_ROUTERS = \[/.test(mainSrcM), 'routeurs : table LOCAL_ROUTERS (OmniRoute + FreeLLM)');

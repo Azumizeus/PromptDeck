@@ -3,7 +3,7 @@
 Une liste sobre, noire, instantanée. **Compréhensible en 3 secondes** : on cherche,
 on lit, on tire le prompt. Rien d'autre.
 
-- **408 experts** : 177 skills 🛠 · 231 agents 👤 · ✍️ tes prompts · ★ tes favoris
+- **411 experts** : 180 skills 🛠 · 231 agents 👤 · ✍️ tes prompts · ★ tes favoris
 - **Recherche instantanée** dès la première lettre, filtres en un clic
 - **Tout au clavier** : ↑↓ naviguer · ⏎ copier · ⌘⏎ ouvrir (LLM par défaut) ·
   ⇧⏎ ChatGPT · ⌥⏎ composer la sélection · ⌘1-9 favoris · ⌘, réglages
@@ -100,7 +100,7 @@ Couverture : catalogue, recherche, filtres (dont 🕸 Équipes), clavier, favori
 
 Depuis les **Réglages → 📁 Dossier MEGA PROMPT** : choisir le dossier (par défaut
 `~/Documents/MEGA PROMPT`), puis **🔄 Générer tous les .md** écrit d'un coup les
-408 experts + tes prompts perso, avec le prompt d'activation prêt à coller dans chaque fichier :
+411 experts + tes prompts perso, avec le prompt d'activation prêt à coller dans chaque fichier :
 
 ```
 MEGA PROMPT/

@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         MEGA PACK Panel Luxe — Skills, Agents & Équipes pour tout LLM
 // @namespace    mega-pack
-// @version      2.13.1
-// @description  Panneau flottant Édition Luxe dans une fenêtre macOS : 177 skills + 231 agents + 🕸 équipes + ✍️ prompts perso + ★ favoris, recherche instantanée, tooltip expert, clic droit multi-LLM, sélecteur de LLM par défaut, composeur ⌘-clic, menu « Vérifier les mises à jour » — injectable dans n'importe quelle conversation LLM (Claude, ChatGPT, Gemini, Perplexity, Mistral, OpenCode Web…)
+// @version      2.13.2
+// @description  Panneau flottant Édition Luxe dans une fenêtre macOS : 180 skills + 231 agents + 🕸 équipes + ✍️ prompts perso + ★ favoris, recherche instantanée, tooltip expert, clic droit multi-LLM, sélecteur de LLM par défaut, composeur ⌘-clic, menu « Vérifier les mises à jour » — injectable dans n'importe quelle conversation LLM (Claude, ChatGPT, Gemini, Perplexity, Mistral, OpenCode Web…)
 // @updateURL    https://raw.githubusercontent.com/Azumizeus/PromptDeck/master/agent-skills/interface/mega-pack-panel-full.user.js
 // @downloadURL  https://raw.githubusercontent.com/Azumizeus/PromptDeck/master/agent-skills/interface/mega-pack-panel-full.user.js
 // @author       MEGA PACK
@@ -151,8 +151,8 @@ window.MG_TEAMS = MG_TEAMS; // combos de personas réutilisables (⚡ panel)
       selected: 'sél.',
       compose: '✚ Composer ({n})',
       newp: '＋', newpTitle: 'Nouveau prompt ✍️',
-      pinOn: '📌 Panneau épinglé — reste visible quand tu cliques dans la page',
-      pinOff: '📌 Désépinglé — se masque au clic dans la page (⌥P pour ré-épingler)',
+      pinOn: '📌 Panneau épinglé — il reste visible quand tu cliques ailleurs',
+      pinOff: '📌 Épinglage retiré — le panneau se masque au clic ailleurs',
       mName: 'Nom', mPrompt: 'Prompt', mSave: 'Enregistrer', mDel: 'Supprimer', mCancel: 'Annuler',
       setAi: '🧠 Intelligence — clé API', setAiD: 'Pour le bouton ✨ Générer : l\'IA rédige tes agents, skills et prompts',
       setAiProv: 'Fournisseur', setAiKey: 'Clé API', setAiModel: 'Modèle (option)', setAiSave: 'Enregistrer', setAiDel: 'Effacer',
@@ -218,8 +218,8 @@ window.MG_TEAMS = MG_TEAMS; // combos de personas réutilisables (⚡ panel)
       selected: 'sel.',
       compose: '✚ Compose ({n})',
       newp: '＋', newpTitle: 'New prompt ✍️',
-      pinOn: '📌 Panel pinned — stays visible when you click the page',
-      pinOff: '📌 Unpinned — hides when you click the page (⌥P to re-pin)',
+      pinOn: '📌 Panel pinned — it stays visible when you click elsewhere',
+      pinOff: '📌 Unpinned — the panel hides when you click elsewhere',
       mName: 'Name', mPrompt: 'Prompt', mSave: 'Save', mDel: 'Delete', mCancel: 'Cancel',
       setAi: '🧠 Intelligence — API key', setAiD: 'For the ✨ Generate button: the AI writes your agents, skills and prompts',
       setAiProv: 'Provider', setAiKey: 'API key', setAiModel: 'Model (optional)', setAiSave: 'Save', setAiDel: 'Clear',
@@ -446,7 +446,7 @@ window.MG_TEAMS = MG_TEAMS; // combos de personas réutilisables (⚡ panel)
   #mgp-macbar .lx button{border:1px solid #31343f;background:none;color:#a8adbd;cursor:pointer;
     font:600 10.5px/1 -apple-system,sans-serif;padding:4px 9px;border-radius:99px}
   #mgp-macbar .lx button:hover{border-color:#9945ff;color:#eef0f6}
-  #mgp-macbar .lx button.pinned{border-color:#14f195;color:#14f195}
+  #mgp-macbar .lx button.pinned{border-color:#9945ff;color:#9945ff;background:rgba(153,69,255,.14)} /* état épinglé : violet accent, aligné app Luxe #pinb[aria-pressed=true] */
   #mgp-set{font-size:13px;line-height:1}
   #mgp-tourbtn{font-size:13px;line-height:1}
   #mgp-tourbtn:hover{border-color:#14f195 !important;color:#14f195 !important}
@@ -633,7 +633,7 @@ window.MG_TEAMS = MG_TEAMS; // combos de personas réutilisables (⚡ panel)
       '<button id="mgp-tourbtn" title="' + T().tourTitle + '">🎓</button>' +
       '<button id="mgp-set" title="' + T().settingsTitle + '">' + T().settings + '</button>' +
       '<button id="mgp-newp" title="' + T().newpTitle + '">' + T().newp + '</button>' +
-      '<button id="mgp-pin" title="' + T().pinOn + '">📌</button>' +
+      '<button id="mgp-pin" title="' + T().pinOn + '" aria-label="' + (LANG === 'fr' ? 'Épingler le panneau (⌥P)' : 'Pin panel (⌥P)') + '">📌</button>' +
       '<button id="mgp-lang">' + LANG.toUpperCase() + '</button></span></div>' +
     '<div id="mgp-head"><b>⚡ MEGA PACK</b><span class="c" id="mgp-counts"></span></div>' +
     '<div id="mgp-qrow"><span class="l">⌕</span><input id="mgp-q"></div>' +
@@ -954,11 +954,12 @@ window.MG_TEAMS = MG_TEAMS; // combos de personas réutilisables (⚡ panel)
     flash(btn, '⌘' + n + ' → ' + lname(it.x));
   });
   function closePanel() { panel.classList.remove('open'); }
-  // ── Épingle 📌 + ⌥P (aligné app Luxe #pinb / keepVisible) ─────────────────
+  // ── Épingle 📌 + ⌥P (aligné app Luxe #pinb / keepVisible : mêmes libellés, CSS violet) ─
   // App Luxe : keepVisible=false → la fenêtre se masque au blur (setAlwaysOnTop côté main).
   // Web : pas de blur OS — l'équivalent honnête est le clic hors du panneau.
-  // Défaut ÉPINGLÉ (comportement historique du userscript : ne jamais se cacher tout seul) ;
-  // désépinglé = le panneau se masque au clic dans la page. État persisté (keepVisible).
+  // Écarts VOLONTAIRES vs app (documentés) : défaut ÉPINGLÉ ici (comportement historique
+  // du userscript : ne jamais se cacher tout seul — l'app naît avec false), et ⌥P limité
+  // à la page focalisée (pas de globalShortcut en web). État persisté (keepVisible).
   (function () {
     let pinned = store.get('keepVisible', true);
     const pinBtn = panel.querySelector('#mgp-pin');

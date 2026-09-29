@@ -38,7 +38,7 @@ die() { echo "✗ $*" >&2; exit 1; }
 # LISEZMOI embarqué dans chaque DMG — bilingue FR/EN (résumé des nouveautés + installation)
 write_lisezmoi() { # $1 = dossier cible · $2 = "universal" pour la ligne variante universelle
   {
-    printf 'MEGA PACK v%s — Skills & Agents / Skills & Agents (408 experts)\n' "$APP_VERSION"
+    printf 'MEGA PACK v%s — Skills & Agents / Skills & Agents (411 experts)\n' "$APP_VERSION"
     if [[ "${2:-}" == "universal" ]]; then
       printf '\nVersion universelle : Intel + Apple Silicon.\nUniversal build: Intel + Apple Silicon.\n'
     fi
@@ -51,7 +51,7 @@ Premier lancement : clic droit → Ouvrir (app non notarisée par l'App Store).
 
 NOUVEAUTÉS v1.1.0
 · 🧭 Aide contextuelle intégrée : 15 recettes filtrables, accès global ⌘⌥/ configurable
-· Catalogue étendu : 177 skills + 231 agents = 408 experts (fusion de l'ancien layout
+· Catalogue étendu : 180 skills + 231 agents = 411 experts (fusion de l'ancien layout
   skill/ + 38 skills du « My Claude resource vault » — apprendre, workflow, mémoire,
   outils MCP, prompts…), traductions FR complètes, recherche bilingue FR/EN
 · ✍️ Prompts personnalisés : bouton ＋, tags, favoris ⭐, import .md/.txt (glisser-déposer), export .md (Réglages)
@@ -77,7 +77,7 @@ First launch: right-click → Open (app is not App Store notarized).
 
 WHAT'S NEW v1.1.0
 · 🧭 Built-in contextual help: 15 filterable recipes, configurable global ⌘⌥/ shortcut
-· Extended catalogue: 177 skills + 231 agents = 408 experts (merged from the old skill/
+· Extended catalogue: 180 skills + 231 agents = 411 experts (merged from the old skill/
   layout + 38 skills from the "My Claude resource vault" — learning, workflow, memory,
   MCP tools, prompts…), full FR translations, bilingual FR/EN search
 · ✍️ Custom prompts: ＋ button, tags, ⭐ favorites, .md/.txt import (drag & drop), .md export (Settings)

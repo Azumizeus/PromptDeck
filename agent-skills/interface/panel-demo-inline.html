@@ -33,8 +33,8 @@ try {
 // ==UserScript==
 // @name         MEGA PACK Panel Luxe — Skills, Agents & Équipes pour tout LLM
 // @namespace    mega-pack
-// @version      2.13.1
-// @description  Panneau flottant Édition Luxe dans une fenêtre macOS : 177 skills + 231 agents + 🕸 équipes + ✍️ prompts perso + ★ favoris, recherche instantanée, tooltip expert, clic droit multi-LLM, sélecteur de LLM par défaut, composeur ⌘-clic, menu « Vérifier les mises à jour » — injectable dans n'importe quelle conversation LLM (Claude, ChatGPT, Gemini, Perplexity, Mistral, OpenCode Web…)
+// @version      2.13.2
+// @description  Panneau flottant Édition Luxe dans une fenêtre macOS : 180 skills + 231 agents + 🕸 équipes + ✍️ prompts perso + ★ favoris, recherche instantanée, tooltip expert, clic droit multi-LLM, sélecteur de LLM par défaut, composeur ⌘-clic, menu « Vérifier les mises à jour » — injectable dans n'importe quelle conversation LLM (Claude, ChatGPT, Gemini, Perplexity, Mistral, OpenCode Web…)
 // @updateURL    https://raw.githubusercontent.com/Azumizeus/PromptDeck/master/agent-skills/interface/mega-pack-panel-full.user.js
 // @downloadURL  https://raw.githubusercontent.com/Azumizeus/PromptDeck/master/agent-skills/interface/mega-pack-panel-full.user.js
 // @author       MEGA PACK
@@ -56,13 +56,13 @@ try {
 // ==/UserScript==
 
 // ── Catalogue complet embarqué (généré par build-userscript.py) ───────────
-// Catalogue complet MEGA PACK v0.7.4 — généré par build-interface.py
-// Skills: 177 | Agents: 231
+// Catalogue complet MEGA PACK v0.7.5 — généré par build-interface.py
+// Skills: 180 | Agents: 231
 const MEGA_CATALOG = {
  "meta": {
-  "generated": "2026-09-26",
-  "version": "0.7.4",
-  "skills": 177,
+  "generated": "2026-09-30",
+  "version": "0.7.5",
+  "skills": 180,
   "agents": 231
  },
  "skills": [
@@ -73,6 +73,12 @@ const MEGA_CATALOG = {
    "path": "skills/addyosmani-skills/",
    "name_fr": "Contrôles qualité (Addy Osmani)",
    "desc_fr": "Contrôles qualité d'ingénierie : revue de code, TDD, discipline de débogage. À utiliser pour imposer une discipline de workflow sur les tâches de code."
+  },
+  {
+   "name": "agentmemory-guide",
+   "desc": ">-",
+   "category": "agentmemory-guide",
+   "path": "skills/agentmemory-guide/"
   },
   {
    "name": "agentmemory",
@@ -153,6 +159,12 @@ const MEGA_CATALOG = {
    "path": "skills/browser-testing-with-devtools/",
    "name_fr": "Tests navigateur avec DevTools",
    "desc_fr": "Teste dans de vrais navigateurs via Chrome DevTools MCP : inspection du DOM, erreurs console, requêtes réseau, profil de performance et vérification visuelle avec des données d'exécution réelles."
+  },
+  {
+   "name": "browser-use-guide",
+   "desc": ">-",
+   "category": "browser-use-guide",
+   "path": "skills/browser-use-guide/"
   },
   {
    "name": "caveman",
@@ -461,6 +473,12 @@ const MEGA_CATALOG = {
    "path": "skills/interview-me/",
    "name_fr": "Interviewe-moi",
    "desc_fr": "Extrait ce que l'utilisateur veut vraiment via un entretien une-question-à-la fois jusqu'à ~95 % de confiance sur l'intention sous-jacente, quand la demande est sous-spécifiée."
+  },
+  {
+   "name": "jev-decision-router",
+   "desc": "Routes a user request to the right skill using typed, structured decisions instead of free-text generation — Jev-style \"System One\" routing, fully local and deterministic. Use when a message must be classified into a lifecycle phase or specialty and the router should return a JSON decision (choice +",
+   "category": "jev-decision-router",
+   "path": "skills/jev-decision-router/"
   },
   {
    "name": "karpathy-skills",
@@ -3805,8 +3823,8 @@ window.MG_TEAMS = MG_TEAMS; // combos de personas réutilisables (⚡ panel)
       selected: 'sél.',
       compose: '✚ Composer ({n})',
       newp: '＋', newpTitle: 'Nouveau prompt ✍️',
-      pinOn: '📌 Panneau épinglé — reste visible quand tu cliques dans la page',
-      pinOff: '📌 Désépinglé — se masque au clic dans la page (⌥P pour ré-épingler)',
+      pinOn: '📌 Panneau épinglé — il reste visible quand tu cliques ailleurs',
+      pinOff: '📌 Épinglage retiré — le panneau se masque au clic ailleurs',
       mName: 'Nom', mPrompt: 'Prompt', mSave: 'Enregistrer', mDel: 'Supprimer', mCancel: 'Annuler',
       setAi: '🧠 Intelligence — clé API', setAiD: 'Pour le bouton ✨ Générer : l\'IA rédige tes agents, skills et prompts',
       setAiProv: 'Fournisseur', setAiKey: 'Clé API', setAiModel: 'Modèle (option)', setAiSave: 'Enregistrer', setAiDel: 'Effacer',
@@ -3872,8 +3890,8 @@ window.MG_TEAMS = MG_TEAMS; // combos de personas réutilisables (⚡ panel)
       selected: 'sel.',
       compose: '✚ Compose ({n})',
       newp: '＋', newpTitle: 'New prompt ✍️',
-      pinOn: '📌 Panel pinned — stays visible when you click the page',
-      pinOff: '📌 Unpinned — hides when you click the page (⌥P to re-pin)',
+      pinOn: '📌 Panel pinned — it stays visible when you click elsewhere',
+      pinOff: '📌 Unpinned — the panel hides when you click elsewhere',
       mName: 'Name', mPrompt: 'Prompt', mSave: 'Save', mDel: 'Delete', mCancel: 'Cancel',
       setAi: '🧠 Intelligence — API key', setAiD: 'For the ✨ Generate button: the AI writes your agents, skills and prompts',
       setAiProv: 'Provider', setAiKey: 'API key', setAiModel: 'Model (optional)', setAiSave: 'Save', setAiDel: 'Clear',
@@ -4100,7 +4118,7 @@ window.MG_TEAMS = MG_TEAMS; // combos de personas réutilisables (⚡ panel)
   #mgp-macbar .lx button{border:1px solid #31343f;background:none;color:#a8adbd;cursor:pointer;
     font:600 10.5px/1 -apple-system,sans-serif;padding:4px 9px;border-radius:99px}
   #mgp-macbar .lx button:hover{border-color:#9945ff;color:#eef0f6}
-  #mgp-macbar .lx button.pinned{border-color:#14f195;color:#14f195}
+  #mgp-macbar .lx button.pinned{border-color:#9945ff;color:#9945ff;background:rgba(153,69,255,.14)} /* violet accent, aligné app Luxe */
   #mgp-set{font-size:13px;line-height:1}
   #mgp-tourbtn{font-size:13px;line-height:1}
   #mgp-tourbtn:hover{border-color:#14f195 !important;color:#14f195 !important}
@@ -4287,7 +4305,7 @@ window.MG_TEAMS = MG_TEAMS; // combos de personas réutilisables (⚡ panel)
       '<button id="mgp-tourbtn" title="' + T().tourTitle + '">🎓</button>' +
       '<button id="mgp-set" title="' + T().settingsTitle + '">' + T().settings + '</button>' +
       '<button id="mgp-newp" title="' + T().newpTitle + '">' + T().newp + '</button>' +
-      '<button id="mgp-pin" title="' + T().pinOn + '">📌</button>' +
+      '<button id="mgp-pin" title="' + T().pinOn + '" aria-label="' + (LANG === 'fr' ? 'Épingler le panneau (⌥P)' : 'Pin panel (⌥P)') + '">📌</button>' +
       '<button id="mgp-lang">' + LANG.toUpperCase() + '</button></span></div>' +
     '<div id="mgp-head"><b>⚡ MEGA PACK</b><span class="c" id="mgp-counts"></span></div>' +
     '<div id="mgp-qrow"><span class="l">⌕</span><input id="mgp-q"></div>' +

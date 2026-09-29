@@ -123,7 +123,7 @@ except Exception as e:
     print("WARN — ancien catalogue illisible :", e)
 
 out = {
-    "meta": {"generated": date.today().isoformat(), "version": "0.7.4",
+    "meta": {"generated": date.today().isoformat(), "version": "0.7.5",
              "skills": len(skills), "agents": len(agents)},
     "skills": [{"name": s["name"], "desc": s["desc"],
                 "category": cat_skill(s["path"]), "path": s["path"]} for s in skills],
@@ -191,23 +191,28 @@ def write_outputs():
         json.dump(out, f, ensure_ascii=False, indent=1)
         f.write(";\n")
 
-    # Synchronise aussi le catalogue embarqué du launcher HTML (source de vérité unique)
-    launcher_path = "interface/mega-pack-launcher.html"
-    if os.path.exists(launcher_path):
-        with open(launcher_path, encoding="utf-8") as f:
+    # Synchronise aussi les catalogues embarqués HTML (source de vérité unique) :
+    # launcher + banc d'essai inline (mêmes marqueurs début/fin).
+    new_block = (
+        "// Catalogue complet MEGA PACK v%s — généré par build-interface.py\n" % out["meta"]["version"]
+        + "// Skills: %d | Agents: %d\n" % (len(skills), len(agents))
+        + "const MEGA_CATALOG = "
+        + json.dumps(out, ensure_ascii=False, indent=1)
+        + ";\n"
+    )
+    for emb_path in ("interface/mega-pack-launcher.html", "interface/panel-demo-inline.html"):
+        if not os.path.exists(emb_path):
+            continue
+        with open(emb_path, encoding="utf-8") as f:
             html = f.read()
+        if "// Catalogue complet MEGA PACK" not in html or "window.MEGA_CATALOG = MEGA_CATALOG;" not in html:
+            print("WARN — %s : marqueurs de catalogue introuvables, non synchronisé" % emb_path)
+            continue
         start = html.index("// Catalogue complet MEGA PACK")
         end = html.index("window.MEGA_CATALOG = MEGA_CATALOG;")
-        new_block = (
-            "// Catalogue complet MEGA PACK v%s — généré par build-interface.py\n" % out["meta"]["version"]
-            + "// Skills: %d | Agents: %d\n" % (len(skills), len(agents))
-            + "const MEGA_CATALOG = "
-            + json.dumps(out, ensure_ascii=False, indent=1)
-            + ";\n"
-        )
-        with open(launcher_path, "w", encoding="utf-8") as f:
+        with open(emb_path, "w", encoding="utf-8") as f:
             f.write(html[:start] + new_block + html[end:])
-        print("OK — launcher synchronisé avec le catalogue")
+        print("OK — %s synchronisé avec le catalogue" % emb_path)
 
 
 if "--self-test" in os.sys.argv:

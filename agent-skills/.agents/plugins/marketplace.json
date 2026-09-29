@@ -7,7 +7,7 @@
     {
       "name": "agent-skills",
       "version": "0.7.4",
-      "description": "Méga-pack : 177 workflows ingénieur senior (cycle complet + Solana, game design, sécurité Cloudflare), bilingue FR/EN.",
+      "description": "Méga-pack : 180 workflows ingénieur senior (cycle complet + Solana, game design, sécurité Cloudflare), bilingue FR/EN.",
       "source": {
         "source": "local",
         "path": "./"

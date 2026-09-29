@@ -12,6 +12,16 @@
 //
 // Sortie : résumé PASS/FAIL par contrôle ; code de sortie 1 au moindre échec.
 const PORT = 9223;
+// Décomptes attendus : lus dans le meta du CATALOGUE SOURCE (plus de nombres en dur —
+// la cohérence docs ↔ catalogue ↔ disque est garantie par verify-counts.py et test-luxe.js §43).
+const EXPECTED = (() => {
+  try {
+    const src = require('fs').readFileSync(__dirname + '/../interface/catalog-full.js', 'utf8');
+    const m = src.match(/"meta":\s*\{[\s\S]*?"skills":\s*(\d+),[\s\S]*?"agents":\s*(\d+)/);
+    if (m) return { s: +m[1], a: +m[2] };
+  } catch {}
+  return { s: 180, a: 231 };
+})();
 const ONLY = process.argv.includes('--quick') ? 'local' : null;
 const CHECKS = [];
 const add = (ok, label, detail) => { CHECKS.push({ ok: !!ok, label, detail }); };
@@ -103,7 +113,7 @@ async function waitPanel(tab, maxMs) {
     add(rep.lxButtons.join(',') === 'mgp-tourbtn,mgp-set,mgp-newp,mgp-pin,mgp-lang', 'local : 5 boutons dans .lx, dans l ordre', JSON.stringify(rep.lxButtons));
     add(rep.style && rep.style.border === 'rgb(49, 52, 63)' && rep.style.radius === '99px', 'local : style pastille sombre (#31343f, r=99px)', JSON.stringify(rep.style));
     add(rep.open, 'local : panneau s ouvre au clic', rep.open ? '' : 'clic ⚡ sans effet');
-    add(/177/.test(rep.counts || ''), 'local : catalogue frais (177·231)', rep.counts);
+    add((rep.counts || '').includes(EXPECTED.s + ' skills · ' + EXPECTED.a + ' agents'), `local : catalogue frais (${EXPECTED.s}·${EXPECTED.a})`, rep.counts);
     tab.close();
   }
 
@@ -132,7 +142,7 @@ async function waitPanel(tab, maxMs) {
       add(rep.lxButtons.join(',') === 'mgp-tourbtn,mgp-set,mgp-newp,mgp-pin,mgp-lang', 'claude.ai : 5 boutons dans .lx, dans l ordre', JSON.stringify(rep.lxButtons));
       add(rep.style && rep.style.border === 'rgb(49, 52, 63)' && rep.style.radius === '99px', 'claude.ai : style pastille sombre', JSON.stringify(rep.style));
       add(rep.open, 'claude.ai : panneau s ouvre au clic', '');
-      add(/177/.test(rep.counts || ''), 'claude.ai : catalogue frais (177·231) = version installée à jour', rep.counts);
+      add((rep.counts || '').includes(EXPECTED.s + ' skills · ' + EXPECTED.a + ' agents'), `claude.ai : catalogue frais (${EXPECTED.s}·${EXPECTED.a}) = version installée à jour`, rep.counts);
     }
     tab.close();
   }
