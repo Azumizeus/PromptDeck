@@ -1307,6 +1307,17 @@ function keysFingerprint(h) {
 async function refreshAgentsBadge() {
   agentsBadge.down = await agentsDownCount();
   agentsBadge.checkedAt = Date.now();
+  // 📈 Disponibilité dashboard :3114 (uptime 7 j) — le service le plus
+  // fragile affiché dans le tooltip du tray (les tests destructifs du jour
+  // expliquent les % bas ; ça se normalise).
+  try {
+    const r = await fetch('http://127.0.0.1:3114/api/uptime', { signal: AbortSignal.timeout(5000) });
+    const j = await r.json();
+    const vals = (j.services || []).map((k) => j.overall && j.overall[k]).filter((v) => typeof v === 'number');
+    agentsBadge.lowestUptime = vals.length ? Math.min(...vals) : null;
+    agentsBadge.lowestLabel = vals.length
+      ? (j.services[vals.indexOf(Math.min(...vals))] || '') : null;
+  } catch (e) { agentsBadge.lowestUptime = null; agentsBadge.lowestLabel = null; }
   updateTrayIcon();
 }
 // 🌐 Routeurs locaux (OmniRoute :20128, FreeLLM :8000) : un 401 = service VIVANT
@@ -1346,6 +1357,9 @@ function updateTrayIcon() {
     tray.setToolTip((a > 0 ? '🔴 ' + a + ' agent(s) down — dashboard :3114 · ' : '') +
       (rd.length > 0
         ? '🟠 ' + rd.map((r) => r.label + ' down (HTTP réseau)').join(' · ') + ' · '
+        : '') +
+      (agentsBadge.lowestUptime != null
+        ? '📈 dispo la plus basse : ' + agentsBadge.lowestLabel + ' ' + agentsBadge.lowestUptime + '% (7 j) · '
         : '') +
       (n > 0
         ? 'MEGA PACK — Skills & Agents · ⚠️ ' + n + ' incident(s) récent(s) — voir 🛡 Journal'
