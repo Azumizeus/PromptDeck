@@ -1359,5 +1359,15 @@ console.log('\n── 40. GOLDEN cadenas Atelier + miroir .md à chaud ──');
 console.log('');
 if (fail) { console.log(`❌ ${fail} test(s) en échec`); process.exit(1); }
 console.log('✅ TOUS LES TESTS PASSENT');
+if (process.argv.includes('--e2e')) {
+  // 🔬 Pont E2E navigateur réel (CDP Chrome-mgp 9223) : span .lx, 4 boutons,
+  // styles sombres, ouverture, compteurs — local + claude.ai (Tampermonkey).
+  // Prérequis : Chrome-mgp lancé avec --remote-debugging-port=9223 (voir header
+  // de scripts/panel-e2e-browser.js). Sans CDP, l E2E sort 2 (ignoré ici).
+  const { spawnSync } = require('child_process');
+  const r = spawnSync(process.execPath, [path.join(__dirname, '..', 'scripts', 'panel-e2e-browser.js')], { stdio: 'inherit' });
+  if (r.status !== 0 && r.status !== 2) { console.log('❌ E2E navigateur en échec'); process.exit(1); }
+  if (r.status === 2) console.log('⚠️  E2E navigateur ignoré (CDP 9223 absent — Chrome-mgp non lancé)');
+}
 }
 runTests().catch((e) => { console.error('✗ Erreur fatale des tests :', e); process.exit(1); });
