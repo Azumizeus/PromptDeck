@@ -81,14 +81,15 @@ pkill -9 -f "$APP_NAME" 2>/dev/null; sleep 1   # pattern large : copie /tmp incl
 : > "$HOME/Library/Application Support/megapack-menubar-luxe/mgp-journal.log" 2>/dev/null || true
 rm -f "$TRACE"
 MGP_TRACE=1 "$BOOT/Contents/MacOS/$APP_NAME" >/tmp/mgp-boot-stdout.log 2>&1 &
-# boot parfois lent (charge machine, AMFI sur copie fraîche) : polling 30 s au lieu d'un sleep unique
-for _ in $(seq 1 30); do
+# boot parfois lent (charge machine, AMFI sur copie fraîche) : polling 90 s —
+# sous charge >400 le boot dépasse 30 s (race constatée en release 2.19.4)
+for _ in $(seq 1 90); do
   [ -f "$TRACE" ] && grep -q "createTray" "$TRACE" 2>/dev/null && break
   sleep 1
 done
 pgrep -f "MacOS/$APP_NAME" >/dev/null || fail "copie DMG : process absent après 30 s (trace : $(tail -2 "$TRACE" 2>/dev/null | tr '\n' ' ')) (stdout : $(tail -3 /tmp/mgp-boot-stdout.log 2>/dev/null | tr '\n' ' ')) (journal : $(tail -2 "$HOME/Library/Application Support/megapack-menubar-luxe/mgp-journal.log" 2>/dev/null | tr '\n' ' '))"
 ok "copie DMG lancée, process vivant"
-[ -f "$TRACE" ] || fail "trace absente (MGP_TRACE ignoré)"
+[ -f "$TRACE" ] || fail "trace absente après 90 s (boot trop lent sous charge, ou MGP_TRACE ignoré)"
 grep -q "uncaughtException\|unhandledRejection\|did-fail-load" "$TRACE" && fail "exception au boot : $(grep -m1 'Exception\|Rejection' "$TRACE")"
 grep -q "createTray: Tray construit" "$TRACE" || fail "tray non construit"
 ok "trace de boot complète, tray construit"
