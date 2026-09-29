@@ -265,6 +265,9 @@ async function refreshHealth(force) {
     }
     line.innerHTML = '<span class="mark">' + mark + '</span><span class="pname">' + (HEALTH_LABEL[p] || p) +
       '</span><span class="pinfo">' + detail + '</span><span class="pkey">' + (it.hasKey ? '🔑' : '·') + '</span>' +
+      (it.keyDiag === 'mismatch' && !q ? '<button class="btn kresync" data-p="' + p + '" title="' +
+        (LANG === 'en' ? 'The router key changed — resync ~/.secrets and opencode.json with the current unified key' : 'La clé du routeur a changé — resynchronise ~/.secrets et opencode.json avec la clé unifiée actuelle') + '">🔧 ' +
+        (LANG === 'en' ? 'Resync key' : 'Resynchroniser') + '</button>' : '') +
       (q ? '<button class="btn qlift" data-p="' + p + '">↩ ' + (LANG === 'en' ? 'Lift' : 'Lever') + '</button>' : '');
     line.title = q
       ? (LANG === 'en' ? '3 consecutive failures — the cascade tries this provider last for 10 min' : '3 échecs consécutifs — la cascade ne le tente qu\'en dernier recours pendant 10 min')
@@ -272,6 +275,21 @@ async function refreshHealth(force) {
         ? (LANG === 'en' ? 'Key configured (env / OpenCode auth.json / keychain)' : 'Clé configurée (env / auth.json OpenCode / trousseau)')
         : (LANG === 'en' ? 'No key found — the cascade still tries local routers' : 'Aucune clé trouvée — la cascade tente quand même les routeurs locaux');
     healthList.appendChild(line);
+  });
+  // boutons « 🔧 Resynchroniser » : le 401 vient d'une clé périmée (keyDiag=mismatch) —
+  // lit la clé unifiée actuelle du routeur et l'écrit dans ~/.secrets + opencode.json
+  healthList.querySelectorAll('.kresync').forEach((b) => {
+    b.onclick = async () => {
+      b.disabled = true;
+      b.textContent = LANG === 'en' ? 'Resync…' : 'Resynchro…';
+      try {
+        const r = await window.mgp.localKeyResync(b.dataset.p);
+        b.textContent = r && r.ok
+          ? '✓ ' + (LANG === 'en' ? 'resynced' : 'resynchronisée')
+          : '✗ ' + ((r && r.error) || 'error').slice(0, 40);
+      } catch (e) { b.textContent = '✗ ' + String(e && e.message || e).slice(0, 40); }
+      refreshHealth(true); // re-sonde sans cache : doit passer ✓ avec la nouvelle clé
+    };
   });
   // boutons « Lever » : lève la quarantaine puis rafraîchit
   healthList.querySelectorAll('.qlift').forEach((b) => {

@@ -1306,6 +1306,24 @@ console.log('\n── 40. GOLDEN cadenas Atelier + miroir .md à chaud ──');
   check(/const PROBE_RETRY_TIMEOUT_MS = 20000;/.test(mainSrcM), 'sonde : budget étendu 20 s sur les réessais');
   check(/if \(rec\.status !== 0\) break;/.test(mainSrcM), 'sonde : une réponse HTTP (même 401) est un verdict définitif, pas de retry');
   check(/attempts: attempt \+ 1/.test(mainSrcM), 'sonde : nombre de tentatives tracé dans le cache');
+
+  // f) auto-réparation des clés des routeurs locaux (401 → resync un clic)
+  check(/const LOCAL_ROUTER_DB = \{/.test(mainSrcM), 'clés : table LOCAL_ROUTER_DB (routeurs locaux avec base)');
+  check(/execFileSync\('\/usr\/bin\/sqlite3'/, 'clés : lecture clé unifiée via /usr/bin/sqlite3 uniquement');
+  check(/timeout: 4000/.test(mainSrcM), 'clés : lecture DB bornée (timeout 4 s)');
+  check(/return \/\^freellmapi-\/\.test\(out\) \? out : ''/.test(mainSrcM) || /\/\^freellmapi-\/\.test\(out\)/.test(mainSrcM), 'clés : format attendu validé avant tout usage');
+  check(/keyDiag = localKeyDiagnosis\(p\)/.test(mainSrcM), 'clés : diagnostic uniquement sur 401 routeur local');
+  check(/ipcMain\.handle\('local-key-resync'/.test(mainSrcM), 'clés : IPC local-key-resync (resync un clic)');
+  check(/mode: 0o600/.test(mainSrcM), 'clés : ~/.secrets réécrit en 0600 (jamais élargi)');
+  check(/copyFileSync\(secPath, secPath \+ '\.bak-' \+ stamp\)/.test(mainSrcM), 'clés : sauvegarde datée de ~/.secrets avant modification');
+  check(/probeCache\.delete\(provider\)/.test(mainSrcM), 'clés : cache de sonde invalidé après resync');
+  check(/clé jamais affichée/.test(mainSrcM), 'clés : aucune clé dans le journal (principe)');
+  const preSrcF = fs.readFileSync(path.join(__dirname, 'preload.js'), 'utf8');
+  check(preSrcF.includes("localKeyResync: (provider) => ipcRenderer.invoke('local-key-resync'"), 'clés : pont preload localKeyResync');
+  const setSrcF = fs.readFileSync(path.join(__dirname, 'settings.js'), 'utf8');
+  check(setSrcF.includes("querySelectorAll('.kresync')"), 'clés : bouton 🔧 Resynchroniser dans le panneau Santé');
+  check(setSrcF.includes('window.mgp.localKeyResync(b.dataset.p)'), 'clés : clic bouton → IPC local-key-resync');
+  check(setSrcF.includes('refreshHealth(true)'), 'clés : re-sonde sans cache après resync');
 }
 
 console.log('');

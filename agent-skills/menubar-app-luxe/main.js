@@ -2,7 +2,7 @@
 // Panneau flottant sous la barre de menus : raccourci global (⌥Espace par défaut) → recherche globale,
 // ⏎ copie le prompt, ⌘⏎ ouvre Claude, ⇧⏎ ouvre ChatGPT.
 const { app, BrowserWindow, Tray, Menu, globalShortcut, clipboard, shell, screen, nativeImage, dialog, ipcMain } = require('electron');
-const { execFile } = require('child_process');
+const { execFile, execFileSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
@@ -104,9 +104,10 @@ function arenaEventsPath() { return path.join(app.getPath('userData'), 'arena-ev
 // omniroute, FreeLLM… La config opencode.json passe avant auth.json (clés plus fraîches).
 
 const OPENCODE_KEYS = {};
-(function loadOpenCodeKeys() {
+function loadOpenCodeKeys() {
   const home = os.homedir();
   const push = (k, v) => { if (v && !OPENCODE_KEYS[k]) OPENCODE_KEYS[k] = v; };
+  for (const k of Object.keys(OPENCODE_KEYS)) delete OPENCODE_KEYS[k]; // rechargement = priorités recalculées (opencode.json avant auth.json)
   try {
     const oc = JSON.parse(fs.readFileSync(path.join(home, '.config/opencode/opencode.json'), 'utf8'));
     for (const [name, p] of Object.entries(oc.provider || {})) {
@@ -121,7 +122,8 @@ const OPENCODE_KEYS = {};
       if (k) push(name === 'google' ? 'gemini' : name.replace(/-direct$/, ''), k);
     }
   } catch (e) { /* pas d'auth.json */ }
-})();
+}
+loadOpenCodeKeys(); // appel initial ; rechargé après une resync de clé locale
 
 
 // ── Fournisseurs LLM (API clé) — tous en OpenAI-compatible sauf Anthropic ──
@@ -268,7 +270,11 @@ ipcMain.handle('api-health', async (e, { force } = {}) => {
   for (const p of Object.keys(PROVIDERS)) {
     if (p === 'custom') continue;
     const rec = await probeProvider(p);
-    results[p] = { ok: rec.ok, status: rec.status, latency: rec.latency || 0, hasKey: !!apiKeyFor(p) };
+    // 🔧 auto-réparation : 401 d'un routeur local → compare la clé enregistrée
+    // à la clé unifiée ACTUELLE du routeur (s'il est joignable)
+    let keyDiag;
+    if (!rec.ok && rec.status === 401 && LOCAL_ROUTER_DB[p]) keyDiag = localKeyDiagnosis(p);
+    results[p] = { ok: rec.ok, status: rec.status, latency: rec.latency || 0, hasKey: !!apiKeyFor(p), keyDiag };
   }
   return { at: Date.now(), results };
 });
@@ -1135,6 +1141,68 @@ function recentIncidents() {
     }).length;
   } catch (e) { return 0; }
 }
+// 🔧 Clés des routeurs LOCAUX : quand la sonde reçoit 401, la clé enregistrée est
+// probablement périmée (le routeur a régénéré sa clé unifiée). On lit la clé ACTUELLE
+// directement dans la base du routeur (lecture seule, clé jamais affichée ni loguée)
+// et on peut la resynchroniser partout en un clic (Réglages → Santé API).
+const LOCAL_ROUTER_DB = {
+  freellm: { db: () => path.join(os.homedir(), 'tools/freellmapi/server/data/freeapi.db'),
+             sql: "SELECT value FROM settings WHERE key = 'unified_api_key'",
+             files: ['~/.secrets', '~/.config/opencode/opencode.json'] },
+};
+function unifiedKeyOf(provider) {
+  const r = LOCAL_ROUTER_DB[provider];
+  if (!r) return '';
+  try {
+    const out = execFileSync('/usr/bin/sqlite3', [r.db(), r.sql], { encoding: 'utf8', timeout: 4000 }).trim();
+    return /^freellmapi-/.test(out) ? out : ''; // format attendu, sinon on ne touche à rien
+  } catch (e) { return ''; }
+}
+// Comparaison sans fuite : renvoie 'match' | 'mismatch' | 'unknown' (routeur ou clé absente).
+function localKeyDiagnosis(provider) {
+  const expected = unifiedKeyOf(provider);
+  if (!expected) return 'unknown';
+  const used = apiKeyFor(provider);
+  if (!used) return 'mismatch'; // routeur vivant mais aucune clé digne de ce nom côté app
+  return used.trim() === expected ? 'match' : 'mismatch';
+}
+// Resync un clic : écrase la clé périmée dans ~/.secrets (2 variables) et
+// opencode.json (provider.options.apiKey). Sauvegarde datée de chaque fichier.
+ipcMain.handle('local-key-resync', async (e, { provider } = {}) => {
+  const expected = unifiedKeyOf(provider);
+  if (!expected) return { ok: false, error: 'clé unifiée introuvable (routeur éteint ou base absente)' };
+  const home = os.homedir();
+  const stamp = new Date().toISOString().replace(/[-:]/g, '').replace(/\..*$/, '');
+  const updated = [];
+  try {
+    const secPath = path.join(home, '.secrets');
+    if (fs.existsSync(secPath)) {
+      let sec = fs.readFileSync(secPath, 'utf8');
+      const re = new RegExp('^(FREELLMAPI(_API)?_KEY)="freellmapi-[a-f0-9]*"$', 'm');
+      if (re.test(sec)) {
+        try { fs.copyFileSync(secPath, secPath + '.bak-' + stamp); } catch (e2) { /* best effort */ }
+        sec = sec.replace(re, (m, name) => `${name}="${expected}"`);
+        fs.writeFileSync(secPath, sec, { mode: 0o600 });
+        updated.push('~/.secrets');
+      }
+    }
+    const ocPath = path.join(home, '.config/opencode/opencode.json');
+    if (fs.existsSync(ocPath)) {
+      const oc = JSON.parse(fs.readFileSync(ocPath, 'utf8'));
+      if (oc.provider && oc.provider.freellmapi && oc.provider.freellmapi.options && oc.provider.freellmapi.options.apiKey !== expected) {
+        try { fs.copyFileSync(ocPath, ocPath + '.avant_freellm_' + stamp); } catch (e2) { /* best effort */ }
+        oc.provider.freellmapi.options.apiKey = expected;
+        fs.writeFileSync(ocPath, JSON.stringify(oc, null, 2) + '\n');
+        updated.push('opencode.json');
+      }
+    }
+    probeCache.delete(provider); // la prochaine sonde re-teste avec la nouvelle clé
+    loadOpenCodeKeys(); // recharge les clés lues au boot (sinon 401 jusqu'au redémarrage)
+    journal('local-key-resync: ' + provider + ' resynchronisé (' + (updated.join(', ') || 'déjà à jour') + ') — clé jamais affichée');
+    return { ok: true, updated };
+  } catch (err) { return { ok: false, error: String((err && err.message) || err).slice(0, 140) }; }
+});
+
 // 🕸 Pastille rouge agents : supervise :3114/api/health (agentmemory + venv browser-use).
 // 1 service down ou dashboard injoignable → 🔴 affiché à côté de l'icône du tray
 // (tray.setTitle — natif macOS, l'icône template reste inchangée).
