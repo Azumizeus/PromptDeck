@@ -64,9 +64,11 @@ ok "pré-vol passé"
 
 # ── 2. Garde-fous logiques ────────────────────────────────────────────────────
 step "2/10 Garde-fous"
-node "$ROOT/scripts/panel-buttons-guard.js" || die "garde-fou boutons : dérive du panneau (node scripts/panel-buttons-guard.js --update si ajout volontaire)"
+# node est absent du PATH des shells non-interactifs (launchd/detached) → résolution explicite
+NODE_BIN="$(command -v node || true)"; [ -n "$NODE_BIN" ] || NODE_BIN="$HOME/.nvm/versions/node/v24.16.0/bin/node"
+"$NODE_BIN" "$ROOT/scripts/panel-buttons-guard.js" || die "garde-fou boutons : dérive du panneau (node scripts/panel-buttons-guard.js --update si ajout volontaire)"
 sub "panel-buttons-guard : liste dorée intacte"
-node "$ROOT/skills/jev-decision-router/scripts/jev-router-test.mjs" >/dev/null 2>&1 \
+"$NODE_BIN" "$ROOT/skills/jev-decision-router/scripts/jev-router-test.mjs" >/dev/null 2>&1 \
   || die "jev-router-test en échec (lance-le sans redirect pour le détail)"
 sub "jev-router-test : 13/13"
 ok "garde-fous verts"
@@ -74,7 +76,7 @@ ok "garde-fous verts"
 # ── 3. Build Luxe ─────────────────────────────────────────────────────────────
 step "3/10 Build Luxe ($VERSION)"
 bash "$MBA/build-app.sh" --runtime local --out "dist/$APP_NAME.app" || die "build-app.sh"
-node "$MBA/test-luxe.js" >/dev/null 2>&1 || die "test-luxe.js en échec (lance-le sans redirect)"
+"$NODE_BIN" "$MBA/test-luxe.js" >/dev/null 2>&1 || die "test-luxe.js en échec (lance-le sans redirect)"
 sub "test-luxe : vert"
 ok "dist/$APP_NAME.app construit ($(du -sh "dist/$APP_NAME.app" | cut -f1))"
 
@@ -141,7 +143,7 @@ ok "rapport poids + SHA établi"
 # ── 10. Notes de release ──────────────────────────────────────────────────────
 step "10/10 Notes de release"
 TODAY=$(date '+%d/%m')
-node -e '
+"$NODE_BIN" -e '
 const fs = require("fs");
 const [notes, szx, shx, sza, sha, szu, shu, today] = process.argv.slice(1);
 let t = fs.readFileSync(notes, "utf8");
