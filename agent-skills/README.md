@@ -213,6 +213,30 @@ Skills are plain Markdown - they work with any agent that accepts system prompts
 
 ---
 
+## MEGA PACK Panel — Mise à jour sans clic (userscript)
+
+Le [panneau MEGA PACK](interface/mega-pack-panel-full.user.js) (userscript Tampermonkey, 180 skills · 231 agents) s'installe et se met à jour sans parcourir les menus, via CDP (Chrome DevTools Protocol) sur un navigateur de test dédié — le profil quotidien ignore le port de débogage par sécurité (Chromium ≥ 136).
+
+```bash
+# Chrome-mgp : profil de test avec CDP (prérequis, voir docs/GUIDE-INSTALLATION-PANNEAU.md)
+open -na "Google Chrome" --args \
+  --user-data-dir="$HOME/Library/Application Support/Google/Chrome-mgp" \
+  --remote-debugging-port=9223 --no-first-run
+
+# Installer / réinstaller le userscript + recharger claude.ai (zéro clic) :
+node agent-skills/scripts/install-userscript-cdp.js --reload
+
+# Vérifier que la version installée dans Tampermonkey = celle du bundle (CI) :
+node agent-skills/scripts/install-userscript-cdp.js --verify   # exit 1 si écart
+
+# Régression pin 📌 + resize : 9 checks dans Chrome OU Brave (--port 9224) :
+node agent-skills/scripts/panel-pin-resize-cdp.js
+```
+
+**Brave sans CDP** (profil quotidien) : icône Tampermonkey → **Tableau de bord → Utilitaires → Importer depuis un fichier** → `interface/mega-pack-panel-full.user.js` → **Réinstaller** → recharger claude.ai. Pensez à activer « Autoriser l'accès aux URL de fichier » dans `brave://extensions` → Tampermonkey → Détails pour l'installation par glisser-déposer. Pipeline détaillé, schéma et dépannage : [docs/GUIDE-INSTALLATION-PANNEAU.md](docs/GUIDE-INSTALLATION-PANNEAU.md).
+
+---
+
 ## Adoption
 
 Already installed? How you roll the pack out depends on your codebase. The **[Adoption Guide](docs/adoption-guide.md)** covers two paths: the full lifecycle from day one for a greenfield project, or an incremental, verification-first rollout for an established codebase.

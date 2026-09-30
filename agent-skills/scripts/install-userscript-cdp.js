@@ -31,6 +31,9 @@
 //   --probe-only      Sonde sans cliquer : liste les inputs file du dashboard
 //                     et les boutons de ask.html (si présente), puis sort.
 //   --reload          Recharge claude.ai après l'installation réussie.
+//   --verify          Test post-install : compare la @version du bundle local
+//                     à celle lue dans le dashboard TM — exit 1 si elles
+//                     diffèrent (ou si la version TM est illisible).
 //   --port N          Port CDP (défaut 9223, aussi via MGP_CDP_PORT).
 //
 // Sortie : journal étape par étape ; code 0 si un bouton d'installation a été
@@ -223,20 +226,46 @@ async function logInstalledVersion(port) {
   const rows = await t.eval(`
     [...document.querySelectorAll('tr')].map(r => r.textContent.replace(/\\s+/g, ' ').trim())
       .filter(x => /MEGA PACK/i.test(x)).slice(0, 3)
-      .map(x => { const i = x.search(/MEGA PACK/i); return i >= 0 ? '…' + x.slice(Math.max(0, i - 20), i + 90) + '…' : x.slice(0, 140); })
   `).catch(() => []);
-  console.log('— lignes TM :', JSON.stringify(rows, null, 0).replace(/\\s+/g, ' ').slice(0, 600));
+  // Journal tronqué pour lecture ; rows retournés BRUTS (la version peut être
+  // collée à la taille « 2.13.2341 KB » → le --verify compare par includes()).
+  const shown = rows.map((x) => { const i = x.search(/MEGA PACK/i); return i >= 0 ? '…' + x.slice(Math.max(0, i - 20), i + 90) + '…' : x.slice(0, 140); });
+  console.log('— lignes TM :', JSON.stringify(shown, null, 0).replace(/\\s+/g, ' ').slice(0, 600));
   t.close();
   return rows;
 }
 
+// ── Version du bundle local : @version extrait du fichier .user.js.
+function localBundleVersion(file) {
+  const m = fs.readFileSync(file, 'utf8').match(/^\/\/\s*@version\s+(\S+)/m);
+  return m ? m[1] : null;
+}
+
+// ── Version installée, lue dans la ligne MEGA PACK du dashboard TM.
+// ⚠️ Le texte de la ligne colle la version et la taille (« …LLM2.13.2341 KB… »)
+// : impossible de découper la version par regex seule. D'où :
+//   - `version` : meilleure extraction indicative (affichage/diagnostic) ;
+//   - `present` : test fiable — la version LOCALE attendue apparaît dans la
+//     ligne (c'est lui qui décide pour --verify).
+async function installedTmVersion(port, localVersion) {
+  const rows = await logInstalledVersion(port);
+  let version = null;
+  for (const r of rows) {
+    const m = r.match(/(\d+\.\d+\.\d+)(?!\d)/);
+    if (m) { version = m[1]; break; }
+  }
+  const present = localVersion ? rows.some((r) => r.includes(localVersion)) : null;
+  return { version, rows, present };
+}
+
 // ── Parsing : premier argument non-option = chemin du .user.js.
 function parseArgs(argv) {
-  const opts = { file: null, probeOnly: false, reload: false, port: PORT };
+  const opts = { file: null, probeOnly: false, reload: false, verify: false, port: PORT };
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
     if (a === '--probe-only') opts.probeOnly = true;
     else if (a === '--reload') opts.reload = true;
+    else if (a === '--verify') opts.verify = true;
     else if (a.startsWith('--port=')) opts.port = Number(a.slice(7)) || opts.port;
     else if (a === '--port') { opts.port = Number(argv[++i]) || opts.port; }
     else if (!a.startsWith('--')) opts.file = a;
@@ -248,7 +277,7 @@ module.exports = {
   PORT, TM_EXT, DEFAULT_FILE, INSTALL_LABELS,
   Tab, cdpUp, ensureTmUtilsTab, probeFileInputs, attachUserJs,
   waitForAskPage, closeStaleAskPages, buildAskClickScript, clickInstallButton,
-  reloadClaude, logInstalledVersion, parseArgs,
+  reloadClaude, logInstalledVersion, localBundleVersion, installedTmVersion, parseArgs,
 };
 
 if (require.main === module) {
@@ -264,6 +293,20 @@ if (require.main === module) {
     }
 
     console.log('— userscript :', file);
+
+    // ── Mode --verify : comparer la @version du bundle local à celle installée
+    // dans TM (test post-install CI : exit 0 si identiques, 1 sinon).
+    if (opts.verify) {
+      const local = localBundleVersion(file);
+      if (!local) { console.error('✗ @version introuvable dans', file); process.exit(1); }
+      const inst = await installedTmVersion(opts.port, local);
+      console.log('— version bundle :', local);
+      console.log('— version TM (indicative) :', inst.version || '(non trouvée)');
+      if (inst.present === true) { console.log('✓ verify : TM à jour (' + local + ')'); return; }
+      console.error('✗ verify : la version ' + local + ' n\'apparaît pas dans la ligne TM du dashboard' + (inst.rows.length ? '' : ' (aucune ligne MEGA PACK trouvée)') + ' — installer le bundle puis relancer --verify');
+      process.exit(1);
+    }
+
     await closeStaleAskPages(opts.port);
     const { info, created } = await ensureTmUtilsTab(opts.port);
     const tab = new Tab(info); await tab.connect();

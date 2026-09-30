@@ -95,3 +95,39 @@ test("click: mode probe — aucun clic, boutons listés", () => {
   assert.ok(!reinstall.clicked, "le mode probe ne doit jamais cliquer");
   assert.deepEqual(rep.buttons.map((b) => b.label), ["Réinstaller"]);
 });
+
+// ── --verify : extraction et comparaison des versions ──
+
+test("localBundleVersion: @version extrait du bundle réel", () => {
+  const v = mod.localBundleVersion(require("path").join(__dirname, "..", "interface", "mega-pack-panel-full.user.js"));
+  assert.match(v, /^\d+\.\d+\.\d+$/, "@version du bundle doit être x.y.z, got: " + v);
+});
+
+test("localBundleVersion: null si pas de @version", () => {
+  const os = require("node:os");
+  const fs = require("node:fs");
+  const tmp = require("path").join(os.tmpdir(), "mgp-no-version-" + Date.now() + ".user.js");
+  fs.writeFileSync(tmp, "// ==UserScript==\n// @name test\n// ==/UserScript==\n");
+  try { assert.equal(mod.localBundleVersion(tmp), null); }
+  finally { fs.unlinkSync(tmp); }
+});
+
+test("parseArgs: --verify reconnu", () => {
+  assert.equal(mod.parseArgs(["--verify"]).verify, true);
+  assert.equal(mod.parseArgs([]).verify, false);
+});
+
+test("version TM: extraction indicative + décision par includes (version collée à la taille)", () => {
+  // La ligne réelle du dashboard colle version et taille : « …LLM2.13.2341 KB… ».
+  // La regex indicative peut déborder (2.13.2341), mais la décision --verify
+  // repose sur includes(versionLocale) qui, lui, est exact.
+  const rows = ["…1MEGA PACK Panel Luxe — Skills, Agents & Équipes pour tout LLM2.13.2341 KB1 min…"];
+  const extract = (rs) => { for (const r of rs) { const m = r.match(/(\d+\.\d+\.\d+)(?!\d)/); if (m) return m[1]; } return null; };
+  const local = "2.13.2";
+  assert.equal(rows.some((r) => r.includes(local)), true, "includes doit trouver 2.13.2 dans la ligne collée");
+  assert.equal(extract(rows), "2.13.2341", "l'extraction indicative peut déborder — non décisionnelle");
+  assert.equal(extract(["MEGA PACK sans numéro"]), null);
+  // Ancienne version installée : includes échoue → verify doit échouer.
+  const oldRows = ["MEGA PACK Panel Luxe2.12.0 341 KB"];
+  assert.equal(oldRows.some((r) => r.includes(local)), false);
+});
