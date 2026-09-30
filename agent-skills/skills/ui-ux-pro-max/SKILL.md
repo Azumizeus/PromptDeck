@@ -35,3 +35,7 @@ Senior UI/UX guidance: design systems, accessibility, interaction patterns and c
 - [ ] La procédure du dépôt source a été suivie de bout en bout.
 - [ ] Le résultat attendu a été observé (pas seulement supposé).
 - [ ] Aucune étape sautée sous pression de temps.
+
+## Repo local (maj 30/09/2026)
+
+Dépôt complet cloné (13 skills : design, banner-design, ui-styling, brand, slides, design-system) : `~/Desktop/Repo github a utiliser/ui-ux-pro-max-skill/` (source : github.com/nextlevelbuilder/ui-ux-pro-max-skill) — CLI dans `cli/`.

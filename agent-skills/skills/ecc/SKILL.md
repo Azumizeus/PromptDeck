@@ -35,3 +35,7 @@ Bundles skills, persistent memory and pre-flight checks for Claude Code in one i
 - [ ] La procédure du dépôt source a été suivie de bout en bout.
 - [ ] Le résultat attendu a été observé (pas seulement supposé).
 - [ ] Aucune étape sautée sous pression de temps.
+
+## Repo local (maj 30/09/2026)
+
+Dépôt complet cloné (1027 skills) : `~/Desktop/Repo github a utiliser/ECC/` (source : github.com/affaan-m/ECC) — skills dans `.cursor/skills/` et plugins ; documentation d'optimisation agents dans `CLAUDE.md`/`AGENTS.md`.
