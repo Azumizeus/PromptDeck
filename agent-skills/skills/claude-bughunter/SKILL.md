@@ -18,6 +18,7 @@ description: Suite de 83 skills de chasse aux bugs et failles (XSS, CORS, JWT, A
 
 - Skills : `skills/hunt-*/SKILL.md` + `skills/meme-coin-audit/SKILL.md`
 - Guide d'installation : `INSTALL.md`
+- **Installé le 30/09/2026 : les 83 skills déployés en entier** dans les 5 surfaces (megapack, opencode, freebuff, claude : sous-dossier `claude-bughunter-pack/` ; ChatDesk : 83 fiches `.cd` dans `~/.chatdeck/skills/`, dont `meme-coin-audit.cd`).
 
 ## When to Use
 
