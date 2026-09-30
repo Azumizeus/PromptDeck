@@ -18,6 +18,11 @@ description: 103 skills d'automatisation navigateur Browser-Act : social-listeni
 
 - `browser-act/SKILL.md` (socle), `solutions/social-listening/*/SKILL.md`, `docs/`
 
+## Verdict install (30/09/2026)
+
+- La CLI officielle `browser-act-cli` n'a **pas de build macOS Intel** (wheels : arm64, Linux x64/arm64, Windows) → pas installable sur ce Mac.
+- **Les recettes restent valides sans la CLI** : patterns d'URL + scripts d'extraction, testés le 30/09 sur Trustpilot (avis extraits via navigateur local) ✓. À utiliser avec le pilotage navigateur de l'agent (Freebuff/ChatDesk) plutôt que la CLI.
+
 ## When to Use
 
 - Veille X/Instagram (complète myzoe/Zoe côté Reels), monitoring de mentions, collecte de commentaires.
