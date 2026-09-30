@@ -71,6 +71,7 @@ Ouvrir **https://claude.ai** (ou ChatGPT, Gemini…) :
 | Compteur « 136/177 skills · 190 agents » | Version périmée → **⚡ Vérifier les mises à jour** puis ré-installer (180·231 attendus) |
 | Le panneau disparaît | Il est masqué, pas désinstallé → cliquer ⚡ pour le rouvrir |
 | Chrome « ne voit pas » la nouvelle version | Tampermonkey met à jour selon son intervalle → forcer via « ⚡ Vérifier les mises à jour » |
+| Réinstaller en ligne de commande (sans clic, dev/CI) | `node agent-skills/scripts/install-userscript-cdp.js --reload` — pipeline CDP complet documenté dans l'en-tête du [script](../scripts/install-userscript-cdp.js) |
 
 ## 7. Vérification automatique (dev)
 
@@ -86,6 +87,12 @@ node agent-skills/scripts/panel-e2e-browser.js --quick  # local uniquement, sans
 
 # Branché au harnais complet (448 checks) :
 node agent-skills/menubar-app-luxe/test-luxe.js --e2e
+
+# Installation / réinstallation du userscript sans clic (pipeline CDP :
+# dashboard TM → import fichier → ask.html → « Mettre à jour »/« Réinstaller ») :
+node agent-skills/scripts/install-userscript-cdp.js --reload       # installe + recharge claude.ai
+node agent-skills/scripts/install-userscript-cdp.js --probe-only   # sonde sans cliquer
+node agent-skills/scripts/install-userscript-cdp-test.js           # tests unitaires (node --test)
 ```
 
 L'E2E échoue si le span `.lx` disparaît, si les 4 boutons sortent du span,
