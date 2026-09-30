@@ -98,3 +98,41 @@ node agent-skills/scripts/install-userscript-cdp-test.js           # tests unita
 L'E2E échoue si le span `.lx` disparaît, si les 4 boutons sortent du span,
 si le style sombre est perdu, ou si le catalogue embarqué n'est plus à jour —
 c'est le garde-fou de la régression « fond blanc » corrigée en 2.12.1/2.13.x.
+
+### Le pipeline CDP d'installation en un coup d'œil
+
+Le script [`scripts/install-userscript-cdp.js`](../scripts/install-userscript-cdp.js)
+automatise tout le cycle d'installation/réinstallation via le protocole de
+débogage de Chrome (CDP). Chaque nœud correspond à une ligne « — » du journal :
+
+```mermaid
+flowchart TD
+    A["node install-userscript-cdp.js"] --> B{"CDP 9223<br/>joignable ?"}
+    B -- "non" --> Z["exit 2 + aide :<br/>lancer Chrome-mgp avec<br/>--remote-debugging-port=9223"]
+    B -- "oui" --> C["Onglet dashboard Tampermonkey<br/>options.html#nav=utils<br/>(réutilisé, ou créé via /json/new PUT)"]
+    C --> D["Fermeture des ask.html périmés<br/>(run précédent resté en attente)"]
+    D --> E["DOM.setFileInputFiles<br/>sur input_ZmlsZV91dGlscw_file<br/>avec le .user.js"]
+    E --> F["⚠️ Dispatch manuel des events<br/>input + change :<br/>setFileInputFiles n'émet RIEN"]
+    F --> G["Poller /json/list :<br/>TM ouvre ask.html?aid=…<br/>dans un NOUVEL onglet"]
+    G --> H{"Boutons de ask.html :<br/>input type=button, ids base64.<br/>Quel libellé est présent ?"}
+    H -- "Réinstaller<br/>(réinstallation)" --> I["click() sur le premier<br/>label matché"]
+    H -- "Mettre à jour<br/>(première install)" --> I
+    H -- "Installer" --> I
+    H -- "aucun match" --> Y["exit 1 + conseil :<br/>relancer avec --probe-only"]
+    I --> J{"--reload ?"}
+    J -- "oui" --> K["Version lue dans le dashboard TM<br/>puis Page.reload ignoreCache<br/>sur claude.ai<br/>(un userscript ne se<br/>réinjecte pas à chaud)"]
+    J -- "non" --> L["exit 0 ✓"]
+    K --> L
+```
+
+Pièges encodés dans le script (à ne pas redécouvrir) :
+
+1. `DOM.setFileInputFiles` copie le fichier mais ne déclenche aucun événement —
+   sans le dispatch manuel `input`/`change`, Tampermonkey reste muet.
+2. Les boutons de `ask.html` sont des `<input type="button">`, **pas** des
+   `<button>` — un sélecteur `button` ne les trouve jamais. Leurs `id` sont
+   encodés base64 (ex. « Réinstaller » → `input_UulpbnN0YWxsZXJfdW5kZWZpbmVk_bu`).
+3. L'ordre des regex importe : « Réinstaller » est testé **avant**
+   « Installer », dont il est la sous-chaîne.
+4. Après installation, la page claude.ai déjà ouverte garde l'ancienne version
+   du script : le rechargement (`--reload`) fait partie du geste.
