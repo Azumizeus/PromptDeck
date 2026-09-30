@@ -72,6 +72,7 @@ Ouvrir **https://claude.ai** (ou ChatGPT, Gemini…) :
 | Le panneau disparaît | Il est masqué, pas désinstallé → cliquer ⚡ pour le rouvrir |
 | Chrome « ne voit pas » la nouvelle version | Tampermonkey met à jour selon son intervalle → forcer via « ⚡ Vérifier les mises à jour » |
 | Réinstaller en ligne de commande (sans clic, dev/CI) | `node agent-skills/scripts/install-userscript-cdp.js --reload` — pipeline CDP complet documenté dans l'en-tête du [script](../scripts/install-userscript-cdp.js) |
+| **Brave** : épingle 📌 absente et panneau non redimensionnable | Vieille version dans le Tampermonkey de Brave (avant la 2.13.1 : pas d'épingle, resize bogué) → **⚡ Vérifier les mises à jour** ou réinstaller le fichier (§3) ; le code 2.13.2 est validé 9/9 dans Brave par le test ci-dessous |
 
 ## 7. Vérification automatique (dev)
 
@@ -93,6 +94,14 @@ node agent-skills/menubar-app-luxe/test-luxe.js --e2e
 node agent-skills/scripts/install-userscript-cdp.js --reload       # installe + recharge claude.ai
 node agent-skills/scripts/install-userscript-cdp.js --probe-only   # sonde sans cliquer
 node agent-skills/scripts/install-userscript-cdp-test.js           # tests unitaires (node --test)
+
+# Pin 📌 + resize : 9 checks fonctionnels dans un Chromium réel (userscript
+# injecté directement, indépendant de Tampermonkey) — Chrome OU Brave :
+node agent-skills/scripts/panel-pin-resize-cdp.js                  # Chrome-mgp (CDP 9223)
+node agent-skills/scripts/panel-pin-resize-cdp.js --port 9224      # Brave profil test (CDP 9224)
+#   Brave : open -na "Brave Browser" --args \
+#     --user-data-dir="$HOME/Library/Application Support/Brave-test-mgp" \
+#     --remote-debugging-port=9224 --no-first-run
 ```
 
 L'E2E échoue si le span `.lx` disparaît, si les 4 boutons sortent du span,
