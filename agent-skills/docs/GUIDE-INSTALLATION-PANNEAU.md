@@ -1,10 +1,10 @@
 # ⚡ MEGA PACK Panel Luxe — Guide d'installation (Chrome & Brave)
 
-> Panneau flottant dans une fenêtre macOS : **180 skills · 231 agents · 🕸 équipes ·
+> Panneau flottant dans une fenêtre macOS : **270 skills · 231 agents · 🕸 équipes ·
 > ✍️ prompts perso · ★ favoris**, injectable dans Claude, ChatGPT, Gemini,
 > Perplexity, Mistral… via **Tampermonkey**.
 >
-> Version actuelle : **2.13.2** — fichier à installer :
+> Version actuelle : **2.14.0** — fichier à installer :
 > [`interface/mega-pack-panel-full.user.js`](../interface/mega-pack-panel-full.user.js)
 
 ---
@@ -48,7 +48,7 @@ Ouvrir **https://claude.ai** (ou ChatGPT, Gemini…) :
   (premier lancement : visite guidée « ÉTAPE 1/9 » — normal) ;
 - barre titre **« ⚡ MEGA PACK — Édition Luxe »** avec à droite
   **🎓 ⚙ Réglages ＋ FR** en **pastilles sombres bordées** (jamais de fond blanc) ;
-- en-tête : « 180 skills · 231 agents » ;
+- en-tête : « 270 skills · 231 agents » ;
 - recherche « swap » → ~10 résultats, compteur dans le pied.
 
 ## 5. Mises à jour
@@ -67,12 +67,12 @@ Ouvrir **https://claude.ai** (ou ChatGPT, Gemini…) :
 |---|---|
 | Le `.js` s'affiche en texte, pas d'installation | Accès aux URL de fichier désactivé (§2.2) → l'activer puis ré-ouvrir le fichier |
 | Pas de bouton ⚡ sur la page | Mode développeur / « Autoriser les scripts utilisateur » (§2.1) ; recharger la page |
-| Panneau présent mais boutons 🎓/⚙/＋/FR **blancs** | Vieille version installée (avant le fix du span `.lx`) → installer la 2.13.2 (§3) |
-| Compteur « 136/177 skills · 190 agents » | Version périmée → **⚡ Vérifier les mises à jour** puis ré-installer (180·231 attendus) |
+| Panneau présent mais boutons 🎓/⚙/＋/FR **blancs** | Vieille version installée (avant le fix du span `.lx`) → installer la 2.14.0 (§3) |
+| Compteur « 136/177 skills · 190 agents » | Version périmée → **⚡ Vérifier les mises à jour** puis ré-installer (270·231 attendus) |
 | Le panneau disparaît | Il est masqué, pas désinstallé → cliquer ⚡ pour le rouvrir |
 | Chrome « ne voit pas » la nouvelle version | Tampermonkey met à jour selon son intervalle → forcer via « ⚡ Vérifier les mises à jour » |
 | Réinstaller en ligne de commande (sans clic, dev/CI) | `node agent-skills/scripts/install-userscript-cdp.js --reload` — pipeline CDP complet documenté dans l'en-tête du [script](../scripts/install-userscript-cdp.js) |
-| **Brave** : épingle 📌 absente et panneau non redimensionnable | Vieille version dans le Tampermonkey de Brave (avant la 2.13.1 : pas d'épingle, resize bogué) → **⚡ Vérifier les mises à jour** ou réinstaller le fichier (§3) ; le code 2.13.2 est validé 9/9 dans Brave par le test ci-dessous |
+| **Brave** : épingle 📌 absente et panneau non redimensionnable | Vieille version dans le Tampermonkey de Brave (avant la 2.13.1 : pas d'épingle, resize bogué) → **⚡ Vérifier les mises à jour** ou réinstaller le fichier (§3) ; le code 2.14.0 est validé 9/9 dans Brave par le test ci-dessous |
 
 ## 7. Vérification automatique (dev)
 

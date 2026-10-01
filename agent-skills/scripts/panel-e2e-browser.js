@@ -20,7 +20,7 @@ const EXPECTED = (() => {
     const m = src.match(/"meta":\s*\{[\s\S]*?"skills":\s*(\d+),[\s\S]*?"agents":\s*(\d+)/);
     if (m) return { s: +m[1], a: +m[2] };
   } catch {}
-  return { s: 180, a: 231 };
+  return { s: 270, a: 231 };
 })();
 const ONLY = process.argv.includes('--quick') ? 'local' : null;
 const CHECKS = [];

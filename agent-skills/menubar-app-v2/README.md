@@ -4,7 +4,7 @@
 > (🌌 Galaxie 3D seule) et [`../menubar-app-bridge`](../menubar-app-bridge)
 > (🛰 Pont de commandement seul) — même moteur, une seule expérience chacune.
 
-Deux vues inédites pour activer les **180 skills + 231 agents + tes prompts perso** :
+Deux vues inédites pour activer les **272 skills + 231 agents + tes prompts perso** :
 
 ## 🌌 Galaxie 3D
 Toute la bibliothèque en étoiles navigables : **agents en orbite verte**, **skills en anneau

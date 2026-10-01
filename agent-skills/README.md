@@ -215,7 +215,7 @@ Skills are plain Markdown - they work with any agent that accepts system prompts
 
 ## MEGA PACK Panel — Mise à jour sans clic (userscript)
 
-Le [panneau MEGA PACK](interface/mega-pack-panel-full.user.js) (userscript Tampermonkey, 180 skills · 231 agents) s'installe et se met à jour sans parcourir les menus, via CDP (Chrome DevTools Protocol) sur un navigateur de test dédié — le profil quotidien ignore le port de débogage par sécurité (Chromium ≥ 136).
+Le [panneau MEGA PACK](interface/mega-pack-panel-full.user.js) (userscript Tampermonkey, 272 skills · 231 agents) s'installe et se met à jour sans parcourir les menus, via CDP (Chrome DevTools Protocol) sur un navigateur de test dédié — le profil quotidien ignore le port de débogage par sécurité (Chromium ≥ 136).
 
 ```bash
 # Chrome-mgp : profil de test avec CDP (prérequis, voir docs/GUIDE-INSTALLATION-PANNEAU.md)
@@ -457,7 +457,7 @@ The portable core stays in shared directories. Host-specific paths are native di
 
 | Layer / consumer | Repository paths | Purpose |
 |---|---|---|
-| Shared workflow core | `skills/` (180 skills : 25 lifecycle + 46 solana-protocols + 7 game-design + 3 packs blockchain/jupiter/lightprotocol + Cloudflare security-audit) | Portable `SKILL.md` workflows used by every integration |
+| Shared workflow core | `skills/` (272 skills : 25 lifecycle + 46 solana-protocols + 7 game-design + 3 packs blockchain/jupiter/lightprotocol + Cloudflare security-audit) | Portable `SKILL.md` workflows used by every integration |
 | Shared review material | `agents/` (190 personas), `references/` (7 checklists) | Specialist reviewers and pack-level checklists carried by whole-repo installs |
 | Claude Code adapter | `.claude/commands/` (10 commands), `.claude-plugin/`, `hooks/` | Slash-command wrappers, marketplace metadata, and lifecycle hooks |
 | Gemini CLI adapter | `.gemini/commands/` (10 commands) | Gemini-native TOML command wrappers |

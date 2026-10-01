@@ -1,6 +1,6 @@
 # 🖱️ MEGA PACK Interface — One-click Skills & Agents
 
-> **Version :** 1.2.0 · 180 skills · 231 agents · works with **any LLM**
+> **Version :** 1.2.0 · 272 skills · 231 agents · works with **any LLM**
 >
 > 🇫🇷 Version française : [`LISEZMOI-INTERFACE.md`](LISEZMOI-INTERFACE.md)
 

@@ -48,7 +48,7 @@ NOUVEAUTÉS v1.1.0
 · ✍️ Prompts personnalisés : bouton ＋, tags, favoris ⭐, import .md/.txt (glisser-déposer), export .md (Réglages)
 · ⭐ Favoris + raccourcis ⌘1-⌘9 · 🕘 Récents · LLM par défaut (⌘⏎)
 · 12 destinations « Ouvrir dans » : Claude, ChatGPT, Perplexity, Copilot, DeepSeek, Z.ai, Kimi, Mammouth.ia, Freebuff, OpenCode (desktop + terminal), presse-papiers
-· Noms/descriptions en français + recherche bilingue FR/EN (411 items)
+· Noms/descriptions en français + recherche bilingue FR/EN (503 items)
 · Lancement auto au démarrage · raccourci ⌥Espace (⌘Espace est réservé par Spotlight)
 · Fenêtre déplaçable/redimensionnable (position mémorisée) · export/import de configuration JSON
 

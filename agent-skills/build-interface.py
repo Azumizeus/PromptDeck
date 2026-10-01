@@ -123,7 +123,7 @@ except Exception as e:
     print("WARN — ancien catalogue illisible :", e)
 
 out = {
-    "meta": {"generated": date.today().isoformat(), "version": "0.7.5",
+    "meta": {"generated": date.today().isoformat(), "version": "0.8.0",
              "skills": len(skills), "agents": len(agents)},
     "skills": [{"name": s["name"], "desc": s["desc"],
                 "category": cat_skill(s["path"]), "path": s["path"]} for s in skills],

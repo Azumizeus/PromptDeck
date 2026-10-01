@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         MEGA PACK Panel Luxe — Skills, Agents & Équipes pour tout LLM
 // @namespace    mega-pack
-// @version      2.13.2
+// @version      2.14.0
 // @description  Panneau flottant Édition Luxe dans une fenêtre macOS : 180 skills + 231 agents + 🕸 équipes + ✍️ prompts perso + ★ favoris, recherche instantanée, tooltip expert, clic droit multi-LLM, sélecteur de LLM par défaut, composeur ⌘-clic, menu « Vérifier les mises à jour » — injectable dans n'importe quelle conversation LLM (Claude, ChatGPT, Gemini, Perplexity, Mistral, OpenCode Web…)
 // @updateURL    https://raw.githubusercontent.com/Azumizeus/PromptDeck/master/agent-skills/interface/mega-pack-panel-full.user.js
 // @downloadURL  https://raw.githubusercontent.com/Azumizeus/PromptDeck/master/agent-skills/interface/mega-pack-panel-full.user.js
@@ -24,13 +24,13 @@
 // ==/UserScript==
 
 // ── Catalogue complet embarqué (généré par build-userscript.py) ───────────
-// Catalogue complet MEGA PACK v0.7.5 — généré par build-interface.py
-// Skills: 180 | Agents: 231
+// Catalogue complet MEGA PACK v0.8.0 — généré par build-interface.py
+// Skills: 272 | Agents: 231
 const MEGA_CATALOG = {
  "meta": {
-  "generated": "2026-09-30",
-  "version": "0.7.5",
-  "skills": 180,
+  "generated": "2026-10-01",
+  "version": "0.8.0",
+  "skills": 272,
   "agents": 231
  },
  "skills": [
@@ -55,6 +55,18 @@ const MEGA_CATALOG = {
    "path": "skills/agentmemory/",
    "name_fr": "Mémoire d'agents",
    "desc_fr": "Donne aux agents une mémoire persistante et structurée : faits, préférences, état projet. À utiliser quand un agent durable doit se rappeler au-delà de la fenêtre de contexte."
+  },
+  {
+   "name": "ai-driven-dev-framework",
+   "desc": "Framework AI-driven-dev (ai-driven-dev/framework) : 103 skills de workflow dev structuré — repo-init, commit, pull-request, release-tag, acceptance-QA, assert, debug. Use when following a disciplined git/QA workflow with agents.",
+   "category": "ai-driven-dev-framework",
+   "path": "skills/ai-driven-dev-framework/"
+  },
+  {
+   "name": "anthropic-cybersecurity-skills",
+   "desc": "818 skills de cybersécurité structurés pour agents IA (défense, audit, forensics, zero-trust, GCP/AWS hardening…) au format compatible Claude Code. Use when a security task needs a proven structured procedure.",
+   "category": "anthropic-cybersecurity-skills",
+   "path": "skills/anthropic-cybersecurity-skills/"
   },
   {
    "name": "anthropics-skills",
@@ -121,6 +133,12 @@ const MEGA_CATALOG = {
    "desc_fr": "Infrastructure blockchain Quicknode : endpoints RPC (80+ chaînes), Streams (données temps réel), Webhooks, stockage IPFS, Add-ons Marketplace (Token API, NFT API, outils DeFi), DAS API Solana, KV Store et streaming gRPC."
   },
   {
+   "name": "browser-act-skills",
+   "desc": "103 skills d'automatisation navigateur Browser-Act : social-listening (X, Instagram, Trustpilot, WeChat…), scraping de profils, veille de marque. Use when a task needs reading or acting on web/social data.",
+   "category": "browser-act-skills",
+   "path": "skills/browser-act-skills/"
+  },
+  {
    "name": "browser-testing-with-devtools",
    "desc": "Tests in real browsers via Chrome DevTools MCP. Use when building or debugging anything that runs in a browser. Use when you need to inspect the DOM, capture console errors, analyze network requests, profile performance, or verify visual output with real runtime data. Requires the chrome-devtools MC",
    "category": "browser-testing-with-devtools",
@@ -157,6 +175,510 @@ const MEGA_CATALOG = {
    "path": "skills/ci-cd-and-automation/",
    "name_fr": "CI/CD et automatisation",
    "desc_fr": "Automatise la mise en place des pipelines CI/CD : quality gates, test runners en CI et stratégies de déploiement."
+  },
+  {
+   "name": "apk-redteam-pipeline",
+   "desc": "End-to-end Android APK red-team pipeline — automated APK acquisition (Play Store + apkpure + apkmirror fallback), jadx decompilation, secret/URL/JWT/Firebase grep, pinned-cert extraction, exported-component enumeration, Frida runtime instrumentation templates, intent-injection probes. Built from an ",
+   "category": "claude-bughunter-pack",
+   "path": "skills/claude-bughunter-pack/apk-redteam-pipeline/"
+  },
+  {
+   "name": "bb-local-toolkit",
+   "desc": "Local-tooling companion to the bug-bounty orchestrator — carries the SAME complete bug-bounty workflow, but reach for THIS variant when you also need to resolve where tools, wordlists, and clones are installed on the local machine (jhaddix, SecLists, trufflehog, ffuf, dalfox, ghauri); for pure orche",
+   "category": "claude-bughunter-pack",
+   "path": "skills/claude-bughunter-pack/bb-local-toolkit/"
+  },
+  {
+   "name": "bb-methodology",
+   "desc": "Use at the START of any bug bounty hunting session, when switching targets, or when feeling lost about what to do next. Master orchestrator that combines the 5-phase non-linear hunting workflow with the critical thinking framework (developer psychology, anomaly detection, What-If experiments). Route",
+   "category": "claude-bughunter-pack",
+   "path": "skills/claude-bughunter-pack/bb-methodology/"
+  },
+  {
+   "name": "bug-bounty",
+   "desc": "Complete bug bounty workflow — recon (subdomain enumeration, asset discovery, fingerprinting, HackerOne scope, source code audit), pre-hunt learning (disclosed reports, tech stack research, mind maps, threat modeling), vulnerability hunting (IDOR, SSRF, XSS, auth bypass, CSRF, race conditions, SQLi,",
+   "category": "claude-bughunter-pack",
+   "path": "skills/claude-bughunter-pack/bug-bounty/"
+  },
+  {
+   "name": "bugcrowd-reporting",
+   "desc": "Bugcrowd-specific reporting tactics complementing report-writing: VRT category search-and-fallback strategy when no exact match exists, manual severity override when VRT defaults underrate impact, severity-request paragraph as first body section, OOS-clause rebuttal templates (rate limiting on auth-",
+   "category": "claude-bughunter-pack",
+   "path": "skills/claude-bughunter-pack/bugcrowd-reporting/"
+  },
+  {
+   "name": "cloud-iam-deep",
+   "desc": "Cloud IAM red-team attack chain across AWS, Azure, GCP — focused on EXTERNAL exploitation paths and post-credential-discovery privilege analysis. Covers IAM enumeration (aws iam, az role, gcloud iam), STS/AssumeRole chaining, Azure Managed Identity abuse (via SSRF/leak), GCP service account JSON abu",
+   "category": "claude-bughunter-pack",
+   "path": "skills/claude-bughunter-pack/cloud-iam-deep/"
+  },
+  {
+   "name": "enterprise-vpn-attack",
+   "desc": "External SSL VPN / remote-access appliance attack matrix — Cisco ASA/AnyConnect, Fortinet FortiGate/FortiOS, Citrix NetScaler/ADC, Palo Alto GlobalProtect, Pulse Secure / Ivanti Connect Secure, SonicWall, F5 Big-IP. Covers version fingerprinting, CVE matrix (2018-2026), AAA backend identification, d",
+   "category": "claude-bughunter-pack",
+   "path": "skills/claude-bughunter-pack/enterprise-vpn-attack/"
+  },
+  {
+   "name": "evidence-hygiene",
+   "desc": "Evidence-capture and PoC-redaction discipline for bug-bounty submissions: cookie redaction protocol (which fields to mask, Preview annotation / Burp panel hiding / DevTools workflow), PII black-bar discipline (what to mask in other-user data — names, emails, phones, faces — vs what is safe to leave ",
+   "category": "claude-bughunter-pack",
+   "path": "skills/claude-bughunter-pack/evidence-hygiene/"
+  },
+  {
+   "name": "hunt-api-misconfig",
+   "desc": "Hunt API security misconfiguration — mass assignment, prototype pollution, HTTP verb tampering. Mass assignment: send {is_admin:true, role:admin, verified:true} on profile/account/reset endpoints — server blindly applies. JWT signature/crypto forging (alg:none, key confusion, kid/jku) is owned by hu",
+   "category": "claude-bughunter-pack",
+   "path": "skills/claude-bughunter-pack/hunt-api-misconfig/"
+  },
+  {
+   "name": "hunt-aspnet",
+   "desc": "Hunt ASP.NET-specific surface — ViewState deserialization (signed-only vs encrypted), machineKey recovery, dual-parser MAC-bypass anti-pattern, request-validator bypass, trace.axd/elmah.axd disclosure, load-balanced ViewState cross-node failures, SafeControl enumeration via reflection, customErrors ",
+   "category": "claude-bughunter-pack",
+   "path": "skills/claude-bughunter-pack/hunt-aspnet/"
+  },
+  {
+   "name": "hunt-ato",
+   "desc": "Hunt account takeover taxonomy — 9 distinct paths to ATO, plus chains. Paths: (1) password reset flaws (host-header injection redirects token, predictable/numeric token, Referer leak, no-expiry/reuse), (2) email change without re-auth, (3) OAuth account-link CSRF, (4) MFA bypass (per hunt-mfa-bypass",
+   "category": "claude-bughunter-pack",
+   "path": "skills/claude-bughunter-pack/hunt-ato/"
+  },
+  {
+   "name": "hunt-auth-bypass",
+   "desc": "Hunting skill for auth bypass vulnerabilities. Built from 12 public bug bounty reports across SAML XSW / parser-differential (GitHub Enterprise CVE-2025-25291/25292), SAML signature stripping (Uber, Rocket.Chat, samlify CVE-2025-47949), SAML domain enforcement bypass via control characters (HackerOn",
+   "category": "claude-bughunter-pack",
+   "path": "skills/claude-bughunter-pack/hunt-auth-bypass/"
+  },
+  {
+   "name": "hunt-brute-force",
+   "desc": "Hunt Missing/Weak Rate Limiting — login brute force, OTP/2FA brute force (10^6 keyspace), password-reset-token brute, credential stuffing, username/email enumeration via error-string / status-code / timing differences, weak password policy, missing CAPTCHA (CAPTCHA token replay / single-use / concur",
+   "category": "claude-bughunter-pack",
+   "path": "skills/claude-bughunter-pack/hunt-brute-force/"
+  },
+  {
+   "name": "hunt-business-logic",
+   "desc": "Hunting skill for business logic vulnerabilities. Built from 12 public bug bounty reports. Covers coupon-race-stacking (Instacart, Stripe, Reverb), negative-quantity-in-cart price tampering (Upserve, Eternal/Zomato), decimal/fraction price-field overflow (Shipt), client-side checkout amount trust on",
+   "category": "claude-bughunter-pack",
+   "path": "skills/claude-bughunter-pack/hunt-business-logic/"
+  },
+  {
+   "name": "hunt-cache-poison",
+   "desc": "Hunting skill for cache poison vulnerabilities. Built from 10 public bug bounty reports including X-Forwarded-Host poisoning, X-HTTP-Method-Override / GCS cache, reflected→stored XSS via cache, classic Omer-Gil Web Cache Deception, Cloudflare Cache Deception Armor bypass, session-token cache decepti",
+   "category": "claude-bughunter-pack",
+   "path": "skills/claude-bughunter-pack/hunt-cache-poison/"
+  },
+  {
+   "name": "hunt-captcha-bypass",
+   "desc": "Hunt CAPTCHA Bypass — 6 distinct patterns: (1) CAPTCHA field simply omitted from the request (server-side validation absent), (2) CAPTCHA token replayed from a solved challenge (no single-use enforcement), (3) CAPTCHA response accepted on a different endpoint than it was solved on (no binding to act",
+   "category": "claude-bughunter-pack",
+   "path": "skills/claude-bughunter-pack/hunt-captcha-bypass/"
+  },
+  {
+   "name": "hunt-cicd",
+   "desc": "Hunt CI/CD pipeline vulnerabilities — GitHub Actions workflow injection (pull_request_target Pwnrequest + ${{ }}-into-shell), self-hosted runner poisoning, OIDC trust-policy abuse, Jenkins script-console RCE and CVE-2024-23897 file read, GitLab CI runner-token registration, Terraform state file leak",
+   "category": "claude-bughunter-pack",
+   "path": "skills/claude-bughunter-pack/hunt-cicd/"
+  },
+  {
+   "name": "hunt-clickjacking",
+   "desc": "Hunt Clickjacking — missing X-Frame-Options / CSP frame-ancestors lets an attacker embed the target page in an invisible iframe and trick victims into clicking buttons they cannot see (UI redressing). Targets: login flows, money transfers, account settings, OAuth confirmation pages. Confirm by fetch",
+   "category": "claude-bughunter-pack",
+   "path": "skills/claude-bughunter-pack/hunt-clickjacking/"
+  },
+  {
+   "name": "hunt-cloud-misconfig",
+   "desc": "Hunt cloud / infrastructure misconfigurations. AWS: public S3 buckets (s3:GetObject anonymous), permissive bucket policies (PutObjectAcl public-write), exposed CloudFront origin, public Lambda function URL, public RDS snapshot, IAM credentials in JS bundles, AWS metadata accessible via SSRF. GCP: pu",
+   "category": "claude-bughunter-pack",
+   "path": "skills/claude-bughunter-pack/hunt-cloud-misconfig/"
+  },
+  {
+   "name": "hunt-cors",
+   "desc": "Hunt CORS Misconfiguration — origin-reflection with credentials, null-origin trust, subdomain-regex bypass (unanchored vs unescaped-dot vs prefix-only), pre-flight (OPTIONS) gating bypass, postMessage origin checks. High only when an attacker-controlled origin can perform a CREDENTIALED cross-origin",
+   "category": "claude-bughunter-pack",
+   "path": "skills/claude-bughunter-pack/hunt-cors/"
+  },
+  {
+   "name": "hunt-csrf",
+   "desc": "Hunting skill for csrf vulnerabilities. Built from 15 public bug bounty reports including modern variants — SameSite=Lax sibling-subdomain bypass (Argo CD CVE-2024-22424), GraphQL mutations-via-GET (GitLab $3,370), framework-wide CSRF middleware disabled (Stripe Dashboard $5,000), path-traversal CSR",
+   "category": "claude-bughunter-pack",
+   "path": "skills/claude-bughunter-pack/hunt-csrf/"
+  },
+  {
+   "name": "hunt-deserialization",
+   "desc": "Hunt Insecure Deserialization — Java gadget chains (ysoserial), PHP object injection (phpggc), Python pickle RCE, .NET BinaryFormatter, Ruby Marshal.load, JNDI/Log4Shell. RCE via deserialization is almost always Critical. Use when target runs Java, PHP serialization, Python pickle, .NET, or Ruby on ",
+   "category": "claude-bughunter-pack",
+   "path": "skills/claude-bughunter-pack/hunt-deserialization/"
+  },
+  {
+   "name": "hunt-dispatch",
+   "desc": "Skill-set loader for /hunt orchestrator. Fingerprints the target, picks the right platform attack skills, and loads the Red Team or WAPT skill set. Use when /hunt has just received a mode answer (redteam or wapt + blackbox|greybox) and needs to load the appropriate skills and print the taxonomy. Not",
+   "category": "claude-bughunter-pack",
+   "path": "skills/claude-bughunter-pack/hunt-dispatch/"
+  },
+  {
+   "name": "hunt-dom",
+   "desc": "Hunt client-side DOM vulnerabilities — DOM Clobbering (overwrite JS globals via HTML injection), PostMessage hijacking (missing origin check), Service Worker abuse (intercept requests from same-origin script), CSS Injection/Exfiltration (attribute selectors → token char-by-char via OOB), client-side",
+   "category": "claude-bughunter-pack",
+   "path": "skills/claude-bughunter-pack/hunt-dom/"
+  },
+  {
+   "name": "hunt-exceptional-conditions",
+   "desc": "Hunt mishandling of exceptional conditions — feed an endpoint malformed/unexpected input (wrong type, broken JSON, oversized field, null byte) and make it fail OPEN or leak internals: a verbose stack-trace / framework error page that discloses ORM internals, server file paths, library versions, or a",
+   "category": "claude-bughunter-pack",
+   "path": "skills/claude-bughunter-pack/hunt-exceptional-conditions/"
+  },
+  {
+   "name": "hunt-file-upload",
+   "desc": "Hunt file upload bugs — RCE via webshell, XSS via SVG/HTML, SSRF via XXE in DOCX, path traversal via filename. Bypass tables (10 techniques): double extension (shell.php.jpg if server checks last ext only), magic bytes spoofing (PNG header on PHP), null byte (shell.php\\0.jpg), case (PHP, .Php, .pHP)",
+   "category": "claude-bughunter-pack",
+   "path": "skills/claude-bughunter-pack/hunt-file-upload/"
+  },
+  {
+   "name": "hunt-fintech-graphql",
+   "desc": "Hunt fintech-specific GraphQL vulnerabilities: money-movement mutations (transfers, redemptions, withdrawals, card top-ups), ledger/balance/portfolio query IDOR, decimal-precision and rounding abuse, idempotency-key bypass enabling double-spend, KYC/PII field-level authorization gaps, and admin-over",
+   "category": "claude-bughunter-pack",
+   "path": "skills/claude-bughunter-pack/hunt-fintech-graphql/"
+  },
+  {
+   "name": "hunt-forgot-password",
+   "desc": "Hunt Forgot Password / Account Recovery Authentication Flaws — 5 distinct patterns: (1) username enumeration via different responses for valid vs invalid email, (2) reset token exposed directly in the API response body, (3) reset token not invalidated after use (replay), (4) password reset link work",
+   "category": "claude-bughunter-pack",
+   "path": "skills/claude-bughunter-pack/hunt-forgot-password/"
+  },
+  {
+   "name": "hunt-graphql",
+   "desc": "Hunting skill for graphql vulnerabilities. Built from 12 public bug bounty reports across IDOR via node() / GID, mutation IDOR including AI/LLM features, cross-tenant IDOR, SSRF via argument, batching-DoS, query-cost-bypass, SQLi via argument, broken-object-level-authz, auth-bypass via unscoped muta",
+   "category": "claude-bughunter-pack",
+   "path": "skills/claude-bughunter-pack/hunt-graphql/"
+  },
+  {
+   "name": "hunt-grpc",
+   "desc": "Hunt gRPC vulnerabilities — server reflection enabled (enumerate all services/methods), missing authentication / metadata-stripping on internal endpoints, plaintext gRPC over HTTP/2, internal endpoint disclosure, proto file leakage, gRPC-Web/grpc-gateway transcoding injection, and HTTP/2 Rapid Reset",
+   "category": "claude-bughunter-pack",
+   "path": "skills/claude-bughunter-pack/hunt-grpc/"
+  },
+  {
+   "name": "hunt-host-header",
+   "desc": "Hunt Host Header Injection — password reset poisoning → ATO, web cache poisoning via unkeyed Host/X-Forwarded-Host, routing-based SSRF (Host picks upstream → cloud metadata/internal services), path-override SSRF/ACL-bypass (X-Original-URL/X-Rewrite-URL), OAuth redirect_uri/issuer poisoning, and abso",
+   "category": "claude-bughunter-pack",
+   "path": "skills/claude-bughunter-pack/hunt-host-header/"
+  },
+  {
+   "name": "hunt-html-injection",
+   "desc": "Hunt HTML Injection — user-supplied input is rendered as raw HTML in the response without sanitisation, allowing an attacker to inject arbitrary HTML tags (but not necessarily JavaScript). Lower severity than XSS but enables phishing, UI manipulation, and credential harvesting via injected forms. Us",
+   "category": "claude-bughunter-pack",
+   "path": "skills/claude-bughunter-pack/hunt-html-injection/"
+  },
+  {
+   "name": "hunt-http-smuggling",
+   "desc": "Hunt HTTP request smuggling (CL.TE, TE.CL, H2.CL, H2.TE). Cause: front-end proxy and back-end server disagree on where one request ends and the next begins (Content-Length vs Transfer-Encoding header parsing inconsistency). CL.TE: front-end uses CL, back uses TE → smuggle by sending TE: chunked but ",
+   "category": "claude-bughunter-pack",
+   "path": "skills/claude-bughunter-pack/hunt-http-smuggling/"
+  },
+  {
+   "name": "hunt-idor",
+   "desc": "Hunting skill for idor vulnerabilities. Built from 26 public bug bounty reports. Use when hunting idor on any target.",
+   "category": "claude-bughunter-pack",
+   "path": "skills/claude-bughunter-pack/hunt-idor/"
+  },
+  {
+   "name": "hunt-jwt-crypto",
+   "desc": "Hunt JWT cryptographic failures — alg:none signature-stripping and RS256→HS256 key-confusion that let an attacker forge a token for any identity (e.g. an admin) without knowing a secret. Use when the app authenticates with a JSON Web Token (an `eyJ...` Bearer token in the Authorization header, a coo",
+   "category": "claude-bughunter-pack",
+   "path": "skills/claude-bughunter-pack/hunt-jwt-crypto/"
+  },
+  {
+   "name": "hunt-k8s",
+   "desc": "Hunt Kubernetes & Docker — API anonymous access, kubelet 10250 exec (SPDY/WebSocket, NOT plain POST) and the simpler /run primitive, etcd 2379 unauth, dashboard skip-login, RBAC misconfig, secret/SA-token abuse, docker.sock host escape, runc/container-escape (Leaky Vessels CVE-2024-21626), API-serve",
+   "category": "claude-bughunter-pack",
+   "path": "skills/claude-bughunter-pack/hunt-k8s/"
+  },
+  {
+   "name": "hunt-laravel",
+   "desc": "Hunt Laravel specific vulnerabilities — Debug mode leakage (APP_DEBUG=true exposes full stack trace + env vars), Laravel Telescope/Horizon dashboard unauthorized access, Ignition RCE (CVE-2021-3129), Signed URL manipulation, Queue Worker abuse, mass assignment via Eloquent, deserialization via cooki",
+   "category": "claude-bughunter-pack",
+   "path": "skills/claude-bughunter-pack/hunt-laravel/"
+  },
+  {
+   "name": "hunt-ldap",
+   "desc": "Hunt LDAP Injection and XPath Injection — authentication bypass, blind char-by-char attribute exfiltration, AD user/group enumeration, XML-store XPath bypass. Covers the LDAP special-character set (* ( ) \\\\ NUL /), search-filter-context vs DN-injection, parenthesis-balancing, AND/OR filter logic, an",
+   "category": "claude-bughunter-pack",
+   "path": "skills/claude-bughunter-pack/hunt-ldap/"
+  },
+  {
+   "name": "hunt-lfi",
+   "desc": "Hunt Local File Inclusion (LFI), Remote File Inclusion (RFI), and Path Traversal — /etc/passwd read, log poisoning → RCE, PHP filter-chain RCE (no upload needed), php:// / data:// / zip:// / phar:// wrappers, RFI via allow_url_include, directory traversal read/write/delete. Covers OOB/blind LFI conf",
+   "category": "claude-bughunter-pack",
+   "path": "skills/claude-bughunter-pack/hunt-lfi/"
+  },
+  {
+   "name": "hunt-llm-ai",
+   "desc": "Hunt LLM/AI feature bugs — prompt injection, indirect injection, exfiltration via tool-use/markdown, ASCII smuggling, agentic AI security (OWASP Agentic Apps 2026, ASI01-ASI10). Patterns: direct injection ('ignore previous instructions'), indirect injection via documents/web pages/email the model re",
+   "category": "claude-bughunter-pack",
+   "path": "skills/claude-bughunter-pack/hunt-llm-ai/"
+  },
+  {
+   "name": "hunt-mfa-bypass",
+   "desc": "Hunt MFA / 2FA bypass — 7 distinct patterns. (1) MFA not enforced on sensitive endpoints (password change, email change accept without MFA challenge), (2) MFA-step skip via direct navigation to post-login URL, (3) MFA-token replay (same code accepted twice), (4) brute-force the 6-digit OTP without r",
+   "category": "claude-bughunter-pack",
+   "path": "skills/claude-bughunter-pack/hunt-mfa-bypass/"
+  },
+  {
+   "name": "hunt-misc",
+   "desc": "Hunting skill for misc vulnerabilities. Built from 225 public bug bounty reports. Use when hunting misc on any target.",
+   "category": "claude-bughunter-pack",
+   "path": "skills/claude-bughunter-pack/hunt-misc/"
+  },
+  {
+   "name": "hunt-nextjs",
+   "desc": "Hunt Next.js specific vulnerabilities — Server Actions arbitrary function execution, Middleware auth bypass via static asset paths, ISR cache poisoning, Image Optimization SSRF (/_next/image), RSC payload leakage, getServerSideProps injection, source map exposure, debug endpoint leakage. Use when ta",
+   "category": "claude-bughunter-pack",
+   "path": "skills/claude-bughunter-pack/hunt-nextjs/"
+  },
+  {
+   "name": "hunt-nodejs",
+   "desc": "Hunt Node.js specific vulnerabilities — Prototype Pollution → RCE chains (lodash/merge/assign), Express trust proxy misconfiguration, child_process/eval injection, template engine SSTI (EJS/Pug/Handlebars), path traversal in file servers, require() injection, environment variable exfil via /proc/sel",
+   "category": "claude-bughunter-pack",
+   "path": "skills/claude-bughunter-pack/hunt-nodejs/"
+  },
+  {
+   "name": "hunt-nosqli",
+   "desc": "Hunt NoSQL Injection — MongoDB operator injection ($where, $regex, $gt, $ne), CouchDB, Redis command injection, auth bypass via NoSQLi, data dump. Use when target uses MongoDB/Mongoose, CouchDB, Redis, or shows NoSQL error messages.",
+   "category": "claude-bughunter-pack",
+   "path": "skills/claude-bughunter-pack/hunt-nosqli/"
+  },
+  {
+   "name": "hunt-ntlm-info",
+   "desc": "Hunt NTLM/Negotiate information disclosure on internet-reachable IIS/SharePoint/Exchange. Anonymous NTLM Type-2 challenge capture leaks NetBIOS domain, internal DNS forest, computer name, AD timestamp via AV_PAIRS structure. Default Windows-installer hostnames (WIN-XXXXXXXXXXX pattern) signal lazy p",
+   "category": "claude-bughunter-pack",
+   "path": "skills/claude-bughunter-pack/hunt-ntlm-info/"
+  },
+  {
+   "name": "hunt-oauth",
+   "desc": "Hunting skill for oauth vulnerabilities. Built from 19 public bug bounty reports. Use when hunting oauth on any target.",
+   "category": "claude-bughunter-pack",
+   "path": "skills/claude-bughunter-pack/hunt-oauth/"
+  },
+  {
+   "name": "hunt-open-redirect",
+   "desc": "Hunt Open Redirect — all types including low-impact, chained to OAuth token theft → ATO, phishing chains. URL parameter manipulation, JavaScript redirect, meta refresh, header injection. Use when hunting redirect bugs or building ATO chains.",
+   "category": "claude-bughunter-pack",
+   "path": "skills/claude-bughunter-pack/hunt-open-redirect/"
+  },
+  {
+   "name": "hunt-race-condition",
+   "desc": "Hunting skill for race condition vulnerabilities. Built from 12 public bug bounty reports including modern HTTP/2 single-packet attack cases (James Kettle DEF CON 2023 \"Smashing the State Machine\"; RyotaK / Flatt Security 10,000-request first-sequence-sync expansion 2024). Covers coupon double-redem",
+   "category": "claude-bughunter-pack",
+   "path": "skills/claude-bughunter-pack/hunt-race-condition/"
+  },
+  {
+   "name": "hunt-rag-vector",
+   "desc": "Hunt vector-store / embedding-layer weaknesses in RAG pipelines (OWASP LLM08 Vector and Embedding Weaknesses) — persistent corpus poisoning that survives across sessions and users (distinct from one-shot indirect prompt injection, which is owned by hunt-llm-ai), cross-tenant vector-database IDOR (un",
+   "category": "claude-bughunter-pack",
+   "path": "skills/claude-bughunter-pack/hunt-rag-vector/"
+  },
+  {
+   "name": "hunt-rce",
+   "desc": "Hunting skill for rce vulnerabilities. Built from 67 public bug bounty reports. Use when hunting rce on any target.",
+   "category": "claude-bughunter-pack",
+   "path": "skills/claude-bughunter-pack/hunt-rce/"
+  },
+  {
+   "name": "hunt-saml",
+   "desc": "Hunt SAML / SSO attacks. Patterns: XML Signature Wrapping (XSW) — modify Assertion while keeping Signature valid by relocating signed element, comment injection in NameID (admin@target.com<!--evil-->@attacker.com → some parsers see admin@target.com), signature stripping (remove Signature element ent",
+   "category": "claude-bughunter-pack",
+   "path": "skills/claude-bughunter-pack/hunt-saml/"
+  },
+  {
+   "name": "hunt-session",
+   "desc": "Hunt Session Management vulnerabilities — session fixation (no regeneration on login), insufficient invalidation on logout / password-change / email-change, predictable or low-entropy session IDs, JWT-as-session with no exp/revocation, refresh-token rotation/reuse-detection gaps, OAuth/SSO session l",
+   "category": "claude-bughunter-pack",
+   "path": "skills/claude-bughunter-pack/hunt-session/"
+  },
+  {
+   "name": "hunt-shadow-api",
+   "desc": "Hunt shadow / zombie / undocumented API surface (OWASP API9 Improper Inventory Management) — enumerate the full API version history (v1/v2/beta/legacy paths, header- and subdomain-based versioning), pull and diff every reachable OpenAPI/Swagger spec (including ones only findable via the Wayback Mach",
+   "category": "claude-bughunter-pack",
+   "path": "skills/claude-bughunter-pack/hunt-shadow-api/"
+  },
+  {
+   "name": "hunt-sharepoint",
+   "desc": "Hunt Microsoft SharePoint Server (2013/2016/2019/Subscription Edition) on-prem farms — anonymous endpoint enumeration, version disclosure, legacy SOAP login bypass (Authentication.asmx), ToolShell precondition chain (CVE-2025-53770), SafeControl reflection enumeration via Picker.aspx, NTLM Type-2 AD",
+   "category": "claude-bughunter-pack",
+   "path": "skills/claude-bughunter-pack/hunt-sharepoint/"
+  },
+  {
+   "name": "hunt-source-leak",
+   "desc": "Hunt source code and build artifact leakage — JavaScript source maps (.js.map) reconstructing TypeScript/ES6 source, Swagger/OpenAPI JSON endpoint discovery, .env/.git exposure, webpack chunks with hardcoded secrets, robots.txt/security.txt recon, build-info files, asset-manifest.json API route disc",
+   "category": "claude-bughunter-pack",
+   "path": "skills/claude-bughunter-pack/hunt-source-leak/"
+  },
+  {
+   "name": "hunt-spa-api",
+   "desc": "Discover a single-page-app's hidden backend API from its public JS bundle, then test that API for broken access control / missing authentication. One of the highest-yield web plays in modern recon — SPAs ship their entire backend route map to the browser, and the API behind them is frequently missin",
+   "category": "claude-bughunter-pack",
+   "path": "skills/claude-bughunter-pack/hunt-spa-api/"
+  },
+  {
+   "name": "hunt-springboot",
+   "desc": "Hunt Spring Boot specific vulnerabilities — Actuator endpoints (heapdump, env, loggers, mappings, shutdown), Spring Expression Language (SpEL) injection → RCE, H2 console RCE, Jolokia JMX exposure, Spring4Shell (CVE-2022-22965), Spring Cloud Function SPEL (CVE-2022-22963), heap dump credential extra",
+   "category": "claude-bughunter-pack",
+   "path": "skills/claude-bughunter-pack/hunt-springboot/"
+  },
+  {
+   "name": "hunt-sqli",
+   "desc": "Hunting skill for sqli vulnerabilities. Built from 12 public bug bounty reports including modern NoSQL injection (Rocket.Chat CVE-2021-22911 MongoDB $regex, Mongoose ORM CVE-2024-53900 $where bypass), modern ORM raw-fragment SQLi (Django CVE-2024-42005, Sequelize GHSA-wrh9-cjv3-2hpw), second-order S",
+   "category": "claude-bughunter-pack",
+   "path": "skills/claude-bughunter-pack/hunt-sqli/"
+  },
+  {
+   "name": "hunt-ssrf",
+   "desc": "Hunting skill for ssrf vulnerabilities. Built from 15 public bug bounty reports including AWS metadata SSRF (HackerOne $25k Analytics PDF, Shopify Exchange $25k, Capital One 106M-record breach, Dropbox/HelloSign $4,913), GCP metadata SSRF (Snapchat $4k), Azure IMDS SSRF (Azure DevOps $15k chain, Cha",
+   "category": "claude-bughunter-pack",
+   "path": "skills/claude-bughunter-pack/hunt-ssrf/"
+  },
+  {
+   "name": "hunt-ssti",
+   "desc": "Hunt server-side template injection (SSTI) across Jinja2 (Flask/Django), Twig (Symfony), Freemarker (Java), ERB (Rails), Spring, Velocity, Mako, Thymeleaf, Smarty. Detection probes use double-curly and dollar-curly math expressions evaluated server-side. Once an engine is fingerprinted, escalate to ",
+   "category": "claude-bughunter-pack",
+   "path": "skills/claude-bughunter-pack/hunt-ssti/"
+  },
+  {
+   "name": "hunt-subdomain",
+   "desc": "Hunting skill for subdomain takeover vulnerabilities. Includes modern provider fingerprints — Microsoft Azure DevOps `cloudapp.azure.com` regional-pool re-issue (1-click OAuth ATO via wildcard `reply_to`, Binary Security), Zendesk help-desk takeover → email interception → password reset chain (0xpri",
+   "category": "claude-bughunter-pack",
+   "path": "skills/claude-bughunter-pack/hunt-subdomain/"
+  },
+  {
+   "name": "hunt-tls-network",
+   "desc": "Hunt TLS/SSL and DNS misconfigurations — missing HSTS (downgrade attack), weak cipher suites, expired/invalid certificates, mTLS bypass, missing SPF/DKIM/DMARC (email spoofing), DNS Zone Transfer (AXFR), dangling CNAME subdomain takeover, CAA records. Most of these are Info/Low on their own — this s",
+   "category": "claude-bughunter-pack",
+   "path": "skills/claude-bughunter-pack/hunt-tls-network/"
+  },
+  {
+   "name": "hunt-websocket",
+   "desc": "Hunt WebSocket vulnerabilities — Cross-Site WebSocket Hijacking (CSWSH), missing/weak Origin validation on the WS handshake, no per-message authentication, message tampering, socket.io namespace/room authorization bypass, and handshake-layer Upgrade smuggling. Use when target has WebSocket endpoints",
+   "category": "claude-bughunter-pack",
+   "path": "skills/claude-bughunter-pack/hunt-websocket/"
+  },
+  {
+   "name": "hunt-xss",
+   "desc": "Hunting skill for xss vulnerabilities. Built from 174 public bug bounty reports. Use when hunting xss on any target. For markup injection that reflects raw HTML but does NOT execute JavaScript (no `<script>`/event-handler execution), see hunt-html-injection — escalate here once script execution is p",
+   "category": "claude-bughunter-pack",
+   "path": "skills/claude-bughunter-pack/hunt-xss/"
+  },
+  {
+   "name": "hunt-xxe",
+   "desc": "Hunting skill for xxe vulnerabilities. Built from 10 public bug bounty reports including SVG-upload XXE, Office-doc (PPTX/DOCX) XXE, SOAP XXE, SAML AssertionConsumer XXE, blind OOB XXE via DTD callback, parameter-entity XXE, XXE-to-LFI, XXE-to-SSRF, and XXE-to-RCE chains (Adobe Commerce CosmicSting ",
+   "category": "claude-bughunter-pack",
+   "path": "skills/claude-bughunter-pack/hunt-xxe/"
+  },
+  {
+   "name": "ios-redteam-pipeline",
+   "desc": "End-to-end iOS red-team pipeline — IPA acquisition (App Store extraction, TestFlight, enterprise/ad-hoc sideload), class-dump/Hopper/Ghidra static analysis, Info.plist + entitlements + Keychain secret extraction, App Transport Security (ATS) misconfig + certificate-pinning bypass (frida-ios-dump, ob",
+   "category": "claude-bughunter-pack",
+   "path": "skills/claude-bughunter-pack/ios-redteam-pipeline/"
+  },
+  {
+   "name": "m365-entra-attack",
+   "desc": "Microsoft 365 / Entra ID red-team attack chain — current 2026 reality. AADSTS code reference, user enumeration vectors (with hardening status), Smart Lockout math, Conditional Access bypass options, ROPC + SAML SSO browser flow, Burp/Playwright templates. Built from authorized red-team work where RO",
+   "category": "claude-bughunter-pack",
+   "path": "skills/claude-bughunter-pack/m365-entra-attack/"
+  },
+  {
+   "name": "meme-coin-audit",
+   "desc": "Meme coin and token security audit — rug pull detection (honeypot, hidden mint, fee manipulation, LP lock bypass), Solana SPL token analysis (freeze authority, mint authority, metadata mutability), Token-2022 extension risks (transfer hooks, permanent delegate), DEX liquidity pool attacks (sandwich ",
+   "category": "claude-bughunter-pack",
+   "path": "skills/claude-bughunter-pack/meme-coin-audit/"
+  },
+  {
+   "name": "mid-engagement-ir-detection",
+   "desc": "Methodology for detecting client SOC patches, attacker activity, and security-state changes that occur DURING a red-team engagement — and converting those observations into deliverable findings. Built from authorized red-team work where the client patched a confirmed SQLi within 30 minutes of detect",
+   "category": "claude-bughunter-pack",
+   "path": "skills/claude-bughunter-pack/mid-engagement-ir-detection/"
+  },
+  {
+   "name": "offensive-osint",
+   "desc": "Operational arsenal for authorized external red-team and bug-bounty recon. Concrete probes, wordlists, regexes, dorks, curl one-liners for: subdomain enum, GraphQL/Swagger/REST discovery, identity fabric (Entra/Okta/ADFS/Google/SAML/M365 deep — Teams/SharePoint/OneDrive), cloud bucket enum (S3/GCS/A",
+   "category": "claude-bughunter-pack",
+   "path": "skills/claude-bughunter-pack/offensive-osint/"
+  },
+  {
+   "name": "okta-attack",
+   "desc": "Okta-as-IdP red-team attack chain — tenant discovery, user enumeration (multiple vectors), authentication flow analysis (factors enumeration, push-notification fatigue, SMS bypass), password spray with lockout discipline, Okta-specific phishing primitives (kits, FastPass abuse, OIDC redirect_uri tam",
+   "category": "claude-bughunter-pack",
+   "path": "skills/claude-bughunter-pack/okta-attack/"
+  },
+  {
+   "name": "osint-methodology",
+   "desc": "Comprehensive OSINT methodology for external red-team operations and authorized attack-surface assessments. Covers the 5-stage recon pipeline (seed discovery, asset expansion, enrichment, exposure analysis, reporting), asset-graph discipline with 29 asset types, severity rubric (CRITICAL/HIGH/MEDIUM",
+   "category": "claude-bughunter-pack",
+   "path": "skills/claude-bughunter-pack/osint-methodology/"
+  },
+  {
+   "name": "recon-scope-triage",
+   "desc": "Triage ASM/recon output for ownership before testing — separate the target's real assets from namespace-collision noise. Automated recon keyword-matches on the brand name, so for any target whose name is a common/dictionary word, the output is dominated by assets belonging to UNRELATED same-named co",
+   "category": "claude-bughunter-pack",
+   "path": "skills/claude-bughunter-pack/recon-scope-triage/"
+  },
+  {
+   "name": "redteam-mindset",
+   "desc": "Red-team operator discipline — the mindset corrections that separate offensive testing from defensive WAPT. Built from authorized red-team work where conservative defaults caused multiple findings to be missed and one to be incorrectly retracted. Use at the START of any red-team engagement and again",
+   "category": "claude-bughunter-pack",
+   "path": "skills/claude-bughunter-pack/redteam-mindset/"
+  },
+  {
+   "name": "redteam-report-template",
+   "desc": "Client-facing red-team deliverable format — codifies the Subject / Observations / Description / Impact / Recommendation / PoC structure used for external red-team engagements (not bug-bounty platform reports). Different audience, different tone, different cadence. Built from an authorized engagement",
+   "category": "claude-bughunter-pack",
+   "path": "skills/claude-bughunter-pack/redteam-report-template/"
+  },
+  {
+   "name": "report-writing",
+   "desc": "Bug bounty report writing for H1/Bugcrowd/Intigriti/Immunefi — report templates, human tone guidelines, impact-first writing, CVSS 3.1 scoring, title formula, impact statement formula, severity decision guide, downgrade counters, pre-submit checklist. Validation gates and the submittability/always-r",
+   "category": "claude-bughunter-pack",
+   "path": "skills/claude-bughunter-pack/report-writing/"
+  },
+  {
+   "name": "security-arsenal",
+   "desc": "Security payloads, bypass tables, wordlists, gf pattern names, always-rejected bug list, and conditionally-valid-with-chain table. Use when you need specific payloads for XSS/SSRF/SQLi/XXE/NoSQLi/command injection/SSTI/IDOR/path-traversal/HTTP smuggling/WebSocket/MFA bypass, or bypass techniques. Su",
+   "category": "claude-bughunter-pack",
+   "path": "skills/claude-bughunter-pack/security-arsenal/"
+  },
+  {
+   "name": "supply-chain-attack-recon",
+   "desc": "External recon for software supply-chain attack surface — package-namespace squatting candidates, dependency-confusion vulnerabilities, GitHub Actions injection openings, container image registry exposure, SBOM mining, internal-package-name leakage, and CI/CD configuration exposure. Reconnaissance a",
+   "category": "claude-bughunter-pack",
+   "path": "skills/claude-bughunter-pack/supply-chain-attack-recon/"
+  },
+  {
+   "name": "triage-validation",
+   "desc": "Finding validation before writing any report — 7-Question Gate (all 7 questions), 4 pre-submission gates, always-rejected list, conditionally valid with chain table, CVSS 3.1 quick reference, severity decision guide, report title formula, 60-second pre-submit checklist. Use BEFORE writing any report",
+   "category": "claude-bughunter-pack",
+   "path": "skills/claude-bughunter-pack/triage-validation/"
+  },
+  {
+   "name": "vmware-vcenter-attack",
+   "desc": "VMware vSphere / vCenter Server external attack matrix — version fingerprinting, the high-impact CVE chain (CVE-2021-21972 vRealize unauth file upload, CVE-2021-21985 vSAN plugin RCE, CVE-2022-22954 Workspace ONE SSTI, CVE-2023-20887 Aria RCE, CVE-2024-37085 ESXi AD bypass, CVE-2023-34048 vCenter DC",
+   "category": "claude-bughunter-pack",
+   "path": "skills/claude-bughunter-pack/vmware-vcenter-attack/"
+  },
+  {
+   "name": "web2-recon",
+   "desc": "Web2 recon pipeline — subdomain enumeration (subfinder, Chaos API, assetfinder), live host discovery (dnsx, httpx), URL crawling (katana, waybackurls, gau), directory fuzzing (ffuf), JS analysis (LinkFinder, SecretFinder), continuous monitoring (new subdomain alerts, JS change detection, GitHub comm",
+   "category": "claude-bughunter-pack",
+   "path": "skills/claude-bughunter-pack/web2-recon/"
+  },
+  {
+   "name": "web3-audit",
+   "desc": "Smart contract security audit — 10 DeFi bug classes (accounting desync, access control, incomplete path, off-by-one, oracle, ERC4626, reentrancy, flash loan, signature replay, proxy), pre-dive kill signals (TVL < $500K etc), Foundry PoC template, grep patterns for each class, and real Immunefi paid ",
+   "category": "claude-bughunter-pack",
+   "path": "skills/claude-bughunter-pack/web3-audit/"
+  },
+  {
+   "name": "claude-bughunter",
+   "desc": "Suite de 83 skills de chasse aux bugs et failles (XSS, CORS, JWT, API, RAG, LLM, meme-coin audit…) par elementalsouls. Use when auditing code, hunting vulnerabilities, or reviewing a Solana/meme-coin project.",
+   "category": "claude-bughunter",
+   "path": "skills/claude-bughunter/"
   },
   {
    "name": "claude-code-router",
@@ -557,6 +1079,12 @@ const MEGA_CATALOG = {
    "desc_fr": "Skills d'ingénierie TypeScript : types, génériques, design d'API. À utiliser en écriture ou relecture de TS fortement typé."
   },
   {
+   "name": "mempalace",
+   "desc": "MemPalace — mémoire IA locale 100 % offline (palais de tiroirs, recherche BM25 + embeddings ONNX locaux, MCP). INSTALLÉ le 30/09/2026 : CLI + palais ~/projects/memoire-mickael, branché MCP sur opencode/ChatDesk/Claude Desktop. Use when an agent needs to recall tool decisions, repos, or past setup — ",
+   "category": "mempalace",
+   "path": "skills/mempalace/"
+  },
+  {
    "name": "metaplex",
    "desc": "Metaplex development on Solana — NFTs, tokens, compressed NFTs, candy machines, token launches, autonomous agents. Use when working with Token Metadata, Core, Bubblegum, Candy Machine, Genesis, Agent Registry, or the mplx CLI.",
    "category": "metaplex-skill",
@@ -573,6 +1101,12 @@ const MEGA_CATALOG = {
    "desc_fr": "Assigne des issues GitHub à des agents de code et achemine leurs résultats. À utiliser pour répartir le travail entre plusieurs agents IA."
   },
   {
+   "name": "obscura",
+   "desc": "Navigateur headless Rust pour agents : fetch avec rendu JS, scraping structuré, serveur MCP avec 37 outils de navigation (clic, formulaires, extraction CSS). Binaire installé sur ce Mac (Intel) dans ~/tools/obscura. Remplace la CLI browser-act (pas de build macOS Intel). Triggers : « scrape",
+   "category": "obscura",
+   "path": "skills/obscura/"
+  },
+  {
    "name": "observability-and-instrumentation",
    "desc": "Instruments code so production behavior is visible and diagnosable. Use when adding logging, metrics, tracing, or alerting. Use when shipping any feature that runs in production and you need evidence it works. Use when production issues are reported but you can't tell what happened from the availabl",
    "category": "observability-and-instrumentation",
@@ -587,6 +1121,12 @@ const MEGA_CATALOG = {
    "path": "skills/oh-my-claudecode/",
    "name_fr": "Coordination d'équipes d'agents",
    "desc_fr": "Schémas de coordination d'équipes d'agents : orchestrateur, spécialistes, passations. À utiliser pour découper un projet entre plusieurs agents de code."
+  },
+  {
+   "name": "openmontage",
+   "desc": "Studio de production vidéo agentique (62k ⭐) : 138 skills embarqués couvrant génération vidéo IA (LTX-2, Seedance, Kling), musique (ACE-Step, Lyria, ElevenLabs), TTS, motion 2D/3D (GSAP, Three.js, Remotion, HyperFrames) et montage FFmpeg. Repo cloné localement — les skills se lisent depuis .agents/s",
+   "category": "openmontage",
+   "path": "skills/openmontage/"
   },
   {
    "name": "performance-optimization",
@@ -643,6 +1183,12 @@ const MEGA_CATALOG = {
    "path": "skills/rtk/",
    "name_fr": "RTK (sorties élaguées)",
    "desc_fr": "Élague et colorise les sorties de commandes pour que les agents lisent moins de bruit. À utiliser quand les sorties d'outils noient la fenêtre de contexte."
+  },
+  {
+   "name": "ruflo",
+   "desc": "Agent-harness pour déployer des essaims d'agents IA coordonnés (knowledge-graph, goals, fédération, deep-research). Use when orchestrating multiple agents on one mission.",
+   "category": "ruflo",
+   "path": "skills/ruflo/"
   },
   {
    "name": "security-and-hardening",
@@ -1345,6 +1891,12 @@ const MEGA_CATALOG = {
    "path": "skills/spec-driven-development/",
    "name_fr": "Développement piloté par les specs",
    "desc_fr": "Crée les specs avant de coder : nouveau projet, fonctionnalité ou changement majeur sans spécification existante. Rédaction de PRD avec objectifs et périmètre, clarification d'exigences floues ou ambiguës."
+  },
+  {
+   "name": "spec-kit",
+   "desc": "GitHub Spec Kit — toolkit officiel de développement piloté par spécification : constitution → spec → plan → tasks → implement. Use when starting a feature from a written spec instead of improvising.",
+   "category": "spec-kit",
+   "path": "skills/spec-kit/"
   },
   {
    "name": "superpowers",

@@ -2,7 +2,7 @@
 
 > **Version :** 1.3.0 (23 septembre 2026)
 > **Base :** addyosmani/agent-skills v0.6.9 → v0.7.0 (méga pack) → v0.7.1 (+ Cloudflare security-audit) → v0.7.2 (synchronisation amont 0.6.10) → **v0.7.3 (correctifs d'audit de sécurité)** + intégration Seeker Team + Skill Game Dev
-> **Total :** 180 skills · 231 agents · 10 slash commands
+> **Total :** 272 skills · 231 agents · 10 slash commands
 
 ## Ce qui a été intégré au dossier maître `agent-skills/`
 
@@ -63,7 +63,7 @@ Les 25 skills lifecycle du maître sont alignés sur la release amont [Agent Ski
   gemini-cli-setup (10 commands), CONTRIBUTING (règle « Write the Procedure, Not the
   Workaround »).
 - **Non intégré volontairement** : les sections Project Structure / tableaux portables du
-  README amont (le README méga-pack décrit 180 skills + 231 agents) et la suppression du
+  README amont (le README méga-pack décrit 272 skills + 231 agents) et la suppression du
   dossier `evals/` amont (le maître garde ses evals et scripts opérationnels).
 
 ### 1. Skills de protocoles Solana → `skills/solana-protocols/` (46 skills)
@@ -126,7 +126,7 @@ python-dev — mais aucun SKILL.md racine n'est en collision).
 
 ## 🖱️ Interface d'activation (boutons) — `interface/`
 
-Catalogue interactif des 180 skills + 231 agents, activables par bouton dans **tout LLM** :
+Catalogue interactif des 272 skills + 231 agents, activables par bouton dans **tout LLM** :
 
 - **`interface/mega-pack-launcher.html`** — launcheur autonome (double-clic) : recherche,
   filtres 36 catégories, bouton ⚡ Activer (copie le prompt d'activation), composeur
@@ -142,7 +142,7 @@ Catalogue interactif des 180 skills + 231 agents, activables par bouton dans **t
 
 ## 🧭 App menu-bar macOS — `menubar-app/`
 
-Application Electron résidente dans la barre de menus : recherche globale des 180 skills +
+Application Electron résidente dans la barre de menus : recherche globale des 272 skills +
 231 agents, activation en 1 clic, ouverture directe dans Claude/ChatGPT.
 
 ```bash

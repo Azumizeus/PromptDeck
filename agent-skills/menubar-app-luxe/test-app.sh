@@ -47,7 +47,7 @@ const fs = require('fs');
 try {
   const code = fs.readFileSync('$CAT', 'utf8');
   const c = new Function(code + ';return MEGA_CATALOG;')();
-  if (c.skills.length === 180 && c.agents.length === 231) console.log('ok');
+  if (c.skills.length === 272 && c.agents.length === 231) console.log('ok');
   else console.log('bad:' + c.skills.length + '/' + c.agents.length);
 } catch (e) { console.log('err'); }
 " 2>/dev/null)

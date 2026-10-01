@@ -1,7 +1,7 @@
 {
   "name": "agent-skills",
   "version": "0.7.4",
-  "description": "Méga-pack : workflows ingénieur senior pour agents IA — cycle complet spec → ship, 180 skills (Solana, game design, sécurité Cloudflare) bilingues FR/EN.",
+  "description": "Méga-pack : workflows ingénieur senior pour agents IA — cycle complet spec → ship, 272 skills (Solana, game design, sécurité Cloudflare) bilingues FR/EN.",
   "author": {
     "name": "Méga-pack (base Addy Osmani)",
     "url": "https://github.com/addyosmani/agent-skills"

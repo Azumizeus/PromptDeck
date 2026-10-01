@@ -1223,7 +1223,7 @@ let diskAgents43 = 0, diskSkills43 = 0;
 (function walk43(d) { for (const e of fs.readdirSync(d, { withFileTypes: true })) { const p = path.join(d, e.name); if (e.isDirectory()) walk43(p); else if (e.name.endsWith('.md')) diskAgents43++; } })(path.join(__dirname, '..', 'agents'));
 (function walk43(d) { for (const e of fs.readdirSync(d, { withFileTypes: true })) { const p = path.join(d, e.name); if (e.isDirectory()) walk43(p); else if (e.name === 'SKILL.md') diskSkills43++; } })(path.join(__dirname, '..', 'skills'));
 check(realSkills43 === diskSkills43 && realAgents43 === diskAgents43, `catalogue ↔ disque : ${realSkills43} skills + ${realAgents43} agents (disque : ${diskSkills43}+${diskAgents43})`);
-check(catalog43.meta && /^0\.7\.[5-9]$/.test(catalog43.meta.version), 'catalogue régénéré avec meta.version ≥ 0.7.5 (actuel : ' + (catalog43.meta || {}).version + ')');
+check(catalog43.meta && /^0\.[7-9]\.[0-9]+$|^0\.[1-9][0-9]+\.[0-9]+$/.test(catalog43.meta.version), 'catalogue régénéré avec meta.version ≥ 0.7.5 (actuel : ' + (catalog43.meta || {}).version + ')');
 const DOC_FILES43 = [
   path.join(__dirname, '..', 'README.md'),
   path.join(__dirname, '..', 'MEGA-PACK.md'),
