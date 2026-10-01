@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         MEGA PACK Panel Luxe — Skills, Agents & Équipes pour tout LLM
 // @namespace    mega-pack
-// @version      2.14.0
+// @version      2.14.1
 // @description  Panneau flottant Édition Luxe dans une fenêtre macOS : 180 skills + 231 agents + 🕸 équipes + ✍️ prompts perso + ★ favoris, recherche instantanée, tooltip expert, clic droit multi-LLM, sélecteur de LLM par défaut, composeur ⌘-clic, menu « Vérifier les mises à jour » — injectable dans n'importe quelle conversation LLM (Claude, ChatGPT, Gemini, Perplexity, Mistral, OpenCode Web…)
 // @updateURL    https://raw.githubusercontent.com/Azumizeus/PromptDeck/master/agent-skills/interface/mega-pack-panel-full.user.js
 // @downloadURL  https://raw.githubusercontent.com/Azumizeus/PromptDeck/master/agent-skills/interface/mega-pack-panel-full.user.js
@@ -1043,7 +1043,9 @@ window.MG_TEAMS = MG_TEAMS; // combos de personas réutilisables (⚡ panel)
   })();
   // ── Redimensionnement : poignée en haut à gauche (la fenêtre s'ouvre vers le bas-droite) ──
   (function () {
-    const h = document.createElement('div'); h.id = 'mgp-rsz'; panel.appendChild(h);
+    const h = document.createElement('div'); h.id = 'mgp-rsz';
+    h.title = LANG === 'fr' ? 'Redimensionner (tirer vers le bas-droit agrandit — coin bas-droit fixe)' : 'Resize (drag toward bottom-right to grow — bottom-right corner is fixed)';
+    panel.appendChild(h);
     let sx = 0, sy = 0, sw = 0, sh = 0, rs = false, rl = 0, rb = 0;
     h.addEventListener('pointerdown', function (e) {
       e.preventDefault(); e.stopPropagation();
@@ -1254,6 +1256,7 @@ window.MG_TEAMS = MG_TEAMS; // combos de personas réutilisables (⚡ panel)
     tour.classList.remove('open');
     document.querySelectorAll('.mgp-tour-hl').forEach(function (n) { n.classList.remove('mgp-tour-hl'); });
     store.set('tour.done', true);
+    gm.set('tour.done', true); // double persistance : survit à un localStorage bloqué/purgé (bouclier Brave, « effacer en quittant »)
   }
   tour.querySelector('.tpri').onclick = tourAdvance;
   tour.querySelector('.tskip').onclick = tourEnd;
@@ -1263,13 +1266,15 @@ window.MG_TEAMS = MG_TEAMS; // combos de personas réutilisables (⚡ panel)
     if (e.key === 'Escape' || e.key === 'Enter') { e.preventDefault(); tourAdvance(); }
   });
   function tourMaybeStart() {
-    if (!store.get('tour.done', false)) {
+    // Vu = l'un OU l'autre des stockages (localStorage peut être purgé/bloqué
+    // par le navigateur ; GM_* (Tampermonkey) survit — et réciproquement).
+    if (!store.get('tour.done', false) && !gm.get('tour.done', false)) {
       panel.classList.add('open');
       renderCounts(); renderTabs(); renderLlmBtn(); render();
       tourShow(0);
     }
   }
-  if (store.get('tour.done', false) === false) setTimeout(tourMaybeStart, 500);
+  if (!store.get('tour.done', false) && !gm.get('tour.done', false)) setTimeout(tourMaybeStart, 500);
   // Rangée 🎓 dans ⚙ — relance
   const tourRow = function () {
     return '<div class="row"><b>' + T().setTour + '<span class="d">' + T().setTourD + '</span></b>' +
@@ -1285,7 +1290,7 @@ window.MG_TEAMS = MG_TEAMS; // combos de personas réutilisables (⚡ panel)
       tourShow(0);
     };
   };
-  btn.onclick = function () { panel.classList.contains('open') ? closePanel() : openPanel(); };
+  btn.onclick = null; // ouverture gérée par l'écouteur 'click' du bloc « bouton déplaçable » (drag vs clic)
   panel.querySelector('#mgp-tourbtn').onclick = function () { tourShow(0); };
   panel.querySelector('#mgp-newp').onclick = function () { openModal(null); };
   panel.querySelector('#mgp-q').oninput = function (e) { q = e.target.value; idx = 0; render(); };
@@ -1342,6 +1347,52 @@ window.MG_TEAMS = MG_TEAMS; // combos de personas réutilisables (⚡ panel)
     store.set('lang', LANG);
     applyLang();
   };
+
+  // ── Bouton ⚡ déplaçable : drag au pointer, position persistée (mgp.btnPos).
+  // Un drag > 4 px annule le clic qui suit (ouvrir le panneau), sinon c'est un simple clic.
+  (function () {
+    const BKEY = 'btnPos';
+    const saved = store.get(BKEY, null);
+    if (saved && typeof saved.left === 'number' && typeof saved.top === 'number') {
+      const w = btn.offsetWidth || 52, h = btn.offsetHeight || 52;
+      btn.style.left = Math.max(4, Math.min(saved.left, window.innerWidth - w - 4)) + 'px';
+      btn.style.top = Math.max(4, Math.min(saved.top, window.innerHeight - h - 4)) + 'px';
+      btn.style.right = 'auto'; btn.style.bottom = 'auto';
+    }
+    let bx = 0, by = 0, bleft = 0, btop = 0, dragging = false, moved = false;
+    btn.addEventListener('pointerdown', function (e) {
+      if (e.button !== 0) return;
+      const r = btn.getBoundingClientRect();
+      bx = e.clientX; by = e.clientY; bleft = r.left; btop = r.top;
+      dragging = true; moved = false;
+      try { btn.setPointerCapture(e.pointerId); } catch (err) {}
+    });
+    btn.addEventListener('pointermove', function (e) {
+      if (!dragging) return;
+      const dx = e.clientX - bx, dy = e.clientY - by;
+      if (!moved && Math.abs(dx) < 4 && Math.abs(dy) < 4) return; // zone morte : simple clic
+      moved = true;
+      const w = btn.offsetWidth || 52, h = btn.offsetHeight || 52;
+      btn.style.left = Math.max(4, Math.min(bleft + dx, window.innerWidth - w - 4)) + 'px';
+      btn.style.top = Math.max(4, Math.min(btop + dy, window.innerHeight - h - 4)) + 'px';
+      btn.style.right = 'auto'; btn.style.bottom = 'auto';
+      e.preventDefault();
+    });
+    btn.addEventListener('pointerup', function () {
+      if (!dragging) return;
+      dragging = false;
+      if (moved) {
+        const r = btn.getBoundingClientRect();
+        store.set(BKEY, { left: Math.round(r.left), top: Math.round(r.top) });
+        btn.onclick = null; // avale le clic de fin de drag
+      }
+    });
+    // Ré-attache le comportement d'ouverture après un drag (et pour les clics normaux).
+    btn.addEventListener('click', function (e) {
+      if (moved) { moved = false; e.preventDefault(); e.stopPropagation(); return; }
+      if (panel.classList.contains('open')) closePanel(); else openPanel();
+    });
+  })();
 
   // ── Injection CSS + DOM ────────────────────────────────────────────────────
   const st = document.createElement('style');

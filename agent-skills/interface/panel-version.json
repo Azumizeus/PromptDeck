@@ -1,8 +1,8 @@
 {
   "name": "MEGA PACK Panel Luxe",
-  "version": "2.14.0",
+  "version": "2.14.1",
   "updated": "2026-10-01",
   "catalog": { "skills": 270, "agents": 231, "version": "0.8.0" },
   "install": "https://github.com/Azumizeus/PromptDeck/raw/master/agent-skills/interface/mega-pack-panel-full.user.js",
-  "notes": "Catalogue frais embarqué (270 skills · 231 agents, v0.8.0) + 2.14.0 : épingle 📌 (garder le panneau visible, ⌥P) et redimensionnement réparé (coin bas-droit gelé, géométrie toujours dans l'écran)."
+  "notes": "Catalogue frais embarqué (270 skills · 231 agents, v0.8.0) + 2.14.1 : bouton ⚡ déplaçable (position persistée), visite guidée une seule fois (persistance double localStorage+GM) et 2.14.0 : épingle 📌 (garder le panneau visible, ⌥P) et redimensionnement réparé (coin bas-droit gelé, géométrie toujours dans l'écran)."
 }
