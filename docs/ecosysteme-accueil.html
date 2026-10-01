@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mon écosystème IA — Tableau de bord</title>
+<style>
+  :root{
+    --bg:#0b0d12; --card:#141821; --card2:#1a2029; --txt:#e8ecf2; --muted:#8a94a6;
+    --violet:#9945FF; --vert:#14F195; --rouge:#ff5c7a; --orange:#ffb454; --bleu:#4da3ff;
+  }
+  *{box-sizing:border-box; margin:0; padding:0}
+  body{background:radial-gradient(1200px 800px at 80% -10%, #1b1440 0%, var(--bg) 55%);
+       color:var(--txt); font-family:-apple-system,'SF Pro Text',Helvetica,Arial,sans-serif;
+       min-height:100vh; padding:32px 20px 60px}
+  .wrap{max-width:1080px; margin:0 auto}
+  h1{font-size:26px; letter-spacing:.3px}
+  h1 span{background:linear-gradient(90deg,var(--violet),var(--vert)); -webkit-background-clip:text;
+          background-clip:text; color:transparent}
+  .sub{color:var(--muted); margin:6px 0 22px; font-size:14px}
+
+  /* ── Barre fine des voyants, un par service ── */
+  .barre{display:flex; gap:6px; align-items:center; background:var(--card);
+         border:1px solid #232a36; border-radius:12px; padding:10px 14px; margin-bottom:18px;
+         overflow-x:auto}
+  .voy{display:flex; align-items:center; gap:6px; flex:none; font-size:12px; color:var(--muted);
+       background:var(--card2); border:1px solid #2a3242; border-radius:20px; padding:4px 10px;
+       position:relative}
+  .voy .led{width:8px; height:8px; border-radius:50%; background:var(--orange);
+            box-shadow:0 0 8px var(--orange); transition:.3s}
+  .voy.ok .led{background:var(--vert); box-shadow:0 0 8px var(--vert)}
+  .voy.ko .led{background:var(--rouge); box-shadow:0 0 8px var(--rouge)}
+  .voy.maj .led{animation:pulse 1s infinite}
+  @keyframes pulse{50%{opacity:.25}}
+  .voy .val{font-size:10.5px; color:#6b7688}
+
+  /* ── Ligne de chargement fine qui défile pendant les vérifications ── */
+  .charge{position:relative; height:3px; background:var(--card2); border-radius:3px;
+          overflow:hidden; margin-bottom:14px}
+  .charge::before{content:""; position:absolute; inset:0;
+    background:linear-gradient(90deg,transparent,var(--vert),var(--violet),transparent);
+    animation:defile 1.4s linear infinite}
+  .charge.fini::before{animation:none; opacity:0; transition:.4s}
+  .charge.ok::before{background:linear-gradient(90deg,var(--vert),#0d8f5f); opacity:.55; animation:none}
+  .charge.ko::before{background:linear-gradient(90deg,var(--rouge),#8f2038); opacity:.55; animation:none}
+  @keyframes defile{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+
+  .health{display:flex; align-items:center; gap:12px; background:var(--card); border:1px solid #232a36;
+          border-radius:14px; padding:14px 18px; margin-bottom:22px; font-size:14px}
+  button.rep{font-size:13px; color:var(--txt); background:linear-gradient(90deg,rgba(255,92,122,.16),rgba(153,69,255,.22));
+             border:1px solid #4a2a3c; padding:9px 14px; border-radius:10px; cursor:pointer; transition:.15s; flex:none;
+             font-family:inherit}
+  button.rep:hover{border-color:var(--rouge); box-shadow:0 0 0 3px rgba(255,92,122,.15)}
+  button.rep:disabled{opacity:.5; cursor:wait}
+  .toggle{display:inline-flex; align-items:center; gap:6px; font-size:12.5px; color:var(--muted);
+          background:var(--card2); border:1px solid #2a3242; border-radius:20px; padding:5px 12px; cursor:pointer}
+  .toggle input{accent-color:var(--vert)}
+  select, input[type=range]{font-family:inherit; font-size:12.5px; background:var(--card2); color:var(--txt);
+          border:1px solid #2a3242; border-radius:8px; padding:4px 6px}
+  input[type=range]{accent-color:var(--violet); padding:0}
+  pre.bilan{white-space:pre-wrap; font-family:'SF Mono',Menlo,monospace; font-size:12px; color:#9fe8c1;
+            background:#0e1117; border:1px solid #232a36; border-radius:10px; padding:12px; margin-top:6px; display:none}
+  .dot{width:11px; height:11px; border-radius:50%; background:var(--orange); flex:none;
+       box-shadow:0 0 10px var(--orange)}
+  .dot.ok{background:var(--vert); box-shadow:0 0 10px var(--vert)}
+  .dot.ko{background:var(--rouge); box-shadow:0 0 10px var(--rouge)}
+  .health b{font-weight:600}
+  .health .detail{color:var(--muted); font-size:12.5px}
+  .grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(320px,1fr)); gap:16px}
+  .card{background:var(--card); border:1px solid #232a36; border-radius:16px; padding:20px;
+        display:flex; flex-direction:column; gap:10px}
+  .card h2{font-size:16.5px; display:flex; align-items:center; gap:8px}
+  .badge{font-size:10.5px; padding:2px 8px; border-radius:20px; background:var(--card2);
+         color:var(--muted); border:1px solid #2a3242; font-weight:500}
+  .p{color:var(--muted); font-size:13.5px; line-height:1.55}
+  .links{display:flex; flex-wrap:wrap; gap:8px; margin-top:auto; padding-top:6px}
+  a.btn{font-size:13px; text-decoration:none; color:var(--txt); background:var(--card2);
+        border:1px solid #2a3242; padding:7px 13px; border-radius:10px; transition:.15s}
+  a.btn:hover{border-color:var(--violet); box-shadow:0 0 0 3px rgba(153,69,255,.15)}
+  a.btn.primary{background:linear-gradient(90deg,rgba(153,69,255,.25),rgba(20,241,149,.18));
+                border-color:#3d2a66}
+  .cmd{font-family:ui-monospace,Menlo,monospace; font-size:12px; background:#0e1117;
+       border:1px solid #232a36; border-radius:8px; padding:8px 10px; color:#9fe8c1;
+       overflow-x:auto; white-space:nowrap}
+  .howto{margin-top:26px; background:var(--card); border:1px solid #232a36; border-radius:16px;
+         padding:20px}
+  .howto h2{font-size:16px; margin-bottom:10px}
+  .howto ol{margin-left:20px; color:var(--muted); font-size:13.5px; line-height:1.9}
+  .howto b{color:var(--txt); font-weight:600}
+
+  /* ── Mémo d'urgence repliable ── */
+  details.memo{margin-top:18px; background:var(--card); border:1px solid #232a36; border-radius:16px;
+               padding:0}
+  details.memo summary{cursor:pointer; padding:16px 20px; font-size:16px; font-weight:600; list-style:none}
+  details.memo summary::before{content:"▸ "; color:var(--violet)}
+  details.memo[open] summary::before{content:"▾ "}
+  details.memo .contenu{padding:4px 20px 18px}
+  .urg{display:flex; flex-wrap:wrap; gap:10px; margin-bottom:14px}
+  button.act{font-size:13px; color:var(--txt); background:var(--card2); border:1px solid #2a3242;
+             padding:9px 14px; border-radius:10px; cursor:pointer; font-family:inherit; transition:.15s}
+  button.act:hover{border-color:var(--orange); box-shadow:0 0 0 3px rgba(255,180,84,.12)}
+  button.act:disabled{opacity:.5; cursor:wait}
+  .journaux{display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:10px}
+  .jr{background:#0e1117; border:1px solid #232a36; border-radius:10px; padding:10px}
+  .jr h4{font-size:12px; color:var(--bleu); margin-bottom:6px}
+  .jr pre{font-family:'SF Mono',Menlo,monospace; font-size:10.5px; color:#8fa3b8; white-space:pre-wrap;
+          max-height:130px; overflow-y:auto}
+
+  footer{margin-top:24px; color:#5b6474; font-size:12px; text-align:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Mon <span>écosystème IA</span> — tableau de bord</h1>
+  <p class="sub">Un moteur (omniroute) · plusieurs applications · des filets de sécurité automatiques</p>
+
+  <!-- Barre des voyants en direct, un par service -->
+  <div class="charge" id="charge"></div>
+  <div class="barre" id="barre"></div>
+
+  <div class="health">
+    <div class="dot" id="dot"></div>
+    <div style="flex:1"><b>omniroute</b> — <span id="etat">vérification en cours…</span><br>
+    <span class="detail" id="detail">http://127.0.0.1:20128</span><br>
+    <span class="detail" id="detail2"></span></div>
+    <label class="toggle" title="Le bilan du matin (8 h) est-il lu à voix haute ?">
+      <input type="checkbox" id="chkVoix" checked> 🔊 voix
+    </label>
+    <select id="selVoix" title="Quelle voix lit le bilan ?">
+      <option>Thomas</option><option>Amélie</option><option>Jacques</option>
+      <option>Eddy (Français (France))</option><option>Flo (Français (France))</option>
+      <option>Rocko (Français (France))</option><option>Sandy (Français (France))</option>
+      <option>Shelley (Français (France))</option>
+    </select>
+    <input type="range" id="rngVitesse" min="120" max="260" step="4" value="172" title="Vitesse de lecture"
+           style="width:90px">
+    <span class="detail" id="valVitesse">172 mots/min</span>
+    <button class="act" id="btnVoixTest" title="Écouter un essai avec ces réglages">▶︎ essai</button>
+    <button class="rep" id="btnRep" title="Rallume Docker et omniroute automatiquement (1 à 3 min)">🔧 Réparer omniroute</button>
+  </div>
+
+  <div class="grid">
+
+    <div class="card">
+      <h2>💬 ChatDeck <span class="badge">app</span></h2>
+      <p class="p">Discuter avec l'IA. Déjà branché sur omniroute (premier maillon de sa cascade).</p>
+      <div class="cmd">Open -a ChatDeck&nbsp;&nbsp;ou&nbsp;&nbsp;icône dans le Dock</div>
+      <div class="links"><a class="btn primary" href="chatdeck://">Ouvrir ChatDeck</a></div>
+    </div>
+
+    <div class="card">
+      <h2>🧑‍💻 OpenCode <span class="badge">app + CLI</span></h2>
+      <p class="p">Coder, travailler sur les projets. Raccourcis : /fb (rapide), /fc (code), /fp (plan).</p>
+      <div class="cmd">open -a OpenCode</div>
+      <div class="links"><a class="btn primary" href="opencode://">Ouvrir OpenCode</a></div>
+    </div>
+
+    <div class="card">
+      <h2>🛡️ Solscan OS <span class="badge">sécurité</span></h2>
+      <p class="p">Scanner/auditer du code Solana. Omniroute se règle dans Paramètres → LLM
+      (provider « omniroute », baseUrl http://127.0.0.1:20128/v1).</p>
+      <div class="cmd">serveur dev du projet solana-sentinel-pro</div>
+      <div class="links"><a class="btn" href="http://localhost:3001" target="_blank">Ouvrir (port 3001)</a></div>
+    </div>
+
+    <div class="card">
+      <h2>🎬 Understudy <span class="badge">agent Mac</span></h2>
+      <p class="p">L'agent qui apprend en vous regardant faire. Cerveau : routeur local FreeLLMAPI :8000
+      (texte + vision, gros prompts acceptés — plan de secours automatique si le routeur tombe).
+      <b>Le robot Telegram @azumizeusbot est connecté</b> (réponses en 6-30 s,
+      le Mac reste éveillé pour lui) — écris-lui depuis ton téléphone.</p>
+      <div class="cmd">double-clic : agents-premium/Understudy-Gateway.command</div>
+      <div class="links">
+        <a class="btn primary" href="http://127.0.0.1:23333/webchat" target="_blank">💬 Ouvrir le Webchat</a>
+        <a class="btn" href="http://127.0.0.1:23333/ui" target="_blank">Dashboard</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>⚡ Système premium <span class="badge">fusion des 4</span></h2>
+      <p class="p">Ton « agent-rédacteur » : tu poses UNE question → il cherche sur le web,
+      fait travailler une équipe d'IA (chercheur → rédacteur → vérificateur) et te rend une
+      <b>note complète et propre</b> (~2 min). Plus poussé que ChatDeck : c'est une mini-équipe
+      qui travaille pour toi. Utilisé pour les recherches sérieuses.</p>
+      <div class="cmd">double-clic : agents-premium/Pipeline-Premium.command</div>
+      <div class="links">
+        <a class="btn" href="../agents-premium/README.md" target="_blank">Ouvrir le dossier</a>
+        <a class="btn primary" href="../agents-premium/README.md" target="_blank">Voir le guide</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>🧠 AgentMemory <span class="badge">mémoire des agents</span></h2>
+      <p class="p">Le « souvenir » partagé de tes agents (OpenCode, Freebuff, ChatDeck…).
+      Il tourne en continu et garde ce que les agents apprennent, pour s'en resservir plus tard.</p>
+      <div class="cmd">serveur : 127.0.0.1:3111 · tableau de bord : 3114</div>
+      <div class="links">
+        <a class="btn primary" href="http://127.0.0.1:3114" target="_blank">Ouvrir le tableau de bord mémoire</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>🗂️ Documentation <span class="badge">docs</span></h2>
+      <p class="p">Guides et inventaires — tout est lisible directement ici, dans l'aperçu.</p>
+      <div class="links">
+        <a class="btn" href="GUIDE-DEBUTANT.html" target="_blank">🧭 Guide débutant</a>
+        <a class="btn" href="TELEGRAM-PAS-A-PAS.html" target="_blank">🤖 Telegram pas à pas</a>
+        <a class="btn" href="TELEGRAM-UNDERSTUDY.html" target="_blank">Guide Telegram (technique)</a>
+        <a class="btn" href="OPENCODE-GUIDE.md" target="_blank">Guide OpenCode</a>
+        <a class="btn" href="INVENTAIRE-SYSTEME.md" target="_blank">Inventaire</a>
+        <a class="btn" href="../agents-premium/README.md" target="_blank">Premium (guide)</a>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="howto">
+    <h2>🧭 Comment tout ça marche (en 3 phrases)</h2>
+    <ol>
+      <li><b>omniroute</b> est le moteur : quand une app a besoin d'un modèle IA, elle lui
+      demande, et il choisit le meilleur modèle gratuit du moment.</li>
+      <li>Les <b>applications</b> (OpenCode, ChatDeck, Solscan OS, Understudy, le pipeline
+      premium) sont les fenêtres que vous ouvrez — elles utilisent toutes ce moteur.</li>
+      <li><b>Les filets de sécurité</b> (surveillance 15 min + gardien auto-réparateur
+      + bilan du matin à 8 h) tournent tout seuls et vous préviennent seulement
+      si quelque chose casse.</li>
+      <li><b>Voyant rouge ?</b> Cliquez <b>« 🔧 Réparer omniroute »</b> : le pilote
+      rallume Docker puis le moteur (1 à 3 min). Perdu ? Ouvrez le Guide débutant.</li>
+    </ol>
+  </div>
+
+  <!-- Mémo d'urgence repliable -->
+  <details class="memo" id="memo">
+    <summary>🚨 Mémo d'urgence — les gestes qui réparent (cliquer pour ouvrir)</summary>
+    <div class="contenu">
+      <div class="urg">
+        <button class="act" data-action="relancer-navigateur">🌐 Relancer le navigateur des agents</button>
+        <button class="act" data-action="ouvrir-docker">🐳 Ouvrir Docker</button>
+        <button class="act" id="btnRepMemo">🔧 Réparer omniroute</button>
+        <button class="act" data-action="tester-voix">🔊 Tester la voix</button>
+      </div>
+      <p class="p" style="margin-bottom:10px"><b>Astuce :</b> « Réparer omniroute » rallume Docker puis le moteur
+      (1 à 3 min). « Relancer le navigateur des agents » répare les visites web automatiques.
+      Ci-dessous, les 6 dernières lignes de chaque journal :</p>
+      <div class="journaux" id="journaux"><span class="p">chargement des journaux…</span></div>
+    </div>
+  </details>
+
+  <footer>Généré le 30/09/2026 · voyants et pastille interrogés en direct toutes les 20 s</footer>
+</div>
+
+<script>
+(async () => {
+  const P = 'http://127.0.0.1:8777';
+  const $ = id => document.getElementById(id);
+
+  /* ── 1. La barre des voyants (style « fine barre de chargement ») ── */
+  const SERVICES = [
+    ['cerveau',     'Cerveau',    'cerveau du robot (routeur local :8000, clic pour tester)'],
+    ['omniroute',   'omniroute',  'le moteur IA'],
+    ['chatdeck',    'ChatDeck',   'app de discussion'],
+    ['solscan',     'Solscan OS', 'audit Solana'],
+    ['agentmemory', 'Mémoire',    'souvenir des agents'],
+    ['cdp',         'CDP',        'navigateur des agents'],
+    ['understudy',  'Understudy', 'passerelle'],
+    ['telegram',    'Telegram',   'robot @azumizeusbot'],
+    ['opencode',    'OpenCode',   'atelier de code'],
+    ['docker',      'Docker',     'le sous-sol'],
+    ['antiveille',  'Éveil',      'le Mac reste éveillé pour le robot (clic pour basculer)'],
+    ['pilote',      'Pilote',     'les réparations'],
+  ];
+  let msgsAujourdhui = null, dernierMsg = null;
+  const barre = $('barre'), charge = $('charge');
+  barre.innerHTML = SERVICES.map(([k, nom, desc]) =>
+    `<div class="voy" id="voy-${k}" title="${desc}"><span class="led"></span>${nom} <span class="val" id="val-${k}">…</span></div>`
+  ).join('');
+  function majBarre(s) {
+    let nOk = 0;
+    for (const [k, nom] of SERVICES) {
+      const el = $('voy-' + k), val = $('val-' + k);
+      el.classList.remove('maj');
+      if (s[k] === true)  { el.className = 'voy ok'; val.textContent = '●'; nOk++; }
+      else if (s[k] === false) { el.className = 'voy ko'; val.textContent = '○'; }
+      else { el.className = 'voy maj'; val.textContent = '…'; }
+    }
+    // La pastille Telegram affiche le nombre de messages reçus aujourd'hui
+    if (typeof s.telegramMsgs === 'number') {
+      const v = $('val-telegram'), e = $('voy-telegram');
+      v.textContent = s.telegramMsgs + ' msg';
+      e.classList.toggle('ok', s.telegram === true);
+      if (s.telegram === true) nOk++;
+    }
+    // Infobulle Telegram enrichie : version, canal, dernière réponse, images
+    const tgParts = [];
+    if (s.understudyVersion) tgParts.push('v' + s.understudyVersion);
+    if (s.telegramRuntime) tgParts.push('canal ' + s.telegramRuntime);
+    if (typeof s.understudyDerniereAge === 'number') {
+      const a = s.understudyDerniereAge;
+      tgParts.push('dernière réponse il y a ' +
+        (a < 60 ? a + ' s' : a < 3600 ? Math.round(a / 60) + ' min' : Math.round(a / 3600) + ' h'));
+    }
+    if (typeof s.imagesDerniere === 'number') {
+      tgParts.push(s.imagesDerniere + ' image' + (s.imagesDerniere > 1 ? 's' : ''));
+    }
+    if (tgParts.length) $('voy-telegram').title = 'robot @azumizeusbot — ' + tgParts.join(' · ');
+    majDerniereReponse(s);
+    // La pastille Cerveau : cliquable pour re-tester immédiatement
+    const vc = $('voy-cerveau');
+    vc.style.cursor = 'pointer';
+    if (!vc.dataset.branche) {
+      vc.dataset.branche = '1';
+      vc.title += ' — clic : re-tester maintenant';
+      vc.addEventListener('click', async () => {
+        vc.classList.add('maj'); $('val-cerveau').textContent = '…';
+        await poster('action', {action: 'sonder-cerveau'});
+        sonde();
+      });
+    }
+    // Alerte visible si le cerveau du robot est tombé (le reste du dashboard
+    // peut être vert : le robot, lui, ne peut plus répondre sans son cerveau).
+    if (s.cerveau === false) {
+      vc.classList.add('ko');
+      vc.title = '⚠️ Cerveau du robot DOWN : le robot Telegram ne peut plus répondre !\nLe plan de secours devrait relancer un cerveau de remplacement automatiquement (voir ~Library/Logs/cerveau-secours.log).';
+    }
+    // La pastille Éveil : cliquable pour activer/désactiver l'anti-veille
+    const ve = $('voy-antiveille');
+    ve.style.cursor = 'pointer';
+    if (!$('voy-antiveille').dataset.branche) {
+      $('voy-antiveille').dataset.branche = '1';
+      ve.addEventListener('click', async () => {
+        ve.classList.add('maj'); $('val-antiveille').textContent = '…';
+        const r = await poster('action', {action: 'basculer-antiveille'});
+        sonde();
+      });
+    }
+    charge.className = 'charge ' + (nOk >= SERVICES.length ? 'ok' : 'ko');
+  }
+  async function sonde() {
+    try { const r = await fetch(P + '/status'); majBarre(await r.json()); }
+    catch (e) { SERVICES.forEach(([k]) => { $('voy-' + k).className = 'voy ko'; $('val-' + k).textContent = '○'; });
+                charge.className = 'charge ko'; }
+  }
+  // Dernière réponse du robot (avec veille anti « images fantômes » :
+  // plus de 1 image par réponse quand aucune capture n'est demandée)
+  const blocDerniere = document.createElement('div');
+  blocDerniere.className = 'jr';
+  $('journaux').parentNode.insertBefore(blocDerniere, $('journaux'));
+  function majDerniereReponse(s) {
+    if (!s || !s.understudyDerniere) { blocDerniere.innerHTML = ''; return; }
+    const a = s.understudyDerniereAge;
+    const quand = typeof a === 'number'
+      ? (a < 60 ? "(à l'instant)" : a < 3600 ? '(il y a ' + Math.round(a / 60) + ' min)'
+                                             : '(il y a ' + Math.round(a / 3600) + ' h)')
+      : '';
+    const imgs = typeof s.imagesDerniere === 'number'
+      ? ' · ' + s.imagesDerniere + ' image' + (s.imagesDerniere > 1 ? 's' : '') : '';
+    blocDerniere.innerHTML = '<h4>🤖 Dernière réponse du robot ' + quand + imgs +
+      '</h4><pre>' + String(s.understudyDerniere).replace(/</g, '&lt;') + '</pre>';
+  }
+  await sonde();
+  setInterval(sonde, 20000);
+
+  /* ── 2. Réglages de la voix (activer/désactiver + voix + vitesse) ── */
+  const chkVoix = $('chkVoix'), selVoix = $('selVoix'), rngVitesse = $('rngVitesse'),
+        valVitesse = $('valVitesse'), btnTest = $('btnVoixTest');
+  fetch(P + '/reglages').then(r => r.json()).then(r => {
+    chkVoix.checked = r.voixBilan !== false;
+    if (r.voix) selVoix.value = r.voix;
+    if (r.vitesse) { rngVitesse.value = r.vitesse; valVitesse.textContent = r.vitesse + ' mots/min'; }
+  }).catch(() => {});
+  chkVoix.addEventListener('change', () => poster('reglage', {cle: 'voixBilan', valeur: chkVoix.checked}));
+  selVoix.addEventListener('change', () => poster('reglage', {cle: 'voix', valeur: selVoix.value}));
+  rngVitesse.addEventListener('input', () => valVitesse.textContent = rngVitesse.value + ' mots/min');
+  rngVitesse.addEventListener('change', () => poster('reglage', {cle: 'vitesse', valeur: parseInt(rngVitesse.value)}));
+  btnTest.addEventListener('click', async () => {
+    btnTest.disabled = true; btnTest.textContent = '…';
+    const r = await poster('action', {action: 'tester-voix'});
+    setTimeout(() => { btnTest.disabled = false; btnTest.textContent = '▶︎ essai'; }, 3500);
+  });
+  async function poster(chemin, corps) {
+    try {
+      const r = await fetch(P + '/' + chemin, {method: 'POST',
+        headers: {'Content-Type': 'application/json'}, body: JSON.stringify(corps)});
+      return await r.json();
+    } catch (e) { return null; }
+  }
+
+  /* ── 3. Pastille omniroute + bouton Réparer (comme avant) ── */
+  const dot = $('dot'), etat = $('etat'), detail = $('detail'), detail2 = $('detail2');
+  try {
+    const r = await fetch('http://127.0.0.1:20128/v1/models', {
+      headers: {'Authorization': 'Bearer sk-d5225223a756eb0d-7dfccf-7ec3b41e'}
+    });
+    if (r.ok) {
+      const j = await r.json();
+      dot.className = 'dot ok';
+      etat.textContent = `opérationnel — ${j.data ? j.data.length : '?'} modèles disponibles`;
+      detail.textContent = 'http://127.0.0.1:20128 · cascade auto/* prête';
+    } else { throw new Error(r.status); }
+  } catch (e) {
+    dot.className = 'dot ko';
+    etat.textContent = 'injoignable — clique « Réparer omniroute »';
+    detail.textContent = 'le reste fonctionne (chaque app a un secours Groq)';
+  }
+
+  async function pilote(chemin) {
+    try { const r = await fetch(P + chemin); return await r.json(); }
+    catch (e) { return null; }
+  }
+  function lancerReparation() {
+    pilote('/reparer-omniroute').then(async rep => {
+      if (!rep) { etat.textContent = 'réparation impossible : le pilote ne répond pas'; return; }
+      if (rep.dejaEnCours) return;
+      $('btnRep').disabled = true;
+      etat.textContent = 'réparation en cours…';
+      const timer = setInterval(async () => {
+        const s = await pilote('/status');
+        if (!s) return;
+        if (s.enCours) { etat.textContent = 'réparation en cours… ' + (s.etape || ''); return; }
+        clearInterval(timer); $('btnRep').disabled = false; sonde();
+        if (s.omniroute) {
+          dot.className = 'dot ok';
+          etat.textContent = 'opérationnel — moteur en ligne ✅';
+          detail.textContent = 'http://127.0.0.1:20128';
+          detail2.textContent = 'réparation terminée' + (s.dernierResultat && s.dernierResultat.secondes ? ' en ' + s.dernierResultat.secondes + ' s' : '');
+        } else {
+          etat.textContent = 'toujours éteint';
+          detail2.textContent = (s.dernierResultat && s.dernierResultat.message) || 'réessayez dans un instant';
+        }
+      }, 3000);
+    });
+  }
+  $('btnRep').addEventListener('click', lancerReparation);
+  $('btnRepMemo').addEventListener('click', () => { lancerReparation(); $('memo').open = false; });
+
+  /* ── 4. Mémo d'urgence : actions + journaux ── */
+  document.querySelectorAll('button.act[data-action]').forEach(b => {
+    b.addEventListener('click', async () => {
+      b.disabled = true; const avant = b.textContent; b.textContent = '…';
+      const r = await poster('action', {action: b.dataset.action});
+      b.textContent = (r && r.message) ? r.message : (r ? 'fait ✅' : 'pilote absent');
+      if (b.dataset.action === 'relancer-navigateur') sonde();
+      setTimeout(() => { b.disabled = false; b.textContent = avant; }, 5000);
+    });
+  });
+  fetch(P + '/journaux').then(r => r.json()).then(j => {
+    $('journaux').innerHTML = (j.journaux || []).map(x =>
+      `<div class="jr"><h4>${x.nom}</h4><pre>${(x.lignes || []).join('\n').replace(/</g,'&lt;')}</pre></div>`
+    ).join('') || '<span class="p">aucun journal</span>';
+  }).catch(() => { $('journaux').textContent = 'journaux indisponibles (pilote éteint ?)'; });
+
+  /* ── 5. Le dernier bilan du matin ── */
+  fetch(P + '/bilan').then(r => r.json()).then(r => {
+    const bloc = document.createElement('pre');
+    bloc.className = 'bilan';
+    bloc.textContent = r.texte || '';
+    document.querySelector('.howto').after(bloc);
+    if (r.texte && !r.texte.includes('aucun bilan')) bloc.style.display = 'block';
+  }).catch(() => {});
+})();
+</script>
+</body>
+</html>
